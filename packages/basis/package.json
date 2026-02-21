@@ -1,0 +1,73 @@
+{
+  "name": "@vorionsys/basis",
+  "version": "1.0.2",
+  "type": "module",
+  "description": "Baseline Authority for Safe & Interoperable Systems (BASIS) - Open standard for AI agent governance with trust tiers, capabilities, validation gate, and KYA verification",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./kya": {
+      "types": "./dist/kya/index.d.ts",
+      "import": "./dist/kya/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:trust": "vitest run src/trust-1000-agents.test.ts",
+    "test:trust:watch": "vitest src/trust-1000-agents.test.ts"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^2.0.0",
+    "did-resolver": "^4.1.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3",
+    "vitest": "4.0.18"
+  },
+  "keywords": [
+    "vorion",
+    "basis",
+    "trust",
+    "ai",
+    "agent",
+    "governance",
+    "blockchain",
+    "identity",
+    "safety",
+    "security",
+    "kya",
+    "know-your-agent",
+    "trust-framework",
+    "ai-governance",
+    "autonomous-agents",
+    "verification"
+  ],
+  "author": "Vorion <team@vorion.org>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voriongit/vorion.git",
+    "directory": "packages/basis"
+  },
+  "homepage": "https://vorion.org",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

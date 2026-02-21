@@ -1,0 +1,916 @@
+openapi: 3.1.0
+info:
+  title: Agent Anchor API
+  description: |
+    API for Agent Anchor - AI agent registry, trust scoring, and attestations.
+
+    ## Authentication
+
+    All API requests require an API key passed via the `Authorization` header:
+
+    ```
+    Authorization: Bearer aa_your_api_key_here
+    ```
+
+    ## Rate Limiting
+
+    Default rate limit is 1000 requests per minute. Rate limit headers are included in all responses:
+
+    - `X-RateLimit-Limit`: Maximum requests per minute
+    - `X-RateLimit-Remaining`: Remaining requests
+    - `X-RateLimit-Reset`: Unix timestamp when limit resets
+
+    ## Trust Tiers
+
+    | Tier | Name | Score Range |
+    |------|------|-------------|
+    | T0 | Sandbox | 0-199 |
+    | T1 | Observed | 200-349 |
+    | T2 | Provisional | 350-499 |
+    | T3 | Monitored | 500-649 |
+    | T4 | Standard | 650-799 |
+    | T5 | Trusted | 800-875 |
+    | T6 | Certified | 876-950 |
+    | T7 | Autonomous | 951-1000 |
+
+  version: 1.0.0
+  contact:
+    name: Agent Anchor Support
+    email: support@agentanchor.io
+    url: https://agentanchor.io
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.agentanchor.io
+    description: Production
+  - url: https://api.staging.agentanchor.io
+    description: Staging
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Agents
+    description: Agent registration and management
+  - name: Trust
+    description: Trust scoring operations
+  - name: Attestations
+    description: Behavioral attestations
+  - name: Lifecycle
+    description: Agent lifecycle management
+  - name: Validation
+    description: ACI validation utilities
+  - name: Health
+    description: Health and status endpoints
+
+paths:
+  /v1/agents:
+    post:
+      tags:
+        - Agents
+      summary: Register a new agent
+      description: Register a new AI agent with Agent Anchor. Returns the assigned ACI.
+      operationId: registerAgent
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterAgentRequest'
+      responses:
+        '201':
+          description: Agent registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Agent with this ACI already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+  /v1/agents/{aci}:
+    get:
+      tags:
+        - Agents
+      summary: Get agent by ACI
+      description: Retrieve agent details including current trust score.
+      operationId: getAgent
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AciParam'
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Agents
+      summary: Update agent metadata
+      description: Update agent description and metadata.
+      operationId: updateAgent
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AciParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAgentRequest'
+      responses:
+        '200':
+          description: Agent updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/agents/{aci}/trust:
+    get:
+      tags:
+        - Trust
+      summary: Get trust score
+      description: |
+        Get the current trust score for an agent. By default, returns a cached
+        score. Use `refresh=true` to force recalculation.
+      operationId: getTrustScore
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AciParam'
+        - name: refresh
+          in: query
+          description: Force cache refresh
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Trust score
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustScoreResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/agents/{aci}/attestations:
+    get:
+      tags:
+        - Attestations
+      summary: Get attestations
+      description: Retrieve attestation history for an agent.
+      operationId: getAttestations
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AciParam'
+        - name: limit
+          in: query
+          description: Maximum number of attestations to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: List of attestations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags:
+        - Attestations
+      summary: Submit attestation
+      description: Submit a behavioral attestation for an agent.
+      operationId: submitAttestation
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AciParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAttestationRequest'
+      responses:
+        '201':
+          description: Attestation submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/agents/{aci}/lifecycle:
+    post:
+      tags:
+        - Lifecycle
+      summary: Transition agent state
+      description: |
+        Request a lifecycle state transition for an agent. Some transitions
+        require human approval and will return `pendingApproval: true`.
+      operationId: transitionState
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AciParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateTransitionRequest'
+      responses:
+        '200':
+          description: Transition result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateTransitionResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Transition blocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/query:
+    post:
+      tags:
+        - Agents
+      summary: Query agents
+      description: Search for agents with filters.
+      operationId: queryAgents
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryAgentsRequest'
+      responses:
+        '200':
+          description: Paginated list of agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryAgentsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/validate:
+    post:
+      tags:
+        - Validation
+      summary: Validate ACI
+      description: Validate an ACI string format and check registration status.
+      operationId: validateAci
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - aci
+              properties:
+                aci:
+                  type: string
+                  example: "a3i.acme.invoice-bot:ABF-L3@1.0.0"
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateAciResponse'
+
+  /v1/a3i/health:
+    get:
+      tags:
+        - Health
+      summary: A3I cache health
+      description: Check health status of the A3I cache layer.
+      operationId: a3iHealth
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/A3IHealthResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      description: API key authentication
+
+  parameters:
+    AciParam:
+      name: aci
+      in: path
+      required: true
+      description: Categorical Agentic Registry
+      schema:
+        type: string
+        pattern: '^[a-z0-9]+\.[a-z0-9-]+\.[a-z0-9-]+:[A-Z]+-L[0-7]@\d+\.\d+\.\d+$'
+        example: "a3i.acme.invoice-bot:ABF-L3@1.0.0"
+
+  schemas:
+    DomainCode:
+      type: string
+      enum: [A, B, C, D, E, F, G, H, I, S]
+      description: |
+        Capability domain codes:
+        - A: Administration
+        - B: Business
+        - C: Communications
+        - D: Data
+        - E: External
+        - F: Finance
+        - G: Governance
+        - H: Hospitality
+        - I: Infrastructure
+        - S: Security
+
+    AgentState:
+      type: string
+      enum:
+        - T0_SANDBOX
+        - T1_OBSERVED
+        - T2_PROVISIONAL
+        - T3_MONITORED
+        - T4_STANDARD
+        - T5_TRUSTED
+        - T6_CERTIFIED
+        - T7_AUTONOMOUS
+        - QUARANTINE
+        - SUSPENDED
+        - REVOKED
+        - EXPELLED
+
+    AttestationType:
+      type: string
+      enum: [BEHAVIORAL, CREDENTIAL, AUDIT, A2A, MANUAL]
+
+    AttestationOutcome:
+      type: string
+      enum: [success, failure, warning]
+
+    StateAction:
+      type: string
+      enum: [PROMOTE, REQUEST_APPROVAL, QUARANTINE, RELEASE, SUSPEND, REVOKE, EXPEL, REINSTATE]
+
+    RegisterAgentRequest:
+      type: object
+      required:
+        - organization
+        - agentClass
+        - domains
+        - level
+        - version
+      properties:
+        organization:
+          type: string
+          minLength: 2
+          maxLength: 63
+          pattern: '^[a-z0-9-]+$'
+          example: "acme"
+        agentClass:
+          type: string
+          minLength: 2
+          maxLength: 63
+          pattern: '^[a-z0-9-]+$'
+          example: "invoice-bot"
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainCode'
+          minItems: 1
+          example: ["A", "B", "F"]
+        level:
+          type: integer
+          minimum: 0
+          maximum: 7
+          example: 3
+        version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+$'
+          example: "1.0.0"
+        description:
+          type: string
+          maxLength: 500
+        metadata:
+          type: object
+          additionalProperties: true
+        contactEmail:
+          type: string
+          format: email
+
+    UpdateAgentRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          maxLength: 500
+        metadata:
+          type: object
+          additionalProperties: true
+        contactEmail:
+          type: string
+          format: email
+
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        aci:
+          type: string
+        registry:
+          type: string
+        organization:
+          type: string
+        agentClass:
+          type: string
+        domains:
+          type: string
+        level:
+          type: integer
+        version:
+          type: string
+        state:
+          $ref: '#/components/schemas/AgentState'
+        trustScore:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        trustTier:
+          type: integer
+          minimum: 0
+          maximum: 7
+        description:
+          type: string
+        metadata:
+          type: object
+        registeredAt:
+          type: string
+          format: date-time
+        lastActiveAt:
+          type: string
+          format: date-time
+
+    TrustScore:
+      type: object
+      properties:
+        score:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        tier:
+          type: integer
+          minimum: 0
+          maximum: 7
+        tierName:
+          type: string
+        cached:
+          type: boolean
+        cacheAge:
+          type: integer
+          description: Cache age in milliseconds
+        factors:
+          type: object
+          properties:
+            behavioral:
+              type: number
+            credential:
+              type: number
+            temporal:
+              type: number
+            audit:
+              type: number
+            volume:
+              type: number
+        calculatedAt:
+          type: string
+          format: date-time
+
+    Attestation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AttestationType'
+        outcome:
+          $ref: '#/components/schemas/AttestationOutcome'
+        action:
+          type: string
+        evidence:
+          type: object
+        processed:
+          type: boolean
+        trustImpact:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+    SubmitAttestationRequest:
+      type: object
+      required:
+        - type
+        - outcome
+        - action
+      properties:
+        type:
+          $ref: '#/components/schemas/AttestationType'
+        outcome:
+          $ref: '#/components/schemas/AttestationOutcome'
+        action:
+          type: string
+          minLength: 1
+          maxLength: 200
+        evidence:
+          type: object
+          additionalProperties: true
+        source:
+          type: string
+        sourceCarId:
+          type: string
+
+    StateTransitionRequest:
+      type: object
+      required:
+        - action
+        - reason
+      properties:
+        action:
+          $ref: '#/components/schemas/StateAction'
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+        context:
+          type: object
+          additionalProperties: true
+
+    StateTransitionResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        previousState:
+          $ref: '#/components/schemas/AgentState'
+        newState:
+          $ref: '#/components/schemas/AgentState'
+        transitionedAt:
+          type: string
+          format: date-time
+        pendingApproval:
+          type: boolean
+        approvalRequestId:
+          type: string
+          format: uuid
+        error:
+          type: string
+
+    QueryAgentsRequest:
+      type: object
+      properties:
+        organization:
+          type: string
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainCode'
+        minLevel:
+          type: integer
+          minimum: 0
+          maximum: 7
+        minTrustTier:
+          type: integer
+          minimum: 0
+          maximum: 7
+        states:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentState'
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+
+    ResponseMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        offset:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        hasMore:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    AgentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Agent'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    TrustScoreResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/TrustScore'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    AttestationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Attestation'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    AttestationsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attestation'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    StateTransitionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/StateTransitionResult'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    QueryAgentsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ValidateAciResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            valid:
+              type: boolean
+            registered:
+              type: boolean
+            parsed:
+              type: object
+              properties:
+                registry:
+                  type: string
+                organization:
+                  type: string
+                agentClass:
+                  type: string
+                domains:
+                  type: array
+                  items:
+                    type: string
+                level:
+                  type: integer
+                version:
+                  type: string
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    A3IHealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            healthy:
+              type: boolean
+            latencyMs:
+              type: integer
+            details:
+              type: object
+            syncStatus:
+              type: object
+              properties:
+                lastSyncAt:
+                  type: integer
+                pendingAttestations:
+                  type: integer
+                syncLagMs:
+                  type: integer
+                healthy:
+                  type: boolean
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: AUTH_REQUIRED
+              message: Authentication required
+            meta:
+              requestId: "abc123"
+              timestamp: "2026-01-31T12:00:00Z"
+              version: "v1"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: AGENT_NOT_FOUND
+              message: Agent not found
+            meta:
+              requestId: "abc123"
+              timestamp: "2026-01-31T12:00:00Z"
+              version: "v1"
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: Invalid request body
+              details:
+                - path: ["domains"]
+                  message: "Required"
+            meta:
+              requestId: "abc123"
+              timestamp: "2026-01-31T12:00:00Z"
+              version: "v1"
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: QUOTA_EXCEEDED
+              message: Rate limit exceeded
+            meta:
+              requestId: "abc123"
+              timestamp: "2026-01-31T12:00:00Z"
+              version: "v1"

@@ -1,0 +1,71 @@
+{
+  "name": "@vorionsys/council",
+  "version": "0.1.0",
+  "description": "16-Agent Governance Council Orchestration System for AI oversight, compliance, and quality assurance",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@vorionsys/ai-gateway": "^0.1.0",
+    "zod": "^3.24.1"
+  },
+  "peerDependencies": {
+    "@prisma/client": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@prisma/client": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
+  },
+  "keywords": [
+    "ai",
+    "governance",
+    "council",
+    "orchestration",
+    "compliance",
+    "pii-detection",
+    "human-in-the-loop",
+    "vorion"
+  ],
+  "author": "Vorion <team@vorion.org>",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voriongit/vorion.git",
+    "directory": "packages/council"
+  },
+  "bugs": {
+    "url": "https://github.com/voriongit/vorion/issues"
+  },
+  "homepage": "https://vorion.org",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

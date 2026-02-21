@@ -1,0 +1,4885 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CAR Attestation Schemas > attestationEvidenceSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "auditReport": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "complianceDocumentation": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "testResults": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "trainingVerification": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Attestation Schemas > attestationProofSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "challenge": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "created": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "domain": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "jws": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "nonce": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "proofPurpose": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "type": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "verificationMethod": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Attestation Schemas > attestationSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "certificationTier": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+    "domains": {
+      "inner": {
+        "element": {
+          "type": "enum",
+          "values": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+          ],
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "evidence": {
+      "inner": {
+        "shape": {
+          "auditReport": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "complianceDocumentation": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "testResults": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "trainingVerification": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "expiresAt": {
+      "type": "date",
+    },
+    "id": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "issuedAt": {
+      "type": "date",
+    },
+    "issuer": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "metadata": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "proof": {
+      "inner": {
+        "shape": {
+          "challenge": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "created": {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+          "domain": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "jws": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "nonce": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "proofPurpose": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "type": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "verificationMethod": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "scope": {
+      "type": "enum",
+      "values": [
+        "compliance",
+        "domain",
+        "full",
+        "identity",
+        "level",
+        "security",
+        "supervision",
+        "training",
+      ],
+    },
+    "status": {
+      "type": "enum",
+      "values": [
+        "active",
+        "expired",
+        "pending",
+        "revoked",
+        "suspended",
+      ],
+    },
+    "subject": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Attestation Schemas > attestationScopeSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "compliance",
+    "domain",
+    "full",
+    "identity",
+    "level",
+    "security",
+    "supervision",
+    "training",
+  ],
+}
+`;
+
+exports[`CAR Attestation Schemas > attestationStatusSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "active",
+    "expired",
+    "pending",
+    "revoked",
+    "suspended",
+  ],
+}
+`;
+
+exports[`CAR Attestation Schemas > attestationVerificationErrorSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "code": {
+      "type": "enum",
+      "values": [
+        "EXPIRED",
+        "INVALID_FORMAT",
+        "INVALID_SIGNATURE",
+        "ISSUER_NOT_TRUSTED",
+        "PROOF_MISSING",
+        "REVOKED",
+        "SUBJECT_MISMATCH",
+        "SUSPENDED",
+        "VERIFICATION_FAILED",
+      ],
+    },
+    "message": {
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Attestation Schemas > attestationVerificationResultSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "attestation": {
+      "inner": {
+        "shape": {
+          "certificationTier": {
+            "type": "nativeEnum",
+            "values": [
+              "T0_SANDBOX",
+              "T1_OBSERVED",
+              "T2_PROVISIONAL",
+              "T3_MONITORED",
+              "T4_STANDARD",
+              "T5_TRUSTED",
+              "T6_CERTIFIED",
+              "T7_AUTONOMOUS",
+            ],
+          },
+          "domains": {
+            "inner": {
+              "element": {
+                "type": "enum",
+                "values": [
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                  "G",
+                  "H",
+                  "I",
+                  "J",
+                  "K",
+                  "L",
+                  "M",
+                  "N",
+                  "O",
+                  "P",
+                  "Q",
+                  "R",
+                  "S",
+                  "T",
+                  "U",
+                  "V",
+                  "W",
+                  "X",
+                  "Y",
+                  "Z",
+                ],
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "evidence": {
+            "inner": {
+              "shape": {
+                "auditReport": {
+                  "inner": {
+                    "checks": [
+                      "url",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "complianceDocumentation": {
+                  "inner": {
+                    "checks": [
+                      "url",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "testResults": {
+                  "inner": {
+                    "checks": [
+                      "url",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "trainingVerification": {
+                  "inner": {
+                    "checks": [
+                      "url",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+              },
+              "type": "object",
+            },
+            "type": "optional",
+          },
+          "expiresAt": {
+            "type": "date",
+          },
+          "id": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "issuedAt": {
+            "type": "date",
+          },
+          "issuer": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "metadata": {
+            "inner": {
+              "keyType": {
+                "type": "string",
+              },
+              "type": "record",
+              "valueType": {
+                "type": "unknown",
+              },
+            },
+            "type": "optional",
+          },
+          "proof": {
+            "inner": {
+              "shape": {
+                "challenge": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "created": {
+                  "checks": [
+                    "datetime",
+                  ],
+                  "type": "string",
+                },
+                "domain": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "jws": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "nonce": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "proofPurpose": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "type": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "verificationMethod": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+            "type": "optional",
+          },
+          "scope": {
+            "type": "enum",
+            "values": [
+              "compliance",
+              "domain",
+              "full",
+              "identity",
+              "level",
+              "security",
+              "supervision",
+              "training",
+            ],
+          },
+          "status": {
+            "type": "enum",
+            "values": [
+              "active",
+              "expired",
+              "pending",
+              "revoked",
+              "suspended",
+            ],
+          },
+          "subject": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "errors": {
+      "element": {
+        "shape": {
+          "code": {
+            "type": "enum",
+            "values": [
+              "EXPIRED",
+              "INVALID_FORMAT",
+              "INVALID_SIGNATURE",
+              "ISSUER_NOT_TRUSTED",
+              "PROOF_MISSING",
+              "REVOKED",
+              "SUBJECT_MISMATCH",
+              "SUSPENDED",
+              "VERIFICATION_FAILED",
+            ],
+          },
+          "message": {
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "valid": {
+      "type": "boolean",
+    },
+    "verificationMethod": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "verifiedAt": {
+      "type": "date",
+    },
+    "warnings": {
+      "element": {
+        "shape": {
+          "code": {
+            "type": "string",
+          },
+          "message": {
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Attestation Schemas > attestationVerificationWarningSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "code": {
+      "type": "string",
+    },
+    "message": {
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Domain Schemas > domainBitmaskSchema shape matches snapshot 1`] = `
+{
+  "checks": [
+    "int",
+    "min",
+    "max",
+  ],
+  "type": "number",
+}
+`;
+
+exports[`CAR Domain Schemas > domainCodeArraySchema shape matches snapshot 1`] = `
+{
+  "element": {
+    "type": "enum",
+    "values": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "U",
+      "V",
+      "W",
+      "X",
+      "Y",
+      "Z",
+    ],
+  },
+  "type": "array",
+}
+`;
+
+exports[`CAR Domain Schemas > domainCodeSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+  ],
+}
+`;
+
+exports[`CAR Domain Schemas > domainDefinitionSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "bit": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "code": {
+      "type": "enum",
+      "values": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
+      ],
+    },
+    "description": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Effective Permission Schemas > constrainingFactorSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "certification_tier",
+    "competence_level",
+    "context_policy_ceiling",
+    "multiple",
+    "observability_ceiling",
+    "runtime_tier",
+    "supervision_elevation",
+  ],
+}
+`;
+
+exports[`CAR Effective Permission Schemas > effectivePermissionContextSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "certificationTier": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+    "competenceLevel": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "contextPolicyCeiling": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "observabilityCeiling": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "runtimeTier": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+    "supervisionElevation": {
+      "inner": {
+        "shape": {
+          "grantedElevation": {
+            "checks": [
+              "int",
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "supervisorTier": {
+            "type": "nativeEnum",
+            "values": [
+              "T0_SANDBOX",
+              "T1_OBSERVED",
+              "T2_PROVISIONAL",
+              "T3_MONITORED",
+              "T4_STANDARD",
+              "T5_TRUSTED",
+              "T6_CERTIFIED",
+              "T7_AUTONOMOUS",
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Effective Permission Schemas > effectivePermissionSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "ceilings": {
+      "shape": {
+        "certificationCeiling": {
+          "type": "nativeEnum",
+          "values": [
+            "L0_OBSERVE",
+            "L1_ADVISE",
+            "L2_DRAFT",
+            "L3_EXECUTE",
+            "L4_AUTONOMOUS",
+            "L5_TRUSTED",
+            "L6_CERTIFIED",
+            "L7_AUTONOMOUS",
+          ],
+        },
+        "competenceCeiling": {
+          "type": "nativeEnum",
+          "values": [
+            "L0_OBSERVE",
+            "L1_ADVISE",
+            "L2_DRAFT",
+            "L3_EXECUTE",
+            "L4_AUTONOMOUS",
+            "L5_TRUSTED",
+            "L6_CERTIFIED",
+            "L7_AUTONOMOUS",
+          ],
+        },
+        "contextPolicyCeiling": {
+          "type": "nativeEnum",
+          "values": [
+            "L0_OBSERVE",
+            "L1_ADVISE",
+            "L2_DRAFT",
+            "L3_EXECUTE",
+            "L4_AUTONOMOUS",
+            "L5_TRUSTED",
+            "L6_CERTIFIED",
+            "L7_AUTONOMOUS",
+          ],
+        },
+        "observabilityCeiling": {
+          "type": "nativeEnum",
+          "values": [
+            "L0_OBSERVE",
+            "L1_ADVISE",
+            "L2_DRAFT",
+            "L3_EXECUTE",
+            "L4_AUTONOMOUS",
+            "L5_TRUSTED",
+            "L6_CERTIFIED",
+            "L7_AUTONOMOUS",
+          ],
+        },
+        "runtimeCeiling": {
+          "type": "nativeEnum",
+          "values": [
+            "L0_OBSERVE",
+            "L1_ADVISE",
+            "L2_DRAFT",
+            "L3_EXECUTE",
+            "L4_AUTONOMOUS",
+            "L5_TRUSTED",
+            "L6_CERTIFIED",
+            "L7_AUTONOMOUS",
+          ],
+        },
+      },
+      "type": "object",
+    },
+    "constrained": {
+      "type": "boolean",
+    },
+    "constrainingFactor": {
+      "inner": {
+        "type": "enum",
+        "values": [
+          "certification_tier",
+          "competence_level",
+          "context_policy_ceiling",
+          "multiple",
+          "observability_ceiling",
+          "runtime_tier",
+          "supervision_elevation",
+        ],
+      },
+      "type": "optional",
+    },
+    "level": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "recommendations": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Effective Permission Schemas > permissionCeilingsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "certificationCeiling": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "competenceCeiling": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "contextPolicyCeiling": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "observabilityCeiling": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "runtimeCeiling": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Effective Permission Schemas > permissionCheckResultSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "allowed": {
+      "type": "boolean",
+    },
+    "effectiveLevel": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "levelGap": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "permission": {
+      "shape": {
+        "ceilings": {
+          "shape": {
+            "certificationCeiling": {
+              "type": "nativeEnum",
+              "values": [
+                "L0_OBSERVE",
+                "L1_ADVISE",
+                "L2_DRAFT",
+                "L3_EXECUTE",
+                "L4_AUTONOMOUS",
+                "L5_TRUSTED",
+                "L6_CERTIFIED",
+                "L7_AUTONOMOUS",
+              ],
+            },
+            "competenceCeiling": {
+              "type": "nativeEnum",
+              "values": [
+                "L0_OBSERVE",
+                "L1_ADVISE",
+                "L2_DRAFT",
+                "L3_EXECUTE",
+                "L4_AUTONOMOUS",
+                "L5_TRUSTED",
+                "L6_CERTIFIED",
+                "L7_AUTONOMOUS",
+              ],
+            },
+            "contextPolicyCeiling": {
+              "type": "nativeEnum",
+              "values": [
+                "L0_OBSERVE",
+                "L1_ADVISE",
+                "L2_DRAFT",
+                "L3_EXECUTE",
+                "L4_AUTONOMOUS",
+                "L5_TRUSTED",
+                "L6_CERTIFIED",
+                "L7_AUTONOMOUS",
+              ],
+            },
+            "observabilityCeiling": {
+              "type": "nativeEnum",
+              "values": [
+                "L0_OBSERVE",
+                "L1_ADVISE",
+                "L2_DRAFT",
+                "L3_EXECUTE",
+                "L4_AUTONOMOUS",
+                "L5_TRUSTED",
+                "L6_CERTIFIED",
+                "L7_AUTONOMOUS",
+              ],
+            },
+            "runtimeCeiling": {
+              "type": "nativeEnum",
+              "values": [
+                "L0_OBSERVE",
+                "L1_ADVISE",
+                "L2_DRAFT",
+                "L3_EXECUTE",
+                "L4_AUTONOMOUS",
+                "L5_TRUSTED",
+                "L6_CERTIFIED",
+                "L7_AUTONOMOUS",
+              ],
+            },
+          },
+          "type": "object",
+        },
+        "constrained": {
+          "type": "boolean",
+        },
+        "constrainingFactor": {
+          "inner": {
+            "type": "enum",
+            "values": [
+              "certification_tier",
+              "competence_level",
+              "context_policy_ceiling",
+              "multiple",
+              "observability_ceiling",
+              "runtime_tier",
+              "supervision_elevation",
+            ],
+          },
+          "type": "optional",
+        },
+        "level": {
+          "type": "nativeEnum",
+          "values": [
+            "L0_OBSERVE",
+            "L1_ADVISE",
+            "L2_DRAFT",
+            "L3_EXECUTE",
+            "L4_AUTONOMOUS",
+            "L5_TRUSTED",
+            "L6_CERTIFIED",
+            "L7_AUTONOMOUS",
+          ],
+        },
+        "recommendations": {
+          "inner": {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+      },
+      "type": "object",
+    },
+    "requestedLevel": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Identity Schemas > agentIdentitySchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "active": {
+      "type": "boolean",
+    },
+    "attestations": {
+      "element": {
+        "shape": {
+          "certificationTier": {
+            "type": "nativeEnum",
+            "values": [
+              "T0_SANDBOX",
+              "T1_OBSERVED",
+              "T2_PROVISIONAL",
+              "T3_MONITORED",
+              "T4_STANDARD",
+              "T5_TRUSTED",
+              "T6_CERTIFIED",
+              "T7_AUTONOMOUS",
+            ],
+          },
+          "domains": {
+            "inner": {
+              "element": {
+                "type": "enum",
+                "values": [
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                  "G",
+                  "H",
+                  "I",
+                  "J",
+                  "K",
+                  "L",
+                  "M",
+                  "N",
+                  "O",
+                  "P",
+                  "Q",
+                  "R",
+                  "S",
+                  "T",
+                  "U",
+                  "V",
+                  "W",
+                  "X",
+                  "Y",
+                  "Z",
+                ],
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "evidence": {
+            "inner": {
+              "shape": {
+                "auditReport": {
+                  "inner": {
+                    "checks": [
+                      "url",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "complianceDocumentation": {
+                  "inner": {
+                    "checks": [
+                      "url",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "testResults": {
+                  "inner": {
+                    "checks": [
+                      "url",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "trainingVerification": {
+                  "inner": {
+                    "checks": [
+                      "url",
+                    ],
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+              },
+              "type": "object",
+            },
+            "type": "optional",
+          },
+          "expiresAt": {
+            "type": "date",
+          },
+          "id": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "issuedAt": {
+            "type": "date",
+          },
+          "issuer": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "metadata": {
+            "inner": {
+              "keyType": {
+                "type": "string",
+              },
+              "type": "record",
+              "valueType": {
+                "type": "unknown",
+              },
+            },
+            "type": "optional",
+          },
+          "proof": {
+            "inner": {
+              "shape": {
+                "challenge": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "created": {
+                  "checks": [
+                    "datetime",
+                  ],
+                  "type": "string",
+                },
+                "domain": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "jws": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "nonce": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "proofPurpose": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "type": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "verificationMethod": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+            "type": "optional",
+          },
+          "scope": {
+            "type": "enum",
+            "values": [
+              "compliance",
+              "domain",
+              "full",
+              "identity",
+              "level",
+              "security",
+              "supervision",
+              "training",
+            ],
+          },
+          "status": {
+            "type": "enum",
+            "values": [
+              "active",
+              "expired",
+              "pending",
+              "revoked",
+              "suspended",
+            ],
+          },
+          "subject": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "capabilities": {
+      "shape": {
+        "domains": {
+          "element": {
+            "type": "enum",
+            "values": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "G",
+              "H",
+              "I",
+              "J",
+              "K",
+              "L",
+              "M",
+              "N",
+              "O",
+              "P",
+              "Q",
+              "R",
+              "S",
+              "T",
+              "U",
+              "V",
+              "W",
+              "X",
+              "Y",
+              "Z",
+            ],
+          },
+          "type": "array",
+        },
+        "domainsBitmask": {
+          "inner": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+        "level": {
+          "type": "nativeEnum",
+          "values": [
+            "L0_OBSERVE",
+            "L1_ADVISE",
+            "L2_DRAFT",
+            "L3_EXECUTE",
+            "L4_AUTONOMOUS",
+            "L5_TRUSTED",
+            "L6_CERTIFIED",
+            "L7_AUTONOMOUS",
+          ],
+        },
+        "skills": {
+          "inner": {
+            "element": {
+              "type": "enum",
+              "values": [
+                "AI",
+                "AU",
+                "CA",
+                "CM",
+                "CR",
+                "CS",
+                "CW",
+                "DA",
+                "DV",
+                "FO",
+                "GV",
+                "PL",
+                "QA",
+                "RS",
+                "RV",
+                "SC",
+                "SM",
+                "TD",
+                "TG",
+                "TR",
+                "WS",
+              ],
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+        "skillsBitmask": {
+          "inner": {
+            "checks": [
+              "int",
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+      },
+      "type": "object",
+    },
+    "car": {
+      "effect": "refinement",
+      "inner": {
+        "type": "string",
+      },
+      "type": "effects",
+    },
+    "carId": {
+      "inner": {
+        "effect": "refinement",
+        "inner": {
+          "type": "string",
+        },
+        "type": "effects",
+      },
+      "type": "optional",
+    },
+    "created": {
+      "type": "date",
+    },
+    "did": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "floatingReferences": {
+      "inner": {
+        "shape": {
+          "delegatedCARs": {
+            "inner": {
+              "element": {
+                "effect": "refinement",
+                "inner": {
+                  "type": "string",
+                },
+                "type": "effects",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "parentCAR": {
+            "inner": {
+              "effect": "refinement",
+              "inner": {
+                "type": "string",
+              },
+              "type": "effects",
+            },
+            "type": "optional",
+          },
+          "relatedCARs": {
+            "inner": {
+              "element": {
+                "effect": "refinement",
+                "inner": {
+                  "type": "string",
+                },
+                "type": "effects",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "supervisorCAR": {
+            "inner": {
+              "effect": "refinement",
+              "inner": {
+                "type": "string",
+              },
+              "type": "effects",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "metadata": {
+      "inner": {
+        "shape": {
+          "contact": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "description": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "documentation": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "logo": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "organization": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "privacyPolicy": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "support": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "termsOfService": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "version": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "parsedCAR": {
+      "inner": {
+        "shape": {
+          "agentClass": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "car": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "domains": {
+            "element": {
+              "type": "enum",
+              "values": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+              ],
+            },
+            "type": "array",
+          },
+          "domainsBitmask": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+          "extensions": {
+            "inner": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "default",
+          },
+          "level": {
+            "type": "nativeEnum",
+            "values": [
+              "L0_OBSERVE",
+              "L1_ADVISE",
+              "L2_DRAFT",
+              "L3_EXECUTE",
+              "L4_AUTONOMOUS",
+              "L5_TRUSTED",
+              "L6_CERTIFIED",
+              "L7_AUTONOMOUS",
+            ],
+          },
+          "organization": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "registry": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "version": {
+            "checks": [
+              "regex",
+            ],
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "parsedCarId": {
+      "inner": {
+        "shape": {
+          "agentClass": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "car": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "domains": {
+            "element": {
+              "type": "enum",
+              "values": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+              ],
+            },
+            "type": "array",
+          },
+          "domainsBitmask": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+          "extensions": {
+            "inner": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "default",
+          },
+          "level": {
+            "type": "nativeEnum",
+            "values": [
+              "L0_OBSERVE",
+              "L1_ADVISE",
+              "L2_DRAFT",
+              "L3_EXECUTE",
+              "L4_AUTONOMOUS",
+              "L5_TRUSTED",
+              "L6_CERTIFIED",
+              "L7_AUTONOMOUS",
+            ],
+          },
+          "organization": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "registry": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "version": {
+            "checks": [
+              "regex",
+            ],
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "runtimeTier": {
+      "inner": {
+        "type": "nativeEnum",
+        "values": [
+          "T0_SANDBOX",
+          "T1_OBSERVED",
+          "T2_PROVISIONAL",
+          "T3_MONITORED",
+          "T4_STANDARD",
+          "T5_TRUSTED",
+          "T6_CERTIFIED",
+          "T7_AUTONOMOUS",
+        ],
+      },
+      "type": "optional",
+    },
+    "serviceEndpoint": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "services": {
+      "inner": {
+        "element": {
+          "shape": {
+            "id": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "serviceEndpoint": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "supervision": {
+      "inner": {
+        "shape": {
+          "elevationTiers": {
+            "checks": [
+              "int",
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "expiresAt": {
+            "type": "date",
+          },
+          "grantedAt": {
+            "type": "date",
+          },
+          "heartbeatIntervalMs": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+          "lastHeartbeat": {
+            "inner": {
+              "type": "date",
+            },
+            "type": "optional",
+          },
+          "scope": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "supervisorCAR": {
+            "effect": "refinement",
+            "inner": {
+              "type": "string",
+            },
+            "type": "effects",
+          },
+          "supervisorDID": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "supervisorTier": {
+            "type": "nativeEnum",
+            "values": [
+              "T0_SANDBOX",
+              "T1_OBSERVED",
+              "T2_PROVISIONAL",
+              "T3_MONITORED",
+              "T4_STANDARD",
+              "T5_TRUSTED",
+              "T6_CERTIFIED",
+              "T7_AUTONOMOUS",
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "updated": {
+      "type": "date",
+    },
+    "verificationMethods": {
+      "inner": {
+        "element": {
+          "shape": {
+            "controller": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "id": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "publicKeyJwk": {
+              "inner": {
+                "keyType": {
+                  "type": "string",
+                },
+                "type": "record",
+                "valueType": {
+                  "type": "unknown",
+                },
+              },
+              "type": "optional",
+            },
+            "publicKeyMultibase": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Identity Schemas > agentIdentitySummarySchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "active": {
+      "type": "boolean",
+    },
+    "car": {
+      "effect": "refinement",
+      "inner": {
+        "type": "string",
+      },
+      "type": "effects",
+    },
+    "carId": {
+      "inner": {
+        "effect": "refinement",
+        "inner": {
+          "type": "string",
+        },
+        "type": "effects",
+      },
+      "type": "optional",
+    },
+    "certificationTier": {
+      "inner": {
+        "type": "nativeEnum",
+        "values": [
+          "T0_SANDBOX",
+          "T1_OBSERVED",
+          "T2_PROVISIONAL",
+          "T3_MONITORED",
+          "T4_STANDARD",
+          "T5_TRUSTED",
+          "T6_CERTIFIED",
+          "T7_AUTONOMOUS",
+        ],
+      },
+      "type": "optional",
+    },
+    "did": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "domains": {
+      "element": {
+        "type": "enum",
+        "values": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+        ],
+      },
+      "type": "array",
+    },
+    "level": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "name": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "runtimeTier": {
+      "inner": {
+        "type": "nativeEnum",
+        "values": [
+          "T0_SANDBOX",
+          "T1_OBSERVED",
+          "T2_PROVISIONAL",
+          "T3_MONITORED",
+          "T4_STANDARD",
+          "T5_TRUSTED",
+          "T6_CERTIFIED",
+          "T7_AUTONOMOUS",
+        ],
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Identity Schemas > agentMatchCriteriaSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "minCertificationTier": {
+      "inner": {
+        "type": "nativeEnum",
+        "values": [
+          "T0_SANDBOX",
+          "T1_OBSERVED",
+          "T2_PROVISIONAL",
+          "T3_MONITORED",
+          "T4_STANDARD",
+          "T5_TRUSTED",
+          "T6_CERTIFIED",
+          "T7_AUTONOMOUS",
+        ],
+      },
+      "type": "optional",
+    },
+    "minLevel": {
+      "inner": {
+        "type": "nativeEnum",
+        "values": [
+          "L0_OBSERVE",
+          "L1_ADVISE",
+          "L2_DRAFT",
+          "L3_EXECUTE",
+          "L4_AUTONOMOUS",
+          "L5_TRUSTED",
+          "L6_CERTIFIED",
+          "L7_AUTONOMOUS",
+        ],
+      },
+      "type": "optional",
+    },
+    "minRuntimeTier": {
+      "inner": {
+        "type": "nativeEnum",
+        "values": [
+          "T0_SANDBOX",
+          "T1_OBSERVED",
+          "T2_PROVISIONAL",
+          "T3_MONITORED",
+          "T4_STANDARD",
+          "T5_TRUSTED",
+          "T6_CERTIFIED",
+          "T7_AUTONOMOUS",
+        ],
+      },
+      "type": "optional",
+    },
+    "mustBeActive": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "mustHaveValidAttestations": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "organization": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "registry": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "requiredDomains": {
+      "inner": {
+        "element": {
+          "type": "enum",
+          "values": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+          ],
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "requiredSkills": {
+      "inner": {
+        "element": {
+          "type": "enum",
+          "values": [
+            "AI",
+            "AU",
+            "CA",
+            "CM",
+            "CR",
+            "CS",
+            "CW",
+            "DA",
+            "DV",
+            "FO",
+            "GV",
+            "PL",
+            "QA",
+            "RS",
+            "RV",
+            "SC",
+            "SM",
+            "TD",
+            "TG",
+            "TR",
+            "WS",
+          ],
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Identity Schemas > agentMetadataSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "contact": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "description": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "documentation": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "logo": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "organization": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "privacyPolicy": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "support": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "termsOfService": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "version": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Identity Schemas > agentRegistrationOptionsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "attestations": {
+      "inner": {
+        "element": {
+          "shape": {
+            "certificationTier": {
+              "type": "nativeEnum",
+              "values": [
+                "T0_SANDBOX",
+                "T1_OBSERVED",
+                "T2_PROVISIONAL",
+                "T3_MONITORED",
+                "T4_STANDARD",
+                "T5_TRUSTED",
+                "T6_CERTIFIED",
+                "T7_AUTONOMOUS",
+              ],
+            },
+            "domains": {
+              "inner": {
+                "element": {
+                  "type": "enum",
+                  "values": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E",
+                    "F",
+                    "G",
+                    "H",
+                    "I",
+                    "J",
+                    "K",
+                    "L",
+                    "M",
+                    "N",
+                    "O",
+                    "P",
+                    "Q",
+                    "R",
+                    "S",
+                    "T",
+                    "U",
+                    "V",
+                    "W",
+                    "X",
+                    "Y",
+                    "Z",
+                  ],
+                },
+                "type": "array",
+              },
+              "type": "optional",
+            },
+            "evidence": {
+              "inner": {
+                "shape": {
+                  "auditReport": {
+                    "inner": {
+                      "checks": [
+                        "url",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                  "complianceDocumentation": {
+                    "inner": {
+                      "checks": [
+                        "url",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                  "testResults": {
+                    "inner": {
+                      "checks": [
+                        "url",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                  "trainingVerification": {
+                    "inner": {
+                      "checks": [
+                        "url",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                },
+                "type": "object",
+              },
+              "type": "optional",
+            },
+            "expiresAt": {
+              "type": "date",
+            },
+            "id": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "issuedAt": {
+              "type": "date",
+            },
+            "issuer": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "metadata": {
+              "inner": {
+                "keyType": {
+                  "type": "string",
+                },
+                "type": "record",
+                "valueType": {
+                  "type": "unknown",
+                },
+              },
+              "type": "optional",
+            },
+            "proof": {
+              "inner": {
+                "shape": {
+                  "challenge": {
+                    "inner": {
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                  "created": {
+                    "checks": [
+                      "datetime",
+                    ],
+                    "type": "string",
+                  },
+                  "domain": {
+                    "inner": {
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                  "jws": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "nonce": {
+                    "inner": {
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                  "proofPurpose": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "type": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "verificationMethod": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+              "type": "optional",
+            },
+            "scope": {
+              "type": "enum",
+              "values": [
+                "compliance",
+                "domain",
+                "full",
+                "identity",
+                "level",
+                "security",
+                "supervision",
+                "training",
+              ],
+            },
+            "status": {
+              "type": "enum",
+              "values": [
+                "active",
+                "expired",
+                "pending",
+                "revoked",
+                "suspended",
+              ],
+            },
+            "subject": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "car": {
+      "effect": "refinement",
+      "inner": {
+        "type": "string",
+      },
+      "type": "effects",
+    },
+    "carId": {
+      "inner": {
+        "effect": "refinement",
+        "inner": {
+          "type": "string",
+        },
+        "type": "effects",
+      },
+      "type": "optional",
+    },
+    "did": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "metadata": {
+      "inner": {
+        "shape": {
+          "contact": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "description": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "documentation": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "logo": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "organization": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "privacyPolicy": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "support": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "termsOfService": {
+            "inner": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "version": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "serviceEndpoint": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "services": {
+      "inner": {
+        "element": {
+          "shape": {
+            "id": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "serviceEndpoint": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+            "type": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "verificationMethods": {
+      "inner": {
+        "element": {
+          "shape": {
+            "controller": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "id": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "publicKeyJwk": {
+              "inner": {
+                "keyType": {
+                  "type": "string",
+                },
+                "type": "record",
+                "valueType": {
+                  "type": "unknown",
+                },
+              },
+              "type": "optional",
+            },
+            "publicKeyMultibase": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Identity Schemas > capabilityVectorSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "domains": {
+      "element": {
+        "type": "enum",
+        "values": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+        ],
+      },
+      "type": "array",
+    },
+    "domainsBitmask": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "level": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "skills": {
+      "inner": {
+        "element": {
+          "type": "enum",
+          "values": [
+            "AI",
+            "AU",
+            "CA",
+            "CM",
+            "CR",
+            "CS",
+            "CW",
+            "DA",
+            "DV",
+            "FO",
+            "GV",
+            "PL",
+            "QA",
+            "RS",
+            "RV",
+            "SC",
+            "SM",
+            "TD",
+            "TG",
+            "TR",
+            "WS",
+          ],
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "skillsBitmask": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Identity Schemas > serviceEndpointSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "id": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "serviceEndpoint": {
+      "checks": [
+        "url",
+      ],
+      "type": "string",
+    },
+    "type": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Identity Schemas > verificationMethodSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "controller": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "id": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "publicKeyJwk": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "publicKeyMultibase": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "type": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR JWT Claims Schemas > carAttestationClaimSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "evidence": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "exp": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "iat": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "iss": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "scope": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "tier": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR JWT Claims Schemas > carConstraintsClaimSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "allowed_resources": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "blocked_resources": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "custom": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "max_operations": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "requires_approval": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "valid_until": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR JWT Claims Schemas > jwtClaimsValidationErrorSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "code": {
+      "type": "enum",
+      "values": [
+        "DOMAINS_MISMATCH",
+        "EXPIRED",
+        "INVALID_CAR",
+        "INVALID_DOMAINS",
+        "INVALID_FORMAT",
+        "INVALID_LEVEL",
+        "INVALID_TIER",
+        "MISSING_CAR",
+        "NOT_YET_VALID",
+      ],
+    },
+    "message": {
+      "type": "string",
+    },
+    "path": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR JWT Claims Schemas > jwtClaimsValidationOptionsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "checkExpiry": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "validateDomainsMismatch": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR JWT Claims Schemas > jwtClaimsValidationResultSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "claims": {
+      "inner": {
+        "shape": {
+          "aud": {
+            "inner": {
+              "options": [
+                {
+                  "type": "string",
+                },
+                {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              ],
+              "type": "union",
+            },
+            "type": "optional",
+          },
+          "car": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "carId": {
+            "inner": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "carId_attestations": {
+            "inner": {
+              "element": {
+                "shape": {
+                  "evidence": {
+                    "inner": {
+                      "checks": [
+                        "url",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                  "exp": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "iat": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "iss": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "scope": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "tier": {
+                    "type": "nativeEnum",
+                    "values": [
+                      "T0_SANDBOX",
+                      "T1_OBSERVED",
+                      "T2_PROVISIONAL",
+                      "T3_MONITORED",
+                      "T4_STANDARD",
+                      "T5_TRUSTED",
+                      "T6_CERTIFIED",
+                      "T7_AUTONOMOUS",
+                    ],
+                  },
+                },
+                "type": "object",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "carId_class": {
+            "inner": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "carId_constraints": {
+            "inner": {
+              "shape": {
+                "allowed_resources": {
+                  "inner": {
+                    "element": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "optional",
+                },
+                "blocked_resources": {
+                  "inner": {
+                    "element": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "optional",
+                },
+                "custom": {
+                  "inner": {
+                    "keyType": {
+                      "type": "string",
+                    },
+                    "type": "record",
+                    "valueType": {
+                      "type": "unknown",
+                    },
+                  },
+                  "type": "optional",
+                },
+                "max_operations": {
+                  "inner": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "type": "optional",
+                },
+                "requires_approval": {
+                  "inner": {
+                    "type": "boolean",
+                  },
+                  "type": "optional",
+                },
+                "valid_until": {
+                  "inner": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "type": "optional",
+                },
+              },
+              "type": "object",
+            },
+            "type": "optional",
+          },
+          "carId_did": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "carId_domains": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "carId_domains_list": {
+            "inner": {
+              "element": {
+                "type": "enum",
+                "values": [
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "E",
+                  "F",
+                  "G",
+                  "H",
+                  "I",
+                  "J",
+                  "K",
+                  "L",
+                  "M",
+                  "N",
+                  "O",
+                  "P",
+                  "Q",
+                  "R",
+                  "S",
+                  "T",
+                  "U",
+                  "V",
+                  "W",
+                  "X",
+                  "Y",
+                  "Z",
+                ],
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "carId_level": {
+            "inner": {
+              "type": "nativeEnum",
+              "values": [
+                "L0_OBSERVE",
+                "L1_ADVISE",
+                "L2_DRAFT",
+                "L3_EXECUTE",
+                "L4_AUTONOMOUS",
+                "L5_TRUSTED",
+                "L6_CERTIFIED",
+                "L7_AUTONOMOUS",
+              ],
+            },
+            "type": "optional",
+          },
+          "carId_org": {
+            "inner": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "carId_permission_ceiling": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+                "max",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "carId_registry": {
+            "inner": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "carId_runtime_tier": {
+            "inner": {
+              "type": "nativeEnum",
+              "values": [
+                "T0_SANDBOX",
+                "T1_OBSERVED",
+                "T2_PROVISIONAL",
+                "T3_MONITORED",
+                "T4_STANDARD",
+                "T5_TRUSTED",
+                "T6_CERTIFIED",
+                "T7_AUTONOMOUS",
+              ],
+            },
+            "type": "optional",
+          },
+          "carId_trust": {
+            "inner": {
+              "type": "nativeEnum",
+              "values": [
+                "T0_SANDBOX",
+                "T1_OBSERVED",
+                "T2_PROVISIONAL",
+                "T3_MONITORED",
+                "T4_STANDARD",
+                "T5_TRUSTED",
+                "T6_CERTIFIED",
+                "T7_AUTONOMOUS",
+              ],
+            },
+            "type": "optional",
+          },
+          "carId_version": {
+            "inner": {
+              "checks": [
+                "regex",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "car_attestations": {
+            "inner": {
+              "element": {
+                "shape": {
+                  "evidence": {
+                    "inner": {
+                      "checks": [
+                        "url",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "optional",
+                  },
+                  "exp": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "iat": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "iss": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "scope": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "tier": {
+                    "type": "nativeEnum",
+                    "values": [
+                      "T0_SANDBOX",
+                      "T1_OBSERVED",
+                      "T2_PROVISIONAL",
+                      "T3_MONITORED",
+                      "T4_STANDARD",
+                      "T5_TRUSTED",
+                      "T6_CERTIFIED",
+                      "T7_AUTONOMOUS",
+                    ],
+                  },
+                },
+                "type": "object",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "car_class": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "car_constraints": {
+            "inner": {
+              "shape": {
+                "allowed_resources": {
+                  "inner": {
+                    "element": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "optional",
+                },
+                "blocked_resources": {
+                  "inner": {
+                    "element": {
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "optional",
+                },
+                "custom": {
+                  "inner": {
+                    "keyType": {
+                      "type": "string",
+                    },
+                    "type": "record",
+                    "valueType": {
+                      "type": "unknown",
+                    },
+                  },
+                  "type": "optional",
+                },
+                "max_operations": {
+                  "inner": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "type": "optional",
+                },
+                "requires_approval": {
+                  "inner": {
+                    "type": "boolean",
+                  },
+                  "type": "optional",
+                },
+                "valid_until": {
+                  "inner": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "type": "optional",
+                },
+              },
+              "type": "object",
+            },
+            "type": "optional",
+          },
+          "car_did": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "car_domains": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+          "car_domains_list": {
+            "element": {
+              "type": "enum",
+              "values": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+              ],
+            },
+            "type": "array",
+          },
+          "car_level": {
+            "type": "nativeEnum",
+            "values": [
+              "L0_OBSERVE",
+              "L1_ADVISE",
+              "L2_DRAFT",
+              "L3_EXECUTE",
+              "L4_AUTONOMOUS",
+              "L5_TRUSTED",
+              "L6_CERTIFIED",
+              "L7_AUTONOMOUS",
+            ],
+          },
+          "car_org": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "car_permission_ceiling": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+                "max",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "car_registry": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "car_runtime_tier": {
+            "inner": {
+              "type": "nativeEnum",
+              "values": [
+                "T0_SANDBOX",
+                "T1_OBSERVED",
+                "T2_PROVISIONAL",
+                "T3_MONITORED",
+                "T4_STANDARD",
+                "T5_TRUSTED",
+                "T6_CERTIFIED",
+                "T7_AUTONOMOUS",
+              ],
+            },
+            "type": "optional",
+          },
+          "car_trust": {
+            "inner": {
+              "type": "nativeEnum",
+              "values": [
+                "T0_SANDBOX",
+                "T1_OBSERVED",
+                "T2_PROVISIONAL",
+                "T3_MONITORED",
+                "T4_STANDARD",
+                "T5_TRUSTED",
+                "T6_CERTIFIED",
+                "T7_AUTONOMOUS",
+              ],
+            },
+            "type": "optional",
+          },
+          "car_version": {
+            "checks": [
+              "regex",
+            ],
+            "type": "string",
+          },
+          "exp": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "iat": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "iss": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "jti": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "nbf": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "sub": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "errors": {
+      "element": {
+        "shape": {
+          "code": {
+            "type": "enum",
+            "values": [
+              "DOMAINS_MISMATCH",
+              "EXPIRED",
+              "INVALID_CAR",
+              "INVALID_DOMAINS",
+              "INVALID_FORMAT",
+              "INVALID_LEVEL",
+              "INVALID_TIER",
+              "MISSING_CAR",
+              "NOT_YET_VALID",
+            ],
+          },
+          "message": {
+            "type": "string",
+          },
+          "path": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "valid": {
+      "type": "boolean",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR JWT Claims Schemas > standardJWTClaimsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "aud": {
+      "inner": {
+        "options": [
+          {
+            "type": "string",
+          },
+          {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+        ],
+        "type": "union",
+      },
+      "type": "optional",
+    },
+    "exp": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "iat": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "iss": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "jti": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "nbf": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "sub": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Level Schemas > capabilityLevelConfigSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "abilities": {
+      "type": "ZodReadonly",
+    },
+    "canOperateAutonomously": {
+      "type": "boolean",
+    },
+    "code": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "description": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "level": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "minCertificationTier": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "requiresApproval": {
+      "type": "boolean",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Level Schemas > capabilityLevelSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "L0_OBSERVE",
+    "L1_ADVISE",
+    "L2_DRAFT",
+    "L3_EXECUTE",
+    "L4_AUTONOMOUS",
+    "L5_TRUSTED",
+    "L6_CERTIFIED",
+    "L7_AUTONOMOUS",
+  ],
+}
+`;
+
+exports[`CAR Mapping Schemas > domainMappingResultSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "domain": {
+      "type": "enum",
+      "values": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
+      ],
+    },
+    "namespace": {
+      "type": "enum",
+      "values": [
+        "administration",
+        "business",
+        "communications",
+        "cross-domain",
+        "data",
+        "external",
+        "finance",
+        "governance",
+        "healthcare",
+        "infrastructure",
+        "judicial",
+        "knowledge",
+        "logistics",
+        "manufacturing",
+        "nlp",
+        "operations",
+        "people",
+        "quality",
+        "research",
+        "reserved",
+        "security",
+        "training",
+        "utilities",
+        "verification",
+        "web",
+        "yield",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Mapping Schemas > tierMappingResultSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "certificationTier": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+    "runtimeTier": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Mapping Schemas > vorionNamespaceSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "administration",
+    "business",
+    "communications",
+    "cross-domain",
+    "data",
+    "external",
+    "finance",
+    "governance",
+    "healthcare",
+    "infrastructure",
+    "judicial",
+    "knowledge",
+    "logistics",
+    "manufacturing",
+    "nlp",
+    "operations",
+    "people",
+    "quality",
+    "research",
+    "reserved",
+    "security",
+    "training",
+    "utilities",
+    "verification",
+    "web",
+    "yield",
+  ],
+}
+`;
+
+exports[`CAR Skill Schemas > skillBitmaskSchema shape matches snapshot 1`] = `
+{
+  "checks": [
+    "int",
+    "min",
+    "max",
+  ],
+  "type": "number",
+}
+`;
+
+exports[`CAR Skill Schemas > skillCodeArraySchema shape matches snapshot 1`] = `
+{
+  "element": {
+    "type": "enum",
+    "values": [
+      "AI",
+      "AU",
+      "CA",
+      "CM",
+      "CR",
+      "CS",
+      "CW",
+      "DA",
+      "DV",
+      "FO",
+      "GV",
+      "PL",
+      "QA",
+      "RS",
+      "RV",
+      "SC",
+      "SM",
+      "TD",
+      "TG",
+      "TR",
+      "WS",
+    ],
+  },
+  "type": "array",
+}
+`;
+
+exports[`CAR Skill Schemas > skillCodeSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "AI",
+    "AU",
+    "CA",
+    "CM",
+    "CR",
+    "CS",
+    "CW",
+    "DA",
+    "DV",
+    "FO",
+    "GV",
+    "PL",
+    "QA",
+    "RS",
+    "RV",
+    "SC",
+    "SM",
+    "TD",
+    "TG",
+    "TR",
+    "WS",
+  ],
+}
+`;
+
+exports[`CAR Skill Schemas > skillDefinitionSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "bit": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "category": {
+      "type": "enum",
+      "values": [
+        "analysis",
+        "business",
+        "content",
+        "development",
+        "security",
+      ],
+    },
+    "code": {
+      "type": "enum",
+      "values": [
+        "AI",
+        "AU",
+        "CA",
+        "CM",
+        "CR",
+        "CS",
+        "CW",
+        "DA",
+        "DV",
+        "FO",
+        "GV",
+        "PL",
+        "QA",
+        "RS",
+        "RV",
+        "SC",
+        "SM",
+        "TD",
+        "TG",
+        "TR",
+        "WS",
+      ],
+    },
+    "description": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "legacyId": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR String Schemas > carStringSchema shape matches snapshot 1`] = `
+{
+  "effect": "refinement",
+  "inner": {
+    "type": "string",
+  },
+  "type": "effects",
+}
+`;
+
+exports[`CAR String Schemas > carValidationErrorSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "code": {
+      "type": "string",
+    },
+    "message": {
+      "type": "string",
+    },
+    "path": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR String Schemas > carValidationResultSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "errors": {
+      "element": {
+        "shape": {
+          "code": {
+            "type": "string",
+          },
+          "message": {
+            "type": "string",
+          },
+          "path": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "parsed": {
+      "inner": {
+        "shape": {
+          "agentClass": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "car": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "domains": {
+            "element": {
+              "type": "enum",
+              "values": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+              ],
+            },
+            "type": "array",
+          },
+          "domainsBitmask": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+          "extensions": {
+            "inner": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "default",
+          },
+          "level": {
+            "type": "nativeEnum",
+            "values": [
+              "L0_OBSERVE",
+              "L1_ADVISE",
+              "L2_DRAFT",
+              "L3_EXECUTE",
+              "L4_AUTONOMOUS",
+              "L5_TRUSTED",
+              "L6_CERTIFIED",
+              "L7_AUTONOMOUS",
+            ],
+          },
+          "organization": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "registry": {
+            "checks": [
+              "min",
+              "regex",
+            ],
+            "type": "string",
+          },
+          "version": {
+            "checks": [
+              "regex",
+            ],
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "valid": {
+      "type": "boolean",
+    },
+    "warnings": {
+      "element": {
+        "shape": {
+          "code": {
+            "type": "string",
+          },
+          "message": {
+            "type": "string",
+          },
+          "path": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR String Schemas > carValidationWarningSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "code": {
+      "type": "string",
+    },
+    "message": {
+      "type": "string",
+    },
+    "path": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR String Schemas > generateCAROptionsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentClass": {
+      "checks": [
+        "min",
+        "regex",
+      ],
+      "type": "string",
+    },
+    "domains": {
+      "element": {
+        "type": "enum",
+        "values": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+        ],
+      },
+      "type": "array",
+    },
+    "extensions": {
+      "inner": {
+        "element": {
+          "checks": [
+            "regex",
+          ],
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "level": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "organization": {
+      "checks": [
+        "min",
+        "regex",
+      ],
+      "type": "string",
+    },
+    "registry": {
+      "checks": [
+        "min",
+        "regex",
+      ],
+      "type": "string",
+    },
+    "version": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR String Schemas > parsedCARSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentClass": {
+      "checks": [
+        "min",
+        "regex",
+      ],
+      "type": "string",
+    },
+    "car": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "domains": {
+      "element": {
+        "type": "enum",
+        "values": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+        ],
+      },
+      "type": "array",
+    },
+    "domainsBitmask": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "extensions": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "default",
+    },
+    "level": {
+      "type": "nativeEnum",
+      "values": [
+        "L0_OBSERVE",
+        "L1_ADVISE",
+        "L2_DRAFT",
+        "L3_EXECUTE",
+        "L4_AUTONOMOUS",
+        "L5_TRUSTED",
+        "L6_CERTIFIED",
+        "L7_AUTONOMOUS",
+      ],
+    },
+    "organization": {
+      "checks": [
+        "min",
+        "regex",
+      ],
+      "type": "string",
+    },
+    "registry": {
+      "checks": [
+        "min",
+        "regex",
+      ],
+      "type": "string",
+    },
+    "version": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Tier Schemas > certificationTierConfigSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "code": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "description": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "maxCapabilityLevel": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "requiredAttestations": {
+      "type": "ZodReadonly",
+    },
+    "scoreRange": {
+      "shape": {
+        "max": {
+          "checks": [
+            "int",
+            "min",
+            "max",
+          ],
+          "type": "number",
+        },
+        "min": {
+          "checks": [
+            "int",
+            "min",
+            "max",
+          ],
+          "type": "number",
+        },
+      },
+      "type": "object",
+    },
+    "tier": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Tier Schemas > certificationTierSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "T0_SANDBOX",
+    "T1_OBSERVED",
+    "T2_PROVISIONAL",
+    "T3_MONITORED",
+    "T4_STANDARD",
+    "T5_TRUSTED",
+    "T6_CERTIFIED",
+    "T7_AUTONOMOUS",
+  ],
+}
+`;
+
+exports[`CAR Tier Schemas > runtimeTierConfigSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "allowsAutonomy": {
+      "type": "boolean",
+    },
+    "code": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "description": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "hasGuardrails": {
+      "type": "boolean",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "requiresApproval": {
+      "type": "boolean",
+    },
+    "scoreRange": {
+      "shape": {
+        "max": {
+          "checks": [
+            "int",
+            "min",
+            "max",
+          ],
+          "type": "number",
+        },
+        "min": {
+          "checks": [
+            "int",
+            "min",
+            "max",
+          ],
+          "type": "number",
+        },
+      },
+      "type": "object",
+    },
+    "tier": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`CAR Tier Schemas > runtimeTierSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "T0_SANDBOX",
+    "T1_OBSERVED",
+    "T2_PROVISIONAL",
+    "T3_MONITORED",
+    "T4_STANDARD",
+    "T5_TRUSTED",
+    "T6_CERTIFIED",
+    "T7_AUTONOMOUS",
+  ],
+}
+`;

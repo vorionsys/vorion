@@ -1,0 +1,100 @@
+{
+  "name": "@vorionsys/runtime",
+  "version": "0.1.2",
+  "description": "Vorion Runtime - Orchestration layer for AI agent governance",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./trust-facade": {
+      "types": "./dist/trust-facade/index.d.ts",
+      "import": "./dist/trust-facade/index.js"
+    },
+    "./intent-pipeline": {
+      "types": "./dist/intent-pipeline/index.d.ts",
+      "import": "./dist/intent-pipeline/index.js"
+    },
+    "./proof-committer": {
+      "types": "./dist/proof-committer/index.d.ts",
+      "import": "./dist/proof-committer/index.js"
+    },
+    "./stores": {
+      "types": "./dist/stores/index.d.ts",
+      "import": "./dist/stores/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@vorionsys/shared-constants": "^1.0.1",
+    "better-sqlite3": "^11.0.0",
+    "pino": "^9.0.0",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "@vorionsys/atsf-core": ">=0.1.0",
+    "@vorionsys/contracts": ">=0.1.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vorionsys/atsf-core": {
+      "optional": true
+    },
+    "@vorionsys/contracts": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "trust",
+    "governance",
+    "runtime",
+    "vorion",
+    "basis",
+    "safety",
+    "orchestration",
+    "proof",
+    "audit"
+  ],
+  "author": "Vorion <team@vorion.org>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voriongit/vorion.git",
+    "directory": "packages/runtime"
+  },
+  "bugs": {
+    "url": "https://github.com/voriongit/vorion/issues"
+  },
+  "homepage": "https://vorion.org",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

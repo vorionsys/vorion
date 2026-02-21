@@ -1,0 +1,3306 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Canonical Agent Schemas > agentCapabilitySchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "autonomyLevel": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "collaborationPreference": {
+      "element": {
+        "type": "enum",
+        "values": [
+          "CONSENSUS",
+          "CONSULT",
+          "DELEGATE",
+          "PARALLEL",
+          "SEQUENTIAL",
+        ],
+      },
+      "type": "array",
+    },
+    "domain": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "skills": {
+      "element": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "trustLevel": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Agent Schemas > agentConfigSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "capabilities": {
+      "element": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "conversationId": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "description": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "environment": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "string",
+        },
+      },
+      "type": "optional",
+    },
+    "lastActivity": {
+      "inner": {
+        "options": [
+          {
+            "type": "date",
+          },
+          {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+        ],
+        "type": "union",
+      },
+      "type": "optional",
+    },
+    "maxTokens": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "mcpServers": {
+      "inner": {
+        "element": {
+          "shape": {
+            "capabilities": {
+              "inner": {
+                "element": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "optional",
+            },
+            "config": {
+              "inner": {
+                "keyType": {
+                  "type": "string",
+                },
+                "type": "record",
+                "valueType": {
+                  "type": "unknown",
+                },
+              },
+              "type": "optional",
+            },
+            "enabled": {
+              "type": "boolean",
+            },
+            "minTrustScore": {
+              "inner": {
+                "checks": [
+                  "int",
+                  "min",
+                  "max",
+                ],
+                "type": "number",
+              },
+              "type": "optional",
+            },
+            "name": {
+              "checks": [
+                "min",
+              ],
+              "type": "string",
+            },
+            "url": {
+              "checks": [
+                "url",
+              ],
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "messageCount": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "model": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "permissions": {
+      "inner": {
+        "element": {
+          "type": "enum",
+          "values": [
+            "admin",
+            "delegate",
+            "execute",
+            "external",
+            "spawn",
+          ],
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "personalityTraits": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "sessionId": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "specialization": {
+      "inner": {
+        "options": [
+          {
+            "type": "enum",
+            "values": [
+              "core",
+              "creative",
+              "customer_service",
+              "data_analysis",
+              "development",
+              "education",
+              "operations",
+              "research",
+              "security",
+              "technical",
+            ],
+          },
+          {
+            "type": "string",
+          },
+        ],
+        "type": "union",
+      },
+      "type": "optional",
+    },
+    "status": {
+      "type": "enum",
+      "values": [
+        "active",
+        "archived",
+        "draft",
+        "suspended",
+        "training",
+      ],
+    },
+    "systemPrompt": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "temperature": {
+      "inner": {
+        "checks": [
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "trustScore": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "userId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "userRole": {
+      "type": "enum",
+      "values": [
+        "admin",
+        "both",
+        "operator",
+        "owner",
+        "viewer",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Agent Schemas > agentLifecycleStatusSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "active",
+    "archived",
+    "draft",
+    "suspended",
+    "training",
+  ],
+}
+`;
+
+exports[`Canonical Agent Schemas > agentPerformanceMetricsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "averageQuality": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "averageResponseTime": {
+      "checks": [
+        "min",
+      ],
+      "type": "number",
+    },
+    "collaborationScore": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "escalationRate": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "tasksCompleted": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "tasksFailed": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "userSatisfaction": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Agent Schemas > agentPermissionSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "admin",
+    "delegate",
+    "execute",
+    "external",
+    "spawn",
+  ],
+}
+`;
+
+exports[`Canonical Agent Schemas > agentPersonaSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "avatar": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "displayName": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "errorResponse": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "farewell": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "greeting": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "traits": {
+      "element": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "voiceStyle": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Agent Schemas > agentRuntimeMetricsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "activeTasks": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "cpuUsage": {
+      "inner": {
+        "checks": [
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "customMetrics": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "number",
+        },
+      },
+      "type": "optional",
+    },
+    "memoryUsage": {
+      "inner": {
+        "checks": [
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "taskQueue": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "uptime": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Agent Schemas > agentRuntimeStatusSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "ERROR",
+    "IDLE",
+    "OFFLINE",
+    "PAUSED",
+    "WORKING",
+  ],
+}
+`;
+
+exports[`Canonical Agent Schemas > agentSpecializationSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "core",
+    "creative",
+    "customer_service",
+    "data_analysis",
+    "development",
+    "education",
+    "operations",
+    "research",
+    "security",
+    "technical",
+  ],
+}
+`;
+
+exports[`Canonical Agent Schemas > agentTaskSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "assignedBy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "completedAt": {
+      "inner": {
+        "options": [
+          {
+            "type": "date",
+          },
+          {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+        ],
+        "type": "union",
+      },
+      "type": "optional",
+    },
+    "context": {
+      "keyType": {
+        "type": "string",
+      },
+      "type": "record",
+      "valueType": {
+        "type": "unknown",
+      },
+    },
+    "createdAt": {
+      "options": [
+        {
+          "type": "date",
+        },
+        {
+          "checks": [
+            "datetime",
+          ],
+          "type": "string",
+        },
+      ],
+      "type": "union",
+    },
+    "deadline": {
+      "inner": {
+        "options": [
+          {
+            "type": "date",
+          },
+          {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+        ],
+        "type": "union",
+      },
+      "type": "optional",
+    },
+    "delegatedTo": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "description": {
+      "type": "string",
+    },
+    "error": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "id": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "input": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "metadata": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "output": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "priority": {
+      "type": "enum",
+      "values": [
+        "critical",
+        "high",
+        "low",
+        "medium",
+      ],
+    },
+    "scheduledFor": {
+      "inner": {
+        "options": [
+          {
+            "type": "date",
+          },
+          {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+        ],
+        "type": "union",
+      },
+      "type": "optional",
+    },
+    "source": {
+      "type": "enum",
+      "values": [
+        "agent",
+        "collaboration",
+        "proactive",
+        "scheduled",
+        "system",
+        "user",
+      ],
+    },
+    "sourceId": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "startedAt": {
+      "inner": {
+        "options": [
+          {
+            "type": "date",
+          },
+          {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+        ],
+        "type": "union",
+      },
+      "type": "optional",
+    },
+    "status": {
+      "type": "enum",
+      "values": [
+        "active",
+        "assigned",
+        "cancelled",
+        "completed",
+        "delegated",
+        "failed",
+        "paused",
+        "queued",
+      ],
+    },
+    "taskType": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "title": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Agent Schemas > collaborationModeSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "CONSENSUS",
+    "CONSULT",
+    "DELEGATE",
+    "PARALLEL",
+    "SEQUENTIAL",
+  ],
+}
+`;
+
+exports[`Canonical Agent Schemas > taskPrioritySchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "critical",
+    "high",
+    "low",
+    "medium",
+  ],
+}
+`;
+
+exports[`Canonical Agent Schemas > taskSourceSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "agent",
+    "collaboration",
+    "proactive",
+    "scheduled",
+    "system",
+    "user",
+  ],
+}
+`;
+
+exports[`Canonical Agent Schemas > taskStatusSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "active",
+    "assigned",
+    "cancelled",
+    "completed",
+    "delegated",
+    "failed",
+    "paused",
+    "queued",
+  ],
+}
+`;
+
+exports[`Canonical Governance Schemas > anyDenialReasonSchema shape matches snapshot 1`] = `
+{
+  "options": [
+    {
+      "type": "nativeEnum",
+      "values": [
+        "context_mismatch",
+        "data_sensitivity_exceeded",
+        "expired_intent",
+        "insufficient_trust",
+        "policy_violation",
+        "rate_limit_exceeded",
+        "resource_restricted",
+        "system_error",
+      ],
+    },
+    {
+      "type": "nativeEnum",
+      "values": [
+        "missing_permissions",
+        "missing_roles",
+        "requires_human_approval",
+        "scope_violation",
+      ],
+    },
+  ],
+  "type": "union",
+}
+`;
+
+exports[`Canonical Governance Schemas > authContextSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "attributes": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+    "governanceRole": {
+      "inner": {
+        "type": "enum",
+        "values": [
+          "admin",
+          "both",
+          "consumer",
+          "operator",
+          "reviewer",
+          "trainer",
+        ],
+      },
+      "type": "optional",
+    },
+    "hierarchyLevel": {
+      "inner": {
+        "type": "lazy",
+      },
+      "type": "optional",
+    },
+    "permissions": {
+      "type": "ZodReadonly",
+    },
+    "roles": {
+      "type": "ZodReadonly",
+    },
+    "sessionId": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "tenantId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "userId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Governance Schemas > authoritySchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "active": {
+      "type": "boolean",
+    },
+    "audit": {
+      "shape": {
+        "approvedAt": {
+          "inner": {
+            "type": "date",
+          },
+          "type": "optional",
+        },
+        "approvedBy": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "createdAt": {
+          "type": "date",
+        },
+        "createdBy": {
+          "checks": [
+            "min",
+          ],
+          "type": "string",
+        },
+        "updatedAt": {
+          "type": "date",
+        },
+        "updatedBy": {
+          "checks": [
+            "min",
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "authorityId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "delegatedFrom": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "expiresAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "permissions": {
+      "type": "ZodReadonly",
+    },
+    "requiredTrustLevel": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "scope": {
+      "shape": {
+        "actions": {
+          "type": "ZodReadonly",
+        },
+        "capabilities": {
+          "type": "ZodReadonly",
+        },
+        "contextRestrictions": {
+          "inner": {
+            "type": "ZodReadonly",
+          },
+          "type": "optional",
+        },
+        "namespaces": {
+          "type": "ZodReadonly",
+        },
+        "resources": {
+          "type": "ZodReadonly",
+        },
+        "timeRestrictions": {
+          "inner": {
+            "shape": {
+              "daysOfWeek": {
+                "inner": {
+                  "type": "ZodReadonly",
+                },
+                "type": "optional",
+              },
+              "endTime": {
+                "inner": {
+                  "checks": [
+                    "regex",
+                  ],
+                  "type": "string",
+                },
+                "type": "optional",
+              },
+              "startTime": {
+                "inner": {
+                  "checks": [
+                    "regex",
+                  ],
+                  "type": "string",
+                },
+                "type": "optional",
+              },
+              "timezone": {
+                "inner": {
+                  "type": "string",
+                },
+                "type": "optional",
+              },
+            },
+            "type": "object",
+          },
+          "type": "optional",
+        },
+        "type": {
+          "type": "enum",
+          "values": [
+            "coordination",
+            "execution",
+            "governance",
+            "interaction",
+            "management",
+          ],
+        },
+      },
+      "type": "object",
+    },
+    "type": {
+      "type": "enum",
+      "values": [
+        "delegated",
+        "emergency",
+        "role",
+        "system",
+        "temporary",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Governance Schemas > authorityScopeSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "actions": {
+      "type": "ZodReadonly",
+    },
+    "capabilities": {
+      "type": "ZodReadonly",
+    },
+    "contextRestrictions": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+    "namespaces": {
+      "type": "ZodReadonly",
+    },
+    "resources": {
+      "type": "ZodReadonly",
+    },
+    "timeRestrictions": {
+      "inner": {
+        "shape": {
+          "daysOfWeek": {
+            "inner": {
+              "type": "ZodReadonly",
+            },
+            "type": "optional",
+          },
+          "endTime": {
+            "inner": {
+              "checks": [
+                "regex",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "startTime": {
+            "inner": {
+              "checks": [
+                "regex",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "timezone": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "type": {
+      "type": "enum",
+      "values": [
+        "coordination",
+        "execution",
+        "governance",
+        "interaction",
+        "management",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Governance Schemas > authorityScopeTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "coordination",
+    "execution",
+    "governance",
+    "interaction",
+    "management",
+  ],
+}
+`;
+
+exports[`Canonical Governance Schemas > authorityTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "delegated",
+    "emergency",
+    "role",
+    "system",
+    "temporary",
+  ],
+}
+`;
+
+exports[`Canonical Governance Schemas > authorizationConstraintsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "allowedSensitivity": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "custom": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "maxOperations": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "requiresOversight": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "resources": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "validityMs": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Governance Schemas > authorizationResultSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "allowed": {
+      "type": "boolean",
+    },
+    "constraints": {
+      "inner": {
+        "shape": {
+          "allowedSensitivity": {
+            "inner": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "custom": {
+            "inner": {
+              "keyType": {
+                "type": "string",
+              },
+              "type": "record",
+              "valueType": {
+                "type": "unknown",
+              },
+            },
+            "type": "optional",
+          },
+          "maxOperations": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "requiresOversight": {
+            "inner": {
+              "type": "boolean",
+            },
+            "type": "optional",
+          },
+          "resources": {
+            "inner": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "validityMs": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "denialReason": {
+      "inner": {
+        "type": "nativeEnum",
+        "values": [
+          "context_mismatch",
+          "data_sensitivity_exceeded",
+          "expired_intent",
+          "insufficient_trust",
+          "policy_violation",
+          "rate_limit_exceeded",
+          "resource_restricted",
+          "system_error",
+        ],
+      },
+      "type": "optional",
+    },
+    "expiresAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "governanceDenialReason": {
+      "inner": {
+        "type": "nativeEnum",
+        "values": [
+          "missing_permissions",
+          "missing_roles",
+          "requires_human_approval",
+          "scope_violation",
+        ],
+      },
+      "type": "optional",
+    },
+    "matchedPermissions": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+    "matchedRoles": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+    "reason": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "remediations": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Governance Schemas > controlActionSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "allow",
+    "audit",
+    "clarify",
+    "constrain",
+    "deny",
+    "escalate",
+    "log",
+  ],
+}
+`;
+
+exports[`Canonical Governance Schemas > denialReasonSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "context_mismatch",
+    "data_sensitivity_exceeded",
+    "expired_intent",
+    "insufficient_trust",
+    "policy_violation",
+    "rate_limit_exceeded",
+    "resource_restricted",
+    "system_error",
+  ],
+}
+`;
+
+exports[`Canonical Governance Schemas > governanceDenialReasonSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "missing_permissions",
+    "missing_roles",
+    "requires_human_approval",
+    "scope_violation",
+  ],
+}
+`;
+
+exports[`Canonical Governance Schemas > governanceRoleSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "admin",
+    "both",
+    "consumer",
+    "operator",
+    "reviewer",
+    "trainer",
+  ],
+}
+`;
+
+exports[`Canonical Governance Schemas > hierarchyLevelConfigSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "authority": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "authorityScope": {
+      "type": "lazy",
+    },
+    "canApproveOthers": {
+      "type": "boolean",
+    },
+    "canDelegate": {
+      "type": "ZodReadonly",
+    },
+    "canTrainOthers": {
+      "type": "boolean",
+    },
+    "description": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "level": {
+      "type": "enum",
+      "values": [
+        "agent",
+        "bot",
+        "hitl",
+        "metagoat",
+        "orch",
+      ],
+    },
+    "maxAutonomyLevel": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "minTrustScore": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "reportsTo": {
+      "inner": {
+        "type": "enum",
+        "values": [
+          "agent",
+          "bot",
+          "hitl",
+          "metagoat",
+          "orch",
+        ],
+      },
+      "type": "nullable",
+    },
+    "requiresHumanOversight": {
+      "type": "boolean",
+    },
+    "tier": {
+      "checks": [
+        "int",
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Governance Schemas > hierarchyLevelSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "agent",
+    "bot",
+    "hitl",
+    "metagoat",
+    "orch",
+  ],
+}
+`;
+
+exports[`Canonical Governance Schemas > permissionSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "action": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "conditions": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+    "granted": {
+      "type": "boolean",
+    },
+    "permissionId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "resource": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Intent Schemas > actionTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "communicate",
+    "delete",
+    "execute",
+    "read",
+    "transfer",
+    "write",
+  ],
+}
+`;
+
+exports[`Canonical Intent Schemas > createIntentRequestSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "action": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "string",
+    },
+    "actionType": {
+      "type": "nativeEnum",
+      "values": [
+        "communicate",
+        "delete",
+        "execute",
+        "read",
+        "transfer",
+        "write",
+      ],
+    },
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "context": {
+      "inner": {
+        "shape": {
+          "domain": {
+            "inner": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "environment": {
+            "inner": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "handlesPhi": {
+            "inner": {
+              "inner": {
+                "type": "boolean",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "handlesPii": {
+            "inner": {
+              "inner": {
+                "type": "boolean",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "jurisdictions": {
+            "inner": {
+              "inner": {
+                "element": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "metadata": {
+            "inner": {
+              "inner": {
+                "keyType": {
+                  "type": "string",
+                },
+                "type": "record",
+                "valueType": {
+                  "type": "unknown",
+                },
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "onBehalfOf": {
+            "inner": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "parentIntentId": {
+            "inner": {
+              "inner": {
+                "checks": [
+                  "uuid",
+                ],
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "priority": {
+            "inner": {
+              "inner": {
+                "checks": [
+                  "int",
+                  "min",
+                  "max",
+                ],
+                "type": "number",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "sessionId": {
+            "inner": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "tags": {
+            "inner": {
+              "inner": {
+                "element": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "correlationId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "dataSensitivity": {
+      "type": "nativeEnum",
+      "values": [
+        "CONFIDENTIAL",
+        "INTERNAL",
+        "PUBLIC",
+        "RESTRICTED",
+      ],
+    },
+    "expiresInMs": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "resourceScope": {
+      "element": {
+        "checks": [
+          "min",
+        ],
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "reversibility": {
+      "type": "nativeEnum",
+      "values": [
+        "IRREVERSIBLE",
+        "PARTIALLY_REVERSIBLE",
+        "REVERSIBLE",
+      ],
+    },
+    "source": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Intent Schemas > dataSensitivitySchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "CONFIDENTIAL",
+    "INTERNAL",
+    "PUBLIC",
+    "RESTRICTED",
+  ],
+}
+`;
+
+exports[`Canonical Intent Schemas > intentContextSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "domain": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "environment": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "handlesPhi": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "handlesPii": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "jurisdictions": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "metadata": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "onBehalfOf": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "parentIntentId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "priority": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "sessionId": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "tags": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Intent Schemas > intentSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "action": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "string",
+    },
+    "actionType": {
+      "type": "nativeEnum",
+      "values": [
+        "communicate",
+        "delete",
+        "execute",
+        "read",
+        "transfer",
+        "write",
+      ],
+    },
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "cancellationReason": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "context": {
+      "shape": {
+        "domain": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "environment": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "handlesPhi": {
+          "inner": {
+            "type": "boolean",
+          },
+          "type": "optional",
+        },
+        "handlesPii": {
+          "inner": {
+            "type": "boolean",
+          },
+          "type": "optional",
+        },
+        "jurisdictions": {
+          "inner": {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+        "metadata": {
+          "inner": {
+            "keyType": {
+              "type": "string",
+            },
+            "type": "record",
+            "valueType": {
+              "type": "unknown",
+            },
+          },
+          "type": "optional",
+        },
+        "onBehalfOf": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "parentIntentId": {
+          "inner": {
+            "checks": [
+              "uuid",
+            ],
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "priority": {
+          "inner": {
+            "checks": [
+              "int",
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+        "sessionId": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "tags": {
+          "inner": {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+      },
+      "type": "object",
+    },
+    "correlationId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "createdAt": {
+      "type": "date",
+    },
+    "dataSensitivity": {
+      "type": "nativeEnum",
+      "values": [
+        "CONFIDENTIAL",
+        "INTERNAL",
+        "PUBLIC",
+        "RESTRICTED",
+      ],
+    },
+    "decisionId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "deletedAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "denialReason": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "executionId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "expiresAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "failureReason": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "intentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "resourceScope": {
+      "element": {
+        "checks": [
+          "min",
+        ],
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "reversibility": {
+      "type": "nativeEnum",
+      "values": [
+        "IRREVERSIBLE",
+        "PARTIALLY_REVERSIBLE",
+        "REVERSIBLE",
+      ],
+    },
+    "source": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "status": {
+      "type": "enum",
+      "values": [
+        "approved",
+        "cancelled",
+        "completed",
+        "denied",
+        "escalated",
+        "evaluating",
+        "executing",
+        "failed",
+        "pending",
+      ],
+    },
+    "tenantId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "trustSnapshot": {
+      "shape": {
+        "band": {
+          "type": "nativeEnum",
+          "values": [
+            "T0_SANDBOX",
+            "T1_OBSERVED",
+            "T2_PROVISIONAL",
+            "T3_MONITORED",
+            "T4_STANDARD",
+            "T5_TRUSTED",
+            "T6_CERTIFIED",
+            "T7_AUTONOMOUS",
+          ],
+        },
+        "capturedAt": {
+          "type": "date",
+        },
+        "profileVersion": {
+          "inner": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+        "score": {
+          "checks": [
+            "min",
+            "max",
+            "int",
+          ],
+          "type": "number",
+        },
+      },
+      "type": "object",
+    },
+    "updatedAt": {
+      "type": "date",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Intent Schemas > intentStatusSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "approved",
+    "cancelled",
+    "completed",
+    "denied",
+    "escalated",
+    "evaluating",
+    "executing",
+    "failed",
+    "pending",
+  ],
+}
+`;
+
+exports[`Canonical Intent Schemas > intentSummarySchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "action": {
+      "type": "string",
+    },
+    "actionType": {
+      "type": "nativeEnum",
+      "values": [
+        "communicate",
+        "delete",
+        "execute",
+        "read",
+        "transfer",
+        "write",
+      ],
+    },
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "correlationId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "createdAt": {
+      "type": "date",
+    },
+    "dataSensitivity": {
+      "type": "nativeEnum",
+      "values": [
+        "CONFIDENTIAL",
+        "INTERNAL",
+        "PUBLIC",
+        "RESTRICTED",
+      ],
+    },
+    "intentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "status": {
+      "type": "enum",
+      "values": [
+        "approved",
+        "cancelled",
+        "completed",
+        "denied",
+        "escalated",
+        "evaluating",
+        "executing",
+        "failed",
+        "pending",
+      ],
+    },
+    "tenantId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "trustBand": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Intent Schemas > reversibilitySchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "IRREVERSIBLE",
+    "PARTIALLY_REVERSIBLE",
+    "REVERSIBLE",
+  ],
+}
+`;
+
+exports[`Canonical Middleware Schemas > corsConfigSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "credentials": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "exposedHeaders": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+    "headers": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+    "maxAge": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "methods": {
+      "inner": {
+        "type": "ZodReadonly",
+      },
+      "type": "optional",
+    },
+    "optionsSuccessStatus": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "origin": {
+      "options": [
+        {
+          "type": "string",
+        },
+        {
+          "type": "ZodReadonly",
+        },
+      ],
+      "type": "union",
+    },
+    "preflightContinue": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Middleware Schemas > errorCategorySchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "authentication",
+    "authorization",
+    "conflict",
+    "external",
+    "internal",
+    "not_found",
+    "rate_limit",
+    "timeout",
+    "unavailable",
+    "validation",
+  ],
+}
+`;
+
+exports[`Canonical Middleware Schemas > errorResponseSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "error": {
+      "shape": {
+        "code": {
+          "checks": [
+            "min",
+          ],
+          "type": "string",
+        },
+        "details": {
+          "inner": {
+            "type": "ZodReadonly",
+          },
+          "type": "optional",
+        },
+        "message": {
+          "checks": [
+            "min",
+          ],
+          "type": "string",
+        },
+        "path": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "requestId": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "timestamp": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Middleware Schemas > rateLimitConfigSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "headers": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "keyGenerator": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "limit": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "message": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "skipFailedRequests": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "skipSuccessfulRequests": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "statusCode": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "windowMs": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Middleware Schemas > rateLimitResultSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "allowed": {
+      "type": "boolean",
+    },
+    "current": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "limit": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "remaining": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "resetAt": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "retryAfter": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Middleware Schemas > securityHeadersConfigSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "contentTypeOptions": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "frameOptions": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "permissionsPolicy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "referrerPolicy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "xssProtection": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Risk Level Schema > canonicalRiskLevelSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "critical",
+    "high",
+    "low",
+    "medium",
+  ],
+}
+`;
+
+exports[`Canonical Trust Band Schemas > bandComparisonSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "band": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+    "otherBand": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Trust Band Schemas > trustBandSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "T0_SANDBOX",
+    "T1_OBSERVED",
+    "T2_PROVISIONAL",
+    "T3_MONITORED",
+    "T4_STANDARD",
+    "T5_TRUSTED",
+    "T6_CERTIFIED",
+    "T7_AUTONOMOUS",
+  ],
+}
+`;
+
+exports[`Canonical Trust Band Schemas > trustBandThresholdSchema shape matches snapshot 1`] = `
+{
+  "effect": "refinement",
+  "inner": {
+    "shape": {
+      "description": {
+        "checks": [
+          "min",
+        ],
+        "type": "string",
+      },
+      "label": {
+        "checks": [
+          "min",
+        ],
+        "type": "string",
+      },
+      "max": {
+        "checks": [
+          "int",
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "min": {
+        "checks": [
+          "int",
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+    },
+    "type": "object",
+  },
+  "type": "effects",
+}
+`;
+
+exports[`Canonical Trust Signal Schemas > createTrustSignalRequestSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "actionId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "correlationId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "description": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "expiresAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "impact": {
+      "shape": {
+        "baseImpact": {
+          "checks": [
+            "min",
+            "max",
+          ],
+          "type": "number",
+        },
+        "confidence": {
+          "inner": {
+            "checks": [
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+        "dimensions": {
+          "inner": {
+            "element": {
+              "type": "enum",
+              "values": [
+                "assurance",
+                "behavioral",
+                "capability",
+                "contextual",
+                "governance",
+              ],
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+        "magnitudeMultiplier": {
+          "inner": {
+            "checks": [
+              "min",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+      },
+      "type": "object",
+    },
+    "intentId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "metadata": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "source": {
+      "type": "enum",
+      "values": [
+        "a3i",
+        "admin",
+        "anomaly",
+        "atsf",
+        "canary",
+        "compliance",
+        "era",
+        "external",
+        "peer",
+        "scheduler",
+        "unknown",
+      ],
+    },
+    "type": {
+      "type": "nativeEnum",
+      "values": [
+        "action_failure",
+        "action_success",
+        "anomaly_detected",
+        "attestation",
+        "canary_failed",
+        "canary_passed",
+        "compliance_met",
+        "compliance_violation",
+        "credential_expired",
+        "credential_verified",
+        "decay",
+        "initial_trust",
+        "manual_adjustment",
+        "outcome_reversal",
+        "peer_endorsement",
+        "trust_transfer",
+      ],
+    },
+    "weight": {
+      "inner": {
+        "checks": [
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Trust Signal Schemas > signalAggregationSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "bySource": {
+      "keyType": {
+        "type": "enum",
+        "values": [
+          "a3i",
+          "admin",
+          "anomaly",
+          "atsf",
+          "canary",
+          "compliance",
+          "era",
+          "external",
+          "peer",
+          "scheduler",
+          "unknown",
+        ],
+      },
+      "type": "record",
+      "valueType": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+    },
+    "byType": {
+      "keyType": {
+        "type": "nativeEnum",
+        "values": [
+          "action_failure",
+          "action_success",
+          "anomaly_detected",
+          "attestation",
+          "canary_failed",
+          "canary_passed",
+          "compliance_met",
+          "compliance_violation",
+          "credential_expired",
+          "credential_verified",
+          "decay",
+          "initial_trust",
+          "manual_adjustment",
+          "outcome_reversal",
+          "peer_endorsement",
+          "trust_transfer",
+        ],
+      },
+      "type": "record",
+      "valueType": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+    },
+    "negativeImpact": {
+      "checks": [
+        "max",
+      ],
+      "type": "number",
+    },
+    "netImpact": {
+      "type": "number",
+    },
+    "periodEnd": {
+      "type": "date",
+    },
+    "periodStart": {
+      "type": "date",
+    },
+    "positiveImpact": {
+      "checks": [
+        "min",
+      ],
+      "type": "number",
+    },
+    "signalCount": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Trust Signal Schemas > signalImpactSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "baseImpact": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "confidence": {
+      "inner": {
+        "checks": [
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "dimensions": {
+      "inner": {
+        "element": {
+          "type": "enum",
+          "values": [
+            "assurance",
+            "behavioral",
+            "capability",
+            "contextual",
+            "governance",
+          ],
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "magnitudeMultiplier": {
+      "inner": {
+        "checks": [
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Trust Signal Schemas > signalSourceSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "a3i",
+    "admin",
+    "anomaly",
+    "atsf",
+    "canary",
+    "compliance",
+    "era",
+    "external",
+    "peer",
+    "scheduler",
+    "unknown",
+  ],
+}
+`;
+
+exports[`Canonical Trust Signal Schemas > signalTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "action_failure",
+    "action_success",
+    "anomaly_detected",
+    "attestation",
+    "canary_failed",
+    "canary_passed",
+    "compliance_met",
+    "compliance_violation",
+    "credential_expired",
+    "credential_verified",
+    "decay",
+    "initial_trust",
+    "manual_adjustment",
+    "outcome_reversal",
+    "peer_endorsement",
+    "trust_transfer",
+  ],
+}
+`;
+
+exports[`Canonical Trust Signal Schemas > trustDimensionSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "assurance",
+    "behavioral",
+    "capability",
+    "contextual",
+    "governance",
+  ],
+}
+`;
+
+exports[`Canonical Trust Signal Schemas > trustSignalSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "actionId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "correlationId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "deltaId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "description": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "expiresAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "impact": {
+      "shape": {
+        "baseImpact": {
+          "checks": [
+            "min",
+            "max",
+          ],
+          "type": "number",
+        },
+        "confidence": {
+          "inner": {
+            "checks": [
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+        "dimensions": {
+          "inner": {
+            "element": {
+              "type": "enum",
+              "values": [
+                "assurance",
+                "behavioral",
+                "capability",
+                "contextual",
+                "governance",
+              ],
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+        "magnitudeMultiplier": {
+          "inner": {
+            "checks": [
+              "min",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+      },
+      "type": "object",
+    },
+    "intentId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "metadata": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "processed": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "processedAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "signalId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "source": {
+      "type": "enum",
+      "values": [
+        "a3i",
+        "admin",
+        "anomaly",
+        "atsf",
+        "canary",
+        "compliance",
+        "era",
+        "external",
+        "peer",
+        "scheduler",
+        "unknown",
+      ],
+    },
+    "tenantId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "timestamp": {
+      "type": "date",
+    },
+    "type": {
+      "type": "nativeEnum",
+      "values": [
+        "action_failure",
+        "action_success",
+        "anomaly_detected",
+        "attestation",
+        "canary_failed",
+        "canary_passed",
+        "compliance_met",
+        "compliance_violation",
+        "credential_expired",
+        "credential_verified",
+        "decay",
+        "initial_trust",
+        "manual_adjustment",
+        "outcome_reversal",
+        "peer_endorsement",
+        "trust_transfer",
+      ],
+    },
+    "weight": {
+      "inner": {
+        "checks": [
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Canonical Trust Signal Schemas > trustSignalSummarySchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "description": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "impactValue": {
+      "type": "number",
+    },
+    "signalId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "source": {
+      "type": "enum",
+      "values": [
+        "a3i",
+        "admin",
+        "anomaly",
+        "atsf",
+        "canary",
+        "compliance",
+        "era",
+        "external",
+        "peer",
+        "scheduler",
+        "unknown",
+      ],
+    },
+    "timestamp": {
+      "type": "date",
+    },
+    "type": {
+      "type": "nativeEnum",
+      "values": [
+        "action_failure",
+        "action_success",
+        "anomaly_detected",
+        "attestation",
+        "canary_failed",
+        "canary_passed",
+        "compliance_met",
+        "compliance_violation",
+        "credential_expired",
+        "credential_verified",
+        "decay",
+        "initial_trust",
+        "manual_adjustment",
+        "outcome_reversal",
+        "peer_endorsement",
+        "trust_transfer",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;

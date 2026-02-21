@@ -1,0 +1,2707 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Validator Decision Schemas > approvalRequirementSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "approver": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "reason": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "timeoutMs": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "type": {
+      "type": "nativeEnum",
+      "values": [
+        "automated_check",
+        "human_review",
+        "multi_party",
+        "none",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Decision Schemas > authorizationRequestSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "intent": {
+      "shape": {
+        "action": {
+          "checks": [
+            "min",
+          ],
+          "type": "string",
+        },
+        "actionType": {
+          "type": "string",
+        },
+        "agentId": {
+          "checks": [
+            "uuid",
+          ],
+          "type": "string",
+        },
+        "context": {
+          "inner": {
+            "keyType": {
+              "type": "string",
+            },
+            "type": "record",
+            "valueType": {
+              "type": "unknown",
+            },
+          },
+          "type": "optional",
+        },
+        "dataSensitivity": {
+          "type": "string",
+        },
+        "resourceScope": {
+          "element": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "reversibility": {
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "policySetId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "requestedConstraints": {
+      "inner": {
+        "shape": {
+          "allowedTools": {
+            "inner": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "dataScopes": {
+            "inner": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "maxExecutionTimeMs": {
+            "inner": {
+              "inner": {
+                "checks": [
+                  "int",
+                  "min",
+                ],
+                "type": "number",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "maxRetries": {
+            "inner": {
+              "inner": {
+                "checks": [
+                  "int",
+                  "min",
+                ],
+                "type": "number",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "rateLimits": {
+            "inner": {
+              "element": {
+                "shape": {
+                  "limit": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "resource": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "windowSeconds": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                },
+                "type": "object",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "requiredApprovals": {
+            "inner": {
+              "element": {
+                "shape": {
+                  "approver": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "reason": {
+                    "checks": [
+                      "min",
+                    ],
+                    "type": "string",
+                  },
+                  "timeoutMs": {
+                    "inner": {
+                      "checks": [
+                        "int",
+                        "min",
+                      ],
+                      "type": "number",
+                    },
+                    "type": "optional",
+                  },
+                  "type": {
+                    "type": "nativeEnum",
+                    "values": [
+                      "automated_check",
+                      "human_review",
+                      "multi_party",
+                      "none",
+                    ],
+                  },
+                },
+                "type": "object",
+              },
+              "type": "array",
+            },
+            "type": "optional",
+          },
+          "resourceQuotas": {
+            "inner": {
+              "inner": {
+                "keyType": {
+                  "type": "string",
+                },
+                "type": "record",
+                "valueType": {
+                  "type": "number",
+                },
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "reversibilityRequired": {
+            "inner": {
+              "type": "boolean",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Decision Schemas > decisionConstraintsSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "allowedTools": {
+      "element": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "dataScopes": {
+      "element": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "maxExecutionTimeMs": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "maxRetries": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "rateLimits": {
+      "element": {
+        "shape": {
+          "limit": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+          "resource": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "windowSeconds": {
+            "checks": [
+              "int",
+              "min",
+            ],
+            "type": "number",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "requiredApprovals": {
+      "element": {
+        "shape": {
+          "approver": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "reason": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "timeoutMs": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "type": {
+            "type": "nativeEnum",
+            "values": [
+              "automated_check",
+              "human_review",
+              "multi_party",
+              "none",
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "resourceQuotas": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "number",
+        },
+      },
+      "type": "optional",
+    },
+    "reversibilityRequired": {
+      "type": "boolean",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Decision Schemas > decisionSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "constraints": {
+      "inner": {
+        "shape": {
+          "allowedTools": {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "dataScopes": {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "maxExecutionTimeMs": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "maxRetries": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "rateLimits": {
+            "element": {
+              "shape": {
+                "limit": {
+                  "checks": [
+                    "int",
+                    "min",
+                  ],
+                  "type": "number",
+                },
+                "resource": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "windowSeconds": {
+                  "checks": [
+                    "int",
+                    "min",
+                  ],
+                  "type": "number",
+                },
+              },
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "requiredApprovals": {
+            "element": {
+              "shape": {
+                "approver": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "reason": {
+                  "checks": [
+                    "min",
+                  ],
+                  "type": "string",
+                },
+                "timeoutMs": {
+                  "inner": {
+                    "checks": [
+                      "int",
+                      "min",
+                    ],
+                    "type": "number",
+                  },
+                  "type": "optional",
+                },
+                "type": {
+                  "type": "nativeEnum",
+                  "values": [
+                    "automated_check",
+                    "human_review",
+                    "multi_party",
+                    "none",
+                  ],
+                },
+              },
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "resourceQuotas": {
+            "inner": {
+              "keyType": {
+                "type": "string",
+              },
+              "type": "record",
+              "valueType": {
+                "type": "number",
+              },
+            },
+            "type": "optional",
+          },
+          "reversibilityRequired": {
+            "type": "boolean",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "correlationId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "decidedAt": {
+      "type": "date",
+    },
+    "decisionId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "expiresAt": {
+      "type": "date",
+    },
+    "intentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "latencyMs": {
+      "checks": [
+        "min",
+      ],
+      "type": "number",
+    },
+    "permitted": {
+      "type": "boolean",
+    },
+    "policySetId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "reasoning": {
+      "element": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "trustBand": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+    "trustScore": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "version": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Decision Schemas > rateLimitSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "limit": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "resource": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "windowSeconds": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Enum Schemas > actionTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "communicate",
+    "delete",
+    "execute",
+    "read",
+    "transfer",
+    "write",
+  ],
+}
+`;
+
+exports[`Validator Enum Schemas > approvalTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "automated_check",
+    "human_review",
+    "multi_party",
+    "none",
+  ],
+}
+`;
+
+exports[`Validator Enum Schemas > componentStatusSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "active",
+    "deprecated",
+    "retired",
+  ],
+}
+`;
+
+exports[`Validator Enum Schemas > componentTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "adapter",
+    "agent",
+    "policy_bundle",
+    "service",
+  ],
+}
+`;
+
+exports[`Validator Enum Schemas > dataSensitivitySchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "CONFIDENTIAL",
+    "INTERNAL",
+    "PUBLIC",
+    "RESTRICTED",
+  ],
+}
+`;
+
+exports[`Validator Enum Schemas > observationTierSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "ATTESTED_BOX",
+    "BLACK_BOX",
+    "GRAY_BOX",
+    "VERIFIED_BOX",
+    "WHITE_BOX",
+  ],
+}
+`;
+
+exports[`Validator Enum Schemas > proofEventTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "component_registered",
+    "component_updated",
+    "decision_made",
+    "execution_completed",
+    "execution_failed",
+    "execution_started",
+    "incident_detected",
+    "intent_received",
+    "rollback_initiated",
+    "trust_delta",
+  ],
+}
+`;
+
+exports[`Validator Enum Schemas > reversibilitySchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "IRREVERSIBLE",
+    "PARTIALLY_REVERSIBLE",
+    "REVERSIBLE",
+  ],
+}
+`;
+
+exports[`Validator Enum Schemas > trustBandSchema shape matches snapshot 1`] = `
+{
+  "type": "nativeEnum",
+  "values": [
+    "T0_SANDBOX",
+    "T1_OBSERVED",
+    "T2_PROVISIONAL",
+    "T3_MONITORED",
+    "T4_STANDARD",
+    "T5_TRUSTED",
+    "T6_CERTIFIED",
+    "T7_AUTONOMOUS",
+  ],
+}
+`;
+
+exports[`Validator Intent Schemas > intentContextSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "domain": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "environment": {
+      "inner": {
+        "type": "enum",
+        "values": [
+          "development",
+          "production",
+          "staging",
+        ],
+      },
+      "type": "optional",
+    },
+    "handlesPhi": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "handlesPii": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "optional",
+    },
+    "jurisdictions": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "metadata": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "onBehalfOf": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "parentIntentId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "priority": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "sessionId": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Intent Schemas > validatorCreateIntentRequestSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "action": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "string",
+    },
+    "actionType": {
+      "type": "nativeEnum",
+      "values": [
+        "communicate",
+        "delete",
+        "execute",
+        "read",
+        "transfer",
+        "write",
+      ],
+    },
+    "agentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "context": {
+      "inner": {
+        "shape": {
+          "domain": {
+            "inner": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "environment": {
+            "inner": {
+              "inner": {
+                "type": "enum",
+                "values": [
+                  "development",
+                  "production",
+                  "staging",
+                ],
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "handlesPhi": {
+            "inner": {
+              "inner": {
+                "type": "boolean",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "handlesPii": {
+            "inner": {
+              "inner": {
+                "type": "boolean",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "jurisdictions": {
+            "inner": {
+              "inner": {
+                "element": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "metadata": {
+            "inner": {
+              "inner": {
+                "keyType": {
+                  "type": "string",
+                },
+                "type": "record",
+                "valueType": {
+                  "type": "unknown",
+                },
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "onBehalfOf": {
+            "inner": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "parentIntentId": {
+            "inner": {
+              "inner": {
+                "checks": [
+                  "uuid",
+                ],
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "priority": {
+            "inner": {
+              "inner": {
+                "checks": [
+                  "int",
+                  "min",
+                  "max",
+                ],
+                "type": "number",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+          "sessionId": {
+            "inner": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": "optional",
+          },
+        },
+        "type": "object",
+      },
+      "type": "optional",
+    },
+    "correlationId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "dataSensitivity": {
+      "type": "nativeEnum",
+      "values": [
+        "CONFIDENTIAL",
+        "INTERNAL",
+        "PUBLIC",
+        "RESTRICTED",
+      ],
+    },
+    "expiresIn": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "resourceScope": {
+      "element": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "reversibility": {
+      "type": "nativeEnum",
+      "values": [
+        "IRREVERSIBLE",
+        "PARTIALLY_REVERSIBLE",
+        "REVERSIBLE",
+      ],
+    },
+    "source": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Intent Schemas > validatorIntentSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "action": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "string",
+    },
+    "actionType": {
+      "type": "nativeEnum",
+      "values": [
+        "communicate",
+        "delete",
+        "execute",
+        "read",
+        "transfer",
+        "write",
+      ],
+    },
+    "agentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "context": {
+      "shape": {
+        "domain": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "environment": {
+          "inner": {
+            "type": "enum",
+            "values": [
+              "development",
+              "production",
+              "staging",
+            ],
+          },
+          "type": "optional",
+        },
+        "handlesPhi": {
+          "inner": {
+            "type": "boolean",
+          },
+          "type": "optional",
+        },
+        "handlesPii": {
+          "inner": {
+            "type": "boolean",
+          },
+          "type": "optional",
+        },
+        "jurisdictions": {
+          "inner": {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+        "metadata": {
+          "inner": {
+            "keyType": {
+              "type": "string",
+            },
+            "type": "record",
+            "valueType": {
+              "type": "unknown",
+            },
+          },
+          "type": "optional",
+        },
+        "onBehalfOf": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "parentIntentId": {
+          "inner": {
+            "checks": [
+              "uuid",
+            ],
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "priority": {
+          "inner": {
+            "checks": [
+              "int",
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "type": "optional",
+        },
+        "sessionId": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+      },
+      "type": "object",
+    },
+    "correlationId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "createdAt": {
+      "type": "date",
+    },
+    "dataSensitivity": {
+      "type": "nativeEnum",
+      "values": [
+        "CONFIDENTIAL",
+        "INTERNAL",
+        "PUBLIC",
+        "RESTRICTED",
+      ],
+    },
+    "expiresAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "intentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "resourceScope": {
+      "element": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "reversibility": {
+      "type": "nativeEnum",
+      "values": [
+        "IRREVERSIBLE",
+        "PARTIALLY_REVERSIBLE",
+        "REVERSIBLE",
+      ],
+    },
+    "source": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Proof Event Schemas > logProofEventRequestSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "correlationId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "eventType": {
+      "type": "nativeEnum",
+      "values": [
+        "component_registered",
+        "component_updated",
+        "decision_made",
+        "execution_completed",
+        "execution_failed",
+        "execution_started",
+        "incident_detected",
+        "intent_received",
+        "rollback_initiated",
+        "trust_delta",
+      ],
+    },
+    "occurredAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "payload": {
+      "options": [
+        {
+          "discriminator": "type",
+          "options": [
+            {
+              "shape": {
+                "action": {
+                  "type": "string",
+                },
+                "actionType": {
+                  "type": "string",
+                },
+                "intentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "resourceScope": {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "intent_received",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "decisionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "intentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "permitted": {
+                  "type": "boolean",
+                },
+                "reasoning": {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "trustBand": {
+                  "type": "string",
+                },
+                "trustScore": {
+                  "type": "number",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "decision_made",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "deltaId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "newBand": {
+                  "type": "string",
+                },
+                "newScore": {
+                  "type": "number",
+                },
+                "previousBand": {
+                  "type": "string",
+                },
+                "previousScore": {
+                  "type": "number",
+                },
+                "reason": {
+                  "type": "string",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "trust_delta",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "actionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "adapterId": {
+                  "type": "string",
+                },
+                "decisionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "executionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "execution_started",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "actionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "durationMs": {
+                  "type": "number",
+                },
+                "executionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "outputHash": {
+                  "type": "string",
+                },
+                "status": {
+                  "type": "enum",
+                  "values": [
+                    "partial",
+                    "success",
+                  ],
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "execution_completed",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "actionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "durationMs": {
+                  "type": "number",
+                },
+                "error": {
+                  "type": "string",
+                },
+                "executionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "retryable": {
+                  "type": "boolean",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "execution_failed",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "affectedResources": {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "description": {
+                  "type": "string",
+                },
+                "incidentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "severity": {
+                  "type": "enum",
+                  "values": [
+                    "critical",
+                    "high",
+                    "low",
+                    "medium",
+                  ],
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "incident_detected",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "executionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "initiatedBy": {
+                  "type": "string",
+                },
+                "reason": {
+                  "type": "string",
+                },
+                "rollbackId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "rollback_initiated",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "componentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "componentType": {
+                  "type": "string",
+                },
+                "name": {
+                  "type": "string",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "component_registered",
+                },
+                "version": {
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "changes": {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "componentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "newVersion": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "previousVersion": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "component_updated",
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "type": "discriminatedUnion",
+        },
+        {
+          "shape": {
+            "type": {
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+      ],
+      "type": "union",
+    },
+    "signedBy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Proof Event Schemas > proofEventFilterSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "correlationId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "eventTypes": {
+      "inner": {
+        "element": {
+          "type": "nativeEnum",
+          "values": [
+            "component_registered",
+            "component_updated",
+            "decision_made",
+            "execution_completed",
+            "execution_failed",
+            "execution_started",
+            "incident_detected",
+            "intent_received",
+            "rollback_initiated",
+            "trust_delta",
+          ],
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "from": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "limit": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "offset": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "to": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Proof Event Schemas > proofEventPayloadSchema shape matches snapshot 1`] = `
+{
+  "options": [
+    {
+      "discriminator": "type",
+      "options": [
+        {
+          "shape": {
+            "action": {
+              "type": "string",
+            },
+            "actionType": {
+              "type": "string",
+            },
+            "intentId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "resourceScope": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": {
+              "type": "literal",
+              "value": "intent_received",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "decisionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "intentId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "permitted": {
+              "type": "boolean",
+            },
+            "reasoning": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "trustBand": {
+              "type": "string",
+            },
+            "trustScore": {
+              "type": "number",
+            },
+            "type": {
+              "type": "literal",
+              "value": "decision_made",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "deltaId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "newBand": {
+              "type": "string",
+            },
+            "newScore": {
+              "type": "number",
+            },
+            "previousBand": {
+              "type": "string",
+            },
+            "previousScore": {
+              "type": "number",
+            },
+            "reason": {
+              "type": "string",
+            },
+            "type": {
+              "type": "literal",
+              "value": "trust_delta",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "actionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "adapterId": {
+              "type": "string",
+            },
+            "decisionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "executionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "type": {
+              "type": "literal",
+              "value": "execution_started",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "actionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "durationMs": {
+              "type": "number",
+            },
+            "executionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "outputHash": {
+              "type": "string",
+            },
+            "status": {
+              "type": "enum",
+              "values": [
+                "partial",
+                "success",
+              ],
+            },
+            "type": {
+              "type": "literal",
+              "value": "execution_completed",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "actionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "durationMs": {
+              "type": "number",
+            },
+            "error": {
+              "type": "string",
+            },
+            "executionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "retryable": {
+              "type": "boolean",
+            },
+            "type": {
+              "type": "literal",
+              "value": "execution_failed",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "affectedResources": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "description": {
+              "type": "string",
+            },
+            "incidentId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "severity": {
+              "type": "enum",
+              "values": [
+                "critical",
+                "high",
+                "low",
+                "medium",
+              ],
+            },
+            "type": {
+              "type": "literal",
+              "value": "incident_detected",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "executionId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "initiatedBy": {
+              "type": "string",
+            },
+            "reason": {
+              "type": "string",
+            },
+            "rollbackId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "type": {
+              "type": "literal",
+              "value": "rollback_initiated",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "componentId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "componentType": {
+              "type": "string",
+            },
+            "name": {
+              "type": "string",
+            },
+            "type": {
+              "type": "literal",
+              "value": "component_registered",
+            },
+            "version": {
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "shape": {
+            "changes": {
+              "element": {
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "componentId": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "newVersion": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "previousVersion": {
+              "inner": {
+                "type": "string",
+              },
+              "type": "optional",
+            },
+            "type": {
+              "type": "literal",
+              "value": "component_updated",
+            },
+          },
+          "type": "object",
+        },
+      ],
+      "type": "discriminatedUnion",
+    },
+    {
+      "shape": {
+        "type": {
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+  ],
+  "type": "union",
+}
+`;
+
+exports[`Validator Proof Event Schemas > proofEventSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "correlationId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "eventHash": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "eventHash3": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "eventId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "eventType": {
+      "type": "nativeEnum",
+      "values": [
+        "component_registered",
+        "component_updated",
+        "decision_made",
+        "execution_completed",
+        "execution_failed",
+        "execution_started",
+        "incident_detected",
+        "intent_received",
+        "rollback_initiated",
+        "trust_delta",
+      ],
+    },
+    "occurredAt": {
+      "type": "date",
+    },
+    "payload": {
+      "options": [
+        {
+          "discriminator": "type",
+          "options": [
+            {
+              "shape": {
+                "action": {
+                  "type": "string",
+                },
+                "actionType": {
+                  "type": "string",
+                },
+                "intentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "resourceScope": {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "intent_received",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "decisionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "intentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "permitted": {
+                  "type": "boolean",
+                },
+                "reasoning": {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "trustBand": {
+                  "type": "string",
+                },
+                "trustScore": {
+                  "type": "number",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "decision_made",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "deltaId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "newBand": {
+                  "type": "string",
+                },
+                "newScore": {
+                  "type": "number",
+                },
+                "previousBand": {
+                  "type": "string",
+                },
+                "previousScore": {
+                  "type": "number",
+                },
+                "reason": {
+                  "type": "string",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "trust_delta",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "actionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "adapterId": {
+                  "type": "string",
+                },
+                "decisionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "executionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "execution_started",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "actionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "durationMs": {
+                  "type": "number",
+                },
+                "executionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "outputHash": {
+                  "type": "string",
+                },
+                "status": {
+                  "type": "enum",
+                  "values": [
+                    "partial",
+                    "success",
+                  ],
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "execution_completed",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "actionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "durationMs": {
+                  "type": "number",
+                },
+                "error": {
+                  "type": "string",
+                },
+                "executionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "retryable": {
+                  "type": "boolean",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "execution_failed",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "affectedResources": {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "description": {
+                  "type": "string",
+                },
+                "incidentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "severity": {
+                  "type": "enum",
+                  "values": [
+                    "critical",
+                    "high",
+                    "low",
+                    "medium",
+                  ],
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "incident_detected",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "executionId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "initiatedBy": {
+                  "type": "string",
+                },
+                "reason": {
+                  "type": "string",
+                },
+                "rollbackId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "rollback_initiated",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "componentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "componentType": {
+                  "type": "string",
+                },
+                "name": {
+                  "type": "string",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "component_registered",
+                },
+                "version": {
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+            {
+              "shape": {
+                "changes": {
+                  "element": {
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "componentId": {
+                  "checks": [
+                    "uuid",
+                  ],
+                  "type": "string",
+                },
+                "newVersion": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "previousVersion": {
+                  "inner": {
+                    "type": "string",
+                  },
+                  "type": "optional",
+                },
+                "type": {
+                  "type": "literal",
+                  "value": "component_updated",
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "type": "discriminatedUnion",
+        },
+        {
+          "shape": {
+            "type": {
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+      ],
+      "type": "union",
+    },
+    "previousHash": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "nullable",
+    },
+    "recordedAt": {
+      "type": "date",
+    },
+    "signature": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "signedBy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Trust Profile Schemas > trustCalculationRequestSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "agentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "evidence": {
+      "element": {
+        "shape": {
+          "collectedAt": {
+            "type": "date",
+          },
+          "evidenceId": {
+            "checks": [
+              "uuid",
+            ],
+            "type": "string",
+          },
+          "evidenceType": {
+            "inner": {
+              "type": "enum",
+              "values": [
+                "audit",
+                "automated",
+                "examination",
+                "hitl_approval",
+                "hitl_rejection",
+                "peer_review",
+                "sandbox_test",
+              ],
+            },
+            "type": "optional",
+          },
+          "expiresAt": {
+            "inner": {
+              "type": "date",
+            },
+            "type": "optional",
+          },
+          "factorCode": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "impact": {
+            "checks": [
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "metadata": {
+            "inner": {
+              "keyType": {
+                "type": "string",
+              },
+              "type": "record",
+              "valueType": {
+                "type": "unknown",
+              },
+            },
+            "type": "optional",
+          },
+          "source": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "observationTier": {
+      "type": "nativeEnum",
+      "values": [
+        "ATTESTED_BOX",
+        "BLACK_BOX",
+        "GRAY_BOX",
+        "VERIFIED_BOX",
+        "WHITE_BOX",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Trust Profile Schemas > trustEvidenceSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "collectedAt": {
+      "type": "date",
+    },
+    "evidenceId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "evidenceType": {
+      "inner": {
+        "type": "enum",
+        "values": [
+          "audit",
+          "automated",
+          "examination",
+          "hitl_approval",
+          "hitl_rejection",
+          "peer_review",
+          "sandbox_test",
+        ],
+      },
+      "type": "optional",
+    },
+    "expiresAt": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "factorCode": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "impact": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "metadata": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "source": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Validator Trust Profile Schemas > trustFactorScoresSchema shape matches snapshot 1`] = `
+{
+  "keyType": {
+    "type": "string",
+  },
+  "type": "record",
+  "valueType": {
+    "checks": [
+      "min",
+      "max",
+    ],
+    "type": "number",
+  },
+}
+`;
+
+exports[`Validator Trust Profile Schemas > trustProfileSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "adjustedScore": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "agentId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "band": {
+      "type": "nativeEnum",
+      "values": [
+        "T0_SANDBOX",
+        "T1_OBSERVED",
+        "T2_PROVISIONAL",
+        "T3_MONITORED",
+        "T4_STANDARD",
+        "T5_TRUSTED",
+        "T6_CERTIFIED",
+        "T7_AUTONOMOUS",
+      ],
+    },
+    "calculatedAt": {
+      "type": "date",
+    },
+    "compositeScore": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "number",
+    },
+    "evidence": {
+      "element": {
+        "shape": {
+          "collectedAt": {
+            "type": "date",
+          },
+          "evidenceId": {
+            "checks": [
+              "uuid",
+            ],
+            "type": "string",
+          },
+          "evidenceType": {
+            "inner": {
+              "type": "enum",
+              "values": [
+                "audit",
+                "automated",
+                "examination",
+                "hitl_approval",
+                "hitl_rejection",
+                "peer_review",
+                "sandbox_test",
+              ],
+            },
+            "type": "optional",
+          },
+          "expiresAt": {
+            "inner": {
+              "type": "date",
+            },
+            "type": "optional",
+          },
+          "factorCode": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "impact": {
+            "checks": [
+              "min",
+              "max",
+            ],
+            "type": "number",
+          },
+          "metadata": {
+            "inner": {
+              "keyType": {
+                "type": "string",
+              },
+              "type": "record",
+              "valueType": {
+                "type": "unknown",
+              },
+            },
+            "type": "optional",
+          },
+          "source": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "factorScores": {
+      "keyType": {
+        "type": "string",
+      },
+      "type": "record",
+      "valueType": {
+        "checks": [
+          "min",
+          "max",
+        ],
+        "type": "number",
+      },
+    },
+    "observationTier": {
+      "type": "nativeEnum",
+      "values": [
+        "ATTESTED_BOX",
+        "BLACK_BOX",
+        "GRAY_BOX",
+        "VERIFIED_BOX",
+        "WHITE_BOX",
+      ],
+    },
+    "profileId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "validUntil": {
+      "inner": {
+        "type": "date",
+      },
+      "type": "optional",
+    },
+    "version": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+  },
+  "type": "object",
+}
+`;

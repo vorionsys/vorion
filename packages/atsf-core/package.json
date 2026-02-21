@@ -1,0 +1,134 @@
+{
+  "name": "@vorionsys/atsf-core",
+  "version": "0.2.2",
+  "description": "Agentic Trust Scoring Framework - Core runtime for AI agent governance, trust scoring (8-tier T0-T7 model), and policy enforcement",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./trust-engine": {
+      "types": "./dist/trust-engine/index.d.ts",
+      "import": "./dist/trust-engine/index.js"
+    },
+    "./basis": {
+      "types": "./dist/basis/index.d.ts",
+      "import": "./dist/basis/index.js"
+    },
+    "./intent": {
+      "types": "./dist/intent/index.d.ts",
+      "import": "./dist/intent/index.js"
+    },
+    "./enforce": {
+      "types": "./dist/enforce/index.d.ts",
+      "import": "./dist/enforce/index.js"
+    },
+    "./proof": {
+      "types": "./dist/proof/index.d.ts",
+      "import": "./dist/proof/index.js"
+    },
+    "./chain": {
+      "types": "./dist/chain/index.d.ts",
+      "import": "./dist/chain/index.js"
+    },
+    "./cognigate": {
+      "types": "./dist/cognigate/index.d.ts",
+      "import": "./dist/cognigate/index.js"
+    },
+    "./types": {
+      "types": "./dist/common/types.d.ts",
+      "import": "./dist/common/types.js"
+    },
+    "./persistence": {
+      "types": "./dist/persistence/index.d.ts",
+      "import": "./dist/persistence/index.js"
+    },
+    "./langchain": {
+      "types": "./dist/langchain/index.d.ts",
+      "import": "./dist/langchain/index.js"
+    },
+    "./sandbox-training": {
+      "types": "./dist/sandbox-training/index.d.ts",
+      "import": "./dist/sandbox-training/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@vorionsys/contracts": "^0.1.1",
+    "@fastify/cors": "^10.0.0",
+    "@fastify/helmet": "^12.0.0",
+    "@fastify/rate-limit": "^10.0.0",
+    "fastify": "^5.0.0",
+    "pino": "^9.0.0",
+    "pino-pretty": "^11.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "@langchain/core": ">=0.2.0",
+    "better-sqlite3": ">=9.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/core": {
+      "optional": true
+    },
+    "better-sqlite3": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "trust",
+    "trust-scoring",
+    "governance",
+    "ai-governance",
+    "ai-safety",
+    "atsf",
+    "vorion",
+    "policy-enforcement",
+    "audit-trail",
+    "multi-agent",
+    "langchain",
+    "agentic"
+  ],
+  "author": "Vorion <team@vorion.org>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voriongit/vorion.git",
+    "directory": "packages/atsf-core"
+  },
+  "homepage": "https://vorion.org",
+  "bugs": {
+    "url": "https://github.com/voriongit/vorion/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

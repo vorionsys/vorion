@@ -1,0 +1,70 @@
+{
+  "name": "@vorion/car-cli",
+  "version": "1.0.0",
+  "description": "CLI for CAR (Categorical Agentic Registry) agent identity and governance operations",
+  "type": "module",
+  "bin": {
+    "car": "dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "test": "echo \"CLI tests: manual verification\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vorion/car-client": "^1.0.0",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.0",
+    "cli-table3": "^0.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "car",
+    "cli",
+    "trust",
+    "governance",
+    "phase6",
+    "categorical-agentic-registry",
+    "vorion",
+    "ai-governance",
+    "agent",
+    "trust-engine"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voriongit/vorion.git",
+    "directory": "packages/car-cli"
+  },
+  "bugs": {
+    "url": "https://github.com/voriongit/vorion/issues"
+  },
+  "homepage": "https://github.com/voriongit/vorion/tree/main/packages/car-cli#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "Vorion",
+  "license": "Apache-2.0"
+}

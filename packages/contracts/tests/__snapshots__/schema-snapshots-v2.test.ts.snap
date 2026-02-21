@@ -1,0 +1,1561 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`V2 Evidence Schemas > EvidenceClassificationSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "COMPLIANCE_RELEVANT",
+    "INCIDENT_RELATED",
+    "LEGAL_HOLD",
+    "ROUTINE",
+    "SECURITY_RELEVANT",
+    "SIGNIFICANT",
+  ],
+}
+`;
+
+exports[`V2 Evidence Schemas > EvidenceItemSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "actorId": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "actorName": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "actorType": {
+      "type": "enum",
+      "values": [
+        "AGENT",
+        "EXTERNAL",
+        "HUMAN",
+        "SYSTEM",
+      ],
+    },
+    "classification": {
+      "type": "enum",
+      "values": [
+        "COMPLIANCE_RELEVANT",
+        "INCIDENT_RELATED",
+        "LEGAL_HOLD",
+        "ROUTINE",
+        "SECURITY_RELEVANT",
+        "SIGNIFICANT",
+      ],
+    },
+    "contentHash": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "correlationId": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "string",
+    },
+    "details": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "id": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "parentEvidenceId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "previousHash": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "rawPayload": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "receivedAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "relatedEntityId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "relatedEntityType": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "schemaVersion": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "default",
+    },
+    "sequenceNumber": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "severity": {
+      "inner": {
+        "type": "enum",
+        "values": [
+          "CRITICAL",
+          "HIGH",
+          "INFO",
+          "LOW",
+          "MEDIUM",
+        ],
+      },
+      "type": "optional",
+    },
+    "signature": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "sourceComponent": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "sourceSystem": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "summary": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "timestamp": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "trustBandAtTime": {
+      "inner": {
+        "type": "enum",
+        "values": [
+          "T0",
+          "T1",
+          "T2",
+          "T3",
+          "T4",
+          "T5",
+        ],
+      },
+      "type": "optional",
+    },
+    "trustProfileId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "type": {
+      "type": "enum",
+      "values": [
+        "AUDIT_CHECKPOINT",
+        "AUTHORIZATION_DECISION",
+        "CONSTRAINT_APPLICATION",
+        "ESCALATION_REQUEST",
+        "ESCALATION_RESPONSE",
+        "EXECUTION_COMPLETE",
+        "EXECUTION_START",
+        "EXECUTION_STEP",
+        "HUMAN_INTERVENTION",
+        "INCIDENT_REPORT",
+        "INTENT_SUBMISSION",
+        "POLICY_EVALUATION",
+        "SYSTEM_EVENT",
+        "TOOL_INVOCATION",
+        "TOOL_RESPONSE",
+        "TRUST_COMPUTATION",
+        "TRUST_DELTA",
+        "VIOLATION_DETECTED",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`V2 Evidence Schemas > EvidencePackSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "classifications": {
+      "element": {
+        "type": "enum",
+        "values": [
+          "COMPLIANCE_RELEVANT",
+          "INCIDENT_RELATED",
+          "LEGAL_HOLD",
+          "ROUTINE",
+          "SECURITY_RELEVANT",
+          "SIGNIFICANT",
+        ],
+      },
+      "type": "array",
+    },
+    "correlationId": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "string",
+    },
+    "createdAt": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "decisionId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "endTime": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "hasIncidents": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "hasViolations": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "highestSeverity": {
+      "inner": {
+        "type": "enum",
+        "values": [
+          "CRITICAL",
+          "HIGH",
+          "INFO",
+          "LOW",
+          "MEDIUM",
+        ],
+      },
+      "type": "optional",
+    },
+    "id": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "intentId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "itemCount": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "items": {
+      "element": {
+        "shape": {
+          "actorId": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "actorName": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "actorType": {
+            "type": "enum",
+            "values": [
+              "AGENT",
+              "EXTERNAL",
+              "HUMAN",
+              "SYSTEM",
+            ],
+          },
+          "classification": {
+            "type": "enum",
+            "values": [
+              "COMPLIANCE_RELEVANT",
+              "INCIDENT_RELATED",
+              "LEGAL_HOLD",
+              "ROUTINE",
+              "SECURITY_RELEVANT",
+              "SIGNIFICANT",
+            ],
+          },
+          "contentHash": {
+            "checks": [
+              "regex",
+            ],
+            "type": "string",
+          },
+          "correlationId": {
+            "checks": [
+              "min",
+              "max",
+            ],
+            "type": "string",
+          },
+          "details": {
+            "inner": {
+              "keyType": {
+                "type": "string",
+              },
+              "type": "record",
+              "valueType": {
+                "type": "unknown",
+              },
+            },
+            "type": "optional",
+          },
+          "id": {
+            "checks": [
+              "uuid",
+            ],
+            "type": "string",
+          },
+          "parentEvidenceId": {
+            "inner": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "previousHash": {
+            "inner": {
+              "checks": [
+                "regex",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "rawPayload": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "receivedAt": {
+            "inner": {
+              "checks": [
+                "datetime",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "relatedEntityId": {
+            "inner": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "relatedEntityType": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "schemaVersion": {
+            "inner": {
+              "checks": [
+                "regex",
+              ],
+              "type": "string",
+            },
+            "type": "default",
+          },
+          "sequenceNumber": {
+            "inner": {
+              "checks": [
+                "int",
+                "min",
+              ],
+              "type": "number",
+            },
+            "type": "optional",
+          },
+          "severity": {
+            "inner": {
+              "type": "enum",
+              "values": [
+                "CRITICAL",
+                "HIGH",
+                "INFO",
+                "LOW",
+                "MEDIUM",
+              ],
+            },
+            "type": "optional",
+          },
+          "signature": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "sourceComponent": {
+            "inner": {
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "sourceSystem": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "summary": {
+            "checks": [
+              "min",
+            ],
+            "type": "string",
+          },
+          "timestamp": {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+          "trustBandAtTime": {
+            "inner": {
+              "type": "enum",
+              "values": [
+                "T0",
+                "T1",
+                "T2",
+                "T3",
+                "T4",
+                "T5",
+              ],
+            },
+            "type": "optional",
+          },
+          "trustProfileId": {
+            "inner": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "type": "optional",
+          },
+          "type": {
+            "type": "enum",
+            "values": [
+              "AUDIT_CHECKPOINT",
+              "AUTHORIZATION_DECISION",
+              "CONSTRAINT_APPLICATION",
+              "ESCALATION_REQUEST",
+              "ESCALATION_RESPONSE",
+              "EXECUTION_COMPLETE",
+              "EXECUTION_START",
+              "EXECUTION_STEP",
+              "HUMAN_INTERVENTION",
+              "INCIDENT_REPORT",
+              "INTENT_SUBMISSION",
+              "POLICY_EVALUATION",
+              "SYSTEM_EVENT",
+              "TOOL_INVOCATION",
+              "TOOL_RESPONSE",
+              "TRUST_COMPUTATION",
+              "TRUST_DELTA",
+              "VIOLATION_DETECTED",
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "type": "array",
+    },
+    "lastUpdated": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "merkleRoot": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "outcome": {
+      "type": "enum",
+      "values": [
+        "BLOCKED",
+        "CANCELLED",
+        "ERROR",
+        "FAILURE",
+        "IN_PROGRESS",
+        "SUCCESS",
+        "TIMEOUT",
+      ],
+    },
+    "packHash": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "schemaVersion": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "default",
+    },
+    "startTime": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "trustProfileId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`V2 Evidence Schemas > EvidenceTypeSchema shape matches snapshot 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "AUDIT_CHECKPOINT",
+    "AUTHORIZATION_DECISION",
+    "CONSTRAINT_APPLICATION",
+    "ESCALATION_REQUEST",
+    "ESCALATION_RESPONSE",
+    "EXECUTION_COMPLETE",
+    "EXECUTION_START",
+    "EXECUTION_STEP",
+    "HUMAN_INTERVENTION",
+    "INCIDENT_REPORT",
+    "INTENT_SUBMISSION",
+    "POLICY_EVALUATION",
+    "SYSTEM_EVENT",
+    "TOOL_INVOCATION",
+    "TOOL_RESPONSE",
+    "TRUST_COMPUTATION",
+    "TRUST_DELTA",
+    "VIOLATION_DETECTED",
+  ],
+}
+`;
+
+exports[`V2 Evidence Schemas > ProofEventSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "chainPosition": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "claim": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "correlationId": {
+      "checks": [
+        "min",
+        "max",
+      ],
+      "type": "string",
+    },
+    "evidenceItemIds": {
+      "element": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "evidencePackId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "expiresAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "generatedAt": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "id": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "previousProofHash": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "previousProofId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "proofData": {
+      "shape": {
+        "algorithm": {
+          "type": "string",
+        },
+        "nonce": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "publicKey": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "signature": {
+          "type": "string",
+        },
+        "timestamp": {
+          "checks": [
+            "datetime",
+          ],
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "proofHash": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "proofType": {
+      "type": "enum",
+      "values": [
+        "AUDIT_PROOF",
+        "COMPLIANCE_ATTESTATION",
+        "DECISION_PROOF",
+        "EXECUTION_PROOF",
+        "INCIDENT_PROOF",
+        "POLICY_EVALUATION_PROOF",
+        "TRUST_COMPUTATION_PROOF",
+      ],
+    },
+    "schemaVersion": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "default",
+    },
+    "verifiable": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "verificationEndpoint": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`V2 Retention Schemas > LegalHoldSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "activatedAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "createdAt": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "createdBy": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "custodianEmails": {
+      "inner": {
+        "element": {
+          "checks": [
+            "email",
+          ],
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "description": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "expiresAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "holdHash": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "id": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "matterReference": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "notifyCustodians": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "preserveAllVersions": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "preventDeletion": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "preventModification": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "releaseReason": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "releasedAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "releasedBy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "schemaVersion": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "default",
+    },
+    "scope": {
+      "shape": {
+        "actorIds": {
+          "inner": {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+        "classifications": {
+          "inner": {
+            "element": {
+              "type": "enum",
+              "values": [
+                "COMPLIANCE_RELEVANT",
+                "INCIDENT_RELATED",
+                "LEGAL_HOLD",
+                "ROUTINE",
+                "SECURITY_RELEVANT",
+                "SIGNIFICANT",
+              ],
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+        "correlationIds": {
+          "inner": {
+            "element": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+        "customQuery": {
+          "inner": {
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "dateRangeEnd": {
+          "inner": {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "dateRangeStart": {
+          "inner": {
+            "checks": [
+              "datetime",
+            ],
+            "type": "string",
+          },
+          "type": "optional",
+        },
+        "evidencePackIds": {
+          "inner": {
+            "element": {
+              "checks": [
+                "uuid",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "optional",
+        },
+      },
+      "type": "object",
+    },
+    "status": {
+      "type": "enum",
+      "values": [
+        "ACTIVE",
+        "EXPIRED",
+        "PENDING",
+        "RELEASED",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`V2 Retention Schemas > RetentionPolicySchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "appliesToClassifications": {
+      "element": {
+        "type": "enum",
+        "values": [
+          "COMPLIANCE_RELEVANT",
+          "INCIDENT_RELATED",
+          "LEGAL_HOLD",
+          "ROUTINE",
+          "SECURITY_RELEVANT",
+          "SIGNIFICANT",
+        ],
+      },
+      "type": "array",
+    },
+    "appliesToJurisdictions": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "appliesToSources": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "approvedAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "approvedBy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "createdAt": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "defaultRetentionDays": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "deletionApprovalRequired": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "deletionApproverRoles": {
+      "inner": {
+        "element": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "deletionMethod": {
+      "type": "enum",
+      "values": [
+        "CRYPTO_SHRED",
+        "HARD_DELETE",
+        "SOFT_DELETE",
+      ],
+    },
+    "description": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "effectiveFrom": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "effectiveUntil": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "id": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "immutablePeriodDays": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "legalHoldOverridesRetention": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "maxRetentionDays": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "minRetentionDays": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "name": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "schemaVersion": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "default",
+    },
+    "status": {
+      "type": "enum",
+      "values": [
+        "ACTIVE",
+        "DEPRECATED",
+        "DRAFT",
+      ],
+    },
+    "updatedAt": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "version": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "wormEnabled": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`V2 Retention Schemas > RetentionScheduleSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "createdAt": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "deletedAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "deletionApprovedAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "deletionApprovedBy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "deletionCertificate": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "evidencePackId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "extendedAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "extendedBy": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "extensionReason": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "id": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "legalHoldIds": {
+      "inner": {
+        "element": {
+          "checks": [
+            "uuid",
+          ],
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "optional",
+    },
+    "markedForDeletionAt": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "originalRetainUntil": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "retainUntil": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "retentionPolicyId": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "schemaVersion": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "default",
+    },
+    "status": {
+      "type": "enum",
+      "values": [
+        "ACTIVE",
+        "DELETED",
+        "EXTENDED",
+        "PENDING_DELETION",
+        "UNDER_HOLD",
+      ],
+    },
+    "underLegalHold": {
+      "inner": {
+        "type": "boolean",
+      },
+      "type": "default",
+    },
+    "updatedAt": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`V2 Retention Schemas > SealEventSchema shape matches snapshot 1`] = `
+{
+  "shape": {
+    "algorithm": {
+      "type": "enum",
+      "values": [
+        "BLAKE3",
+        "SHA256",
+        "SHA384",
+        "SHA512",
+      ],
+    },
+    "chainPosition": {
+      "inner": {
+        "checks": [
+          "int",
+          "min",
+        ],
+        "type": "number",
+      },
+      "type": "optional",
+    },
+    "evidencePackId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "id": {
+      "checks": [
+        "uuid",
+      ],
+      "type": "string",
+    },
+    "itemCount": {
+      "checks": [
+        "int",
+        "min",
+      ],
+      "type": "number",
+    },
+    "merkleRoot": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "periodEnd": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "periodStart": {
+      "inner": {
+        "checks": [
+          "datetime",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "previousSealHash": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "previousSealId": {
+      "inner": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "publicKeyId": {
+      "type": "string",
+    },
+    "schemaVersion": {
+      "inner": {
+        "checks": [
+          "regex",
+        ],
+        "type": "string",
+      },
+      "type": "default",
+    },
+    "sealHash": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "sealType": {
+      "type": "enum",
+      "values": [
+        "AUDIT_SEAL",
+        "COMPLIANCE_SEAL",
+        "EVIDENCE_SEAL",
+        "INCIDENT_SEAL",
+        "PACK_SEAL",
+        "PERIOD_SEAL",
+      ],
+    },
+    "sealedAt": {
+      "checks": [
+        "datetime",
+      ],
+      "type": "string",
+    },
+    "sealedBy": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "sealedContentHash": {
+      "checks": [
+        "regex",
+      ],
+      "type": "string",
+    },
+    "sealedEntityIds": {
+      "element": {
+        "checks": [
+          "uuid",
+        ],
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "sealedEntityType": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "signature": {
+      "type": "string",
+    },
+    "timestampAuthority": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "timestampToken": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "verificationInstructions": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "verificationUrl": {
+      "inner": {
+        "checks": [
+          "url",
+        ],
+        "type": "string",
+      },
+      "type": "optional",
+    },
+  },
+  "type": "object",
+}
+`;

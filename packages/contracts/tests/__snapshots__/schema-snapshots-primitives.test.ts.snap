@@ -1,0 +1,182 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Common Primitives > Actor Schemas > ActorSchema shape 1`] = `
+{
+  "shape": {
+    "id": {
+      "checks": [
+        "min",
+      ],
+      "type": "string",
+    },
+    "metadata": {
+      "inner": {
+        "keyType": {
+          "type": "string",
+        },
+        "type": "record",
+        "valueType": {
+          "type": "unknown",
+        },
+      },
+      "type": "optional",
+    },
+    "name": {
+      "inner": {
+        "type": "string",
+      },
+      "type": "optional",
+    },
+    "type": {
+      "type": "enum",
+      "values": [
+        "AGENT",
+        "EXTERNAL",
+        "HUMAN",
+        "SYSTEM",
+      ],
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Common Primitives > Actor Schemas > ActorTypeSchema shape 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "AGENT",
+    "EXTERNAL",
+    "HUMAN",
+    "SYSTEM",
+  ],
+}
+`;
+
+exports[`Common Primitives > Autonomy Schema > AutonomyLevelSchema shape 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "BROAD",
+    "CONSTRAINED",
+    "FULL",
+    "HITL",
+    "NONE",
+    "SUPERVISED",
+  ],
+}
+`;
+
+exports[`Common Primitives > Decision Schemas > DecisionOutcomeSchema shape 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "DENY",
+    "ESCALATE",
+    "PENDING",
+    "PERMIT",
+  ],
+}
+`;
+
+exports[`Common Primitives > Decision Schemas > ExecutionOutcomeSchema shape 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "BLOCKED",
+    "CANCELLED",
+    "ERROR",
+    "FAILURE",
+    "SUCCESS",
+    "TIMEOUT",
+  ],
+}
+`;
+
+exports[`Common Primitives > Identifier Schemas > CorrelationIdSchema shape 1`] = `
+{
+  "checks": [
+    "min",
+    "max",
+  ],
+  "type": "string",
+}
+`;
+
+exports[`Common Primitives > Identifier Schemas > HashSchema shape 1`] = `
+{
+  "checks": [
+    "regex",
+  ],
+  "type": "string",
+}
+`;
+
+exports[`Common Primitives > Identifier Schemas > SemVerSchema shape 1`] = `
+{
+  "checks": [
+    "regex",
+  ],
+  "type": "string",
+}
+`;
+
+exports[`Common Primitives > Identifier Schemas > TimestampSchema shape 1`] = `
+{
+  "checks": [
+    "datetime",
+  ],
+  "type": "string",
+}
+`;
+
+exports[`Common Primitives > Identifier Schemas > UUIDSchema shape 1`] = `
+{
+  "checks": [
+    "uuid",
+  ],
+  "type": "string",
+}
+`;
+
+exports[`Common Primitives > Severity & Risk Schemas > RiskLevelSchema shape 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "EXTREME",
+    "HIGH",
+    "LOW",
+    "MEDIUM",
+    "NEGLIGIBLE",
+  ],
+}
+`;
+
+exports[`Common Primitives > Severity & Risk Schemas > SeveritySchema shape 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "CRITICAL",
+    "HIGH",
+    "INFO",
+    "LOW",
+    "MEDIUM",
+  ],
+}
+`;
+
+exports[`Common Primitives > Trust Band Schema > TrustBandSchema shape 1`] = `
+{
+  "type": "enum",
+  "values": [
+    "T0",
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "T7",
+  ],
+}
+`;

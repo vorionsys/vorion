@@ -1,0 +1,96 @@
+{
+  "name": "@vorionsys/shared-constants",
+  "version": "1.0.2",
+  "description": "Shared constants for Vorion ecosystem - single source of truth for tiers, domains, and configuration",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./tiers": {
+      "types": "./dist/tiers.d.ts",
+      "import": "./dist/tiers.js"
+    },
+    "./domains": {
+      "types": "./dist/domains.d.ts",
+      "import": "./dist/domains.js"
+    },
+    "./capabilities": {
+      "types": "./dist/capabilities.d.ts",
+      "import": "./dist/capabilities.js"
+    },
+    "./products": {
+      "types": "./dist/products.d.ts",
+      "import": "./dist/products.js"
+    },
+    "./rate-limits": {
+      "types": "./dist/rate-limits.d.ts",
+      "import": "./dist/rate-limits.js"
+    },
+    "./error-codes": {
+      "types": "./dist/error-codes.d.ts",
+      "import": "./dist/error-codes.js"
+    },
+    "./api-versions": {
+      "types": "./dist/api-versions.d.ts",
+      "import": "./dist/api-versions.js"
+    },
+    "./themes": {
+      "types": "./dist/themes.d.ts",
+      "import": "./dist/themes.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/tiers.ts src/domains.ts src/capabilities.ts src/products.ts src/rate-limits.ts src/error-codes.ts src/api-versions.ts src/themes.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts src/tiers.ts src/domains.ts src/capabilities.ts src/products.ts src/rate-limits.ts src/error-codes.ts src/api-versions.ts src/themes.ts --format esm,cjs --dts --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "vorion",
+    "basis",
+    "trust",
+    "tiers",
+    "constants",
+    "shared",
+    "ai-governance",
+    "agent-trust",
+    "cognigate",
+    "agentanchor",
+    "trust-tiers",
+    "rate-limits",
+    "error-codes",
+    "capabilities"
+  ],
+  "author": "Vorion <team@vorion.org>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voriongit/vorion.git",
+    "directory": "packages/shared-constants"
+  },
+  "homepage": "https://vorion.org",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "4.0.18"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

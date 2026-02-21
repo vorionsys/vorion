@@ -1,0 +1,71 @@
+{
+  "name": "@vorionsys/ai-gateway",
+  "version": "0.1.0",
+  "description": "Multi-provider AI Gateway with intelligent routing, privacy protection, sustainability tracking, and cost optimization",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "nanoid": "^5.0.0",
+    "openai": "^4.73.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.7.2"
+  },
+  "peerDependencies": {
+    "@vorionsys/contracts": "^0.1.2"
+  },
+  "peerDependenciesMeta": {
+    "@vorionsys/contracts": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "ai",
+    "gateway",
+    "multi-provider",
+    "routing",
+    "privacy",
+    "sustainability",
+    "carbon-tracking",
+    "pii-detection",
+    "vorion"
+  ],
+  "author": "Vorion <team@vorion.org>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voriongit/vorion.git",
+    "directory": "packages/ai-gateway"
+  },
+  "bugs": {
+    "url": "https://github.com/voriongit/vorion/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://vorion.org",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

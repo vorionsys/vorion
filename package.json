@@ -1,0 +1,41 @@
+{
+  "name": "@vorionsys/platform",
+  "version": "0.1.0",
+  "description": "Vorion Open Source — AI Governance Framework (BASIS, ATSF, CAR, Cognigate, Kaizen)",
+  "type": "module",
+  "packageManager": "npm@10.8.2",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vorionsys/vorion.git"
+  },
+  "author": "Vorion, Inc.",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:coverage": "turbo run test:coverage",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write \"packages/**/*.ts\"",
+    "format:check": "prettier --check \"packages/**/*.ts\"",
+    "clean": "turbo run clean",
+    "check:circular": "madge --circular --extensions ts,tsx packages/"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "prettier": "^3.2.0",
+    "madge": "^8.0.0"
+  }
+}

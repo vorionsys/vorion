@@ -1,0 +1,38 @@
+{
+  "name": "@vorionsys/cognigate-api",
+  "version": "0.1.0",
+  "description": "Cognigate API - REST gateway for Vorion agent governance",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "docker:build": "docker build -t cognigate-api -f Dockerfile ../..",
+    "docker:run": "docker run -p 3000:3000 -v cognigate-data:/app/data cognigate-api",
+    "docker:up": "docker-compose up --build",
+    "fly:deploy": "fly deploy --config fly.toml"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "@fastify/helmet": "^12.0.0",
+    "@fastify/swagger": "^9.0.0",
+    "@fastify/swagger-ui": "^5.0.0",
+    "@vorionsys/runtime": "file:../../packages/runtime",
+    "@vorionsys/shared-constants": "file:../../packages/shared-constants",
+    "fastify": "^5.0.0",
+    "pino": "^9.0.0",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.18"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT"
+}
