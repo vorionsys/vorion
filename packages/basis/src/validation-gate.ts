@@ -8,8 +8,8 @@
  */
 
 import { z } from 'zod';
-import { TrustTier, TIER_THRESHOLDS } from './trust-factors';
-import { hasCapability, getCapabilitiesForTier, type Capability } from './trust-capabilities';
+import { TrustTier, TIER_THRESHOLDS } from './trust-factors.js';
+import { hasCapability, getCapabilitiesForTier, type Capability } from './trust-capabilities.js';
 
 // =============================================================================
 // VALIDATION GATE TYPES

@@ -5,7 +5,7 @@
  * Factors determine the score; capabilities determine what agents can DO.
  */
 
-import { TrustTier } from './trust-factors';
+import { TrustTier } from './trust-factors.js';
 
 // =============================================================================
 // CAPABILITY CATEGORIES

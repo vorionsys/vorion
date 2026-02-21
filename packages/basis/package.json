@@ -1,6 +1,6 @@
 {
   "name": "@vorionsys/basis",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "Baseline Authority for Safe & Interoperable Systems (BASIS) - Open standard for AI agent governance with trust tiers, capabilities, validation gate, and KYA verification",
   "license": "Apache-2.0",
