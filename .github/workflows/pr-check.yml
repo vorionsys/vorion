@@ -1,0 +1,106 @@
+# =============================================================================
+# PR Check - Lightweight Pull Request Validation
+# =============================================================================
+# Runs on every pull request. Performs fast, lightweight checks:
+#   - Linting (via turbo)
+#   - Type checking (via turbo)
+#   - Circular dependency detection (via madge)
+#
+# This is intentionally separate from the full CI workflow to provide
+# rapid feedback on PRs without waiting for a complete build + test cycle.
+# =============================================================================
+
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            packages/*/node_modules
+            apps/*/node_modules
+          key: npm-${{ runner.os }}-node20-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-node20-
+
+      - name: Cache Turbo build artifacts
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-
+            turbo-${{ runner.os }}-node20-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages (required for typecheck)
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+  circular-deps:
+    name: Circular Dependency Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            packages/*/node_modules
+            apps/*/node_modules
+          key: npm-${{ runner.os }}-node20-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-node20-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for circular dependencies
+        run: npm run check:circular
