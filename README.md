@@ -20,7 +20,6 @@ This monorepo contains the open-source packages powering the Vorion AI governanc
 |---------|-------------|
 | [`@vorionsys/atsf-core`](packages/atsf-core) | Agentic Trust Scoring Framework |
 | [`@vorionsys/cognigate`](packages/cognigate) | Policy enforcement client |
-| [`@vorionsys/platform-core`](packages/platform-core) | Core governance platform |
 | [`@vorionsys/runtime`](packages/runtime) | Orchestration layer |
 | [`@vorionsys/ai-gateway`](packages/ai-gateway) | Multi-provider AI routing |
 | [`@vorionsys/proof-plane`](packages/proof-plane) | Immutable audit trail with hash chains |
