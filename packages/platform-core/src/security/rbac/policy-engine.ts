@@ -1286,13 +1286,156 @@ export class RBACPolicyEngine {
   }
 
   /**
-   * Match IP address (supports CIDR notation)
+   * Match IP address against a pattern.
+   *
+   * Supports:
+   * - Wildcard '*' (matches any IP)
+   * - CIDR notation for IPv4 (e.g., "192.168.1.0/24")
+   * - CIDR notation for IPv6 (e.g., "fe80::/10")
+   * - Exact string match as fallback
+   *
+   * When a CIDR pattern omits the prefix length, it defaults to
+   * /32 for IPv4 and /128 for IPv6 (exact host match).
    */
   private matchIpAddress(ip: string, pattern: string): boolean {
-    // Simple exact match for now
-    // TODO: Add CIDR notation support
     if (pattern === '*') return true;
-    return ip === pattern;
+
+    // Attempt CIDR match if the pattern looks like an IP or CIDR
+    try {
+      return RBACPolicyEngine.ipMatchesCidr(ip, pattern);
+    } catch {
+      // If parsing fails, fall back to exact string comparison
+      return ip === pattern;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Static IP / CIDR helpers (pure TypeScript, no external dependencies)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Determine whether `ip` falls within the network described by `cidr`.
+   * `cidr` may be a bare IP (treated as /32 or /128) or "ip/prefix".
+   */
+  private static ipMatchesCidr(ip: string, cidr: string): boolean {
+    const [networkStr, prefixStr] = cidr.split('/');
+
+    const isIpV6 = RBACPolicyEngine.isIPv6(ip);
+    const isPatternV6 = RBACPolicyEngine.isIPv6(networkStr);
+
+    // IP family mismatch → no match
+    if (isIpV6 !== isPatternV6) return false;
+
+    if (isIpV6) {
+      const defaultPrefix = 128;
+      const prefixLen = prefixStr !== undefined ? parseInt(prefixStr, 10) : defaultPrefix;
+      if (isNaN(prefixLen) || prefixLen < 0 || prefixLen > 128) return false;
+
+      const ipBits = RBACPolicyEngine.ipv6ToBits(ip);
+      const networkBits = RBACPolicyEngine.ipv6ToBits(networkStr);
+
+      return RBACPolicyEngine.bitsMatchPrefix(ipBits, networkBits, prefixLen);
+    } else {
+      const defaultPrefix = 32;
+      const prefixLen = prefixStr !== undefined ? parseInt(prefixStr, 10) : defaultPrefix;
+      if (isNaN(prefixLen) || prefixLen < 0 || prefixLen > 32) return false;
+
+      const ipNum = RBACPolicyEngine.ipv4ToNumber(ip);
+      const networkNum = RBACPolicyEngine.ipv4ToNumber(networkStr);
+
+      // Throw on unparseable addresses so the caller can fall back to
+      // exact string comparison for non-IP values (e.g., hostnames).
+      if (ipNum === null || networkNum === null) {
+        throw new Error(`Invalid IPv4 address: ip=${ip}, network=${networkStr}`);
+      }
+
+      if (prefixLen === 0) return true; // /0 matches everything
+
+      // Build a 32-bit mask: e.g. prefix 24 → 0xFFFFFF00
+      const mask = (~0 << (32 - prefixLen)) >>> 0;
+      return ((ipNum & mask) >>> 0) === ((networkNum & mask) >>> 0);
+    }
+  }
+
+  /** Returns true when the address string contains a colon (→ IPv6). */
+  private static isIPv6(addr: string): boolean {
+    return addr.includes(':');
+  }
+
+  /**
+   * Parse a dotted-quad IPv4 string into a 32-bit unsigned integer.
+   * Returns null on invalid input.
+   */
+  private static ipv4ToNumber(ip: string): number | null {
+    const parts = ip.split('.');
+    if (parts.length !== 4) return null;
+
+    let num = 0;
+    for (const part of parts) {
+      const octet = parseInt(part, 10);
+      if (isNaN(octet) || octet < 0 || octet > 255) return null;
+      num = ((num << 8) | octet) >>> 0;
+    }
+    return num;
+  }
+
+  /**
+   * Expand an IPv6 address (handling :: shorthand) into a 128-element
+   * bit array (array of 0 | 1).
+   */
+  private static ipv6ToBits(addr: string): number[] {
+    // Handle IPv4-mapped IPv6 (e.g., ::ffff:192.168.1.1)
+    const v4Suffix = addr.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+    if (v4Suffix) {
+      const ipv4Num = RBACPolicyEngine.ipv4ToNumber(v4Suffix[1]);
+      if (ipv4Num === null) throw new Error(`Invalid IPv4-mapped IPv6: ${addr}`);
+      // Construct the full 128-bit representation
+      // First 80 bits are 0, next 16 bits are 0xFFFF, last 32 bits are the IPv4
+      const bits: number[] = new Array(80).fill(0);
+      for (let i = 15; i >= 0; i--) {
+        bits.push((0xFFFF >> (15 - i)) & 1);
+      }
+      for (let i = 31; i >= 0; i--) {
+        bits.push((ipv4Num >> i) & 1);
+      }
+      return bits;
+    }
+
+    // Expand :: into the correct number of zero groups
+    let fullAddr = addr;
+    if (fullAddr.includes('::')) {
+      const halves = fullAddr.split('::');
+      const left = halves[0] ? halves[0].split(':') : [];
+      const right = halves[1] ? halves[1].split(':') : [];
+      const missing = 8 - left.length - right.length;
+      const middle = new Array(Math.max(missing, 0)).fill('0');
+      fullAddr = [...left, ...middle, ...right].join(':');
+    }
+
+    const groups = fullAddr.split(':');
+    if (groups.length !== 8) throw new Error(`Invalid IPv6 address: ${addr}`);
+
+    const bits: number[] = [];
+    for (const group of groups) {
+      const val = parseInt(group || '0', 16);
+      if (isNaN(val) || val < 0 || val > 0xFFFF) {
+        throw new Error(`Invalid IPv6 group "${group}" in ${addr}`);
+      }
+      for (let i = 15; i >= 0; i--) {
+        bits.push((val >> i) & 1);
+      }
+    }
+    return bits;
+  }
+
+  /**
+   * Compare the first `prefixLen` bits of two 128-element bit arrays.
+   */
+  private static bitsMatchPrefix(a: number[], b: number[], prefixLen: number): boolean {
+    for (let i = 0; i < prefixLen; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
   }
 
   /**
