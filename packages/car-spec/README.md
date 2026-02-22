@@ -1,4 +1,4 @@
-# @vorion/car-spec
+# @vorionsys/car-spec
 
 OpenAPI 3.1.0 specification for the **Categorical Agentic Registry (CAR)** and **Trust Engine** API -- the machine-readable contract that every Vorion SDK, CLI, and integration is built from.
 
@@ -18,7 +18,7 @@ This package contains a single file -- `openapi.yaml` -- the source-of-truth Ope
 
 ```bash
 npx @openapitools/openapi-generator-cli generate \
-  -i node_modules/@vorion/car-spec/openapi.yaml \
+  -i node_modules/@vorionsys/car-spec/openapi.yaml \
   -g typescript-fetch \
   -o ./generated/car-client
 ```
@@ -27,7 +27,7 @@ npx @openapitools/openapi-generator-cli generate \
 
 ```bash
 openapi-generator generate \
-  -i node_modules/@vorion/car-spec/openapi.yaml \
+  -i node_modules/@vorionsys/car-spec/openapi.yaml \
   -g python \
   -o ./generated/car-python
 ```
@@ -39,7 +39,7 @@ Point Swagger UI at the spec file to get an interactive API explorer:
 ```bash
 docker run -p 8080:8080 \
   -e SWAGGER_JSON=/spec/openapi.yaml \
-  -v $(pwd)/node_modules/@vorion/car-spec:/spec \
+  -v $(pwd)/node_modules/@vorionsys/car-spec:/spec \
   swaggerapi/swagger-ui
 ```
 
@@ -52,7 +52,7 @@ docker run -p 8080:8080 \
 ### Validate the Spec
 
 ```bash
-npx @redocly/cli lint node_modules/@vorion/car-spec/openapi.yaml
+npx @redocly/cli lint node_modules/@vorionsys/car-spec/openapi.yaml
 ```
 
 ## API Overview
@@ -140,9 +140,9 @@ npx @redocly/cli lint node_modules/@vorion/car-spec/openapi.yaml
 
 | Package | Description |
 |---------|-------------|
-| [`@vorion/car-client`](../car-client) | TypeScript client SDK for the CAR & Trust Engine API |
-| [`@vorion/car-cli`](../car-cli) | CLI tool for CAR operations |
-| [`@vorion/car-python`](../car-python) | Python client SDK |
+| [`@vorionsys/car-client`](../car-client) | TypeScript client SDK for the CAR & Trust Engine API |
+| [`@vorionsys/car-cli`](../car-cli) | CLI tool for CAR operations |
+| [`@vorionsys/car-python`](../car-python) | Python client SDK |
 
 ## License
 

@@ -1,4 +1,4 @@
-# @vorion/car-cli
+# @vorionsys/car-cli
 
 Command-line tools for **CAR agent identity** and **governance operations** -- manage the Categorical Agentic Registry and interact with the trust engine from your terminal.
 
@@ -6,18 +6,18 @@ Command-line tools for **CAR agent identity** and **governance operations** -- m
 
 ```bash
 # Global install
-npm install -g @vorion/car-cli
+npm install -g @vorionsys/car-cli
 
 # One-off usage
-npx @vorion/car-cli <command>
+npx @vorionsys/car-cli <command>
 
 # Within a monorepo / project
-pnpm add @vorion/car-cli
+pnpm add @vorionsys/car-cli
 ```
 
 ## What It Provides
 
-`@vorion/car-cli` exposes the `car` binary, a unified terminal interface to both the **CAR registry** (agent identity) and the **trust engine** (behavioral governance). These are architecturally separate systems (see [ADR-004](https://github.com/voriongit/vorion/tree/main/docs/adr)), combined in a single CLI for developer convenience.
+`@vorionsys/car-cli` exposes the `car` binary, a unified terminal interface to both the **CAR registry** (agent identity) and the **trust engine** (behavioral governance). These are architecturally separate systems (see [ADR-004](https://github.com/voriongit/vorion/tree/main/docs/adr)), combined in a single CLI for developer convenience.
 
 **CAR Registry (Identity) operations:**
 
@@ -31,7 +31,7 @@ pnpm add @vorion/car-cli
 - Check trust-score ceilings against regulatory compliance frameworks
 - List and triage gaming/anomaly alerts
 
-All data is fetched from a running CAR API instance via `@vorion/car-client`.
+All data is fetched from a running CAR API instance via `@vorionsys/car-client`.
 
 ## Quick Start
 
@@ -228,10 +228,10 @@ The CLI checks `CAR_API_URL` first, then falls back to `VORION_BASE_URL`, and fi
 
 ## Programmatic API
 
-The package also re-exports the full `@vorion/car-client` SDK for programmatic use:
+The package also re-exports the full `@vorionsys/car-client` SDK for programmatic use:
 
 ```typescript
-import { createCARClient } from '@vorion/car-cli'
+import { createCARClient } from '@vorionsys/car-cli'
 
 const client = createCARClient({
   baseUrl: 'https://api.agentanchorai.com',
@@ -241,7 +241,7 @@ const client = createCARClient({
 const { stats } = await client.getStats()
 ```
 
-For full SDK documentation, see [`@vorion/car-client`](https://github.com/voriongit/vorion/tree/main/packages/car-client).
+For full SDK documentation, see [`@vorionsys/car-client`](https://github.com/voriongit/vorion/tree/main/packages/car-client).
 
 ## Trust Tiers (Reference)
 
@@ -286,5 +286,5 @@ For full SDK documentation, see [`@vorion/car-client`](https://github.com/vorion
 ## Links
 
 - [Main repository](https://github.com/voriongit/vorion)
-- [`@vorion/car-client` SDK](https://github.com/voriongit/vorion/tree/main/packages/car-client)
+- [`@vorionsys/car-client` SDK](https://github.com/voriongit/vorion/tree/main/packages/car-client)
 - [CAR Specification](https://github.com/voriongit/vorion/tree/main/packages/car-spec)

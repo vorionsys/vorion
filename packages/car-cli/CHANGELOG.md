@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `@vorion/car-cli` will be documented in this file.
+All notable changes to `@vorionsys/car-cli` will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
@@ -16,4 +16,4 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - `car alerts [status]` -- list and filter gaming/anomaly alerts by status and severity.
 - `car presets` -- browse the federated weight-preset hierarchy (CAR / Vorion / Axiom).
 - Environment-variable configuration (`CAR_API_URL`, `CAR_API_KEY`, `VORION_BASE_URL`, `VORION_API_KEY`).
-- Programmatic re-export of the full `@vorion/car-client` SDK.
+- Programmatic re-export of the full `@vorionsys/car-client` SDK.

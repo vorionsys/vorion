@@ -29,10 +29,10 @@ This monorepo contains the open-source packages powering the Vorion AI governanc
 
 | Package | Description |
 |---------|-------------|
-| [`@vorion/car-spec`](packages/car-spec) | CAR OpenAPI 3.1.0 specification |
-| [`@vorion/car-client`](packages/car-client) | TypeScript client SDK |
-| [`@vorion/car-cli`](packages/car-cli) | CLI tool |
-| [`@vorion/car-python`](packages/car-python) | Python client SDK |
+| [`@vorionsys/car-spec`](packages/car-spec) | CAR OpenAPI 3.1.0 specification |
+| [`@vorionsys/car-client`](packages/car-client) | TypeScript client SDK |
+| [`@vorionsys/car-cli`](packages/car-cli) | CLI tool |
+| [`@vorionsys/car-python`](packages/car-python) | Python client SDK |
 
 ### SDKs
 
@@ -45,7 +45,7 @@ This monorepo contains the open-source packages powering the Vorion AI governanc
 
 | App | Description |
 |-----|-------------|
-| [`@vorion/kaizen`](apps/kaizen) | AI Learning Platform — [learn.vorion.org](https://learn.vorion.org) |
+| [`@vorionsys/kaizen`](apps/kaizen) | AI Learning Platform — [learn.vorion.org](https://learn.vorion.org) |
 | [`cognigate-api`](apps/cognigate-api) | Cognigate governance API service |
 
 ## Getting Started

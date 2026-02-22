@@ -1,12 +1,12 @@
 /**
- * @vorion/car-client
+ * @vorionsys/car-client
  *
  * TypeScript client SDK for the Categorical Agentic Registry (CAR) standard.
  * Provides type-safe access to Phase 6 Trust Engine APIs.
  *
  * @example
  * ```typescript
- * import { createCARClient, TrustTier, AgentRole } from '@vorion/car-client'
+ * import { createCARClient, TrustTier, AgentRole } from '@vorionsys/car-client'
  *
  * const client = createCARClient({
  *   baseUrl: 'https://api.agentanchorai.com',
