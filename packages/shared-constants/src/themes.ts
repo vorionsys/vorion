@@ -3,7 +3,7 @@
  *
  * Controls the visual identity across all three sites:
  * - cognigate.dev (Developer Engine)
- * - agentanchorai.com (Enterprise Platform)
+ * - vorion.org (Governance Platform)
  * - vorion.org (Community / Standard)
  *
  * QUICK SWAP: Change ACTIVE_THEME to switch all sites at once.

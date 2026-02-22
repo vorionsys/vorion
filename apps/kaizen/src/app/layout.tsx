@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Kaizen | The Agentic AI Knowledge Base',
   description: 'Comprehensive documentation covering autonomous AI agents, multi-agent systems, governance protocols, and the Vorion ecosystem.',
-  keywords: ['AI agents', 'agentic AI', 'BASIS', 'AgentAnchor', 'Cognigate', 'Vorion', 'AI governance'],
+  keywords: ['AI agents', 'agentic AI', 'BASIS', 'CAR', 'Cognigate', 'Vorion', 'AI governance'],
   authors: [{ name: 'Vorion' }],
   icons: {
     icon: '/vorion.png',

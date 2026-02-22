@@ -128,7 +128,7 @@ export class IdentityVerifier {
           {
             id: `${did}#agentcard`,
             type: 'AgentCard',
-            serviceEndpoint: `https://agentanchorai.com/cards/${identifier}`,
+            serviceEndpoint: `https://vorion.org/cards/${identifier}`,
           },
         ],
         kya: {

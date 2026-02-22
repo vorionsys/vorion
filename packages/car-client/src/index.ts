@@ -9,7 +9,7 @@
  * import { createCARClient, TrustTier, AgentRole } from '@vorionsys/car-client'
  *
  * const client = createCARClient({
- *   baseUrl: 'https://api.agentanchorai.com',
+ *   baseUrl: 'https://api.vorion.org',
  *   apiKey: process.env.CAR_API_KEY,
  * })
  *

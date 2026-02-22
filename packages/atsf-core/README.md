@@ -427,6 +427,6 @@ Copyright 2024-2026 Vorion
 
 ## Links
 
-- **Repository:** [github.com/voriongit/vorion](https://github.com/voriongit/vorion/tree/main/packages/atsf-core)
+- **Repository:** [github.com/vorionsys/vorion](https://github.com/vorionsys/vorion/tree/main/packages/atsf-core)
 - **Homepage:** [vorion.org](https://vorion.org)
-- **Issues:** [github.com/voriongit/vorion/issues](https://github.com/voriongit/vorion/issues)
+- **Issues:** [github.com/vorionsys/vorion/issues](https://github.com/vorionsys/vorion/issues)

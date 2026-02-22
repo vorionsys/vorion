@@ -292,7 +292,7 @@ async function example() {
   // Grant capability to agent
   await authManager.grantCapability('did:vorion:agent:123', {
     id: 'cap_001',
-    issuer: 'did:vorion:org:agentanchor',
+    issuer: 'did:vorion:org:vorion',
     subject: 'did:vorion:agent:123',
     capabilities: [
       {

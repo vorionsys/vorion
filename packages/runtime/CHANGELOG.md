@@ -48,5 +48,5 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - **Logger** -- pino-based logger with pretty-printing in development.
 - Subpath exports for tree-shakeable imports (`/trust-facade`, `/proof-committer`, `/intent-pipeline`, `/stores`).
 
-[0.1.1]: https://github.com/voriongit/vorion/compare/@vorionsys/runtime@0.1.0...@vorionsys/runtime@0.1.1
-[0.1.0]: https://github.com/voriongit/vorion/releases/tag/@vorionsys/runtime@0.1.0
+[0.1.1]: https://github.com/vorionsys/vorion/compare/@vorionsys/runtime@0.1.0...@vorionsys/runtime@0.1.1
+[0.1.0]: https://github.com/vorionsys/vorion/releases/tag/@vorionsys/runtime@0.1.0

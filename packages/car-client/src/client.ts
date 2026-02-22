@@ -44,7 +44,7 @@ import {
  * @example
  * ```typescript
  * const client = new CARClient({
- *   baseUrl: 'https://api.agentanchorai.com',
+ *   baseUrl: 'https://api.vorion.org',
  *   apiKey: 'your-api-key',
  * })
  *
@@ -553,7 +553,7 @@ export class CARError extends Error {
  * @example
  * ```typescript
  * const client = createCARClient({
- *   baseUrl: 'https://api.agentanchorai.com',
+ *   baseUrl: 'https://api.vorion.org',
  *   apiKey: process.env.CAR_API_KEY,
  * })
  * ```

@@ -150,6 +150,6 @@ Apache-2.0. See [LICENSE](./LICENSE) for details.
 
 ## Links
 
-- [Repository](https://github.com/voriongit/vorion)
-- [Package directory](https://github.com/voriongit/vorion/tree/main/packages/car-spec)
-- [Issue tracker](https://github.com/voriongit/vorion/issues)
+- [Repository](https://github.com/vorionsys/vorion)
+- [Package directory](https://github.com/vorionsys/vorion/tree/main/packages/car-spec)
+- [Issue tracker](https://github.com/vorionsys/vorion/issues)

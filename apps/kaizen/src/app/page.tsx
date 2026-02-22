@@ -77,9 +77,9 @@ const ecosystemLinks = [
   },
   {
     icon: Zap,
-    title: 'AgentAnchor',
-    description: 'Enterprise AI governance platform with trust scoring and certification',
-    href: 'https://agentanchorai.com',
+    title: 'Cognigate',
+    description: 'AI governance runtime with trust scoring and policy enforcement',
+    href: 'https://cognigate.dev',
   },
   {
     icon: Cpu,
@@ -309,7 +309,7 @@ export default function HomePage() {
             <a href="https://discord.gg/basis-protocol" className="hover:text-cyan-400 transition-colors">
               Discord
             </a>
-            <a href="https://github.com/voriongit" className="hover:text-cyan-400 transition-colors">
+            <a href="https://github.com/vorionsys" className="hover:text-cyan-400 transition-colors">
               GitHub
             </a>
           </div>

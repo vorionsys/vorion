@@ -127,7 +127,7 @@ https://mumbai.polygonscan.com/token/0x.../0
 
 ---
 
-## Step 6: Certify Agent with AgentAnchor
+## Step 6: Certify Agent with Vorion CAR
 
 Edit `scripts/certify-agent.ts` and set contract address, then:
 
@@ -164,7 +164,7 @@ Certified: true
 1. **View on PolygonScan**: Explore your contract and AgentCard
 2. **Integrate with KYA SDK**: Use the AgentCard in your applications
 3. **Mint More AgentCards**: Create cards for other agents
-4. **Deploy Portal UI**: Set up AgentAnchor certification portal
+4. **Deploy Portal UI**: Set up Vorion CAR certification portal
 
 ---
 

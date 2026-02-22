@@ -17,7 +17,7 @@ pnpm add @vorionsys/car-cli
 
 ## What It Provides
 
-`@vorionsys/car-cli` exposes the `car` binary, a unified terminal interface to both the **CAR registry** (agent identity) and the **trust engine** (behavioral governance). These are architecturally separate systems (see [ADR-004](https://github.com/voriongit/vorion/tree/main/docs/adr)), combined in a single CLI for developer convenience.
+`@vorionsys/car-cli` exposes the `car` binary, a unified terminal interface to both the **CAR registry** (agent identity) and the **trust engine** (behavioral governance). These are architecturally separate systems (see [ADR-004](https://github.com/vorionsys/vorion/tree/main/docs/adr)), combined in a single CLI for developer convenience.
 
 **CAR Registry (Identity) operations:**
 
@@ -37,7 +37,7 @@ All data is fetched from a running CAR API instance via `@vorionsys/car-client`.
 
 ```bash
 # Point at your CAR API (defaults to http://localhost:3000)
-export CAR_API_URL=https://api.agentanchorai.com
+export CAR_API_URL=https://api.vorion.org
 export CAR_API_KEY=your-api-key
 
 # Dashboard overview
@@ -234,14 +234,14 @@ The package also re-exports the full `@vorionsys/car-client` SDK for programmati
 import { createCARClient } from '@vorionsys/car-cli'
 
 const client = createCARClient({
-  baseUrl: 'https://api.agentanchorai.com',
+  baseUrl: 'https://api.vorion.org',
   apiKey: process.env.CAR_API_KEY,
 })
 
 const { stats } = await client.getStats()
 ```
 
-For full SDK documentation, see [`@vorionsys/car-client`](https://github.com/voriongit/vorion/tree/main/packages/car-client).
+For full SDK documentation, see [`@vorionsys/car-client`](https://github.com/vorionsys/vorion/tree/main/packages/car-client).
 
 ## Trust Tiers (Reference)
 
@@ -285,6 +285,6 @@ For full SDK documentation, see [`@vorionsys/car-client`](https://github.com/vor
 
 ## Links
 
-- [Main repository](https://github.com/voriongit/vorion)
-- [`@vorionsys/car-client` SDK](https://github.com/voriongit/vorion/tree/main/packages/car-client)
-- [CAR Specification](https://github.com/voriongit/vorion/tree/main/packages/car-spec)
+- [Main repository](https://github.com/vorionsys/vorion)
+- [`@vorionsys/car-client` SDK](https://github.com/vorionsys/vorion/tree/main/packages/car-client)
+- [CAR Specification](https://github.com/vorionsys/vorion/tree/main/packages/car-spec)

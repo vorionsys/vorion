@@ -41,5 +41,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full TypeScript type exports for all API request/response shapes.
 - Dual ESM/CJS output via tsup.
 
-[1.0.1]: https://github.com/voriongit/vorion/compare/@vorionsys/cognigate@1.0.0...@vorionsys/cognigate@1.0.1
-[1.0.0]: https://github.com/voriongit/vorion/releases/tag/@vorionsys/cognigate@1.0.0
+[1.0.1]: https://github.com/vorionsys/vorion/compare/@vorionsys/cognigate@1.0.0...@vorionsys/cognigate@1.0.1
+[1.0.0]: https://github.com/vorionsys/vorion/releases/tag/@vorionsys/cognigate@1.0.0

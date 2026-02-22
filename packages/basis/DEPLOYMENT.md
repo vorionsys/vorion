@@ -133,7 +133,7 @@ npx hardhat verify --network polygon <CONTRACT_ADDRESS>
 **Roles**:
 - `DEFAULT_ADMIN_ROLE`: Full admin (deployer)
 - `MINTER_ROLE`: Can mint new AgentCards
-- `CERTIFIER_ROLE`: Can certify agents (AgentAnchor)
+- `CERTIFIER_ROLE`: Can certify agents (Vorion)
 
 ### Key Functions
 
@@ -219,7 +219,7 @@ rm -rf cache artifacts
 After successful deployment:
 
 1. **Update documentation** with contract addresses
-2. **Grant roles** to AgentAnchor backend
+2. **Grant roles** to Vorion backend
 3. **Integrate SDK** into applications
 4. **Test minting** via API
 5. **Monitor** contract on PolygonScan

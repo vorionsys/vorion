@@ -1,6 +1,6 @@
 # @vorionsys/runtime
 
-Orchestration layer for AI agent governance, built on the [Vorion](https://github.com/voriongit/vorion) trust framework and aligned with the BASIS (Baseline Authority for Safe & Interoperable Systems) specification.
+Orchestration layer for AI agent governance, built on the [Vorion](https://github.com/vorionsys/vorion) trust framework and aligned with the BASIS (Baseline Authority for Safe & Interoperable Systems) specification.
 
 Combines **Gate Trust** (one-time admission control) and **Dynamic Trust** (per-action real-time scoring) into a unified, fast decision system with cryptographic proof of every governance decision.
 
@@ -572,5 +572,5 @@ import type {
 
 ## Links
 
-- [Vorion Monorepo](https://github.com/voriongit/vorion)
-- [BASIS Specification](https://github.com/voriongit/vorion/tree/main/docs) -- Baseline Authority for Safe & Interoperable Systems
+- [Vorion Monorepo](https://github.com/vorionsys/vorion)
+- [BASIS Specification](https://github.com/vorionsys/vorion/tree/main/docs) -- Baseline Authority for Safe & Interoperable Systems

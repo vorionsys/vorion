@@ -182,7 +182,7 @@ https://amoy.polygonscan.com/token/0x.../0
 
 ---
 
-## Step 6: Certify Agent with AgentAnchor
+## Step 6: Certify Agent with Vorion CAR
 
 Update contract address in certify script:
 
@@ -292,7 +292,7 @@ https://amoy.polygonscan.com/token/<CONTRACT_ADDRESS>?a=0
 3. ✅ Test minting more AgentCards
 
 ### Integration
-4. Update AgentAnchor portal with contract address
+4. Update Vorion CAR portal with contract address
 5. Integrate KYA SDK for verification
 6. Connect CC Agent to use AgentCard
 7. Implement multi-persona architecture

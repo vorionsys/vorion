@@ -446,7 +446,7 @@ import { KYA, IdentityVerifier } from '@vorionsys/basis/kya';
 
 ## Repository
 
-This package is part of the [Vorion monorepo](https://github.com/voriongit/vorion) at `packages/basis`.
+This package is part of the [Vorion monorepo](https://github.com/vorionsys/vorion) at `packages/basis`.
 
 ## License
 

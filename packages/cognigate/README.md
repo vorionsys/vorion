@@ -451,10 +451,10 @@ interface CognigateConfig {
 
 ## Contributing
 
-This package is part of the [Vorion monorepo](https://github.com/voriongit/vorion). See the root `CONTRIBUTING.md` for guidelines.
+This package is part of the [Vorion monorepo](https://github.com/vorionsys/vorion). See the root `CONTRIBUTING.md` for guidelines.
 
 ## Links
 
 - [Cognigate API Documentation](https://cognigate.dev)
-- [Vorion Monorepo](https://github.com/voriongit/vorion)
+- [Vorion Monorepo](https://github.com/vorionsys/vorion)
 - [npm: @vorionsys/cognigate](https://www.npmjs.com/package/@vorionsys/cognigate)

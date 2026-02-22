@@ -8,7 +8,7 @@
 - **Local-First Knowledge** - 25+ terms in the built-in lexicon, checked before any API call
 - **Glassmorphism UI** - Dark cyberpunk theme with smooth animations
 - **Documentation Hub** - Guides on agent architecture, orchestration, protocols, and safety
-- **SDK Reference** - AgentAnchor and BASIS protocol documentation
+- **SDK Reference** - Vorion CAR, ATSF, and BASIS protocol documentation
 
 ## Quick Start
 
@@ -111,7 +111,7 @@ CNAME learn -> cname.vercel-dns.com
 | Product | Description |
 |---------|-------------|
 | [BASIS](https://vorion.org/basis) | Open standard for AI agent governance |
-| [AgentAnchor](https://agentanchorai.com) | AI governance platform with certification |
+| [Vorion](https://vorion.org) | AI governance platform with trust scoring |
 | [Cognigate](https://cognigate.dev) | Reference implementation of BASIS runtime |
 
 ## Technology Stack

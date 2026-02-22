@@ -382,7 +382,7 @@ const TTS = (rawScore / maxPossible) * 1000; // 0-1000 scale
 
 ## 7. Implementation in Vorion Ecosystem
 
-### AgentAnchor Dashboard
+### Vorion Dashboard
 - Display all 15 core factors per agent
 - Color-coded by tier weight
 - Trend visualization over time
@@ -417,7 +417,7 @@ const TTS = (rawScore / maxPossible) * 1000; // 0-1000 scale
 
 ### Phase 7A (Q1 2026)
 - [ ] Implement 15-factor scoring in ATSF runtime
-- [ ] Add factor visualization to AgentAnchor
+- [ ] Add factor visualization to Vorion
 - [ ] Create Cognigate policy rules per factor
 
 ### Phase 7B (Q2 2026)

@@ -40,24 +40,24 @@ export const DOMAIN_ALIASES = {
 } as const;
 
 // =============================================================================
-// AGENT ANCHOR AI (COMMERCIAL)
+// VORION COMMERCIAL
 // =============================================================================
 
 export const AGENTANCHOR_DOMAINS = {
-  /** Main Agent Anchor AI site */
-  main: 'https://agentanchorai.com',
+  /** Main Vorion platform site */
+  main: 'https://vorion.org',
 
-  /** Agent Anchor Trust - Trust verification and certification */
-  trust: 'https://trust.agentanchorai.com',
+  /** Trust verification and certification */
+  trust: 'https://trust.vorion.org',
 
-  /** Agent Anchor Logic - Policy engine and governance logic */
-  logic: 'https://logic.agentanchorai.com',
+  /** Policy engine and governance logic */
+  logic: 'https://logic.vorion.org',
 
   /** Status page */
-  status: 'https://status.agentanchorai.com',
+  status: 'https://status.vorion.org',
 
   /** Agent trust verification portal */
-  verify: 'https://verify.agentanchorai.com',
+  verify: 'https://verify.vorion.org',
 } as const;
 
 // =============================================================================
@@ -83,23 +83,23 @@ export const API_ENDPOINTS = {
     staging: 'https://staging.cognigate.dev/v1',
   },
 
-  /** Agent Anchor AI Production API */
+  /** Vorion Platform API */
   agentAnchor: {
-    production: 'https://api.agentanchorai.com/v1',
-    staging: 'https://staging-api.agentanchorai.com/v1',
-    sandbox: 'https://sandbox.agentanchorai.com/v1',
+    production: 'https://api.vorion.org/v1',
+    staging: 'https://staging-api.vorion.org/v1',
+    sandbox: 'https://sandbox.vorion.org/v1',
   },
 
   /** Trust API */
   trust: {
-    production: 'https://trust.agentanchorai.com/v1',
-    staging: 'https://staging.trust.agentanchorai.com/v1',
+    production: 'https://trust.vorion.org/v1',
+    staging: 'https://staging.trust.vorion.org/v1',
   },
 
   /** Logic/Policy API */
   logic: {
-    production: 'https://logic.agentanchorai.com/v1',
-    staging: 'https://staging.logic.agentanchorai.com/v1',
+    production: 'https://logic.vorion.org/v1',
+    staging: 'https://staging.logic.vorion.org/v1',
   },
 } as const;
 
@@ -126,25 +126,25 @@ export const VORION_EMAILS = {
 
 export const AGENTANCHOR_EMAILS = {
   /** General support */
-  support: 'support@agentanchorai.com',
+  support: 'support@vorion.org',
 
   /** Sales inquiries */
-  sales: 'sales@agentanchorai.com',
+  sales: 'sales@vorion.org',
 
   /** Partner program */
-  partners: 'partners@agentanchorai.com',
+  partners: 'partners@vorion.org',
 
   /** API support */
-  apiSupport: 'api-support@agentanchorai.com',
+  apiSupport: 'api-support@vorion.org',
 
   /** Enterprise inquiries */
-  enterprise: 'enterprise@agentanchorai.com',
+  enterprise: 'enterprise@vorion.org',
 
   /** Compliance */
-  compliance: 'compliance@agentanchorai.com',
+  compliance: 'compliance@vorion.org',
 
   /** Team */
-  team: 'team@agentanchorai.com',
+  team: 'team@vorion.org',
 } as const;
 
 // =============================================================================
@@ -152,15 +152,15 @@ export const AGENTANCHOR_EMAILS = {
 // =============================================================================
 
 export const GITHUB = {
-  /** Vorion organization */
+  /** Vorion organization (public) */
   vorion: {
-    org: 'https://github.com/voriongit',
-    mainRepo: 'https://github.com/voriongit/vorion',
+    org: 'https://github.com/vorionsys',
+    mainRepo: 'https://github.com/vorionsys/vorion',
   },
 
-  /** Agent Anchor AI (if separate) */
+  /** Vorion private (enterprise) */
   agentAnchor: {
-    org: 'https://github.com/agentanchorai',
+    org: 'https://github.com/vorionsys',
   },
 } as const;
 
@@ -179,11 +179,11 @@ export const NPM_PACKAGES = {
     sharedConstants: '@vorionsys/shared-constants',
   },
 
-  /** Commercial packages (@agentanchor) */
+  /** Enterprise packages (@vorionsys) */
   agentAnchor: {
-    sdk: '@agentanchor/sdk',
-    trust: '@agentanchor/trust',
-    logic: '@agentanchor/logic',
+    sdk: '@vorionsys/sdk',
+    trust: '@vorionsys/trust',
+    logic: '@vorionsys/logic',
   },
 } as const;
 

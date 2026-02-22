@@ -82,7 +82,7 @@ export const TRUST_API_VERSIONS: Record<string, ApiVersionDefinition> = {
     fullVersion: '1.0.0',
     releaseDate: '2026-02-01',
     status: VersionStatus.STABLE,
-    changelogUrl: 'https://trust.agentanchorai.com/changelog/v1',
+    changelogUrl: 'https://trust.vorion.org/changelog/v1',
   },
 } as const;
 
@@ -98,7 +98,7 @@ export const LOGIC_API_VERSIONS: Record<string, ApiVersionDefinition> = {
     fullVersion: '1.0.0',
     releaseDate: '2026-02-01',
     status: VersionStatus.PREVIEW,
-    changelogUrl: 'https://logic.agentanchorai.com/changelog/v1',
+    changelogUrl: 'https://logic.vorion.org/changelog/v1',
   },
 } as const;
 

@@ -36,5 +36,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full TypeScript type definitions (`VorionConfig`, `AgentOptions`, `ActionResult`, `TrustInfo`)
 - Re-exported runtime types (`TrustTier`, `DecisionTier`, `AgentCredentials`, `Action`, `TrustSignal`)
 
-[0.1.1]: https://github.com/voriongit/vorion/compare/@vorionsys/sdk@0.1.0...@vorionsys/sdk@0.1.1
-[0.1.0]: https://github.com/voriongit/vorion/releases/tag/@vorionsys/sdk@0.1.0
+[0.1.1]: https://github.com/vorionsys/vorion/compare/@vorionsys/sdk@0.1.0...@vorionsys/sdk@0.1.1
+[0.1.0]: https://github.com/vorionsys/vorion/releases/tag/@vorionsys/sdk@0.1.0

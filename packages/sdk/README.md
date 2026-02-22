@@ -334,7 +334,7 @@ import type {
 
 ## Contributing
 
-See the [main repository](https://github.com/voriongit/vorion) for contribution guidelines.
+See the [main repository](https://github.com/vorionsys/vorion) for contribution guidelines.
 
 ## License
 
@@ -342,4 +342,4 @@ Apache-2.0 -- see [LICENSE](./LICENSE) for details.
 
 ---
 
-Part of the [Vorion](https://github.com/voriongit/vorion) project.
+Part of the [Vorion](https://github.com/vorionsys/vorion) project.

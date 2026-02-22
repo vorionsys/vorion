@@ -71,7 +71,7 @@ export default function PitchPage() {
               npm
             </a>
             <a
-              href="https://github.com/voriongit/vorion"
+              href="https://github.com/vorionsys/vorion"
               target="_blank"
               className="text-sm text-gray-400 hover:text-cyan-400 transition-colors"
             >
@@ -345,7 +345,7 @@ await agent.invoke(input, { callbacks: [callback] });`}</code>
                 <p className="text-sm text-gray-400 mb-3">
                   View source, contribute, or fork for your needs.
                 </p>
-                <a href="https://github.com/voriongit/vorion" target="_blank">
+                <a href="https://github.com/vorionsys/vorion" target="_blank">
                   <Button variant="outline" size="sm" className="w-full">
                     View on GitHub
                     <ExternalLink className="w-3 h-3 ml-2" />

@@ -23,7 +23,7 @@ import { createCARClient } from '@vorionsys/car-client'
 
 // Create a client connected to the CAR API
 const client = createCARClient({
-  baseUrl: 'https://api.agentanchorai.com',
+  baseUrl: 'https://api.vorion.org',
   apiKey: process.env.CAR_API_KEY,
 })
 
@@ -73,7 +73,7 @@ Every agent in CAR has immutable provenance. Register a new agent identity or tr
 import { createCARClient } from '@vorionsys/car-client'
 
 const client = createCARClient({
-  baseUrl: 'https://api.agentanchorai.com',
+  baseUrl: 'https://api.vorion.org',
   apiKey: process.env.CAR_API_KEY,
 })
 
@@ -441,6 +441,6 @@ Apache-2.0. See [LICENSE](./LICENSE) for details.
 
 ## Links
 
-- [Repository](https://github.com/voriongit/vorion)
-- [Package directory](https://github.com/voriongit/vorion/tree/main/packages/car-client)
-- [Issue tracker](https://github.com/voriongit/vorion/issues)
+- [Repository](https://github.com/vorionsys/vorion)
+- [Package directory](https://github.com/vorionsys/vorion/tree/main/packages/car-client)
+- [Issue tracker](https://github.com/vorionsys/vorion/issues)

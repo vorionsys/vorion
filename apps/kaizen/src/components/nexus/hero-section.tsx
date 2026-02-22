@@ -78,7 +78,7 @@ export function HeroSection() {
         <p className="text-gray-400 text-sm">
           Comprehensive documentation covering autonomous AI agents, multi-agent systems,
           governance protocols, and the Vorion ecosystem including BASIS Standard,
-          AgentAnchor, and Cognigate.
+          CAR, ATSF, and Cognigate.
         </p>
       </div>
     </div>

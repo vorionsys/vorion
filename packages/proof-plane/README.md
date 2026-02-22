@@ -9,7 +9,7 @@ Immutable dual-hash audit trail for AI agent governance decisions.
 
 ## Overview
 
-The **Proof Plane** is a core component of the [Vorion](https://github.com/voriongit/vorion) AI governance stack, built on the **BASIS** (Baseline Authority for Safe & Interoperable Systems) framework. It provides a cryptographically verifiable, immutable audit trail for every decision made by AI agents -- from intent submission through authorization, execution, and trust score changes.
+The **Proof Plane** is a core component of the [Vorion](https://github.com/vorionsys/vorion) AI governance stack, built on the **BASIS** (Baseline Authority for Safe & Interoperable Systems) framework. It provides a cryptographically verifiable, immutable audit trail for every decision made by AI agents -- from intent submission through authorization, execution, and trust score changes.
 
 Every event in the proof plane is:
 
@@ -481,7 +481,7 @@ The proof plane sits at the foundation of the Vorion governance stack:
 
 ## Repository
 
-This package is part of the [Vorion](https://github.com/voriongit/vorion) monorepo.
+This package is part of the [Vorion](https://github.com/vorionsys/vorion) monorepo.
 
 ```
 vorion/

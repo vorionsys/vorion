@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 
 /**
- * Certify CC Agent with AgentAnchor (T2: Standard tier, 350 trust score)
+ * Certify CC Agent with Vorion CAR (T2: Standard tier, 350 trust score)
  */
 async function main() {
   const [deployer] = await ethers.getSigners();

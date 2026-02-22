@@ -17,7 +17,7 @@ The **KYA (Know Your Agent) Framework** establishes a universal trust layer for 
 3. **Accountability Tracking** - Immutable audit trail linking actions to identities
 4. **Continuous Behavior Monitoring** - Real-time anomaly detection and trust scoring
 
-**Integration**: KYA is a core component of BASIS, providing the identity and trust foundation for Cognigate (Kaizen runtime) and AgentAnchor (certification platform).
+**Integration**: KYA is a core component of BASIS, providing the identity and trust foundation for Cognigate (Kaizen runtime) and Vorion (certification platform).
 
 ---
 
@@ -93,7 +93,7 @@ did:vorion:ed25519:5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk
     {
       "id": "did:vorion:ed25519:5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk#agentcard",
       "type": "AgentCard",
-      "serviceEndpoint": "https://agentanchorai.com/cards/5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk"
+      "serviceEndpoint": "https://vorion.org/cards/5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk"
     },
     {
       "id": "did:vorion:ed25519:5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk#kaizen",
@@ -105,7 +105,7 @@ did:vorion:ed25519:5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk
     "trustScore": 520,
     "tier": "T3",
     "certified": true,
-    "certifier": "did:vorion:org:agentanchor",
+    "certifier": "did:vorion:org:vorion",
     "certificationDate": "2026-01-15T00:00:00Z",
     "capabilities": [
       "file_read",
@@ -176,7 +176,7 @@ async function verifyIdentity(proof: IdentityProof): Promise<boolean> {
 ```json
 {
   "id": "cap_abc123",
-  "issuer": "did:vorion:org:agentanchor",
+  "issuer": "did:vorion:org:vorion",
   "subject": "did:vorion:ed25519:5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk",
   "capabilities": [
     {
@@ -571,7 +571,7 @@ contract AgentCard {
     string[] capabilities;           // Advertised capabilities
     uint256 trustScore;              // Current TSG score
     uint8 tier;                      // T0-T5
-    bool certified;                  // AgentAnchor certification
+    bool certified;                  // Vorion certification
     address certifier;               // Certifying organization
     uint256 certificationDate;
     string metadataURI;              // IPFS link to full metadata
@@ -633,7 +633,7 @@ contract AgentCard {
     { "trait_type": "Trust Score", "value": 520 },
     { "trait_type": "Trust Tier", "value": "T3" },
     { "trait_type": "Certified", "value": "true" },
-    { "trait_type": "Certifier", "value": "AgentAnchor" },
+    { "trait_type": "Certifier", "value": "Vorion" },
     { "trait_type": "Primary Capability", "value": "Financial Transactions" },
     { "trait_type": "Created", "value": "2026-01-15" }
   ],
@@ -796,7 +796,7 @@ KYA can integrate with OAuth 2.0 for capability delegation:
 ### Phase 2: AgentCard (Q2 2026)
 - [ ] AgentCard smart contract deployment (Polygon)
 - [ ] IPFS metadata storage
-- [ ] AgentAnchor certification portal
+- [ ] Vorion certification portal
 - [ ] NFT marketplace integration
 
 ### Phase 3: Behavior Monitoring (Q3 2026)
@@ -808,7 +808,7 @@ KYA can integrate with OAuth 2.0 for capability delegation:
 ### Phase 4: Production (Q4 2026)
 - [ ] Full Kaizen + TSG + KYA integration
 - [ ] Cross-platform DID interoperability
-- [ ] Enterprise deployment (AgentAnchor)
+- [ ] Enterprise deployment (Vorion)
 - [ ] Certification API for third parties
 
 ---

@@ -27,7 +27,7 @@ const logger = createLogger({ component: 'key-manager' });
 
 /**
  * Generate a new Ed25519 key pair using jose library
- * Note: This uses the jose library which is available in AgentAnchor
+ * Note: This uses the jose library for Ed25519 key operations
  */
 export async function generateKeyPair(keyId?: string): Promise<AuditKeyPair> {
   // Dynamic import of jose to allow this module to work standalone

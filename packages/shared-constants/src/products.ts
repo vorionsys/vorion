@@ -82,7 +82,7 @@ export interface ProductDefinition {
   npmPackage?: string;
 
   /** Parent organization */
-  organization: 'vorion' | 'agentanchor';
+  organization: 'vorion' | 'vorion';
 
   /** Version (semver) */
   version?: string;
@@ -101,7 +101,7 @@ export const VORION_PRODUCTS: Record<string, ProductDefinition> = {
     status: ProductStatus.GA,
     url: 'https://basis.vorion.org',
     docsUrl: 'https://basis.vorion.org/docs',
-    repoUrl: 'https://github.com/voriongit/vorion/tree/master/packages/basis',
+    repoUrl: 'https://github.com/vorionsys/vorion/tree/master/packages/basis',
     npmPackage: '@vorionsys/basis',
     organization: 'vorion',
     version: '1.0.0',
@@ -115,7 +115,7 @@ export const VORION_PRODUCTS: Record<string, ProductDefinition> = {
     status: ProductStatus.GA,
     url: 'https://carid.vorion.org',
     docsUrl: 'https://carid.vorion.org/docs',
-    repoUrl: 'https://github.com/voriongit/vorion/tree/master/packages/car-spec',
+    repoUrl: 'https://github.com/vorionsys/vorion/tree/master/packages/car-spec',
     npmPackage: '@vorionsys/car-spec',
     organization: 'vorion',
     version: '1.0.0',
@@ -129,7 +129,7 @@ export const VORION_PRODUCTS: Record<string, ProductDefinition> = {
     status: ProductStatus.BETA,
     url: 'https://atsf.vorion.org',
     docsUrl: 'https://atsf.vorion.org/docs',
-    repoUrl: 'https://github.com/voriongit/vorion/tree/master/packages/atsf-core',
+    repoUrl: 'https://github.com/vorionsys/vorion/tree/master/packages/atsf-core',
     npmPackage: '@vorionsys/atsf-core',
     organization: 'vorion',
     version: '0.9.0',
@@ -143,7 +143,7 @@ export const VORION_PRODUCTS: Record<string, ProductDefinition> = {
     status: ProductStatus.BETA,
     url: 'https://learn.vorion.org',
     docsUrl: 'https://learn.vorion.org/docs',
-    repoUrl: 'https://github.com/voriongit/vorion/tree/master/kaizen',
+    repoUrl: 'https://github.com/vorionsys/vorion/tree/master/kaizen',
     organization: 'vorion',
   },
 
@@ -154,7 +154,7 @@ export const VORION_PRODUCTS: Record<string, ProductDefinition> = {
     category: ProductCategory.EDUCATION,
     status: ProductStatus.BETA,
     url: 'https://kaizen.vorion.org',
-    repoUrl: 'https://github.com/voriongit/vorion/tree/master/kaizen',
+    repoUrl: 'https://github.com/vorionsys/vorion/tree/master/kaizen',
     organization: 'vorion',
   },
 
@@ -165,7 +165,7 @@ export const VORION_PRODUCTS: Record<string, ProductDefinition> = {
     category: ProductCategory.OPEN_SOURCE,
     status: ProductStatus.BETA,
     url: 'https://vorion.org/proof-plane',
-    repoUrl: 'https://github.com/voriongit/vorion/tree/master/packages/proof-plane',
+    repoUrl: 'https://github.com/vorionsys/vorion/tree/master/packages/proof-plane',
     npmPackage: '@vorionsys/proof-plane',
     organization: 'vorion',
     version: '0.5.0',
@@ -178,7 +178,7 @@ export const VORION_PRODUCTS: Record<string, ProductDefinition> = {
     category: ProductCategory.OPEN_SOURCE,
     status: ProductStatus.BETA,
     url: 'https://vorion.org/contracts',
-    repoUrl: 'https://github.com/voriongit/vorion/tree/master/packages/contracts',
+    repoUrl: 'https://github.com/vorionsys/vorion/tree/master/packages/contracts',
     npmPackage: '@vorionsys/contracts',
     organization: 'vorion',
   },
@@ -198,41 +198,41 @@ export const AGENTANCHOR_PRODUCTS: Record<string, ProductDefinition> = {
     url: 'https://cognigate.dev',
     docsUrl: 'https://cognigate.dev/docs',
     npmPackage: '@vorionsys/cognigate',
-    organization: 'agentanchor',
+    organization: 'vorion',
     version: '1.0.0',
   },
 
   trust: {
     id: 'trust',
-    name: 'Agent Anchor Trust',
+    name: 'Vorion Trust',
     description: 'Trust verification and certification platform for AI agents',
     category: ProductCategory.COMMERCIAL,
     status: ProductStatus.GA,
-    url: 'https://trust.agentanchorai.com',
-    docsUrl: 'https://trust.agentanchorai.com/docs',
-    organization: 'agentanchor',
+    url: 'https://trust.vorion.org',
+    docsUrl: 'https://trust.vorion.org/docs',
+    organization: 'vorion',
   },
 
   logic: {
     id: 'logic',
-    name: 'Agent Anchor Logic',
+    name: 'Vorion Logic',
     description: 'Policy engine and governance logic for enterprise AI',
     category: ProductCategory.COMMERCIAL,
     status: ProductStatus.BETA,
-    url: 'https://logic.agentanchorai.com',
-    docsUrl: 'https://logic.agentanchorai.com/docs',
-    organization: 'agentanchor',
+    url: 'https://logic.vorion.org',
+    docsUrl: 'https://logic.vorion.org/docs',
+    organization: 'vorion',
   },
 
   platform: {
     id: 'platform',
-    name: 'Agent Anchor Platform',
+    name: 'Vorion Platform',
     description: 'Enterprise AI governance dashboard and management console',
     category: ProductCategory.COMMERCIAL,
     status: ProductStatus.GA,
-    url: 'https://agentanchorai.com',
-    docsUrl: 'https://agentanchorai.com/docs',
-    organization: 'agentanchor',
+    url: 'https://vorion.org',
+    docsUrl: 'https://vorion.org/docs',
+    organization: 'vorion',
   },
 } as const;
 
@@ -278,7 +278,7 @@ export function getProductsByStatus(status: ProductStatus): ProductDefinition[] 
 /**
  * Get all products by organization
  */
-export function getProductsByOrganization(org: 'vorion' | 'agentanchor'): ProductDefinition[] {
+export function getProductsByOrganization(org: 'vorion' | 'vorion'): ProductDefinition[] {
   return org === 'vorion'
     ? Object.values(VORION_PRODUCTS)
     : Object.values(AGENTANCHOR_PRODUCTS);
