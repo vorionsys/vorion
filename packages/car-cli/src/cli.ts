@@ -24,7 +24,7 @@ import {
   AgentRole,
   TRUST_TIER_LABELS,
   AGENT_ROLE_LABELS,
-} from '@vorion/car-client'
+} from '@vorionsys/car-client'
 
 // =============================================================================
 // CONFIGURATION

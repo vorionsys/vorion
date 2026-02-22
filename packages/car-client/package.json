@@ -1,5 +1,5 @@
 {
-  "name": "@vorion/car-client",
+  "name": "@vorionsys/car-client",
   "version": "1.0.0",
   "description": "CAR (Categorical Agentic Registry) Client SDK -- Agent identity, provenance, and governance operations",
   "type": "module",

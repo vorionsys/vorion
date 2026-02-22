@@ -1,12 +1,12 @@
 /**
- * @vorion/car-cli
+ * @vorionsys/car-cli
  *
  * Programmatic API for CAR CLI commands.
  */
 
-export { createCARClient, CARClient, CARError } from '@vorion/car-client'
+export { createCARClient, CARClient, CARError } from '@vorionsys/car-client'
 
 // Backwards-compatible aliases (deprecated)
-export { createCARClient as createACIClient, CARClient as ACIClient, CARError as ACIError } from '@vorion/car-client'
+export { createCARClient as createACIClient, CARClient as ACIClient, CARError as ACIError } from '@vorionsys/car-client'
 
-export * from '@vorion/car-client'
+export * from '@vorionsys/car-client'
