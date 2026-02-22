@@ -78,7 +78,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/voriongit/vorion.git",
+    "url": "git+https://github.com/vorionsys/vorion.git",
     "directory": "packages/shared-constants"
   },
   "homepage": "https://vorion.org",

@@ -55,11 +55,11 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/voriongit/vorion.git",
+    "url": "git+https://github.com/vorionsys/vorion.git",
     "directory": "packages/ai-gateway"
   },
   "bugs": {
-    "url": "https://github.com/voriongit/vorion/issues"
+    "url": "https://github.com/vorionsys/vorion/issues"
   },
   "publishConfig": {
     "access": "public"

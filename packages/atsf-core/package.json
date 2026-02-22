@@ -118,12 +118,12 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/voriongit/vorion.git",
+    "url": "git+https://github.com/vorionsys/vorion.git",
     "directory": "packages/atsf-core"
   },
   "homepage": "https://vorion.org",
   "bugs": {
-    "url": "https://github.com/voriongit/vorion/issues"
+    "url": "https://github.com/vorionsys/vorion/issues"
   },
   "engines": {
     "node": ">=18.0.0"
