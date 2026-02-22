@@ -54,7 +54,7 @@ export {
   HSMKeyNotFoundError,
   HSMOperationError,
   HSMPermissionError,
-} from './provider';
+} from './provider.js';
 
 // ============================================================================
 // Provider Implementations
@@ -64,7 +64,7 @@ export {
 export {
   AWSCloudHSMProvider,
   AWSCloudHSMConfig,
-} from './aws-cloudhsm';
+} from './aws-cloudhsm.js';
 
 // Azure Managed HSM
 export {
@@ -72,7 +72,7 @@ export {
   AzureHSMConfig,
   AzureHSMRole,
   RoleAssignment,
-} from './azure-hsm';
+} from './azure-hsm.js';
 
 // Google Cloud HSM
 export {
@@ -82,7 +82,7 @@ export {
   KeyVersionState,
   CloudKMSRole,
   IAMBinding,
-} from './gcp-hsm';
+} from './gcp-hsm.js';
 
 // Thales Luna HSM
 export {
@@ -90,13 +90,13 @@ export {
   ThalesLunaConfig,
   HAGroupMember,
   PartitionInfo,
-} from './thales-luna';
+} from './thales-luna.js';
 
 // SoftHSM (Development)
 export {
   SoftHSMProvider,
   SoftHSMConfig,
-} from './local-softHSM';
+} from './local-softHSM.js';
 
 // ============================================================================
 // Key Ceremony
@@ -113,7 +113,7 @@ export {
   KeyCustodian,
   CustodianRole,
   KeyShare,
-} from './key-ceremony';
+} from './key-ceremony.js';
 
 // ============================================================================
 // Key Operations
@@ -130,7 +130,7 @@ export {
   SignatureOptions,
   KeyOperationMetrics,
   getFIPSKeySpec,
-} from './key-operations';
+} from './key-operations.js';
 
 // ============================================================================
 // PKCS#11 Wrapper
@@ -150,7 +150,7 @@ export {
   TokenInfo,
   SlotInfo,
   MechanismInfo,
-} from './pkcs11-wrapper';
+} from './pkcs11-wrapper.js';
 
 // ============================================================================
 // HSM Service (Orchestration)
@@ -161,7 +161,7 @@ export {
   HSMServiceConfig,
   HSMProviderSelector,
   createHSMService,
-} from './hsm-service';
+} from './hsm-service.js';
 
 // ============================================================================
 // Convenience Types for Common Use Cases
@@ -245,8 +245,8 @@ export const ProviderRecommendations = {
 // Quick Start Functions
 // ============================================================================
 
-import { HSMService, createHSMService as createService } from './hsm-service';
-import { KeyType, KeyUsage, ECCurve } from './provider';
+import { HSMService, createHSMService as createService } from './hsm-service.js';
+import { KeyType, KeyUsage, ECCurve } from './provider.js';
 
 /**
  * Quick start: Create and initialize HSM service for the current environment

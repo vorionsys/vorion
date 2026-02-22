@@ -12,12 +12,12 @@ import {
   VendorRiskReport,
   PaginatedResponse,
   ApiError,
-} from './types';
-import { TrustOracleService } from './oracle';
-import { VendorRegistry, CreateVendorInput, UpdateVendorInput } from './vendor-registry';
-import { AlertManager, ListAlertsOptions } from './alerts';
-import { ReportingService, ReportOptions, ListReportsOptions } from './reporting';
-import { ContinuousMonitoringService, HealthEventQueryOptions } from './continuous-monitoring';
+} from './types.js';
+import { TrustOracleService } from './oracle.js';
+import { VendorRegistry, CreateVendorInput, UpdateVendorInput } from './vendor-registry.js';
+import { AlertManager, ListAlertsOptions } from './alerts.js';
+import { ReportingService, ReportOptions, ListReportsOptions } from './reporting.js';
+import { ContinuousMonitoringService, HealthEventQueryOptions } from './continuous-monitoring.js';
 
 // ============================================================================
 // API Router Configuration

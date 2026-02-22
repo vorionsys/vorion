@@ -13,8 +13,8 @@
  */
 
 import * as crypto from 'crypto';
-import { split, reconstruct, GF256, createPolynomial } from './verified-shamir';
-import { VerifiedShare, GF256Element, ShareIndex, createShareIndex, createGF256Element } from './types';
+import { split, reconstruct, GF256, createPolynomial } from './verified-shamir.js';
+import { VerifiedShare, GF256Element, ShareIndex, createShareIndex, createGF256Element } from './types.js';
 
 // ============================================================================
 // Reference Implementation Compatibility Types

@@ -13,7 +13,7 @@ import {
   RemainingQuota,
   BurstConfig,
   CostLimit,
-} from './types';
+} from './types.js';
 
 /**
  * Rate limiter configuration

@@ -17,7 +17,7 @@
  */
 
 // Types
-export * from './types';
+export * from './types.js';
 
 // Model Registry
 export {
@@ -29,7 +29,7 @@ export {
   type RiskAssessmentResult,
   type RiskFactor,
   type ModelRegistryStorage,
-} from './model-registry';
+} from './model-registry.js';
 
 // Access Policy
 export {
@@ -43,7 +43,7 @@ export {
   type AccessRestriction,
   type PolicyStorage,
   type UsageTracker,
-} from './access-policy';
+} from './access-policy.js';
 
 // Prompt Injection Defense
 export {
@@ -52,7 +52,7 @@ export {
   type InjectionDetectionConfig,
   type InjectionPattern,
   type TemplateStorage,
-} from './prompt-injection';
+} from './prompt-injection.js';
 
 // Output Filtering
 export {
@@ -60,7 +60,7 @@ export {
   type OutputFilterConfig,
   type SensitiveDataPattern,
   type ValidationRule,
-} from './output-filter';
+} from './output-filter.js';
 
 // Audit Trail
 export {
@@ -70,7 +70,7 @@ export {
   type AnomalyThresholds,
   type AuditQueryOptions,
   type AuditStorage,
-} from './audit-trail';
+} from './audit-trail.js';
 
 // Bias Detection
 export {
@@ -83,7 +83,7 @@ export {
   type BiasSample,
   type BiasSampleStorage,
   type BiasAlertStorage,
-} from './bias-detection';
+} from './bias-detection.js';
 
 // Rate Limiting
 export {
@@ -92,7 +92,7 @@ export {
   type RateLimiterConfig,
   type RateLimitCheckResult,
   type RateLimitStorage,
-} from './rate-limiter';
+} from './rate-limiter.js';
 
 // Middleware
 export {
@@ -101,7 +101,7 @@ export {
   type AIGovernanceMiddlewareOptions,
   type AIGovernanceContext,
   type AIModelResponse,
-} from './middleware';
+} from './middleware.js';
 
 // Convenience factory for creating a complete AI Governance system
 export interface AIGovernanceSystemConfig {

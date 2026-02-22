@@ -26,7 +26,7 @@ import {
   SigningAlgorithm,
   HSMOperationError,
   HSMKeyNotFoundError,
-} from './provider';
+} from './provider.js';
 
 // ============================================================================
 // Types

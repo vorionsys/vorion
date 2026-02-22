@@ -108,7 +108,7 @@ export {
   createTrustOracle,
   getDefaultTrustOracleOptions,
   TrustOracleError,
-} from './oracle';
+} from './oracle.js';
 
 export type {
   TrustOracle,
@@ -116,7 +116,7 @@ export type {
   TrustOracleOptions,
   TrustOracleStorage,
   TrustScoreCache,
-} from './oracle';
+} from './oracle.js';
 
 // ============================================================================
 // Vendor Registry
@@ -125,7 +125,7 @@ export type {
 export {
   VendorRegistry,
   VendorRegistryError,
-} from './vendor-registry';
+} from './vendor-registry.js';
 
 export type {
   VendorRegistryConfig,
@@ -144,7 +144,7 @@ export type {
   AuditLogger,
   NotificationService,
   WorkflowEngine,
-} from './vendor-registry';
+} from './vendor-registry.js';
 
 // ============================================================================
 // Risk Scoring Engine
@@ -153,7 +153,7 @@ export type {
 export {
   RiskScorer,
   createRiskScorer,
-} from './risk-scorer';
+} from './risk-scorer.js';
 
 export type {
   RiskScorerConfig,
@@ -175,7 +175,7 @@ export type {
   NewsSentiment,
   IndustryRanking,
   SecurityControl,
-} from './risk-scorer';
+} from './risk-scorer.js';
 
 // ============================================================================
 // Continuous Monitoring
@@ -186,7 +186,7 @@ export {
   createContinuousMonitoringService,
   getDefaultPollingIntervals,
   MonitoringError,
-} from './continuous-monitoring';
+} from './continuous-monitoring.js';
 
 export type {
   ContinuousMonitoringConfig,
@@ -197,7 +197,7 @@ export type {
   HealthEventStats,
   MonitoringStorage,
   AlertDispatcher,
-} from './continuous-monitoring';
+} from './continuous-monitoring.js';
 
 // ============================================================================
 // Data Sources
@@ -209,7 +209,7 @@ export {
   DataSourceError,
   createDataSourceManager,
   getDefaultDataSourceConfig,
-} from './data-sources';
+} from './data-sources.js';
 
 export type {
   DataSourceConfig,
@@ -220,7 +220,7 @@ export type {
   DataSourceManagerConfig,
   DataSourceStatus,
   DarkWebMention,
-} from './data-sources';
+} from './data-sources.js';
 
 // ============================================================================
 // Alert Management
@@ -231,7 +231,7 @@ export {
   createAlertManager,
   getDefaultEscalationPolicies,
   AlertError,
-} from './alerts';
+} from './alerts.js';
 
 export type {
   AlertManagerConfig,
@@ -251,7 +251,7 @@ export type {
   SIEMEvent,
   SIEMIndicator,
   AlertStorage,
-} from './alerts';
+} from './alerts.js';
 
 // ============================================================================
 // Reporting
@@ -261,7 +261,7 @@ export {
   ReportingService,
   createReportingService,
   ReportingError,
-} from './reporting';
+} from './reporting.js';
 
 export type {
   ReportingServiceConfig,
@@ -273,7 +273,7 @@ export type {
   ReportStorage,
   TemplateEngine,
   ExportService,
-} from './reporting';
+} from './reporting.js';
 
 // ============================================================================
 // REST API
@@ -283,7 +283,7 @@ export {
   TrustOracleApiRouter,
   createTrustOracleApi,
   generateOpenApiSpec,
-} from './api';
+} from './api.js';
 
 export type {
   TrustOracleApiConfig,
@@ -292,7 +292,7 @@ export type {
   AuthContext,
   ApiRequest,
   ApiResponse,
-} from './api';
+} from './api.js';
 
 // ============================================================================
 // Module Info
@@ -310,14 +310,14 @@ export const MODULE_INFO = {
 // Quick Start Factory
 // ============================================================================
 
-import { TrustOracleService, TrustOracleConfig } from './oracle';
-import { VendorRegistry } from './vendor-registry';
-import { RiskScorer } from './risk-scorer';
-import { DataSourceManager, getDefaultDataSourceConfig } from './data-sources';
-import { ContinuousMonitoringService, getDefaultPollingIntervals } from './continuous-monitoring';
-import { AlertManager, getDefaultEscalationPolicies } from './alerts';
-import { ReportingService } from './reporting';
-import { TrustOracleApiRouter } from './api';
+import { TrustOracleService, TrustOracleConfig } from './oracle.js';
+import { VendorRegistry } from './vendor-registry.js';
+import { RiskScorer } from './risk-scorer.js';
+import { DataSourceManager, getDefaultDataSourceConfig } from './data-sources.js';
+import { ContinuousMonitoringService, getDefaultPollingIntervals } from './continuous-monitoring.js';
+import { AlertManager, getDefaultEscalationPolicies } from './alerts.js';
+import { ReportingService } from './reporting.js';
+import { TrustOracleApiRouter } from './api.js';
 
 /**
  * Quick start configuration for Trust Oracle

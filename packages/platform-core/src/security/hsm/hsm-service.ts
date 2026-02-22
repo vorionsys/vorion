@@ -18,19 +18,19 @@ import {
   HSMConnectionError,
   HSMOperationError,
   ECCurve,
-} from './provider';
-import { AWSCloudHSMProvider, AWSCloudHSMConfig } from './aws-cloudhsm';
-import { AzureHSMProvider, AzureHSMConfig } from './azure-hsm';
-import { GCPHSMProvider, GCPHSMConfig } from './gcp-hsm';
-import { ThalesLunaProvider, ThalesLunaConfig } from './thales-luna';
-import { SoftHSMProvider, SoftHSMConfig } from './local-softHSM';
+} from './provider.js';
+import { AWSCloudHSMProvider, AWSCloudHSMConfig } from './aws-cloudhsm.js';
+import { AzureHSMProvider, AzureHSMConfig } from './azure-hsm.js';
+import { GCPHSMProvider, GCPHSMConfig } from './gcp-hsm.js';
+import { ThalesLunaProvider, ThalesLunaConfig } from './thales-luna.js';
+import { SoftHSMProvider, SoftHSMConfig } from './local-softHSM.js';
 import {
   KeyCeremonyManager,
   CeremonyConfig,
   Ceremony,
   CeremonyType,
   CeremonyAuditEntry,
-} from './key-ceremony';
+} from './key-ceremony.js';
 import {
   withCircuitBreakerResult,
   CircuitBreakerOpenError,

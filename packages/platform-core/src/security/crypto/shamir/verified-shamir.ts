@@ -32,7 +32,7 @@ import {
   createShareIndex,
   createGF256Element,
   validateShamirParams,
-} from './types';
+} from './types.js';
 
 // ============================================================================
 // GF(2^8) Field Implementation

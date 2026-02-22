@@ -10,7 +10,7 @@ import {
   DataClassification,
   AuditLevel,
   TimeRestriction,
-} from './types';
+} from './types.js';
 
 /**
  * Access request context

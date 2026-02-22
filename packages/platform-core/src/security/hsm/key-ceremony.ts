@@ -14,7 +14,7 @@ import {
   KeyUsage,
   ECCurve,
   AuditLogEntry,
-} from './provider';
+} from './provider.js';
 
 // ============================================================================
 // Key Ceremony Types

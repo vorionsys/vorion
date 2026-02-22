@@ -20,7 +20,7 @@ import {
   ViolationSummary,
   InjectionDetectionResult,
   OutputFilterResult,
-} from './types';
+} from './types.js';
 
 /**
  * Audit configuration

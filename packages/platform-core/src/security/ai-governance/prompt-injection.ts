@@ -12,7 +12,7 @@ import {
   PromptTemplate,
   PromptVariable,
   PromptConstraint,
-} from './types';
+} from './types.js';
 
 /**
  * Injection detection configuration

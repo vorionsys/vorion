@@ -22,14 +22,14 @@ import {
   reconstruct,
   GF256,
   lagrangeInterpolateAtZero,
-} from './verified-shamir';
+} from './verified-shamir.js';
 import {
   VerifiedShare,
   ShamirParams,
   GF256Element,
   ShareIndex,
   createShareIndex,
-} from './types';
+} from './types.js';
 
 // ============================================================================
 // Random Test Data Generation

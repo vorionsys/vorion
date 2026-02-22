@@ -19,7 +19,7 @@ import {
   HSMOperationError,
   HSMKeyNotFoundError,
   ECCurve,
-} from './provider';
+} from './provider.js';
 
 // ============================================================================
 // AWS CloudHSM Configuration

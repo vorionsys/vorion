@@ -11,7 +11,7 @@ import {
   DeploymentStatus,
   DataClassification,
   TrainingDataInfo,
-} from './types';
+} from './types.js';
 
 /**
  * Model registration options

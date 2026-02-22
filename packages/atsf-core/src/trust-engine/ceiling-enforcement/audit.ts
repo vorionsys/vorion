@@ -11,12 +11,12 @@ import {
   TrustEvent,
   TrustMetrics,
   Phase6ValidationError,
-} from '../phase6-types';
+} from '../phase6-types.js';
 import {
   CeilingEnforcementResult,
   ContextType,
   clampTrustScore,
-} from './kernel';
+} from './kernel.js';
 
 /**
  * Audit log entry for a ceiling enforcement operation

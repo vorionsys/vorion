@@ -12,7 +12,7 @@ import {
   SensitiveDataMatch,
   HallucinationIndicator,
   ValidationError,
-} from './types';
+} from './types.js';
 
 /**
  * Output filter configuration

@@ -13,7 +13,7 @@
  * @see https://basis.vorion.org/car/categories
  */
 
-import { TrustTier } from './tiers';
+import { TrustTier } from './tiers.js';
 
 // =============================================================================
 // CATEGORY CODES

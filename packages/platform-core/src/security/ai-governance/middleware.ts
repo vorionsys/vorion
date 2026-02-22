@@ -6,19 +6,19 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply, FastifyPluginCallback } from 'fastify';
 import fp from 'fastify-plugin';
-import { ModelRegistry } from './model-registry';
-import { AccessPolicyManager, AccessRequestContext } from './access-policy';
-import { PromptInjectionDetector } from './prompt-injection';
-import { OutputFilter } from './output-filter';
-import { AuditTrail } from './audit-trail';
-import { BiasDetector } from './bias-detection';
-import { AIRateLimiter } from './rate-limiter';
+import { ModelRegistry } from './model-registry.js';
+import { AccessPolicyManager, AccessRequestContext } from './access-policy.js';
+import { PromptInjectionDetector } from './prompt-injection.js';
+import { OutputFilter } from './output-filter.js';
+import { AuditTrail } from './audit-trail.js';
+import { BiasDetector } from './bias-detection.js';
+import { AIRateLimiter } from './rate-limiter.js';
 import {
   AuditLevel,
   TokenUsage,
   InjectionDetectionResult,
   OutputFilterResult,
-} from './types';
+} from './types.js';
 
 /**
  * AI Governance middleware options

@@ -17,7 +17,7 @@ import {
   GF256,
   constantTimeEqual,
   constantTimeSelect,
-} from './verified-shamir';
+} from './verified-shamir.js';
 import {
   VerifiedShare,
   SecurityAnalysisResult,
@@ -25,7 +25,7 @@ import {
   EntropyAnalysis,
   TimingAnalysis,
   GF256Element,
-} from './types';
+} from './types.js';
 
 // ============================================================================
 // Entropy Analysis

@@ -14,7 +14,7 @@ import {
   EqualOpportunityMetric,
   ResponseConsistencyMetric,
   RepresentationGapMetric,
-} from './types';
+} from './types.js';
 
 /**
  * Bias detection configuration

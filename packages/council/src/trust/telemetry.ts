@@ -9,7 +9,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { DIMENSIONS, TRUST_TIERS, GATING_THRESHOLDS, TierName } from './simulation';
+import { DIMENSIONS, TRUST_TIERS, GATING_THRESHOLDS, TierName } from './simulation.js';
 
 // Re-export DIMENSIONS as FACTORS for forward compatibility
 /** The canonical 16-factor list (imported from simulation) */

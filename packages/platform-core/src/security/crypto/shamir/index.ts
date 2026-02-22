@@ -70,7 +70,7 @@ export {
   createShareIndex,
   createGF256Element,
   validateShamirParams,
-} from './types';
+} from './types.js';
 
 // ============================================================================
 // Core Implementation
@@ -102,7 +102,7 @@ export {
   // Constant-time utilities
   constantTimeSelect,
   constantTimeEqual,
-} from './verified-shamir';
+} from './verified-shamir.js';
 
 // ============================================================================
 // Mathematical Proofs
@@ -115,7 +115,7 @@ export {
   verifyReconstructionCompleteness,
   verifyGeneratorProperties,
   runAllProofs,
-} from './proofs';
+} from './proofs.js';
 
 // ============================================================================
 // Test Vectors
@@ -141,7 +141,7 @@ export {
   verifyPolynomialVector,
   runAllTestVectors,
   generateDeterministicShares,
-} from './test-vectors';
+} from './test-vectors.js';
 
 // ============================================================================
 // Property-Based Testing
@@ -163,7 +163,7 @@ export {
   // Result types
   PropertyTestResult,
   PropertyTestSuite,
-} from './property-tests';
+} from './property-tests.js';
 
 // ============================================================================
 // Security Analysis
@@ -191,7 +191,7 @@ export {
   // Comprehensive analysis
   runSecurityAnalysis,
   runQuickSecurityCheck,
-} from './security-analysis';
+} from './security-analysis.js';
 
 // ============================================================================
 // Interoperability
@@ -215,7 +215,7 @@ export {
   runInteroperabilityTests,
   getCompatibilityReport,
   IMPLEMENTATION_DIFFERENCES,
-} from './comparison';
+} from './comparison.js';
 
 // ============================================================================
 // Convenience Functions

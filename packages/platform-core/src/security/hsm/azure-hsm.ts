@@ -18,7 +18,7 @@ import {
   HSMOperationError,
   HSMKeyNotFoundError,
   ECCurve,
-} from './provider';
+} from './provider.js';
 
 // ============================================================================
 // Azure HSM Configuration

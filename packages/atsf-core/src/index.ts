@@ -134,6 +134,53 @@ export {
 // Sandbox Adversarial Training Boot Camp
 export * from './sandbox-training/index.js';
 
+// Intent Gateway - Jurisdictional Router & Governance Topology Selector
+export {
+  // Classes
+  IntentGateway,
+  createIntentGateway,
+  JurisdictionResolver,
+  PolicyComposer,
+  RegimeSelector,
+  AiActClassifier,
+  GatewayConflictError,
+  // Constants
+  JURISDICTIONS,
+  INDUSTRIES,
+  CRYPTO_SUITES,
+  PROOF_ANCHORING_METHODS,
+  CONSENT_MODELS,
+  ESCALATION_MODES,
+  AI_ACT_CLASSIFICATIONS,
+  AI_ACT_HIGH_RISK_CATEGORIES,
+  JURISDICTION_RESIDENCY_ZONES,
+  DEFAULT_GATEWAY_CONFIG,
+} from './intent-gateway/index.js';
+export type {
+  Jurisdiction,
+  Industry,
+  CryptoSuite,
+  ProofAnchoringMethod,
+  ConsentModel,
+  EscalationMode,
+  AiActClassification,
+  AiActHighRiskCategory,
+  JurisdictionSource,
+  EnforcementLevel,
+  PolicyConstraintType,
+  ConflictSeverity,
+  JurisdictionContext,
+  GovernanceRegime,
+  PolicyConstraint,
+  PolicyConflict,
+  ComposedPolicySet,
+  PolicyBundle,
+  TenantJurisdictionConfig,
+  IntentGatewayConfig,
+  GatewayDispatchResult,
+  AiActClassificationResult,
+} from './intent-gateway/index.js';
+
 // Version
 export const VERSION = '0.2.2';
 

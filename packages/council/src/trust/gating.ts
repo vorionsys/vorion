@@ -11,8 +11,8 @@
  * - Audit trail for all tier changes
  */
 
-import { TRUST_TIERS, GATING_THRESHOLDS, TierName, DIMENSIONS } from './simulation';
-import { getTelemetryCollector, AgentTrustState, FactorState } from './telemetry';
+import { TRUST_TIERS, GATING_THRESHOLDS, TierName, DIMENSIONS } from './simulation.js';
+import { getTelemetryCollector, AgentTrustState, FactorState } from './telemetry.js';
 import * as fs from 'fs';
 import * as path from 'path';
 

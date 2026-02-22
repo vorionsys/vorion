@@ -33,7 +33,7 @@ import {
   HSMOperationError,
   HSMKeyNotFoundError,
   HSMPermissionError,
-} from './provider';
+} from './provider.js';
 
 // ============================================================================
 // PKCS#11 Types and Constants

@@ -11,8 +11,8 @@
  * @module security/crypto/shamir/test-vectors
  */
 
-import { TestVector, GF256Element, ShareIndex } from './types';
-import { GF256, createPolynomial } from './verified-shamir';
+import { TestVector, GF256Element, ShareIndex } from './types.js';
+import { GF256, createPolynomial } from './verified-shamir.js';
 
 // ============================================================================
 // NIST-Style Test Vectors

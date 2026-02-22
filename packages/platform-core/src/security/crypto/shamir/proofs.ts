@@ -20,13 +20,13 @@ import {
   createPolynomial,
   lagrangeBasisAtZero,
   lagrangeInterpolateAtZero,
-} from './verified-shamir';
+} from './verified-shamir.js';
 import {
   GF256Element,
   ShareIndex,
   createGF256Element,
   createShareIndex,
-} from './types';
+} from './types.js';
 
 // ============================================================================
 // Proof 1: GF(2^8) Field Axioms

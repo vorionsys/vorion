@@ -16,13 +16,13 @@ import {
   Contract,
   SecurityRating,
   BreachRecord,
-} from './types';
-import { VendorRegistry } from './vendor-registry';
-import { RiskScorer, TrustScoreInput, RiskAssessmentInput } from './risk-scorer';
-import { DataSourceManager } from './data-sources';
-import { ContinuousMonitoringService, MonitoringStorage } from './continuous-monitoring';
-import { AlertManager, CreateAlertInput } from './alerts';
-import { ReportingService } from './reporting';
+} from './types.js';
+import { VendorRegistry } from './vendor-registry.js';
+import { RiskScorer, TrustScoreInput, RiskAssessmentInput } from './risk-scorer.js';
+import { DataSourceManager } from './data-sources.js';
+import { ContinuousMonitoringService, MonitoringStorage } from './continuous-monitoring.js';
+import { AlertManager, CreateAlertInput } from './alerts.js';
+import { ReportingService } from './reporting.js';
 
 // ============================================================================
 // Trust Oracle Interface

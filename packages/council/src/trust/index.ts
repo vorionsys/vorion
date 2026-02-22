@@ -29,7 +29,7 @@ export {
     type SimulationDay,
     simulateAgent,
     runAllSimulations,
-} from './simulation';
+} from './simulation.js';
 
 // Telemetry collection
 export {
@@ -48,7 +48,7 @@ export {
     /** @deprecated Use FactorState */
     type DimensionState,
     type TrustSnapshot,
-} from './telemetry';
+} from './telemetry.js';
 
 // Gating engine
 export {
@@ -60,7 +60,7 @@ export {
     type GatingDecision,
     type PromotionRequest,
     type TierChangeAudit,
-} from './gating';
+} from './gating.js';
 
 // Presets (BASIS compatibility, 16-factor model)
 export {
@@ -77,7 +77,7 @@ export {
     type WeightConfig,
     createAxiomPreset,
     bootstrapAgentTrustConfigs,
-} from './presets';
+} from './presets.js';
 
 // Re-export for convenience
-export { default as bmadPresets } from './bmad-presets';
+export { default as bmadPresets } from './bmad-presets.js';
