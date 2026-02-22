@@ -112,6 +112,7 @@
     "@opentelemetry/exporter-trace-otlp-http": "^0.210.0",
     "@opentelemetry/sdk-node": "^0.210.0",
     "@opentelemetry/semantic-conventions": "^1.39.0",
+    "@vorion/security": "^1.0.0",
     "@vorionsys/contracts": "^0.1.2",
     "ajv": "^8.12.0",
     "bullmq": "^4.12.2",

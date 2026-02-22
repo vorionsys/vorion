@@ -360,6 +360,7 @@ export function listFIPSApprovedAlgorithms(): {
 /**
  * Post-Quantum Cryptography exports
  *
+ * Re-exported from @vorionsys/security to avoid code duplication.
  * Provides NIST-standardized post-quantum algorithms:
  * - CRYSTALS-Kyber (ML-KEM) for key encapsulation
  * - CRYSTALS-Dilithium (ML-DSA) for digital signatures
@@ -374,7 +375,7 @@ export function listFIPSApprovedAlgorithms(): {
  * const keyPair = await pq.generateKEMKeyPair();
  * ```
  */
-export * as postQuantum from './post-quantum/index.js';
+export { postQuantum } from '@vorion/security/crypto';
 
 // =============================================================================
 // Shamir Secret Sharing Module
