@@ -82,7 +82,7 @@ export interface ProductDefinition {
   npmPackage?: string;
 
   /** Parent organization */
-  organization: 'vorion' | 'vorion';
+  organization: 'vorion';
 
   /** Version (semver) */
   version?: string;
@@ -185,7 +185,7 @@ export const VORION_PRODUCTS: Record<string, ProductDefinition> = {
 } as const;
 
 // =============================================================================
-// AGENT ANCHOR COMMERCIAL PRODUCTS
+// VORION COMMERCIAL PRODUCTS
 // =============================================================================
 
 export const AGENTANCHOR_PRODUCTS: Record<string, ProductDefinition> = {
@@ -278,7 +278,7 @@ export function getProductsByStatus(status: ProductStatus): ProductDefinition[] 
 /**
  * Get all products by organization
  */
-export function getProductsByOrganization(org: 'vorion' | 'vorion'): ProductDefinition[] {
+export function getProductsByOrganization(org: 'vorion'): ProductDefinition[] {
   return org === 'vorion'
     ? Object.values(VORION_PRODUCTS)
     : Object.values(AGENTANCHOR_PRODUCTS);

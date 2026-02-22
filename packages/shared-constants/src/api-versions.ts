@@ -73,7 +73,7 @@ export const COGNIGATE_CURRENT_VERSION = 'v1';
 export const COGNIGATE_DEFAULT_VERSION = 'v1';
 
 // =============================================================================
-// AGENT ANCHOR TRUST API VERSIONS
+// VORION TRUST API VERSIONS
 // =============================================================================
 
 export const TRUST_API_VERSIONS: Record<string, ApiVersionDefinition> = {
@@ -89,7 +89,7 @@ export const TRUST_API_VERSIONS: Record<string, ApiVersionDefinition> = {
 export const TRUST_CURRENT_VERSION = 'v1';
 
 // =============================================================================
-// AGENT ANCHOR LOGIC API VERSIONS
+// VORION LOGIC API VERSIONS
 // =============================================================================
 
 export const LOGIC_API_VERSIONS: Record<string, ApiVersionDefinition> = {
