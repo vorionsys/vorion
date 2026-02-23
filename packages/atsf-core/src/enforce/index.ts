@@ -592,4 +592,63 @@ export function createMockEnforcementService(policy?: EnforcementPolicy): MockEn
 // =============================================================================
 
 export { TrustAwareEnforcementService } from './trust-aware-enforcement-service.js';
-export type { TrustAwareEnforcementConfig } from './trust-aware-enforcement-service.js';
+export type {
+  TrustAwareEnforcementConfig,
+  IPolicyEngine,
+  PolicyEvaluationInput,
+  PolicyViolation,
+} from './trust-aware-enforcement-service.js';
+
+// =============================================================================
+// POLICY COMPOSITION
+// =============================================================================
+
+/**
+ * Policy predicate — a function that evaluates an intent context and returns
+ * whether the policy condition is met.
+ */
+export type PolicyPredicate = (context: EnforcementContext) => boolean;
+
+/**
+ * Compose policies with AND — all must pass for the combined policy to pass.
+ */
+export function allOf(...predicates: PolicyPredicate[]): PolicyPredicate {
+  return (context: EnforcementContext) => predicates.every(p => p(context));
+}
+
+/**
+ * Compose policies with OR — at least one must pass.
+ */
+export function anyOf(...predicates: PolicyPredicate[]): PolicyPredicate {
+  return (context: EnforcementContext) => predicates.some(p => p(context));
+}
+
+/**
+ * Negate a policy predicate.
+ */
+export function not(predicate: PolicyPredicate): PolicyPredicate {
+  return (context: EnforcementContext) => !predicate(context);
+}
+
+/**
+ * Built-in policy predicates for common checks.
+ */
+export const PolicyPredicates = {
+  /** Trust level is at or above the given threshold */
+  minTrustLevel: (level: number): PolicyPredicate =>
+    (ctx) => (ctx.trustLevel ?? 0) >= level,
+
+  /** Action type matches */
+  actionType: (type: string): PolicyPredicate =>
+    (ctx) => ctx.intent.actionType === type,
+
+  /** Data sensitivity is at most the given level */
+  maxSensitivity: (level: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED'): PolicyPredicate => {
+    const order = { PUBLIC: 0, INTERNAL: 1, CONFIDENTIAL: 2, RESTRICTED: 3 };
+    return (ctx) => order[(ctx.intent.dataSensitivity ?? 'PUBLIC') as keyof typeof order] <= order[level];
+  },
+
+  /** Action is reversible */
+  isReversible: (): PolicyPredicate =>
+    (ctx) => ctx.intent.reversibility !== 'IRREVERSIBLE',
+} as const;

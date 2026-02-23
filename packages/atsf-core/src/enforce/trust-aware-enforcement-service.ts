@@ -44,6 +44,40 @@ const logger = createLogger({ component: 'trust-aware-enforcement' });
  */
 type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
+// =============================================================================
+// SECURITY POLICY ENGINE INTERFACE
+// =============================================================================
+
+/**
+ * Input for policy evaluation.
+ * Minimal interface to avoid hard dependency on @vorionsys/security.
+ */
+export interface PolicyEvaluationInput {
+  intent: import('../common/types.js').Intent;
+  trustScore: import('../common/types.js').TrustScore;
+  trustLevel: import('../common/types.js').TrustLevel;
+  context?: Record<string, unknown>;
+}
+
+/**
+ * A violation detected by the security policy engine.
+ */
+export interface PolicyViolation {
+  policyId: string;
+  policyName: string;
+  action: 'deny' | 'escalate' | 'limit' | 'monitor';
+  reason: string;
+}
+
+/**
+ * Interface for security policy engine integration.
+ * The full SecurityPolicyEngine from @vorionsys/security satisfies this interface.
+ * Defined locally to avoid hard dependency in the public SDK package.
+ */
+export interface IPolicyEngine {
+  evaluate(context: PolicyEvaluationInput): PolicyViolation[];
+}
+
 /**
  * Compute risk level from intent metadata fields.
  */
@@ -94,7 +128,7 @@ function computeRiskLevel(context: EnforcementContext): RiskLevel {
 function buildConstraints(
   riskLevel: RiskLevel,
   trustLevel: TrustLevel,
-  policy: Required<TrustAwareEnforcementConfig>,
+  policy: Required<Omit<TrustAwareEnforcementConfig, 'policyEngine'>>,
   defaultConstraints?: Partial<DecisionConstraints>,
 ): DecisionConstraints {
   const base: DecisionConstraints = {
@@ -219,9 +253,11 @@ export interface TrustAwareEnforcementConfig {
   maxRefinementAttempts?: number;
   /** Default constraints for GREEN decisions */
   defaultConstraints?: Partial<DecisionConstraints>;
+  /** Optional security policy engine for additional policy evaluation */
+  policyEngine?: IPolicyEngine;
 }
 
-const DEFAULT_CONFIG: Required<TrustAwareEnforcementConfig> = {
+const DEFAULT_CONFIG: Required<Omit<TrustAwareEnforcementConfig, 'policyEngine'>> = {
   autoApproveLevel: 4 as TrustLevel,
   requireRefinementLevel: 2 as TrustLevel,
   autoDenyLevel: 0 as TrustLevel,
@@ -245,11 +281,12 @@ const DEFAULT_CONFIG: Required<TrustAwareEnforcementConfig> = {
  * - Full audit trail via decision/workflow records
  */
 export class TrustAwareEnforcementService implements IEnforcementService {
-  private config: Required<TrustAwareEnforcementConfig>;
+  private config: Required<Omit<TrustAwareEnforcementConfig, 'policyEngine'>>;
   private policy: EnforcementPolicy;
   private decisions = new Map<ID, FluidDecision>();
   private workflows = new Map<ID, WorkflowInstance>(); // keyed by intentId
   private trustEngine: TrustEngine | null;
+  private policyEngine: IPolicyEngine | null;
 
   constructor(
     trustEngine: TrustEngine | null,
@@ -257,7 +294,8 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     policy?: EnforcementPolicy,
   ) {
     this.trustEngine = trustEngine;
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.policyEngine = config?.policyEngine ?? null;
+    this.config = { ...DEFAULT_CONFIG, ...(config ? { ...config, policyEngine: undefined } : {}) };
     this.policy = policy ?? {
       defaultAction: 'deny',
       trustThresholds: {
@@ -295,6 +333,55 @@ export class TrustAwareEnforcementService implements IEnforcementService {
 
     // Determine risk level from intent metadata
     const riskLevel = computeRiskLevel(context);
+
+    // Evaluate security policies if engine is available
+    if (this.policyEngine) {
+      const policyInput: PolicyEvaluationInput = {
+        intent,
+        trustScore: trustScore ?? 0,
+        trustLevel: trustLevel ?? (0 as TrustLevel),
+        context: { riskLevel, tenantId, correlationId },
+      };
+
+      const violations = this.policyEngine.evaluate(policyInput);
+
+      if (violations.length > 0) {
+        logger.info(
+          { intentId: intent.id, violationCount: violations.length },
+          'Security policy violations detected',
+        );
+
+        // Convert violations to RuleResult entries for tier determination
+        for (const violation of violations) {
+          if (violation.action === 'deny') {
+            evaluation.violatedRules.push({
+              ruleId: violation.policyId,
+              ruleName: violation.policyName,
+              matched: true,
+              action: 'deny',
+              reason: violation.reason,
+              details: { source: 'security-policy-engine' },
+              durationMs: 0,
+            });
+          } else if (violation.action === 'escalate') {
+            evaluation.violatedRules.push({
+              ruleId: violation.policyId,
+              ruleName: violation.policyName,
+              matched: true,
+              action: 'escalate',
+              reason: violation.reason,
+              details: { source: 'security-policy-engine' },
+              durationMs: 0,
+            });
+          }
+        }
+
+        // If any deny violations, mark evaluation as failed
+        if (violations.some((v) => v.action === 'deny')) {
+          evaluation.passed = false;
+        }
+      }
+    }
 
     // Determine decision tier
     const tier = this.determineTier(evaluation, trustLevel, riskLevel);
@@ -546,9 +633,57 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     }
   }
 
+  /**
+   * Refresh policy configuration at runtime (hot-reload).
+   * Accepts partial updates — only specified fields are changed.
+   * Existing in-flight decisions are not affected.
+   */
+  refreshPolicy(updates: Partial<TrustAwareEnforcementConfig>): void {
+    const previousConfig = { ...this.config };
+    // Extract policyEngine separately — it is not part of the config object
+    if (updates.policyEngine !== undefined) {
+      this.setPolicyEngine(updates.policyEngine ?? null);
+    }
+    const { policyEngine: _pe, ...restUpdates } = updates;
+    this.config = { ...this.config, ...restUpdates };
+
+    // Sync policy thresholds if updated
+    if (updates.autoApproveLevel !== undefined || updates.requireRefinementLevel !== undefined || updates.autoDenyLevel !== undefined) {
+      this.policy.trustThresholds = {
+        autoApproveLevel: this.config.autoApproveLevel,
+        requireRefinementLevel: this.config.requireRefinementLevel,
+        autoDenyLevel: this.config.autoDenyLevel,
+      };
+    }
+
+    logger.info(
+      { previous: previousConfig, updated: this.config },
+      'Enforcement policy refreshed at runtime',
+    );
+  }
+
+  /**
+   * Get current policy configuration (for inspection/debugging).
+   */
+  getPolicy(): { config: Required<Omit<TrustAwareEnforcementConfig, 'policyEngine'>>; policy: EnforcementPolicy } {
+    return { config: { ...this.config }, policy: { ...this.policy } };
+  }
+
   // ===========================================================================
   // Public helpers
   // ===========================================================================
+
+  /**
+   * Set or replace the security policy engine.
+   * Can be called at runtime to add/swap policy evaluation.
+   */
+  setPolicyEngine(engine: IPolicyEngine | null): void {
+    this.policyEngine = engine;
+    logger.info(
+      { hasEngine: engine !== null },
+      'Security policy engine updated',
+    );
+  }
 
   /**
    * Get count of active decisions.
