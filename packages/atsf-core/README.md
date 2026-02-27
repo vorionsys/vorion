@@ -379,6 +379,69 @@ Import from the package root or via deep imports:
 | `trust:recovery_milestone` | Tier restored, full recovery, or accelerated recovery earned |
 | `trust:*` | Wildcard -- all trust events |
 
+## Wave 1 API Stability
+
+The following modules are **stable for Wave 1** on the `0.2.x` series and covered by the semver guarantee. Anything not listed here is internal and subject to change without notice.
+
+### Stable (≥ v0.2.2)
+
+| Module | Key Exports |
+|--------|-------------|
+| `trust-engine` | `TrustEngine`, `createTrustEngine`, `TRUST_THRESHOLDS`, `TRUST_LEVEL_NAMES`, `SIGNAL_WEIGHTS` |
+| `basis` | `createEvaluator`, `RuleEvaluator`, `parseNamespace`, `validateRule`, `validateNamespace` |
+| `intent` | `createIntentService`, `IntentService` |
+| `enforce` | `createEnforcementService`, `EnforcementService` |
+| `proof` | `createProofService`, `ProofService` |
+| `governance` | `createGovernanceEngine`, `GovernanceEngine`, `createGovernanceRule` |
+| `persistence` | `createFileProvider`, `createMemoryProvider` |
+| `phase6` | `createPhase6TrustEngine`, `BASIS_CANONICAL_PRESETS`, `TrustTier`, `AgentRole`, `ContextType` |
+| `layers` | `createSecurityPipeline`, `BaseSecurityLayer` |
+| `langchain` | `createTrustAwareExecutor`, `createTrustTools` |
+| `sandbox-training` | `PromotionService`, `CHALLENGE_CATALOG` |
+| `chain` | `createChainAnchor`, `computeMerkleRoot`, `computeMerkleProof`, `sha256` |
+
+### Beta (functional — API shape may change before Wave 2)
+
+| Module | Notes |
+|--------|-------|
+| `intent-gateway` | `IntentGateway`, `createIntentGateway` — jurisdiction selectors not yet final |
+| `crewai` | CrewAI integration utilities |
+| `arbitration` | `MultiAgentTrustArbitrator` — multi-agent quorum logic stabilizing |
+| `containment` | `ProgressiveContainmentService` — protocol steps may be extended |
+
+---
+
+## Deprecated Exports
+
+The following are present for backwards compatibility only. Migrate before v1.0.0.
+
+### `ACI_CANONICAL_PRESETS` → `BASIS_CANONICAL_PRESETS`
+
+`ACI_CANONICAL_PRESETS` is a legacy alias created during the ACI → BASIS nomenclature rename. It points to exactly the same object as `BASIS_CANONICAL_PRESETS` — there is no behavioral difference.
+
+```typescript
+// ❌ Deprecated — do not use in new code
+import { phase6 } from '@vorionsys/atsf-core';
+const preset = phase6.ACI_CANONICAL_PRESETS['basis:preset:balanced'];
+
+// ✅ Correct Wave 1 pattern
+import { phase6 } from '@vorionsys/atsf-core';
+const preset = phase6.BASIS_CANONICAL_PRESETS['basis:preset:balanced'];
+```
+
+| Milestone | Action |
+|-----------|--------|
+| `v0.3.0` | `@deprecated` JSDoc annotation added — TypeScript will surface a warning on all call sites |
+| `v1.0.0` | Export removed (Wave 2 release) |
+
+**Migration:** search-and-replace only — no behavioral change.
+
+### `ACIClient`, `ACIError`, `createACIClient`, `createLocalACIClient` (in `@vorionsys/car-client`)
+
+Same ACI → CAR rename — aliases in `@vorionsys/car-client` follow the identical removal timeline.
+
+---
+
 ## Architecture
 
 ```

@@ -3,7 +3,7 @@
 **Scope:** Wave 1 launch hardening for ATSF in the CARID + BASIS + ATSF + Cognigate release track.
 
 **Owner:** @chunkstar (engineering lead)
-**Status:** In progress — A1/A2/A3 done, A4/A5 active
+**Status:** ✅ Complete — A1/A2/A3/A4/A5 done
 **Target window:** Week 1 (Foundation Lock) — due by March 6, 2026
 
 ## Objectives
@@ -93,8 +93,8 @@
 - [x] No placeholder cryptographic helpers in launch path (A2 complete)
 - [x] Phase 6 tests active and green in CI (A1 complete)
 - [x] Critical trust logic coverage targets met (A3 complete)
-- [ ] **A4** README/API docs aligned with Wave 1 scope — owner: @chunkstar, due March 3
-- [ ] **A5** BASIS + Cognigate integration smoke checks passing — owner: @chunkstar, due March 5
+- [x] **A4** README/API docs aligned with Wave 1 scope — completed Feb 27, 2026
+- [x] **A5** BASIS + Cognigate integration smoke checks passing — completed Feb 27, 2026
 
 ## Next Steps (Immediate)
 
@@ -102,6 +102,6 @@
 2. ~~Implement A2~~ — done (SHA-256 in `src/phase6/types.ts`)
 3. ~~Activate Phase 6 tests~~ — done (`tests/**` included in `vitest.config.ts`)
 4. ~~Re-run ATSF package tests and coverage~~ — done (thresholds enforced in CI)
-5. **A4:** Document Wave 1 API surface + deprecation timeline (due March 3)
-6. **A5:** Write CARID → ATSF → Cognigate integration smoke test (due March 5)
-7. After A5: run `npm run test:coverage` in `packages/atsf-core` and confirm green in CI
+5. ~~**A4:** Document Wave 1 API surface + deprecation timeline~~ — done (Feb 27, 2026)
+6. ~~**A5:** Write CARID → ATSF → Cognigate integration smoke test~~ — done (Feb 27, 2026)
+7. Run `npm run test:coverage` in `packages/atsf-core` to confirm green in CI
