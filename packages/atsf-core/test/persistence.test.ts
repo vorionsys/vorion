@@ -255,28 +255,33 @@ describe('FilePersistenceProvider', () => {
   });
 
   it('should support auto-save interval', async () => {
+    const autoSavePath = join(testDir, 'auto-save.json');
     const autoSaveProvider = createFileProvider({
-      path: join(testDir, 'auto-save.json'),
+      path: autoSavePath,
       autoSaveIntervalMs: 50,
     });
     await autoSaveProvider.initialize();
 
     await autoSaveProvider.save(createTestRecord('agent-001', 500, 3));
 
-    // Wait for auto-save
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    let retrieved: TrustRecord | undefined;
+    const maxAttempts = 12;
 
-    // Create new provider and verify data was saved
-    const newProvider = createFileProvider({
-      path: join(testDir, 'auto-save.json'),
-    });
-    await newProvider.initialize();
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const newProvider = createFileProvider({ path: autoSavePath });
+      await newProvider.initialize();
+      retrieved = await newProvider.get('agent-001');
+      await newProvider.close();
 
-    const retrieved = await newProvider.get('agent-001');
+      if (retrieved) {
+        break;
+      }
+    }
+
     expect(retrieved).toBeDefined();
 
     await autoSaveProvider.close();
-    await newProvider.close();
   });
 
   it('should handle query operations', async () => {

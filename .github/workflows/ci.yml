@@ -75,5 +75,87 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Run tests
-        run: npm run test
+      - name: Run tests (excluding coverage-gated packages)
+        run: >-
+          npm run test --
+          --filter=!@vorionsys/proof-plane
+          --filter=!@vorionsys/runtime
+          --filter=!@vorionsys/contracts
+          --filter=!@vorionsys/atsf-core
+          --filter=!@vorionsys/basis
+          --filter=!@vorionsys/car-client
+          --filter=!@vorionsys/cognigate
+          --filter=!@vorionsys/cognigate-api
+          --filter=!@vorionsys/council
+          --filter=!@vorionsys/sdk
+          --filter=!@vorionsys/kaizen
+
+  coverage:
+    name: Coverage Gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: true
+      matrix:
+        node-version: [20]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            packages/*/node_modules
+            apps/*/node_modules
+          key: npm-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-node${{ matrix.node-version }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Proof-plane coverage gate
+        run: npm --workspace @vorionsys/proof-plane run test:coverage
+
+      - name: Runtime coverage gate
+        run: npm --workspace @vorionsys/runtime run test:coverage
+
+      - name: Contracts coverage gate
+        run: npm --workspace @vorionsys/contracts run test:coverage
+
+      - name: ATSF Core coverage gate
+        run: npm --workspace @vorionsys/atsf-core run test:coverage
+
+      - name: Basis coverage gate
+        run: npm --workspace @vorionsys/basis run test:coverage
+
+      - name: CAR Client coverage gate
+        run: npm --workspace @vorionsys/car-client run test:coverage
+
+      - name: Cognigate coverage gate
+        run: npm --workspace @vorionsys/cognigate run test:coverage
+
+      - name: Cognigate API coverage gate
+        run: npm --workspace @vorionsys/cognigate-api run test:coverage
+
+      - name: Council coverage gate
+        run: npm --workspace @vorionsys/council run test:coverage
+
+      - name: SDK coverage gate
+        run: npm --workspace @vorionsys/sdk run test:coverage
+
+      - name: Kaizen coverage gate
+        run: npm --workspace @vorionsys/kaizen run test:coverage

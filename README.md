@@ -68,7 +68,7 @@ npm run typecheck
 ```
 Foundation:    shared-constants → basis → contracts
                        ↓            ↓        ↓
-Services:      atsf-core, cognigate, platform-core, runtime
+Services:      atsf-core, cognigate, runtime
                        ↓
 SDKs:          sdk, council, car-client, car-cli
 ```
@@ -82,3 +82,11 @@ Apache-2.0. See [LICENSE](LICENSE) for details.
 - [vorion.org](https://vorion.org) — Main site
 - [learn.vorion.org](https://learn.vorion.org) — Kaizen learning platform
 - [cognigate.dev](https://cognigate.dev) — Governance runtime
+
+## Governance
+
+- [Contributing](.github/CONTRIBUTING.md)
+- [Security Policy](.github/SECURITY.md)
+- [Code of Conduct](.github/CODE_OF_CONDUCT.md)
+- [Pull Request Template](.github/pull_request_template.md)
+- [Issue Templates](.github/ISSUE_TEMPLATE)

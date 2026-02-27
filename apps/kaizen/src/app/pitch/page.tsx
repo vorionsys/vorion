@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import type { ComponentType } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -138,7 +139,7 @@ export default function PitchPage() {
               <Lock className="w-8 h-8 text-yellow-400 mb-4" />
               <h3 className="text-lg font-bold text-white mb-2">No Audit Trail</h3>
               <p className="text-gray-400 text-sm">
-                Enterprises can't prove what AI did, when it did it, or why -
+                Enterprises can&apos;t prove what AI did, when it did it, or why -
                 a compliance nightmare waiting to happen.
               </p>
             </div>
@@ -227,7 +228,7 @@ export default function PitchPage() {
                 <h3 className="text-xl font-bold text-white">Decay by Design</h3>
               </div>
               <p className="text-gray-400 mb-4">
-                Trust isn't permanent. Scores decay over time, with 3x accelerated
+                Trust isn&apos;t permanent. Scores decay over time, with 3x accelerated
                 decay after failures. Continuous good behavior required.
               </p>
               <div className="text-xs text-gray-500">
@@ -315,11 +316,11 @@ await agent.invoke(input, { callbacks: [callback] });`}</code>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Let's Talk
+              Let&apos;s Talk
             </h2>
             <p className="text-gray-400">
               Interested in AI governance for your organization?
-              Tell us about your needs and we'll be in touch.
+              Tell us about your needs and we&apos;ll be in touch.
             </p>
           </div>
 
@@ -368,7 +369,7 @@ await agent.invoke(input, { callbacks: [callback] });`}</code>
       <footer className="border-t border-gray-800 py-8 px-6">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <p className="text-sm text-gray-500">
-            &copy; 2026 Vorion Risk, LLC
+            &copy; 2026 Vorion
           </p>
           <div className="flex gap-4 text-sm text-gray-500">
             <Link href="/" className="hover:text-cyan-400">Kaizen</Link>
@@ -407,7 +408,7 @@ function MetricCard({
   label,
   color
 }: {
-  icon: any;
+  icon: ComponentType<{ className?: string }>;
   value: string;
   label: string;
   color: 'cyan' | 'green' | 'orange' | 'purple';
@@ -535,13 +536,6 @@ function AnimatedDemo() {
     return () => clearTimeout(timeout);
   }, [phase, displayedUserText, displayedAssistantText, scenario]);
 
-  // Reset when scenario changes
-  useEffect(() => {
-    setDisplayedUserText('');
-    setDisplayedAssistantText('');
-    setShowGovernance(false);
-  }, [scenarioIndex]);
-
   const decisionColors = {
     ALLOW: 'bg-green-500/20 text-green-400 border-green-500/50',
     DENY: 'bg-red-500/20 text-red-400 border-red-500/50',
@@ -564,6 +558,9 @@ function AnimatedDemo() {
           <button
             key={s.id}
             onClick={() => {
+              setDisplayedUserText('');
+              setDisplayedAssistantText('');
+              setShowGovernance(false);
               setScenarioIndex(i);
               setPhase('typing-user');
             }}
@@ -1084,7 +1081,7 @@ function ContactForm() {
       <div className="glass p-8 rounded-xl text-center">
         <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
         <h3 className="text-xl font-bold text-white mb-2">Message Sent!</h3>
-        <p className="text-gray-400">We'll get back to you shortly.</p>
+        <p className="text-gray-400">We&apos;ll get back to you shortly.</p>
       </div>
     );
   }

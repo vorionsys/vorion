@@ -1,6 +1,6 @@
 # @vorionsys/atsf-core
 
-Agentic Trust Scoring Framework (ATSF) -- the core runtime for AI agent governance, trust scoring, and policy enforcement. Implements the complete 8-tier trust model (T0-T7) on a 0-1000 scale with behavioral signal processing, time-based decay, recovery mechanics, and immutable audit trails.
+Agentic Trust Scoring Framework (ATSF) -- the core runtime for AI agent governance, trust scoring, and policy enforcement. Implements the complete 8-tier trust model (T0-T7) on a 0-1000 scale with behavioral signal processing, time-based Readiness Degree adjustments, recovery mechanics, and immutable audit trails.
 
 ## Installation
 
@@ -19,8 +19,8 @@ ATSF continuously evaluates agent behavior across multiple dimensions and assign
 Key principles:
 
 - **Trust is earned, not granted.** Agents start at low trust and must demonstrate competence to advance.
-- **Trust decays over time.** Idle agents lose trust; active, well-behaved agents maintain or gain it.
-- **Trust loss is asymmetric.** Trust is hard to gain and easy to lose (10:1 ratio per ATSF v2.0).
+- **Readiness adjusts over time.** Idle agents can lose readiness; active, well-behaved agents maintain or gain it.
+- **Readiness reduction is asymmetric.** Trust dynamics are configurable by policy profile, with stricter readiness and recovery behavior at higher assurance requirements.
 - **Every decision is auditable.** An immutable proof chain records all governance decisions.
 
 ## The 8-Tier Trust Model (T0-T7)
@@ -78,7 +78,7 @@ await engine.recordSignal({
   metadata: { task: 'data-analysis' },
 });
 
-// Get the updated score (includes automatic decay calculation)
+// Get the updated score (includes automatic Readiness Degree adjustment)
 const record = await engine.getScore('agent-001');
 console.log(record?.score, record?.level);
 ```
@@ -94,7 +94,8 @@ const engine = createTrustEngine({
   decayRate: 0.01,                 // 1% decay per interval
   decayIntervalMs: 60000,         // 1-minute intervals
   failureThreshold: 0.3,          // Signals below 0.3 = failure
-  acceleratedDecayMultiplier: 3.0, // 3x decay on repeated failures
+  acceleratedDecayMultiplier: 1.0, // No extra decay multiplier by default
+  readinessMode: 'checkpoint_schedule', // Preferred neutral mode naming
   successThreshold: 0.7,          // Signals above 0.7 = success
   recoveryRate: 0.02,             // 2% recovery per success signal
 });
@@ -166,7 +167,7 @@ engine.on('trust:tier_changed', (event) => {
 engine.on('trust:failure_detected', (event) => {
   console.log(`Failure #${event.failureCount} for ${event.entityId}`);
   if (event.acceleratedDecayActive) {
-    console.log('Accelerated decay is now active (3x normal rate)');
+    console.log('Additional decay multiplier is active for this policy profile');
   }
 });
 
@@ -370,7 +371,9 @@ Import from the package root or via deep imports:
 | `trust:signal_recorded` | Behavioral signal recorded |
 | `trust:score_changed` | Score changes by 5+ points |
 | `trust:tier_changed` | Entity promoted or demoted |
-| `trust:decay_applied` | Trust decayed (includes `accelerated` flag) |
+| `trust:readiness_adjusted` | Readiness Degree adjusted (primary neutral event) |
+| `trust:freshness_adjusted` | Backward-compatible readiness alias |
+| `trust:decay_applied` | Legacy compatibility alias (includes `accelerated` flag) |
 | `trust:failure_detected` | Signal value below failure threshold |
 | `trust:recovery_applied` | Recovery from successful signal |
 | `trust:recovery_milestone` | Tier restored, full recovery, or accelerated recovery earned |
@@ -380,7 +383,7 @@ Import from the package root or via deep imports:
 
 ```
 @vorionsys/atsf-core
-  |-- trust-engine/     Trust scoring with 8-tier model, decay, and recovery
+  |-- trust-engine/     Trust scoring with 8-tier model, readiness adjustments, and recovery
   |-- basis/            BASIS rule evaluation engine
   |-- intent/           Intent submission and lifecycle tracking
   |-- enforce/          Policy decision point (allow/deny/escalate)
@@ -409,7 +412,7 @@ Import from the package root or via deep imports:
 
 ## Testing
 
-The package has comprehensive test coverage with **401+ tests** covering trust scoring, decay mechanics, recovery paths, governance pipelines, security layers, and edge cases.
+The package has comprehensive test coverage with **401+ tests** covering trust scoring, readiness-adjustment mechanics, recovery paths, governance pipelines, security layers, and edge cases.
 
 ```bash
 # Run all tests

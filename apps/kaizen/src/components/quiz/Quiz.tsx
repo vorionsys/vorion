@@ -74,6 +74,18 @@ export function Quiz({ quiz, onComplete, onRetry }: QuizProps) {
     }
   };
 
+  const calculateScore = (): number => {
+    let correct = 0;
+    for (const question of quiz.questions) {
+      const selectedId = answers[question.id];
+      const correctOption = question.options.find(o => o.isCorrect);
+      if (selectedId === correctOption?.id) {
+        correct++;
+      }
+    }
+    return Math.round((correct / totalQuestions) * 100);
+  };
+
   const finishQuiz = useCallback(() => {
     const score = calculateScore();
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
@@ -91,18 +103,6 @@ export function Quiz({ quiz, onComplete, onRetry }: QuizProps) {
     setState('results');
     onComplete?.(newAttempt);
   }, [answers, quiz.id, quiz.passingScore, startTime, onComplete]);
-
-  const calculateScore = (): number => {
-    let correct = 0;
-    for (const question of quiz.questions) {
-      const selectedId = answers[question.id];
-      const correctOption = question.options.find(o => o.isCorrect);
-      if (selectedId === correctOption?.id) {
-        correct++;
-      }
-    }
-    return Math.round((correct / totalQuestions) * 100);
-  };
 
   const isCorrectAnswer = (questionId: string): boolean => {
     const question = quiz.questions.find(q => q.id === questionId);

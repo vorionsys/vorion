@@ -465,12 +465,13 @@ export class ContainmentService {
     // Update condition progress
     for (const condition of state.deescalationConditions) {
       switch (condition.type) {
-        case 'time_elapsed':
+        case 'time_elapsed': {
           const targetMs = condition.target as number;
           const elapsed = now - appliedAt;
           condition.progress = Math.min(1, elapsed / targetMs);
           condition.met = elapsed >= targetMs;
           break;
+        }
         // Other conditions would be updated by external events
       }
     }
@@ -607,17 +608,20 @@ export class ContainmentService {
     context: Record<string, unknown>
   ): boolean {
     switch (trigger.type) {
-      case 'trust_threshold':
+      case 'trust_threshold': {
         const trustScore = context['trustScore'] as number | undefined;
         return trustScore !== undefined && trustScore < trigger.threshold;
+      }
 
-      case 'error_rate':
+      case 'error_rate': {
         const errorRate = context['errorRate'] as number | undefined;
         return errorRate !== undefined && errorRate > trigger.threshold;
+      }
 
-      case 'anomaly_score':
+      case 'anomaly_score': {
         const anomalyScore = context['anomalyScore'] as number | undefined;
         return anomalyScore !== undefined && anomalyScore > trigger.threshold;
+      }
 
       default:
         return false;

@@ -23,7 +23,8 @@ import {
   validateCreationType,
   validateWeights,
   Phase6ValidationError,
-} from '../phase6-types';
+  generateHash,
+} from '../../src/phase6/types.js';
 
 // ============================================================================
 // Q1: CEILING ENFORCEMENT TESTS (40 tests)
@@ -265,4 +266,21 @@ describe('Phase 6 Performance', () => {
   });
 
   // TODO: Add more performance tests
+});
+
+// ============================================================================
+// HASHING TESTS
+// ============================================================================
+
+describe('Phase 6 Hashing', () => {
+  it('should generate deterministic sha256 hashes', () => {
+    const h1 = generateHash('vorion-phase6');
+    const h2 = generateHash('vorion-phase6');
+    expect(h1).toBe(h2);
+  });
+
+  it('should return sha256-prefixed 64-char hex digest', () => {
+    const hash = generateHash('atsf-core');
+    expect(hash).toMatch(/^sha256:[a-f0-9]{64}$/);
+  });
 });

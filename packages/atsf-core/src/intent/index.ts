@@ -15,6 +15,8 @@
 import { createLogger } from '../common/logger.js';
 import type { Intent, ID, IntentStatus } from '../common/types.js';
 
+/* eslint-disable no-redeclare */
+
 const logger = createLogger({ component: 'intent' });
 
 // =============================================================================
@@ -57,6 +59,8 @@ export const Reversibility = {
 } as const;
 
 export type Reversibility = (typeof Reversibility)[keyof typeof Reversibility];
+
+/* eslint-enable no-redeclare */
 
 // =============================================================================
 // INTENT SUBMISSION TYPES

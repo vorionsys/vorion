@@ -12,6 +12,8 @@ import {
 } from '../src/trust-engine/index.js';
 import type { TrustSignal } from '../src/common/types.js';
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 describe('TrustEngine', () => {
   let engine: TrustEngine;
 
@@ -24,7 +26,7 @@ describe('TrustEngine', () => {
       expect(engine.decayRate).toBe(0.01);
       expect(engine.decayIntervalMs).toBe(60000);
       expect(engine.failureThreshold).toBe(0.3);
-      expect(engine.acceleratedDecayMultiplier).toBe(3.0);
+      expect(engine.acceleratedDecayMultiplier).toBe(1.0);
     });
 
     it('should create engine with custom config', () => {
@@ -136,6 +138,41 @@ describe('TrustEngine', () => {
       });
 
       expect(events).toHaveLength(1);
+    });
+
+    it('should reduce manual approval uplift at higher trust tiers', async () => {
+      const lowTierEngine = createTrustEngine();
+      const highTierEngine = createTrustEngine();
+
+      await lowTierEngine.initializeEntity('agent-low', 1);
+      await highTierEngine.initializeEntity('agent-high', 6);
+
+      const manualApprovalSignal = {
+        id: 'manual-approval-1',
+        type: 'behavioral.manual_review',
+        value: 0.95,
+        source: 'manual',
+        timestamp: new Date().toISOString(),
+        metadata: {},
+      };
+
+      await lowTierEngine.recordSignal({
+        ...manualApprovalSignal,
+        entityId: 'agent-low',
+      });
+
+      await highTierEngine.recordSignal({
+        ...manualApprovalSignal,
+        id: 'manual-approval-2',
+        entityId: 'agent-high',
+      });
+
+      const lowRecord = await lowTierEngine.getScore('agent-low');
+      const highRecord = await highTierEngine.getScore('agent-high');
+
+      expect(lowRecord).toBeDefined();
+      expect(highRecord).toBeDefined();
+      expect((lowRecord?.score ?? 0) - 500).toBeGreaterThan((highRecord?.score ?? 0) - 500);
     });
   });
 
@@ -859,6 +896,80 @@ describe('TrustEngine', () => {
       testEngine.removeAllListeners();
 
       expect(testEngine.getListenerStats().totalListeners).toBe(0);
+    });
+  });
+
+  describe('scheduled readiness adjustment', () => {
+    it('should apply 6% adjustment at day 7 checkpoint', async () => {
+      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
+      const record = await testEngine.initializeEntity('fresh-001', 3);
+
+      record.lastCalculatedAt = new Date(Date.now() - (7 * DAY_MS + 1000)).toISOString();
+
+      const updated = await testEngine.getScore('fresh-001');
+      expect(updated).toBeDefined();
+      expect(updated!.score).toBe(470);
+    });
+
+    it('should calibrate to half-life (50%) at day 182', async () => {
+      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
+      const record = await testEngine.initializeEntity('fresh-002', 3);
+
+      record.lastCalculatedAt = new Date(Date.now() - (182 * DAY_MS + 60_000)).toISOString();
+
+      const updated = await testEngine.getScore('fresh-002');
+      expect(updated).toBeDefined();
+      expect(updated!.score).toBe(250);
+    });
+
+    it('should apply deferred full reduction after exception expiry', async () => {
+      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
+      const record = await testEngine.initializeEntity('fresh-003', 3);
+
+      testEngine.setReadinessException('fresh-003', {
+        reason: 'telemetry_outage',
+        expiresAt: new Date(Date.now() + 3 * DAY_MS).toISOString(),
+        reductionScale: 0.5,
+      });
+
+      record.lastCalculatedAt = new Date(Date.now() - (8 * DAY_MS)).toISOString();
+
+      const duringException = await testEngine.getScore('fresh-003');
+      expect(duringException).toBeDefined();
+      expect(duringException!.score).toBe(485);
+
+      const activeException = testEngine.getReadinessException('fresh-003');
+      expect(activeException).toBeDefined();
+      activeException!.expiresAt = new Date(Date.now() - 1000).toISOString();
+
+      const afterExpiry = await testEngine.getScore('fresh-003');
+      expect(afterExpiry).toBeDefined();
+      expect(afterExpiry!.score).toBe(470);
+      expect(testEngine.getReadinessException('fresh-003')).toBeUndefined();
+    });
+
+    it('should reject unsupported readiness exception reason', async () => {
+      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
+      await testEngine.initializeEntity('fresh-004', 3);
+
+      expect(() => {
+        testEngine.setReadinessException('fresh-004', {
+          reason: 'custom_reason' as never,
+          expiresAt: new Date(Date.now() + DAY_MS).toISOString(),
+        });
+      }).toThrow(/Unsupported readiness exception reason/);
+    });
+
+    it('should reject readiness exception with past expiry', async () => {
+      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
+      await testEngine.initializeEntity('fresh-005', 3);
+
+      expect(() => {
+        testEngine.setReadinessException('fresh-005', {
+          reason: 'planned_maintenance',
+          expiresAt: new Date(Date.now() - DAY_MS).toISOString(),
+        });
+      }).toThrow(/must be in the future/);
     });
   });
 });

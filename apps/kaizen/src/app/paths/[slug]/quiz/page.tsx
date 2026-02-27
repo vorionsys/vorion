@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Navbar } from '@/components/nexus';
@@ -69,7 +69,6 @@ export default function PathQuizPage() {
   const slug = params.slug as string;
   const moduleId = searchParams.get('module');
 
-  const [quiz, setQuiz] = useState<QuizType | null>(null);
   const [quizKey, setQuizKey] = useState(0);
 
   const path = getPathBySlug(slug);
@@ -78,21 +77,17 @@ export default function PathQuizPage() {
 
   useEffect(() => {
     if (!path) return;
-
     // Mark path as started when viewing quiz
     beginPath(slug);
+  }, [slug, path, beginPath]);
 
-    // Generate the appropriate quiz
-    let generatedQuiz: QuizType | null = null;
-
+  const quiz = useMemo(() => {
+    if (!path) return null;
     if (moduleId) {
-      generatedQuiz = generateModuleQuiz(slug, moduleId);
-    } else {
-      generatedQuiz = generatePathQuiz(slug, 15);
+      return generateModuleQuiz(slug, moduleId);
     }
-
-    setQuiz(generatedQuiz);
-  }, [slug, moduleId, path, beginPath]);
+    return generatePathQuiz(slug, 15);
+  }, [path, slug, moduleId, quizKey]);
 
   if (!path) {
     notFound();
@@ -109,8 +104,8 @@ export default function PathQuizPage() {
   // Get terms for the quiz (for mastery tracking)
   const getQuizTerms = (): string[] => {
     if (moduleId) {
-      const module = path.modules.find(m => m.id === moduleId);
-      return module?.terms ?? [];
+      const moduleEntry = path.modules.find(m => m.id === moduleId);
+      return moduleEntry?.terms ?? [];
     }
     return getPathTerms(path);
   };
@@ -136,13 +131,6 @@ export default function PathQuizPage() {
 
   const handleRetry = () => {
     // Regenerate quiz on retry
-    let generatedQuiz: QuizType | null = null;
-    if (moduleId) {
-      generatedQuiz = generateModuleQuiz(slug, moduleId);
-    } else {
-      generatedQuiz = generatePathQuiz(slug, 15);
-    }
-    setQuiz(generatedQuiz);
     setQuizKey(prev => prev + 1);
   };
 
@@ -263,7 +251,7 @@ export default function PathQuizPage() {
       <footer className="border-t border-gray-800 py-8 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Vorion Risk, LLC. Content licensed under CC BY 4.0.
+            © {new Date().getFullYear()} Vorion. Content licensed under CC BY 4.0.
           </p>
           <div className="flex gap-4 text-sm text-gray-500">
             <Link href="/lexicon" className="hover:text-cyan-400 transition-colors">

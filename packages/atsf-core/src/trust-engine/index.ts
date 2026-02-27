@@ -66,6 +66,8 @@ export type TrustEventType =
   | 'trust:signal_recorded'
   | 'trust:score_changed'
   | 'trust:tier_changed'
+  | 'trust:readiness_adjusted'
+  | 'trust:freshness_adjusted'
   | 'trust:decay_applied'
   | 'trust:failure_detected'
   | 'trust:recovery_applied'
@@ -135,6 +137,30 @@ export interface TrustDecayAppliedEvent extends TrustEvent {
 }
 
 /**
+ * Readiness Degree adjusted event (primary neutral terminology)
+ */
+export interface TrustReadinessAdjustedEvent extends TrustEvent {
+  type: 'trust:readiness_adjusted';
+  previousScore: TrustScore;
+  newScore: TrustScore;
+  adjustmentAmount: number;
+  stalenessMs: number;
+  accelerated: boolean;
+}
+
+/**
+ * Freshness adjustment event (neutral terminology alias for trust:decay_applied)
+ */
+export interface TrustFreshnessAdjustedEvent extends TrustEvent {
+  type: 'trust:freshness_adjusted';
+  previousScore: TrustScore;
+  newScore: TrustScore;
+  adjustmentAmount: number;
+  stalenessMs: number;
+  accelerated: boolean;
+}
+
+/**
  * Failure detected event
  */
 export interface TrustFailureDetectedEvent extends TrustEvent {
@@ -176,10 +202,45 @@ export type AnyTrustEvent =
   | TrustSignalRecordedEvent
   | TrustScoreChangedEvent
   | TrustTierChangedEvent
+  | TrustReadinessAdjustedEvent
+  | TrustFreshnessAdjustedEvent
   | TrustDecayAppliedEvent
   | TrustFailureDetectedEvent
   | TrustRecoveryAppliedEvent
   | TrustRecoveryMilestoneEvent;
+
+/**
+ * Time-bound exception for Readiness Degree adjustments.
+ */
+export interface ReadinessException {
+  /** Human-readable reason for exception */
+  reason: string;
+  /** Exception issue timestamp */
+  issuedAt: string;
+  /** Exception expiration timestamp */
+  expiresAt: string;
+  /** 0..1 scale applied to scheduled reductions while exception is active (default: 1) */
+  reductionScale: number;
+}
+
+/**
+ * Canonical reason codes for time-bound readiness exceptions.
+ */
+export const READINESS_EXCEPTION_REASON_CODES = [
+  'approved_leave',
+  'planned_maintenance',
+  'telemetry_outage',
+  'legal_hold',
+  'incident_response',
+  'dependency_outage',
+] as const;
+
+export type ReadinessExceptionReasonCode = typeof READINESS_EXCEPTION_REASON_CODES[number];
+
+/**
+ * @deprecated Use ReadinessException.
+ */
+export type FreshnessException = ReadinessException;
 
 /**
  * Entity trust record
@@ -200,6 +261,22 @@ export interface TrustRecord {
   peakScore: TrustScore;
   /** Consecutive successful signals count */
   consecutiveSuccesses: number;
+  /** Scheduled readiness checkpoint index */
+  readinessCheckpointIndex?: number;
+  /** Deferred multiplier accumulated during active exception windows */
+  deferredReadinessMultiplier?: number;
+  /** Optional active readiness exception */
+  readinessException?: ReadinessException;
+  /** Baseline score captured when readiness schedule starts */
+  readinessBaselineScore?: TrustScore;
+  /** @deprecated Use readinessCheckpointIndex */
+  freshnessCheckpointIndex?: number;
+  /** @deprecated Use deferredReadinessMultiplier */
+  deferredFreshnessMultiplier?: number;
+  /** @deprecated Use readinessException */
+  freshnessException?: FreshnessException;
+  /** @deprecated Use readinessBaselineScore */
+  freshnessBaselineScore?: TrustScore;
 }
 
 /**
@@ -232,7 +309,7 @@ export interface TrustEngineConfig {
   decayIntervalMs?: number;
   /** Signal value threshold below which a signal is considered a failure (default: 0.3) */
   failureThreshold?: number;
-  /** Multiplier applied to decay rate when entity has recent failures (default: 3.0) */
+  /** Multiplier applied to decay rate when entity has recent failures (default: 1.0) */
   acceleratedDecayMultiplier?: number;
   /** Time window in ms to consider failures as "recent" (default: 3600000 = 1 hour) */
   failureWindowMs?: number;
@@ -264,6 +341,42 @@ export interface TrustEngineConfig {
   maxTotalListeners?: number;
   /** Warn when listener count exceeds this percentage of max (default: 0.8 = 80%) */
   listenerWarningThreshold?: number;
+
+  /** Freshness adjustment mode (default: checkpoint_schedule) */
+  freshnessMode?: 'legacy_interval' | 'checkpoint_schedule';
+  /** Absolute day checkpoints since last trust-relevant action */
+  freshnessCheckpointDays?: number[];
+  /** Reduction percentages per checkpoint (0..1) */
+  freshnessCheckpointReductions?: number[];
+  /** Readiness Degree adjustment mode (preferred name) */
+  readinessMode?: 'legacy_interval' | 'checkpoint_schedule';
+  /** Readiness Degree checkpoint days (preferred name) */
+  readinessCheckpointDays?: number[];
+  /** Readiness Degree checkpoint reductions (preferred name) */
+  readinessCheckpointReductions?: number[];
+  /** Allowed readiness exception reason codes (default: READINESS_EXCEPTION_REASON_CODES) */
+  readinessExceptionAllowedReasons?: ReadinessExceptionReasonCode[];
+  /** Maximum readiness exception duration in ms (default: 30 days) */
+  readinessExceptionMaxDurationMs?: number;
+  /** @deprecated Use readinessExceptionAllowedReasons */
+  freshnessExceptionAllowedReasons?: ReadinessExceptionReasonCode[];
+  /** @deprecated Use readinessExceptionMaxDurationMs */
+  freshnessExceptionMaxDurationMs?: number;
+}
+
+const DEFAULT_READINESS_CHECKPOINT_DAYS = [7, 14, 28, 42, 56, 84, 112, 140, 182];
+const DEFAULT_READINESS_REDUCTIONS = [0.06, 0.06, 0.06, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05];
+const DEFAULT_READINESS_EXCEPTION_MAX_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+
+function toMs(days: number): number {
+  return days * 24 * 60 * 60 * 1000;
+}
+
+function clampReductionScale(value: number | undefined): number {
+  if (value === undefined || Number.isNaN(value)) return 1;
+  if (value < 0) return 0;
+  if (value > 1) return 1;
+  return value;
 }
 
 /**
@@ -294,13 +407,18 @@ export class TrustEngine extends EventEmitter {
   private _listenerWarningThreshold: number;
   private _listenerCounts: Map<string, number> = new Map();
   private _totalListeners = 0;
+  private _readinessMode: 'legacy_interval' | 'checkpoint_schedule';
+  private _readinessCheckpointDays: number[];
+  private _readinessCheckpointReductions: number[];
+  private _allowedReadinessExceptionReasons: Set<ReadinessExceptionReasonCode>;
+  private _readinessExceptionMaxDurationMs: number;
 
   constructor(config: TrustEngineConfig = {}) {
     super();
     this._decayRate = config.decayRate ?? 0.01;
     this._decayIntervalMs = config.decayIntervalMs ?? 60000;
     this._failureThreshold = config.failureThreshold ?? 0.3;
-    this._acceleratedDecayMultiplier = config.acceleratedDecayMultiplier ?? 3.0;
+    this._acceleratedDecayMultiplier = config.acceleratedDecayMultiplier ?? 1.0;
     this._failureWindowMs = config.failureWindowMs ?? 3600000; // 1 hour
     this._minFailuresForAcceleration = config.minFailuresForAcceleration ?? 2;
     this._persistence = config.persistence;
@@ -319,8 +437,241 @@ export class TrustEngine extends EventEmitter {
     this._maxTotalListeners = config.maxTotalListeners ?? 1000;
     this._listenerWarningThreshold = config.listenerWarningThreshold ?? 0.8;
 
+    this._readinessMode = config.readinessMode ?? config.freshnessMode ?? (
+      config.decayIntervalMs !== undefined || config.decayRate !== undefined
+        ? 'legacy_interval'
+        : 'checkpoint_schedule'
+    );
+    this._readinessCheckpointDays =
+      config.readinessCheckpointDays ?? config.freshnessCheckpointDays ?? [...DEFAULT_READINESS_CHECKPOINT_DAYS];
+    this._readinessCheckpointReductions =
+      config.readinessCheckpointReductions ?? config.freshnessCheckpointReductions ?? [...DEFAULT_READINESS_REDUCTIONS];
+    if (this._readinessCheckpointDays.length !== this._readinessCheckpointReductions.length) {
+      throw new Error('freshnessCheckpointDays and freshnessCheckpointReductions must have equal length');
+    }
+    this._allowedReadinessExceptionReasons = new Set(
+      config.readinessExceptionAllowedReasons ??
+      config.freshnessExceptionAllowedReasons ??
+      [...READINESS_EXCEPTION_REASON_CODES]
+    );
+    this._readinessExceptionMaxDurationMs =
+      config.readinessExceptionMaxDurationMs ??
+      config.freshnessExceptionMaxDurationMs ??
+      DEFAULT_READINESS_EXCEPTION_MAX_DURATION_MS;
+
     // Set default max listeners on EventEmitter
     this.setMaxListeners(this._maxListenersPerEvent);
+  }
+
+  private validateReadinessExceptionOptions(options: {
+    reason: string;
+    expiresAt: string;
+    reductionScale?: number;
+  }): void {
+    if (!this._allowedReadinessExceptionReasons.has(options.reason as ReadinessExceptionReasonCode)) {
+      throw new Error(
+        `Unsupported readiness exception reason: ${options.reason}. ` +
+        `Allowed reasons: ${Array.from(this._allowedReadinessExceptionReasons).join(', ')}`
+      );
+    }
+
+    const now = Date.now();
+    const expiresAtMs = new Date(options.expiresAt).getTime();
+
+    if (Number.isNaN(expiresAtMs)) {
+      throw new Error('Invalid expiresAt timestamp for readiness exception');
+    }
+
+    if (expiresAtMs <= now) {
+      throw new Error('Readiness exception expiresAt must be in the future');
+    }
+
+    if (expiresAtMs - now > this._readinessExceptionMaxDurationMs) {
+      throw new Error(
+        `Readiness exception duration exceeds configured maximum (${this._readinessExceptionMaxDurationMs} ms)`
+      );
+    }
+  }
+
+  private getCheckpointIntervalMs(index: number): number {
+    if (index <= 0) {
+      return toMs(this._readinessCheckpointDays[0] ?? 7);
+    }
+    const current = this._readinessCheckpointDays[index] ?? this._readinessCheckpointDays[this._readinessCheckpointDays.length - 1] ?? 7;
+    const previous = this._readinessCheckpointDays[index - 1] ?? 0;
+    return toMs(Math.max(1, current - previous));
+  }
+
+  private ensureReadinessState(record: TrustRecord): void {
+    record.readinessCheckpointIndex ??= record.freshnessCheckpointIndex ?? 0;
+    record.deferredReadinessMultiplier ??= record.deferredFreshnessMultiplier ?? 1;
+    record.readinessBaselineScore ??= record.freshnessBaselineScore ?? record.score;
+
+    record.freshnessCheckpointIndex = record.readinessCheckpointIndex;
+    record.deferredFreshnessMultiplier = record.deferredReadinessMultiplier;
+    record.freshnessBaselineScore = record.readinessBaselineScore;
+    record.freshnessException = record.readinessException ?? record.freshnessException;
+  }
+
+  private isUsingDefaultReadinessSchedule(): boolean {
+    if (this._readinessCheckpointDays.length !== DEFAULT_READINESS_CHECKPOINT_DAYS.length) {
+      return false;
+    }
+    if (this._readinessCheckpointReductions.length !== DEFAULT_READINESS_REDUCTIONS.length) {
+      return false;
+    }
+
+    return this._readinessCheckpointDays.every((v, i) => v === DEFAULT_READINESS_CHECKPOINT_DAYS[i]) &&
+      this._readinessCheckpointReductions.every((v, i) => v === DEFAULT_READINESS_REDUCTIONS[i]);
+  }
+
+  private isReadinessExceptionActive(record: TrustRecord, now: number): boolean {
+    const exception = record.readinessException ?? record.freshnessException;
+    if (!exception) return false;
+    const issuedAt = new Date(exception.issuedAt).getTime();
+    const expiresAt = new Date(exception.expiresAt).getTime();
+    return now >= issuedAt && now < expiresAt;
+  }
+
+  private async applyDeferredReadinessCatchupIfExpired(record: TrustRecord): Promise<void> {
+    const exception = record.readinessException ?? record.freshnessException;
+    if (!exception) return;
+
+    const now = Date.now();
+    const expiresAt = new Date(exception.expiresAt).getTime();
+    if (now < expiresAt) return;
+
+    this.ensureReadinessState(record);
+    const deferredMultiplier = record.deferredReadinessMultiplier ?? 1;
+    if (deferredMultiplier < 1) {
+      const previousScore = record.score;
+      const adjustedScore = Math.max(0, Math.round(record.score * deferredMultiplier));
+      record.score = adjustedScore;
+      record.level = this.scoreToLevel(adjustedScore);
+      record.deferredReadinessMultiplier = 1;
+      record.deferredFreshnessMultiplier = 1;
+
+      this.emitReadinessAdjustmentEvents(record.entityId, {
+        previousScore,
+        newScore: record.score,
+        stalenessMs: 0,
+        accelerated: false,
+      });
+    }
+
+    delete record.readinessException;
+    delete record.freshnessException;
+  }
+
+  private async applyScheduledReadinessAdjustment(record: TrustRecord): Promise<void> {
+    this.ensureReadinessState(record);
+    await this.applyDeferredReadinessCatchupIfExpired(record);
+
+    while ((record.readinessCheckpointIndex ?? 0) < this._readinessCheckpointDays.length) {
+      const checkpointIndex = record.readinessCheckpointIndex ?? 0;
+      const intervalMs = this.getCheckpointIntervalMs(checkpointIndex);
+      const stalenessMs = Date.now() - new Date(record.lastCalculatedAt).getTime();
+      if (stalenessMs < intervalMs) {
+        break;
+      }
+
+      const previousScore = record.score;
+      const previousLevel = record.level;
+      const fullReduction = this._readinessCheckpointReductions[checkpointIndex] ?? 0;
+      const activeException = this.isReadinessExceptionActive(record, Date.now());
+      const scale = activeException ? clampReductionScale((record.readinessException ?? record.freshnessException)?.reductionScale) : 1;
+      const appliedReduction = fullReduction * scale;
+      const appliedMultiplier = 1 - appliedReduction;
+      const fullMultiplier = 1 - fullReduction;
+
+      record.score = Math.max(0, Math.round(record.score * appliedMultiplier));
+      const isFinalCheckpoint = checkpointIndex === this._readinessCheckpointDays.length - 1;
+      if (isFinalCheckpoint && !activeException && this.isUsingDefaultReadinessSchedule()) {
+        const baseline = record.readinessBaselineScore ?? record.freshnessBaselineScore ?? record.score;
+        record.score = Math.max(0, Math.round(baseline * 0.5));
+      }
+      record.level = this.scoreToLevel(record.score);
+      record.readinessCheckpointIndex = checkpointIndex + 1;
+      record.freshnessCheckpointIndex = record.readinessCheckpointIndex;
+
+      const lastCalculatedMs = new Date(record.lastCalculatedAt).getTime();
+      record.lastCalculatedAt = new Date(lastCalculatedMs + intervalMs).toISOString();
+
+      if (activeException && appliedMultiplier > 0 && fullMultiplier >= 0) {
+        const debtFactor = fullMultiplier / appliedMultiplier;
+        record.deferredReadinessMultiplier = (record.deferredReadinessMultiplier ?? 1) * debtFactor;
+        record.deferredFreshnessMultiplier = record.deferredReadinessMultiplier;
+      }
+
+      if (previousScore !== record.score) {
+        this.emitReadinessAdjustmentEvents(record.entityId, {
+          previousScore,
+          newScore: record.score,
+          stalenessMs,
+          accelerated: false,
+        });
+
+        if (previousLevel !== record.level) {
+          this.emitTrustEvent({
+            type: 'trust:tier_changed',
+            entityId: record.entityId,
+            timestamp: new Date().toISOString(),
+            previousLevel,
+            newLevel: record.level,
+            previousLevelName: TRUST_LEVEL_NAMES[previousLevel],
+            newLevelName: TRUST_LEVEL_NAMES[record.level],
+            direction: record.level < previousLevel ? 'demoted' : 'promoted',
+          });
+        }
+
+        await this.autoPersistRecord(record);
+      }
+    }
+  }
+
+  private emitReadinessAdjustmentEvents(
+    entityId: ID,
+    details: {
+      previousScore: TrustScore;
+      newScore: TrustScore;
+      stalenessMs: number;
+      accelerated: boolean;
+    }
+  ): void {
+    const adjustmentAmount = details.previousScore - details.newScore;
+
+    this.emitTrustEvent({
+      type: 'trust:readiness_adjusted',
+      entityId,
+      timestamp: new Date().toISOString(),
+      previousScore: details.previousScore,
+      newScore: details.newScore,
+      adjustmentAmount,
+      stalenessMs: details.stalenessMs,
+      accelerated: details.accelerated,
+    });
+
+    this.emitTrustEvent({
+      type: 'trust:freshness_adjusted',
+      entityId,
+      timestamp: new Date().toISOString(),
+      previousScore: details.previousScore,
+      newScore: details.newScore,
+      adjustmentAmount,
+      stalenessMs: details.stalenessMs,
+      accelerated: details.accelerated,
+    });
+
+    this.emitTrustEvent({
+      type: 'trust:decay_applied',
+      entityId,
+      timestamp: new Date().toISOString(),
+      previousScore: details.previousScore,
+      newScore: details.newScore,
+      decayAmount: adjustmentAmount,
+      stalenessMs: details.stalenessMs,
+      accelerated: details.accelerated,
+    });
   }
 
   /**
@@ -583,9 +934,10 @@ export class TrustEngine extends EventEmitter {
   async calculate(entityId: ID): Promise<TrustCalculation> {
     const record = this.records.get(entityId);
     const signals = record?.signals ?? [];
+    const currentLevel = record?.level ?? 1;
 
     // Calculate component scores
-    const components = this.calculateComponents(signals);
+    const components = this.calculateComponents(signals, currentLevel);
 
     // Calculate weighted total
     const score = Math.round(
@@ -766,6 +1118,11 @@ export class TrustEngine extends EventEmitter {
       // Clean up old failures
       this.cleanupFailures(record);
 
+      if (this._readinessMode === 'checkpoint_schedule') {
+        await this.applyScheduledReadinessAdjustment(record);
+        return record;
+      }
+
       // Apply decay if stale
       const staleness = Date.now() - new Date(record.lastCalculatedAt).getTime();
       if (staleness > this._decayIntervalMs) {
@@ -911,6 +1268,12 @@ export class TrustEngine extends EventEmitter {
     record.level = calculation.level;
     record.components = calculation.components;
     record.lastCalculatedAt = new Date().toISOString();
+    record.readinessCheckpointIndex = 0;
+    record.deferredReadinessMultiplier = 1;
+    record.readinessBaselineScore = calculation.score;
+    record.freshnessCheckpointIndex = 0;
+    record.deferredFreshnessMultiplier = 1;
+    record.freshnessBaselineScore = calculation.score;
 
     // Record history if significant change
     if (Math.abs(calculation.score - previousScore) >= 10) {
@@ -1006,6 +1369,12 @@ export class TrustEngine extends EventEmitter {
       recentSuccesses: [],
       peakScore: score,
       consecutiveSuccesses: 0,
+      readinessCheckpointIndex: 0,
+      deferredReadinessMultiplier: 1,
+      readinessBaselineScore: score,
+      freshnessCheckpointIndex: 0,
+      deferredFreshnessMultiplier: 1,
+      freshnessBaselineScore: score,
     };
 
     this.records.set(entityId, record);
@@ -1056,7 +1425,7 @@ export class TrustEngine extends EventEmitter {
   /**
    * Calculate component scores from signals
    */
-  private calculateComponents(signals: TrustSignal[]): TrustComponents {
+  private calculateComponents(signals: TrustSignal[], currentLevel: TrustLevel): TrustComponents {
     // Group signals by type
     const behavioral = signals.filter((s) => s.type.startsWith('behavioral.'));
     const compliance = signals.filter((s) => s.type.startsWith('compliance.'));
@@ -1064,17 +1433,17 @@ export class TrustEngine extends EventEmitter {
     const context = signals.filter((s) => s.type.startsWith('context.'));
 
     return {
-      behavioral: this.averageSignalValue(behavioral, 0.5),
-      compliance: this.averageSignalValue(compliance, 0.5),
-      identity: this.averageSignalValue(identity, 0.5),
-      context: this.averageSignalValue(context, 0.5),
+      behavioral: this.averageSignalValue(behavioral, 0.5, currentLevel),
+      compliance: this.averageSignalValue(compliance, 0.5, currentLevel),
+      identity: this.averageSignalValue(identity, 0.5, currentLevel),
+      context: this.averageSignalValue(context, 0.5, currentLevel),
     };
   }
 
   /**
    * Calculate average signal value with default
    */
-  private averageSignalValue(signals: TrustSignal[], defaultValue: number): number {
+  private averageSignalValue(signals: TrustSignal[], defaultValue: number, currentLevel: TrustLevel): number {
     if (signals.length === 0) return defaultValue;
 
     // Weight recent signals more heavily
@@ -1085,11 +1454,55 @@ export class TrustEngine extends EventEmitter {
     for (const signal of signals) {
       const age = now - new Date(signal.timestamp).getTime();
       const weight = Math.exp(-age / (7 * 24 * 60 * 60 * 1000)); // 7-day half-life
-      weightedSum += signal.value * weight;
+      const adjustedValue = this.adjustSignalValueForTier(signal, defaultValue, currentLevel);
+      weightedSum += adjustedValue * weight;
       totalWeight += weight;
     }
 
     return totalWeight > 0 ? weightedSum / totalWeight : defaultValue;
+  }
+
+  /**
+   * Human/manual positive approvals carry less upward impact at higher tiers.
+   */
+  private adjustSignalValueForTier(
+    signal: TrustSignal,
+    defaultValue: number,
+    currentLevel: TrustLevel
+  ): number {
+    if (!this.isHumanApprovalSignal(signal) || signal.value <= defaultValue) {
+      return signal.value;
+    }
+
+    const assistFactor = this.getHumanApprovalAssistFactor(currentLevel);
+    return defaultValue + (signal.value - defaultValue) * assistFactor;
+  }
+
+  private isHumanApprovalSignal(signal: TrustSignal): boolean {
+    const source = signal.source?.toLowerCase() ?? '';
+    return source === 'manual' || source === 'human' || source === 'human_review' || source === 'human-approval';
+  }
+
+  private getHumanApprovalAssistFactor(level: TrustLevel): number {
+    switch (level) {
+      case 0:
+      case 1:
+        return 1.0;
+      case 2:
+        return 0.85;
+      case 3:
+        return 0.7;
+      case 4:
+        return 0.55;
+      case 5:
+        return 0.4;
+      case 6:
+        return 0.3;
+      case 7:
+        return 0.2;
+      default:
+        return 1.0;
+    }
   }
 
   /**
@@ -1136,7 +1549,80 @@ export class TrustEngine extends EventEmitter {
       recentSuccesses: [],
       peakScore: initialScore,
       consecutiveSuccesses: 0,
+      readinessCheckpointIndex: 0,
+      deferredReadinessMultiplier: 1,
+      readinessBaselineScore: initialScore,
+      freshnessCheckpointIndex: 0,
+      deferredFreshnessMultiplier: 1,
+      freshnessBaselineScore: initialScore,
     };
+  }
+
+  /**
+   * Configure a time-bound Readiness Degree exception for an entity.
+   */
+  setReadinessException(
+    entityId: ID,
+    options: { reason: ReadinessExceptionReasonCode; expiresAt: string; reductionScale?: number }
+  ): void {
+    const record = this.records.get(entityId);
+    if (!record) {
+      throw new Error(`Entity not found: ${entityId}`);
+    }
+
+    this.validateReadinessExceptionOptions(options);
+    this.ensureReadinessState(record);
+    record.readinessException = {
+      reason: options.reason,
+      issuedAt: new Date().toISOString(),
+      expiresAt: options.expiresAt,
+      reductionScale: clampReductionScale(options.reductionScale),
+    };
+    record.freshnessException = record.readinessException;
+  }
+
+  /**
+   * @deprecated Use setReadinessException.
+   */
+  setFreshnessException(
+    entityId: ID,
+    options: { reason: ReadinessExceptionReasonCode; expiresAt: string; reductionScale?: number }
+  ): void {
+    this.setReadinessException(entityId, options);
+  }
+
+  /**
+   * Clear Readiness Degree exception for an entity.
+   */
+  clearReadinessException(entityId: ID): void {
+    const record = this.records.get(entityId);
+    if (!record) {
+      return;
+    }
+    delete record.readinessException;
+    delete record.freshnessException;
+  }
+
+  /**
+   * @deprecated Use clearReadinessException.
+   */
+  clearFreshnessException(entityId: ID): void {
+    this.clearReadinessException(entityId);
+  }
+
+  /**
+   * Get active Readiness Degree exception for an entity.
+   */
+  getReadinessException(entityId: ID): ReadinessException | undefined {
+    const record = this.records.get(entityId);
+    return record?.readinessException ?? record?.freshnessException;
+  }
+
+  /**
+   * @deprecated Use getReadinessException.
+   */
+  getFreshnessException(entityId: ID): FreshnessException | undefined {
+    return this.getReadinessException(entityId);
   }
 
   /**

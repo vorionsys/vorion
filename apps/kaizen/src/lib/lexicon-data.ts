@@ -1263,7 +1263,7 @@ if not is_safe:
     level: 'intermediate',
     category: 'safety',
     tags: ['trust', 'governance', 'basis'],
-    slug: 'trust-score',
+    slug: 'basis-trust-score',
     relatedTerms: ['Trust Tier', 'Signal', 'Trust Decay', 'BASIS Standard'],
   },
   {
@@ -1281,7 +1281,7 @@ if not is_safe:
     level: 'intermediate',
     category: 'safety',
     tags: ['trust', 'governance', 'basis'],
-    slug: 'trust-tier',
+    slug: 'basis-trust-tier',
     relatedTerms: ['Trust Score', 'Capability Gating', 'BASIS Standard'],
   },
   {

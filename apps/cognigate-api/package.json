@@ -10,6 +10,7 @@
     "dev": "tsx watch src/server.ts",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
     "docker:build": "docker build -t cognigate-api -f Dockerfile ../..",
     "docker:run": "docker run -p 3000:3000 -v cognigate-data:/app/data cognigate-api",
     "docker:up": "docker-compose up --build",

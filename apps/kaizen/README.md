@@ -24,7 +24,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3001](http://localhost:3001).
 
 ## Project Structure
 
@@ -91,7 +91,7 @@ Currently, Claude and Grok are simulated using Gemini with persona prompts. Add 
 git init
 git add .
 git commit -m "Initial commit"
-gh repo create voriongit/kaizen --public --source=. --push
+gh repo create vorionsys/kaizen --public --source=. --push
 
 # Deploy on Vercel
 # 1. Import from GitHub at vercel.com
@@ -116,7 +116,7 @@ CNAME learn -> cname.vercel-dns.com
 
 ## Technology Stack
 
-- **Framework**: Next.js 14+ (App Router)
+- **Framework**: Next.js 16+ (App Router)
 - **Styling**: Tailwind CSS 4.0 + custom glassmorphism
 - **AI**: Vercel AI SDK with Google Gemini
 - **Icons**: Lucide React

@@ -32,20 +32,22 @@ const DANGEROUS_PATTERNS: Array<{
   {
     name: 'bidi_override',
     // Bi-directional override characters (used in trojan source attacks)
-    pattern: /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,
+    pattern:
+      /(?:\u200E|\u200F|\u202A|\u202B|\u202C|\u202D|\u202E|\u2066|\u2067|\u2068|\u2069)/g,
     severity: 'critical',
     description: 'Bi-directional text override characters can disguise malicious content',
   },
   {
     name: 'zero_width',
     // Zero-width characters (invisible text injection)
-    pattern: /[\u200B\u200C\u200D\uFEFF]/g,
+    pattern: /(?:\u200B|\u200C|\u200D|\uFEFF)/g,
     severity: 'high',
     description: 'Zero-width characters can hide content from human reviewers',
   },
   {
     name: 'control_chars',
     // C0/C1 control characters except common whitespace (tab, newline, carriage return)
+    // eslint-disable-next-line no-control-regex
     pattern: /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\x80-\x9F]/g,
     severity: 'high',
     description: 'Control characters can corrupt parsing or inject escape sequences',
@@ -53,7 +55,7 @@ const DANGEROUS_PATTERNS: Array<{
   {
     name: 'tag_chars',
     // Unicode tag characters (U+E0001-U+E007F) — used to hide instructions
-    pattern: /[\uDB40][\uDC01-\uDC7F]/g,
+    pattern: /\uDB40[\uDC01-\uDC7F]/g,
     severity: 'high',
     description: 'Unicode tag characters can embed hidden instructions',
   },

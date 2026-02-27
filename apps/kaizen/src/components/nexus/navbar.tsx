@@ -92,15 +92,19 @@ export function Navbar({ onActivateChat }: NavbarProps) {
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+            aria-expanded={mobileMenuOpen}
+            data-testid="navbar-mobile-toggle"
             className="md:hidden p-2 text-gray-400 hover:text-white"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X data-testid="navbar-mobile-close-icon" className="w-5 h-5" /> : <Menu data-testid="navbar-mobile-open-icon" className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       <div
+        data-testid="navbar-mobile-menu"
         className={cn(
           'md:hidden absolute top-16 left-0 right-0 glass border-b border-gray-800 transition-all duration-300',
           mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'

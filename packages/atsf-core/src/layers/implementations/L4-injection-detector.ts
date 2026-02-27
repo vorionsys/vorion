@@ -116,7 +116,7 @@ const INJECTION_PATTERNS: InjectionPattern[] = [
   // === Encoding Attacks ===
   {
     name: 'base64_instruction',
-    pattern: /(?:base64|decode|atob|btoa)\s*[\(:]\s*['"]?[A-Za-z0-9+/=]{20,}/i,
+    pattern: /(?:base64|decode|atob|btoa)\s*[(:]\s*['"]?[A-Za-z0-9+/=]{20,}/i,
     severity: 'high',
     category: 'encoding_attack',
     description: 'Base64-encoded content that may hide injection payloads',
