@@ -41,7 +41,7 @@ export class CognigateError extends Error {
 }
 
 export class Cognigate {
-  private readonly config: Required<Omit<CognigateConfig, 'webhookSecret'>> & { webhookSecret?: string };
+  private readonly config: Required<Omit<CognigateConfig, 'webhookSecret' | 'region'>> & { webhookSecret?: string; region?: string };
   public readonly agents: AgentsClient;
   public readonly trust: TrustClient;
   public readonly governance: GovernanceClient;
@@ -59,6 +59,7 @@ export class Cognigate {
       retries: config.retries || DEFAULT_RETRIES,
       debug: config.debug || false,
       webhookSecret: config.webhookSecret,
+      region: config.region,
     };
 
     // Initialize sub-clients
@@ -83,6 +84,7 @@ export class Cognigate {
       'Content-Type': 'application/json',
       'X-SDK-Version': '1.0.0',
       'X-SDK-Language': 'typescript',
+      ...(this.config.region ? { 'X-Cognigate-Region': this.config.region } : {}),
     };
 
     let lastError: Error | null = null;

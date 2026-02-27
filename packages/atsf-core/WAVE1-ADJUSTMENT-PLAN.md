@@ -2,9 +2,9 @@
 
 **Scope:** Wave 1 launch hardening for ATSF in the CARID + BASIS + ATSF + Cognigate release track.
 
-**Owner:** ATSF engineering lead  
-**Status:** Draft (execution-ready)  
-**Target window:** Week 1 (Foundation Lock)
+**Owner:** @chunkstar (engineering lead)
+**Status:** In progress — A1/A2/A3 done, A4/A5 active
+**Target window:** Week 1 (Foundation Lock) — due by March 6, 2026
 
 ## Objectives
 
@@ -56,19 +56,29 @@
 
 ## A4. Finalize API and deprecation policy for Wave 1
 
-- Explicitly document supported public exports for Wave 1 (`trust-engine`, `basis`, `cognigate`, `phase6` usage)
-- Mark deprecated aliases with migration guidance and removal timeline
-- Ensure README examples match production-recommended APIs
+**Owner:** @chunkstar
+**Due:** March 3, 2026 (Wave 1 Foundation Lock)
+**Status:** Not started
 
-**Done when:** ATSF README and changelog communicate a stable Wave 1 API surface.
+- Explicitly document supported public exports for Wave 1 (`trust-engine`, `basis`, `cognigate`, `phase6` usage)
+- Mark deprecated aliases with migration guidance and removal timeline (`ACI_CANONICAL_PRESETS` → `BASIS_CANONICAL_PRESETS`)
+- Ensure README examples match production-recommended APIs
+- Confirm `packages/atsf-core/README.md` terminology is updated (decay → readiness adjustment per Wave 1 commit)
+
+**Done when:** ATSF README and changelog communicate a stable Wave 1 API surface and all deprecated aliases have removal timeline documented.
 
 ## A5. Integration validation with BASIS and Cognigate
+
+**Owner:** @chunkstar
+**Due:** March 5, 2026 (Wave 1 Foundation Lock)
+**Status:** Not started
 
 - Validate ATSF + BASIS evaluator interaction in one integration test path
 - Validate ATSF trust outputs are consumable by Cognigate enforcement path
 - Add launch smoke assertions for trust decision auditability
+- Confirm `autoPersist` RTT is acceptable in the Cognigate hot path (see `apps/cognigate-api/DEPLOYMENT.md`)
 
-**Done when:** One e2e launch smoke path covers CARID identity context -> ATSF trust -> Cognigate decision.
+**Done when:** One e2e launch smoke path covers CARID identity context -> ATSF trust -> Cognigate decision and passes in CI.
 
 ## Suggested Execution Order (Recommended)
 
@@ -80,16 +90,18 @@
 
 ## Launch Exit Checklist (ATSF)
 
-- [ ] No placeholder cryptographic helpers in launch path
-- [ ] Phase 6 tests active and green in CI
-- [ ] Critical trust logic coverage targets met
-- [ ] README/API docs aligned with Wave 1 scope
-- [ ] BASIS + Cognigate integration smoke checks passing
+- [x] No placeholder cryptographic helpers in launch path (A2 complete)
+- [x] Phase 6 tests active and green in CI (A1 complete)
+- [x] Critical trust logic coverage targets met (A3 complete)
+- [ ] **A4** README/API docs aligned with Wave 1 scope — owner: @chunkstar, due March 3
+- [ ] **A5** BASIS + Cognigate integration smoke checks passing — owner: @chunkstar, due March 5
 
 ## Next Steps (Immediate)
 
-1. Assign owners for A1-A5
-2. Implement A2 in first pass (small, high-value, low-risk)
-3. Activate Phase 6 tests with minimal CI-safe subset
-4. Re-run ATSF package tests and coverage; capture baseline
-5. Promote ATSF checklist status into top-level launch tracker
+1. ~~Assign owners for A1-A5~~ — done (all assigned to @chunkstar)
+2. ~~Implement A2~~ — done (SHA-256 in `src/phase6/types.ts`)
+3. ~~Activate Phase 6 tests~~ — done (`tests/**` included in `vitest.config.ts`)
+4. ~~Re-run ATSF package tests and coverage~~ — done (thresholds enforced in CI)
+5. **A4:** Document Wave 1 API surface + deprecation timeline (due March 3)
+6. **A5:** Write CARID → ATSF → Cognigate integration smoke test (due March 5)
+7. After A5: run `npm run test:coverage` in `packages/atsf-core` and confirm green in CI

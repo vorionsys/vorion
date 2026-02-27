@@ -203,7 +203,26 @@ export type WebhookEventType =
 
 export interface CognigateConfig {
   apiKey: string;
+  /**
+   * Base URL for the Cognigate API.
+   * Override this to route to a regional endpoint:
+   *   - US (default):  https://cognigate.dev/v1
+   *   - EU:            https://eu.cognigate.dev/v1
+   *   - APAC:          https://apac.cognigate.dev/v1
+   *
+   * For large consumers (>500 evaluations/day) or SLA <50ms p95, always set
+   * baseUrl to the nearest regional endpoint. Cross-region calls from EU or
+   * APAC to the default US endpoint add 90–170ms RTT per request.
+   * See apps/cognigate-api/DEPLOYMENT.md for the full regional architecture.
+   */
   baseUrl?: string;
+  /**
+   * Logical region identifier forwarded as `X-Cognigate-Region` on every request.
+   * Used for observability and per-region latency dashboards.
+   * Should match the Fly.io region code of your nearest cognigate-api instance.
+   * Examples: 'iad' (US East, default), 'lhr' (EU), 'nrt' (APAC), 'sjc' (US West)
+   */
+  region?: string;
   timeout?: number;
   retries?: number;
   debug?: boolean;
