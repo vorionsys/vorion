@@ -6,6 +6,9 @@ describe("API Server", () => {
   let server: FastifyInstance;
 
   beforeAll(async () => {
+    // Provide a test JWT secret (min 32 chars required by config schema)
+    process.env["VORION_JWT_SECRET"] ??=
+      "test-jwt-secret-for-unit-tests-only";
     server = await createServer();
   });
 
