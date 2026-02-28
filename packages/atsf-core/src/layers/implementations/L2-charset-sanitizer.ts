@@ -11,14 +11,14 @@
  * @packageDocumentation
  */
 
-import { BaseSecurityLayer, createLayerConfig } from '../index.js';
+import { BaseSecurityLayer, createLayerConfig } from "../index.js";
 import type {
   LayerInput,
   LayerExecutionResult,
   LayerFinding,
   LayerModification,
   LayerTiming,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * Unicode categories of dangerous characters
@@ -26,59 +26,61 @@ import type {
 const DANGEROUS_PATTERNS: Array<{
   name: string;
   pattern: RegExp;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
 }> = [
   {
-    name: 'bidi_override',
+    name: "bidi_override",
     // Bi-directional override characters (used in trojan source attacks)
     pattern:
       /(?:\u200E|\u200F|\u202A|\u202B|\u202C|\u202D|\u202E|\u2066|\u2067|\u2068|\u2069)/g,
-    severity: 'critical',
-    description: 'Bi-directional text override characters can disguise malicious content',
+    severity: "critical",
+    description:
+      "Bi-directional text override characters can disguise malicious content",
   },
   {
-    name: 'zero_width',
+    name: "zero_width",
     // Zero-width characters (invisible text injection)
     pattern: /(?:\u200B|\u200C|\u200D|\uFEFF)/g,
-    severity: 'high',
-    description: 'Zero-width characters can hide content from human reviewers',
+    severity: "high",
+    description: "Zero-width characters can hide content from human reviewers",
   },
   {
-    name: 'control_chars',
+    name: "control_chars",
     // C0/C1 control characters except common whitespace (tab, newline, carriage return)
     // eslint-disable-next-line no-control-regex
     pattern: /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\x80-\x9F]/g,
-    severity: 'high',
-    description: 'Control characters can corrupt parsing or inject escape sequences',
+    severity: "high",
+    description:
+      "Control characters can corrupt parsing or inject escape sequences",
   },
   {
-    name: 'tag_chars',
+    name: "tag_chars",
     // Unicode tag characters (U+E0001-U+E007F) — used to hide instructions
     pattern: /\uDB40[\uDC01-\uDC7F]/g,
-    severity: 'high',
-    description: 'Unicode tag characters can embed hidden instructions',
+    severity: "high",
+    description: "Unicode tag characters can embed hidden instructions",
   },
   {
-    name: 'interlinear_annotation',
+    name: "interlinear_annotation",
     // Interlinear annotation characters
     pattern: /[\uFFF9\uFFFA\uFFFB]/g,
-    severity: 'medium',
-    description: 'Annotation characters can inject hidden metadata',
+    severity: "medium",
+    description: "Annotation characters can inject hidden metadata",
   },
   {
-    name: 'replacement_char',
+    name: "replacement_char",
     // Object replacement character (can mask embedded objects)
     pattern: /\uFFFC/g,
-    severity: 'medium',
-    description: 'Object replacement character may mask embedded content',
+    severity: "medium",
+    description: "Object replacement character may mask embedded content",
   },
   {
-    name: 'variation_selector_abuse',
+    name: "variation_selector_abuse",
     // Excessive variation selectors (emoji/glyph variant abuse)
     pattern: /[\uFE00-\uFE0F]{3,}/g,
-    severity: 'low',
-    description: 'Excessive variation selectors suggest encoding manipulation',
+    severity: "low",
+    description: "Excessive variation selectors suggest encoding manipulation",
   },
 ];
 
@@ -86,28 +88,28 @@ const DANGEROUS_PATTERNS: Array<{
  * Common homoglyph mappings (confusable characters → ASCII equivalent)
  */
 const HOMOGLYPH_MAP: Record<string, string> = {
-  '\u0410': 'A', // Cyrillic А → Latin A
-  '\u0412': 'B', // Cyrillic В → Latin B
-  '\u0421': 'C', // Cyrillic С → Latin C
-  '\u0415': 'E', // Cyrillic Е → Latin E
-  '\u041D': 'H', // Cyrillic Н → Latin H
-  '\u041A': 'K', // Cyrillic К → Latin K
-  '\u041C': 'M', // Cyrillic М → Latin M
-  '\u041E': 'O', // Cyrillic О → Latin O
-  '\u0420': 'P', // Cyrillic Р → Latin P
-  '\u0422': 'T', // Cyrillic Т → Latin T
-  '\u0425': 'X', // Cyrillic Х → Latin X
-  '\u0430': 'a', // Cyrillic а → Latin a
-  '\u0435': 'e', // Cyrillic е → Latin e
-  '\u043E': 'o', // Cyrillic о → Latin o
-  '\u0440': 'p', // Cyrillic р → Latin p
-  '\u0441': 'c', // Cyrillic с → Latin c
-  '\u0443': 'y', // Cyrillic у → Latin y
-  '\u0445': 'x', // Cyrillic х → Latin x
-  '\u0456': 'i', // Cyrillic і → Latin i
-  '\u0458': 'j', // Cyrillic ј → Latin j
-  '\u0455': 's', // Cyrillic ѕ → Latin s
-  '\u0501': 'd', // Cyrillic ԁ → Latin d
+  "\u0410": "A", // Cyrillic А → Latin A
+  "\u0412": "B", // Cyrillic В → Latin B
+  "\u0421": "C", // Cyrillic С → Latin C
+  "\u0415": "E", // Cyrillic Е → Latin E
+  "\u041D": "H", // Cyrillic Н → Latin H
+  "\u041A": "K", // Cyrillic К → Latin K
+  "\u041C": "M", // Cyrillic М → Latin M
+  "\u041E": "O", // Cyrillic О → Latin O
+  "\u0420": "P", // Cyrillic Р → Latin P
+  "\u0422": "T", // Cyrillic Т → Latin T
+  "\u0425": "X", // Cyrillic Х → Latin X
+  "\u0430": "a", // Cyrillic а → Latin a
+  "\u0435": "e", // Cyrillic е → Latin e
+  "\u043E": "o", // Cyrillic о → Latin o
+  "\u0440": "p", // Cyrillic р → Latin p
+  "\u0441": "c", // Cyrillic с → Latin c
+  "\u0443": "y", // Cyrillic у → Latin y
+  "\u0445": "x", // Cyrillic х → Latin x
+  "\u0456": "i", // Cyrillic і → Latin i
+  "\u0458": "j", // Cyrillic ј → Latin j
+  "\u0455": "s", // Cyrillic ѕ → Latin s
+  "\u0501": "d", // Cyrillic ԁ → Latin d
 };
 
 /**
@@ -118,17 +120,18 @@ const HOMOGLYPH_MAP: Record<string, string> = {
 export class L2CharsetSanitizer extends BaseSecurityLayer {
   constructor() {
     super(
-      createLayerConfig(2, 'Character Set Sanitizer', {
-        description: 'Detects and sanitizes dangerous Unicode sequences, invisible characters, and homoglyph attacks',
-        tier: 'input_validation',
-        primaryThreat: 'prompt_injection',
-        secondaryThreats: ['deceptive_output', 'audit_evasion'],
-        failMode: 'block',
+      createLayerConfig(2, "Character Set Sanitizer", {
+        description:
+          "Detects and sanitizes dangerous Unicode sequences, invisible characters, and homoglyph attacks",
+        tier: "input_validation",
+        primaryThreat: "prompt_injection",
+        secondaryThreats: ["deceptive_output", "audit_evasion"],
+        failMode: "block",
         required: true,
         timeoutMs: 300,
         parallelizable: true,
         dependencies: [],
-      })
+      }),
     );
   }
 
@@ -139,22 +142,28 @@ export class L2CharsetSanitizer extends BaseSecurityLayer {
     const modifications: LayerModification[] = [];
 
     // Walk all string values in the payload
-    this.scanObject(input.payload, '', findings, modifications);
+    this.scanObject(input.payload, "", findings, modifications);
 
     const timing = this.buildTiming(startedAt, t0);
-    const hasCritical = findings.some((f) => f.severity === 'critical');
-    const hasHigh = findings.some((f) => f.severity === 'high');
+    const hasCritical = findings.some((f) => f.severity === "critical");
+    const hasHigh = findings.some((f) => f.severity === "high");
     const passed = !hasCritical && !hasHigh;
 
     if (passed) {
-      return this.createSuccessResult('allow', 0.9, findings, modifications, timing);
+      return this.createSuccessResult(
+        "allow",
+        0.9,
+        findings,
+        modifications,
+        timing,
+      );
     }
 
     return this.createFailureResult(
-      hasCritical ? 'deny' : 'escalate',
+      hasCritical ? "deny" : "escalate",
       0.85,
       findings,
-      timing
+      timing,
     );
   }
 
@@ -162,11 +171,11 @@ export class L2CharsetSanitizer extends BaseSecurityLayer {
     obj: unknown,
     path: string,
     findings: LayerFinding[],
-    modifications: LayerModification[]
+    modifications: LayerModification[],
   ): void {
     if (obj === null || obj === undefined) return;
 
-    if (typeof obj === 'string') {
+    if (typeof obj === "string") {
       this.scanString(obj, path, findings, modifications);
       return;
     }
@@ -178,11 +187,21 @@ export class L2CharsetSanitizer extends BaseSecurityLayer {
       return;
     }
 
-    if (typeof obj === 'object') {
+    if (typeof obj === "object") {
       for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
         // Also scan keys for homoglyphs
-        this.scanString(key, `${path ? path + '.' : ''}(key:${key})`, findings, modifications);
-        this.scanObject(val, path ? `${path}.${key}` : key, findings, modifications);
+        this.scanString(
+          key,
+          `${path ? path + "." : ""}(key:${key})`,
+          findings,
+          modifications,
+        );
+        this.scanObject(
+          val,
+          path ? `${path}.${key}` : key,
+          findings,
+          modifications,
+        );
       }
     }
   }
@@ -191,7 +210,7 @@ export class L2CharsetSanitizer extends BaseSecurityLayer {
     value: string,
     path: string,
     findings: LayerFinding[],
-    modifications: LayerModification[]
+    modifications: LayerModification[],
   ): void {
     // 1. Check for dangerous character patterns
     for (const { name, pattern, severity, description } of DANGEROUS_PATTERNS) {
@@ -200,22 +219,28 @@ export class L2CharsetSanitizer extends BaseSecurityLayer {
       const matches = value.match(pattern);
       if (matches && matches.length > 0) {
         findings.push({
-          type: 'threat_detected',
+          type: "threat_detected",
           severity,
           code: `L2_${name.toUpperCase()}`,
           description: `${description} at '${path}'`,
           evidence: [
             `Found ${matches.length} instance(s)`,
-            `Code points: ${matches.slice(0, 5).map((c) => `U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`).join(', ')}`,
+            `Code points: ${matches
+              .slice(0, 5)
+              .map(
+                (c) =>
+                  `U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0")}`,
+              )
+              .join(", ")}`,
           ],
           remediation: `Remove ${name} characters from the input`,
         });
 
         modifications.push({
           target: path,
-          type: 'sanitize',
+          type: "sanitize",
           originalValue: `[${matches.length} ${name} chars]`,
-          newValue: '[stripped]',
+          newValue: "[stripped]",
           reason: description,
         });
       }
@@ -225,20 +250,29 @@ export class L2CharsetSanitizer extends BaseSecurityLayer {
     const homoglyphs = this.detectHomoglyphs(value);
     if (homoglyphs.length > 0) {
       findings.push({
-        type: 'threat_detected',
-        severity: 'high',
-        code: 'L2_HOMOGLYPH_ATTACK',
+        type: "threat_detected",
+        severity: "high",
+        code: "L2_HOMOGLYPH_ATTACK",
         description: `Mixed-script homoglyph characters detected at '${path}'`,
-        evidence: homoglyphs.slice(0, 10).map(
-          (h) => `'${h.char}' (U+${h.codePoint}) looks like '${h.looksLike}'`
-        ),
-        remediation: 'Use consistent character scripts (do not mix Cyrillic with Latin)',
+        evidence: homoglyphs
+          .slice(0, 10)
+          .map(
+            (h) => `'${h.char}' (U+${h.codePoint}) looks like '${h.looksLike}'`,
+          ),
+        remediation:
+          "Use consistent character scripts (do not mix Cyrillic with Latin)",
       });
     }
   }
 
-  private detectHomoglyphs(value: string): Array<{ char: string; codePoint: string; looksLike: string }> {
-    const results: Array<{ char: string; codePoint: string; looksLike: string }> = [];
+  private detectHomoglyphs(
+    value: string,
+  ): Array<{ char: string; codePoint: string; looksLike: string }> {
+    const results: Array<{
+      char: string;
+      codePoint: string;
+      looksLike: string;
+    }> = [];
 
     // Only flag if the string contains a mix of Latin and non-Latin scripts
     const hasLatin = /[a-zA-Z]/.test(value);
@@ -249,7 +283,11 @@ export class L2CharsetSanitizer extends BaseSecurityLayer {
       if (mapped) {
         results.push({
           char,
-          codePoint: char.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0'),
+          codePoint: char
+            .charCodeAt(0)
+            .toString(16)
+            .toUpperCase()
+            .padStart(4, "0"),
           looksLike: mapped,
         });
       }

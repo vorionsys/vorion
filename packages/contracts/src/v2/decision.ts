@@ -5,7 +5,13 @@
  * three-tier fluid governance model (GREEN/YELLOW/RED).
  */
 
-import type { ApprovalType, TrustBand, DecisionTier, RefinementAction, WorkflowState } from './enums.js';
+import type {
+  ApprovalType,
+  TrustBand,
+  DecisionTier,
+  RefinementAction,
+  WorkflowState,
+} from "./enums.js";
 
 /**
  * Rate limit constraint
@@ -159,14 +165,14 @@ export interface AuthorizationResponse {
  * Denial reasons enum for structured denials
  */
 export enum DenialReason {
-  INSUFFICIENT_TRUST = 'insufficient_trust',
-  POLICY_VIOLATION = 'policy_violation',
-  RESOURCE_RESTRICTED = 'resource_restricted',
-  DATA_SENSITIVITY_EXCEEDED = 'data_sensitivity_exceeded',
-  RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
-  CONTEXT_MISMATCH = 'context_mismatch',
-  EXPIRED_INTENT = 'expired_intent',
-  SYSTEM_ERROR = 'system_error',
+  INSUFFICIENT_TRUST = "insufficient_trust",
+  POLICY_VIOLATION = "policy_violation",
+  RESOURCE_RESTRICTED = "resource_restricted",
+  DATA_SENSITIVITY_EXCEEDED = "data_sensitivity_exceeded",
+  RATE_LIMIT_EXCEEDED = "rate_limit_exceeded",
+  CONTEXT_MISMATCH = "context_mismatch",
+  EXPIRED_INTENT = "expired_intent",
+  SYSTEM_ERROR = "system_error",
 }
 
 // ============================================================================
@@ -193,7 +199,7 @@ export interface RefinementOption {
   successProbability: number;
 
   /** Estimated effort/cost to implement this refinement */
-  effort: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
 
   /** Specific parameters for the refinement */
   parameters?: Record<string, unknown>;
@@ -270,7 +276,7 @@ export interface FluidDecision extends Decision {
   violatedPolicies?: Array<{
     policyId: string;
     policyName: string;
-    severity: 'warning' | 'error' | 'critical';
+    severity: "warning" | "error" | "critical";
   }>;
 }
 
@@ -361,7 +367,7 @@ export interface WorkflowInstance {
     executionId: string;
     startedAt: Date;
     completedAt?: Date;
-    status: 'running' | 'completed' | 'failed';
+    status: "running" | "completed" | "failed";
     result?: unknown;
     error?: string;
   };

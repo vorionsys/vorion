@@ -2,7 +2,7 @@
  * Proof Event types - immutable audit trail entries
  */
 
-import type { ProofEventType } from './enums.js';
+import type { ProofEventType } from "./enums.js";
 
 /**
  * Shadow mode status for events from sandbox/testnet environments
@@ -11,11 +11,11 @@ import type { ProofEventType } from './enums.js';
  * trust scores until verified by HITL review.
  */
 export type ShadowModeStatus =
-  | 'production'    // Normal production event (default)
-  | 'shadow'        // Shadow mode - recorded but not counted
-  | 'testnet'       // Testnet event - for testing only
-  | 'verified'      // Shadow event that was verified by HITL
-  | 'rejected';     // Shadow event that was rejected by HITL
+  | "production" // Normal production event (default)
+  | "shadow" // Shadow mode - recorded but not counted
+  | "testnet" // Testnet event - for testing only
+  | "verified" // Shadow event that was verified by HITL
+  | "rejected"; // Shadow event that was rejected by HITL
 
 /**
  * Proof event - an immutable record in the audit trail
@@ -101,7 +101,7 @@ export type ProofEventPayload =
 
 /** Intent received payload */
 export interface IntentReceivedPayload {
-  type: 'intent_received';
+  type: "intent_received";
   intentId: string;
   action: string;
   actionType: string;
@@ -110,7 +110,7 @@ export interface IntentReceivedPayload {
 
 /** Decision made payload */
 export interface DecisionMadePayload {
-  type: 'decision_made';
+  type: "decision_made";
   decisionId: string;
   intentId: string;
   permitted: boolean;
@@ -121,7 +121,7 @@ export interface DecisionMadePayload {
 
 /** Trust delta payload */
 export interface TrustDeltaPayload {
-  type: 'trust_delta';
+  type: "trust_delta";
   deltaId: string;
   previousScore: number;
   newScore: number;
@@ -132,7 +132,7 @@ export interface TrustDeltaPayload {
 
 /** Execution started payload */
 export interface ExecutionStartedPayload {
-  type: 'execution_started';
+  type: "execution_started";
   executionId: string;
   actionId: string;
   decisionId: string;
@@ -141,17 +141,17 @@ export interface ExecutionStartedPayload {
 
 /** Execution completed payload */
 export interface ExecutionCompletedPayload {
-  type: 'execution_completed';
+  type: "execution_completed";
   executionId: string;
   actionId: string;
-  status: 'success' | 'partial';
+  status: "success" | "partial";
   durationMs: number;
   outputHash: string;
 }
 
 /** Execution failed payload */
 export interface ExecutionFailedPayload {
-  type: 'execution_failed';
+  type: "execution_failed";
   executionId: string;
   actionId: string;
   error: string;
@@ -161,16 +161,16 @@ export interface ExecutionFailedPayload {
 
 /** Incident detected payload */
 export interface IncidentDetectedPayload {
-  type: 'incident_detected';
+  type: "incident_detected";
   incidentId: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   affectedResources: string[];
 }
 
 /** Rollback initiated payload */
 export interface RollbackInitiatedPayload {
-  type: 'rollback_initiated';
+  type: "rollback_initiated";
   rollbackId: string;
   executionId: string;
   reason: string;
@@ -179,7 +179,7 @@ export interface RollbackInitiatedPayload {
 
 /** Component registered payload */
 export interface ComponentRegisteredPayload {
-  type: 'component_registered';
+  type: "component_registered";
   componentId: string;
   componentType: string;
   name: string;
@@ -188,7 +188,7 @@ export interface ComponentRegisteredPayload {
 
 /** Component updated payload */
 export interface ComponentUpdatedPayload {
-  type: 'component_updated';
+  type: "component_updated";
   componentId: string;
   changes: string[];
   previousVersion?: string;

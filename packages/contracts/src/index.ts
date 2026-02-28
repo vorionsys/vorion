@@ -7,17 +7,17 @@
  */
 
 // Re-export all v2 contracts
-export * from './v2/index.js';
+export * from "./v2/index.js";
 
 // Re-export validators
 // export * from './validators/index.js';
-export * from './canonical/agent.js';
+export * from "./canonical/agent.js";
 
 // Re-export canonical validation utilities as namespace to avoid naming conflicts
-export * as Canonical from './canonical/index.js';
+export * as Canonical from "./canonical/index.js";
 
 // Re-export database schemas
-export * as db from './db/index.js';
+export * as db from "./db/index.js";
 
 // Re-export feature flags
-export * from './flags.js';
+export * from "./flags.js";

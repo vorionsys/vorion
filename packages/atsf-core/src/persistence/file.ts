@@ -6,14 +6,22 @@
  * @packageDocumentation
  */
 
-import { readFile, writeFile, mkdir, unlink, access, rename, copyFile } from 'fs/promises';
-import { dirname, join } from 'path';
-import type { ID } from '../common/types.js';
-import type { TrustRecord } from '../trust-engine/index.js';
-import type { PersistenceProvider, TrustRecordQuery } from './types.js';
-import { createLogger } from '../common/logger.js';
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  unlink,
+  access,
+  rename,
+  copyFile,
+} from "fs/promises";
+import { dirname, join } from "path";
+import type { ID } from "../common/types.js";
+import type { TrustRecord } from "../trust-engine/index.js";
+import type { PersistenceProvider, TrustRecordQuery } from "./types.js";
+import { createLogger } from "../common/logger.js";
 
-const logger = createLogger({ component: 'persistence-file' });
+const logger = createLogger({ component: "persistence-file" });
 
 /**
  * File storage format
@@ -58,9 +66,11 @@ export interface FilePersistenceConfig {
  * File-based persistence provider with robust error handling
  */
 export class FilePersistenceProvider implements PersistenceProvider {
-  readonly name = 'file';
+  readonly name = "file";
   private records: Map<ID, TrustRecord> = new Map();
-  private config: Required<Omit<FilePersistenceConfig, 'onAutoSaveError'>> & { onAutoSaveError?: FilePersistenceConfig['onAutoSaveError'] };
+  private config: Required<Omit<FilePersistenceConfig, "onAutoSaveError">> & {
+    onAutoSaveError?: FilePersistenceConfig["onAutoSaveError"];
+  };
   private dirty = false;
   private saveTimer: ReturnType<typeof setInterval> | null = null;
   private retryCount = 0;
@@ -86,7 +96,7 @@ export class FilePersistenceProvider implements PersistenceProvider {
     // Load existing data if file exists
     try {
       await access(this.config.path);
-      const content = await readFile(this.config.path, 'utf-8');
+      const content = await readFile(this.config.path, "utf-8");
       const storage: FileStorage = JSON.parse(content);
 
       // Load records into memory
@@ -94,15 +104,24 @@ export class FilePersistenceProvider implements PersistenceProvider {
         this.records.set(id, record);
       }
 
-      logger.info({ path: this.config.path, count: this.records.size }, 'Loaded trust records from file');
+      logger.info(
+        { path: this.config.path, count: this.records.size },
+        "Loaded trust records from file",
+      );
     } catch (error) {
       // Check if it's a parse error vs file not existing
       if (error instanceof SyntaxError) {
-        logger.warn({ path: this.config.path, error: error.message }, 'Corrupted file detected, attempting recovery from backup');
+        logger.warn(
+          { path: this.config.path, error: error.message },
+          "Corrupted file detected, attempting recovery from backup",
+        );
         await this.recoverFromBackup();
       } else {
         // File doesn't exist, start fresh
-        logger.info({ path: this.config.path }, 'Creating new trust records file');
+        logger.info(
+          { path: this.config.path },
+          "Creating new trust records file",
+        );
       }
     }
 
@@ -111,7 +130,7 @@ export class FilePersistenceProvider implements PersistenceProvider {
       this.saveTimer = setInterval(() => {
         if (this.dirty && !this.isFlushing) {
           this.flushWithRetry().catch((err) => {
-            logger.error({ err }, 'Auto-save exhausted all retry attempts');
+            logger.error({ err }, "Auto-save exhausted all retry attempts");
           });
         }
       }, this.config.autoSaveIntervalMs);
@@ -125,19 +144,22 @@ export class FilePersistenceProvider implements PersistenceProvider {
     const backupPath = `${this.config.path}.backup`;
     try {
       await access(backupPath);
-      const content = await readFile(backupPath, 'utf-8');
+      const content = await readFile(backupPath, "utf-8");
       const storage: FileStorage = JSON.parse(content);
 
       for (const [id, record] of Object.entries(storage.records)) {
         this.records.set(id, record);
       }
 
-      logger.info({ path: backupPath, count: this.records.size }, 'Recovered trust records from backup');
+      logger.info(
+        { path: backupPath, count: this.records.size },
+        "Recovered trust records from backup",
+      );
 
       // Restore main file from backup
       await copyFile(backupPath, this.config.path);
     } catch {
-      logger.warn({ backupPath }, 'No valid backup found, starting fresh');
+      logger.warn({ backupPath }, "No valid backup found, starting fresh");
     }
   }
 
@@ -151,7 +173,10 @@ export class FilePersistenceProvider implements PersistenceProvider {
       await access(this.config.path);
       const backupPath = `${this.config.path}.backup`;
       await copyFile(this.config.path, backupPath);
-      logger.debug({ path: this.config.path, backupPath }, 'Created backup before write');
+      logger.debug(
+        { path: this.config.path, backupPath },
+        "Created backup before write",
+      );
     } catch {
       // Original file doesn't exist, no backup needed
     }
@@ -169,7 +194,9 @@ export class FilePersistenceProvider implements PersistenceProvider {
     } catch (error) {
       this.retryCount++;
       const willRetry = this.retryCount < this.config.maxRetryAttempts;
-      const nextRetryMs = willRetry ? this.config.retryDelayMs * Math.pow(2, this.retryCount - 1) : undefined;
+      const nextRetryMs = willRetry
+        ? this.config.retryDelayMs * Math.pow(2, this.retryCount - 1)
+        : undefined;
 
       const errorEvent: AutoSaveErrorEvent = {
         error: error instanceof Error ? error : new Error(String(error)),
@@ -183,7 +210,7 @@ export class FilePersistenceProvider implements PersistenceProvider {
         try {
           this.config.onAutoSaveError(errorEvent);
         } catch (handlerError) {
-          logger.warn({ handlerError }, 'Error in onAutoSaveError callback');
+          logger.warn({ handlerError }, "Error in onAutoSaveError callback");
         }
       }
 
@@ -195,14 +222,14 @@ export class FilePersistenceProvider implements PersistenceProvider {
           nextRetryMs,
           error: errorEvent.error.message,
         },
-        'Auto-save failed'
+        "Auto-save failed",
       );
 
       if (willRetry) {
         // Schedule retry with exponential backoff
         this.retryTimer = setTimeout(() => {
           this.flushWithRetry().catch((err) => {
-            logger.error({ err }, 'Retry flush failed');
+            logger.error({ err }, "Retry flush failed");
           });
         }, nextRetryMs);
       } else {
@@ -264,18 +291,20 @@ export class FilePersistenceProvider implements PersistenceProvider {
     }
 
     // Apply sorting
-    const sortBy = options.sortBy ?? 'score';
-    const sortOrder = options.sortOrder ?? 'desc';
+    const sortBy = options.sortBy ?? "score";
+    const sortOrder = options.sortOrder ?? "desc";
     results.sort((a, b) => {
       let comparison = 0;
-      if (sortBy === 'score') {
+      if (sortBy === "score") {
         comparison = a.score - b.score;
-      } else if (sortBy === 'level') {
+      } else if (sortBy === "level") {
         comparison = a.level - b.level;
-      } else if (sortBy === 'lastCalculatedAt') {
-        comparison = new Date(a.lastCalculatedAt).getTime() - new Date(b.lastCalculatedAt).getTime();
+      } else if (sortBy === "lastCalculatedAt") {
+        comparison =
+          new Date(a.lastCalculatedAt).getTime() -
+          new Date(b.lastCalculatedAt).getTime();
       }
-      return sortOrder === 'asc' ? comparison : -comparison;
+      return sortOrder === "asc" ? comparison : -comparison;
     });
 
     // Apply pagination
@@ -338,13 +367,13 @@ export class FilePersistenceProvider implements PersistenceProvider {
 
     // Write to temp file first, then rename for atomicity
     const tempPath = `${this.config.path}.tmp`;
-    await writeFile(tempPath, content, 'utf-8');
+    await writeFile(tempPath, content, "utf-8");
 
     try {
       await rename(tempPath, this.config.path);
     } catch (renameError) {
       // Fallback to direct write if rename fails (e.g., cross-device)
-      await writeFile(this.config.path, content, 'utf-8');
+      await writeFile(this.config.path, content, "utf-8");
       // Clean up temp file
       try {
         await unlink(tempPath);
@@ -355,7 +384,10 @@ export class FilePersistenceProvider implements PersistenceProvider {
 
     this.dirty = false;
 
-    logger.debug({ path: this.config.path, count: this.records.size }, 'Flushed trust records to file');
+    logger.debug(
+      { path: this.config.path, count: this.records.size },
+      "Flushed trust records to file",
+    );
   }
 
   /**
@@ -373,6 +405,8 @@ export class FilePersistenceProvider implements PersistenceProvider {
 /**
  * Create a new file persistence provider
  */
-export function createFileProvider(config: FilePersistenceConfig): FilePersistenceProvider {
+export function createFileProvider(
+  config: FilePersistenceConfig,
+): FilePersistenceProvider {
   return new FilePersistenceProvider(config);
 }

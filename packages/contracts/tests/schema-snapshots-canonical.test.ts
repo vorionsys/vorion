@@ -5,8 +5,8 @@
  * intent, and middleware schemas from the canonical module.
  */
 
-import { describe, it, expect } from 'vitest';
-import { describeSchema } from './helpers/schema-descriptor';
+import { describe, it, expect } from "vitest";
+import { describeSchema } from "./helpers/schema-descriptor";
 
 import {
   governanceDenialReasonSchema,
@@ -24,7 +24,7 @@ import {
   authorityTypeSchema,
   permissionSchema,
   authoritySchema,
-} from '../src/canonical/governance';
+} from "../src/canonical/governance";
 
 import {
   agentLifecycleStatusSchema,
@@ -41,13 +41,13 @@ import {
   agentTaskSchema,
   agentPersonaSchema,
   agentConfigSchema,
-} from '../src/canonical/agent';
+} from "../src/canonical/agent";
 
 import {
   trustBandSchema,
   trustBandThresholdSchema,
   bandComparisonSchema,
-} from '../src/canonical/trust-band';
+} from "../src/canonical/trust-band";
 
 import {
   signalTypeSchema,
@@ -58,11 +58,9 @@ import {
   trustSignalSummarySchema,
   createTrustSignalRequestSchema,
   signalAggregationSchema,
-} from '../src/canonical/trust-signal';
+} from "../src/canonical/trust-signal";
 
-import {
-  riskLevelSchema as canonicalRiskLevelSchema,
-} from '../src/canonical/risk-level';
+import { riskLevelSchema as canonicalRiskLevelSchema } from "../src/canonical/risk-level";
 
 import {
   actionTypeSchema,
@@ -73,7 +71,7 @@ import {
   intentSchema,
   intentSummarySchema,
   createIntentRequestSchema,
-} from '../src/canonical/intent';
+} from "../src/canonical/intent";
 
 import {
   rateLimitConfigSchema,
@@ -82,9 +80,9 @@ import {
   errorResponseSchema,
   errorCategorySchema,
   securityHeadersConfigSchema,
-} from '../src/canonical/middleware';
+} from "../src/canonical/middleware";
 
-describe('Canonical Governance Schemas', () => {
+describe("Canonical Governance Schemas", () => {
   const schemas = {
     governanceDenialReasonSchema,
     denialReasonSchema,
@@ -109,24 +107,28 @@ describe('Canonical Governance Schemas', () => {
     });
   }
 
-  it('governanceDenialReasonSchema accepts MISSING_ROLES', () => {
-    expect(governanceDenialReasonSchema.safeParse('missing_roles').success).toBe(true);
+  it("governanceDenialReasonSchema accepts MISSING_ROLES", () => {
+    expect(
+      governanceDenialReasonSchema.safeParse("missing_roles").success,
+    ).toBe(true);
   });
 
-  it('governanceDenialReasonSchema rejects invalid reason', () => {
-    expect(governanceDenialReasonSchema.safeParse('invalid').success).toBe(false);
+  it("governanceDenialReasonSchema rejects invalid reason", () => {
+    expect(governanceDenialReasonSchema.safeParse("invalid").success).toBe(
+      false,
+    );
   });
 
-  it('authorizationResultSchema accepts valid result', () => {
+  it("authorizationResultSchema accepts valid result", () => {
     const result = authorizationResultSchema.safeParse({
       allowed: true,
-      reason: 'All checks passed',
+      reason: "All checks passed",
     });
     expect(result.success).toBe(true);
   });
 });
 
-describe('Canonical Agent Schemas', () => {
+describe("Canonical Agent Schemas", () => {
   const schemas = {
     agentLifecycleStatusSchema,
     agentRuntimeStatusSchema,
@@ -150,22 +152,22 @@ describe('Canonical Agent Schemas', () => {
     });
   }
 
-  it('agentLifecycleStatusSchema accepts active', () => {
-    expect(agentLifecycleStatusSchema.safeParse('active').success).toBe(true);
+  it("agentLifecycleStatusSchema accepts active", () => {
+    expect(agentLifecycleStatusSchema.safeParse("active").success).toBe(true);
   });
 
-  it('agentLifecycleStatusSchema rejects unknown status', () => {
-    expect(agentLifecycleStatusSchema.safeParse('deleted').success).toBe(false);
+  it("agentLifecycleStatusSchema rejects unknown status", () => {
+    expect(agentLifecycleStatusSchema.safeParse("deleted").success).toBe(false);
   });
 
-  it('taskPrioritySchema accepts valid priorities', () => {
-    for (const p of ['critical', 'high', 'medium', 'low']) {
+  it("taskPrioritySchema accepts valid priorities", () => {
+    for (const p of ["critical", "high", "medium", "low"]) {
       expect(taskPrioritySchema.safeParse(p).success).toBe(true);
     }
   });
 });
 
-describe('Canonical Trust Band Schemas', () => {
+describe("Canonical Trust Band Schemas", () => {
   const schemas = {
     trustBandSchema,
     trustBandThresholdSchema,
@@ -178,14 +180,14 @@ describe('Canonical Trust Band Schemas', () => {
     });
   }
 
-  it('trustBandSchema accepts T0-T7 numeric values', () => {
+  it("trustBandSchema accepts T0-T7 numeric values", () => {
     for (let i = 0; i <= 7; i++) {
       expect(trustBandSchema.safeParse(i).success).toBe(true);
     }
   });
 });
 
-describe('Canonical Trust Signal Schemas', () => {
+describe("Canonical Trust Signal Schemas", () => {
   const schemas = {
     signalTypeSchema,
     signalSourceSchema,
@@ -204,13 +206,13 @@ describe('Canonical Trust Signal Schemas', () => {
   }
 });
 
-describe('Canonical Risk Level Schema', () => {
-  it('canonicalRiskLevelSchema shape matches snapshot', () => {
+describe("Canonical Risk Level Schema", () => {
+  it("canonicalRiskLevelSchema shape matches snapshot", () => {
     expect(describeSchema(canonicalRiskLevelSchema)).toMatchSnapshot();
   });
 });
 
-describe('Canonical Intent Schemas', () => {
+describe("Canonical Intent Schemas", () => {
   const schemas = {
     actionTypeSchema,
     dataSensitivitySchema,
@@ -228,16 +230,16 @@ describe('Canonical Intent Schemas', () => {
     });
   }
 
-  it('actionTypeSchema accepts read', () => {
-    expect(actionTypeSchema.safeParse('read').success).toBe(true);
+  it("actionTypeSchema accepts read", () => {
+    expect(actionTypeSchema.safeParse("read").success).toBe(true);
   });
 
-  it('intentStatusSchema accepts pending', () => {
-    expect(intentStatusSchema.safeParse('pending').success).toBe(true);
+  it("intentStatusSchema accepts pending", () => {
+    expect(intentStatusSchema.safeParse("pending").success).toBe(true);
   });
 });
 
-describe('Canonical Middleware Schemas', () => {
+describe("Canonical Middleware Schemas", () => {
   const schemas = {
     rateLimitConfigSchema,
     rateLimitResultSchema,
@@ -253,8 +255,14 @@ describe('Canonical Middleware Schemas', () => {
     });
   }
 
-  it('errorCategorySchema accepts valid categories', () => {
-    for (const c of ['authentication', 'authorization', 'validation', 'not_found', 'internal']) {
+  it("errorCategorySchema accepts valid categories", () => {
+    for (const c of [
+      "authentication",
+      "authorization",
+      "validation",
+      "not_found",
+      "internal",
+    ]) {
       expect(errorCategorySchema.safeParse(c).success).toBe(true);
     }
   });

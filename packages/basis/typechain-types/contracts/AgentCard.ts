@@ -49,7 +49,7 @@ export declare namespace AgentCard {
     certificationDate: bigint,
     certificationExpiry: bigint,
     metadataURI: string,
-    revoked: boolean
+    revoked: boolean,
   ] & {
     did: string;
     name: string;
@@ -106,7 +106,7 @@ export interface AgentCardInterface extends Interface {
       | "tokenURI"
       | "totalSupply"
       | "transferFrom"
-      | "updateTrustScore"
+      | "updateTrustScore",
   ): FunctionFragment;
 
   getEvent(
@@ -123,176 +123,176 @@ export interface AgentCardInterface extends Interface {
       | "RoleGranted"
       | "RoleRevoked"
       | "Transfer"
-      | "TrustScoreUpdated"
+      | "TrustScoreUpdated",
   ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "CERTIFIER_ROLE",
-    values?: undefined
+    values?: undefined,
   ): string;
   encodeFunctionData(
     functionFragment: "DEFAULT_ADMIN_ROLE",
-    values?: undefined
+    values?: undefined,
   ): string;
   encodeFunctionData(
     functionFragment: "MINTER_ROLE",
-    values?: undefined
+    values?: undefined,
   ): string;
   encodeFunctionData(
     functionFragment: "addCapabilities",
-    values: [BigNumberish, string[]]
+    values: [BigNumberish, string[]],
   ): string;
   encodeFunctionData(
     functionFragment: "addRestrictions",
-    values: [BigNumberish, string[]]
+    values: [BigNumberish, string[]],
   ): string;
   encodeFunctionData(
     functionFragment: "approve",
-    values: [AddressLike, BigNumberish]
+    values: [AddressLike, BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "balanceOf",
-    values: [AddressLike]
+    values: [AddressLike],
   ): string;
   encodeFunctionData(functionFragment: "cards", values: [BigNumberish]): string;
   encodeFunctionData(
     functionFragment: "certify",
-    values: [BigNumberish, BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish, BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "didToTokenId",
-    values: [string]
+    values: [string],
   ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
-    values: [BigNumberish]
+    values: [BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "getCapabilities",
-    values: [BigNumberish]
+    values: [BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "getCard",
-    values: [BigNumberish]
+    values: [BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "getCardByDID",
-    values: [string]
+    values: [string],
   ): string;
   encodeFunctionData(
     functionFragment: "getCardsByOwner",
-    values: [AddressLike]
+    values: [AddressLike],
   ): string;
   encodeFunctionData(
     functionFragment: "getCertifiedAgents",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "getRestrictions",
-    values: [BigNumberish]
+    values: [BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
-    values: [BytesLike]
+    values: [BytesLike],
   ): string;
   encodeFunctionData(
     functionFragment: "grantRole",
-    values: [BytesLike, AddressLike]
+    values: [BytesLike, AddressLike],
   ): string;
   encodeFunctionData(
     functionFragment: "hasRole",
-    values: [BytesLike, AddressLike]
+    values: [BytesLike, AddressLike],
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
-    values: [AddressLike, AddressLike]
+    values: [AddressLike, AddressLike],
   ): string;
   encodeFunctionData(
     functionFragment: "isCertified",
-    values: [BigNumberish]
+    values: [BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "mint",
-    values: [AddressLike, string, string, string, string[], string]
+    values: [AddressLike, string, string, string, string[], string],
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
-    values: [BigNumberish]
+    values: [BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "renounceRole",
-    values: [BytesLike, AddressLike]
+    values: [BytesLike, AddressLike],
   ): string;
   encodeFunctionData(
     functionFragment: "revokeCertification",
-    values: [BigNumberish, string]
+    values: [BigNumberish, string],
   ): string;
   encodeFunctionData(
     functionFragment: "revokeRole",
-    values: [BytesLike, AddressLike]
+    values: [BytesLike, AddressLike],
   ): string;
   encodeFunctionData(
     functionFragment: "safeTransferFrom(address,address,uint256)",
-    values: [AddressLike, AddressLike, BigNumberish]
+    values: [AddressLike, AddressLike, BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
-    values: [AddressLike, AddressLike, BigNumberish, BytesLike]
+    values: [AddressLike, AddressLike, BigNumberish, BytesLike],
   ): string;
   encodeFunctionData(
     functionFragment: "setApprovalForAll",
-    values: [AddressLike, boolean]
+    values: [AddressLike, boolean],
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
-    values: [BytesLike]
+    values: [BytesLike],
   ): string;
   encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "tokenByIndex",
-    values: [BigNumberish]
+    values: [BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "tokenOfOwnerByIndex",
-    values: [AddressLike, BigNumberish]
+    values: [AddressLike, BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "tokenURI",
-    values: [BigNumberish]
+    values: [BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "totalSupply",
-    values?: undefined
+    values?: undefined,
   ): string;
   encodeFunctionData(
     functionFragment: "transferFrom",
-    values: [AddressLike, AddressLike, BigNumberish]
+    values: [AddressLike, AddressLike, BigNumberish],
   ): string;
   encodeFunctionData(
     functionFragment: "updateTrustScore",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish, BigNumberish],
   ): string;
 
   decodeFunctionResult(
     functionFragment: "CERTIFIER_ROLE",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "MINTER_ROLE",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "addCapabilities",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "addRestrictions",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
@@ -300,96 +300,96 @@ export interface AgentCardInterface extends Interface {
   decodeFunctionResult(functionFragment: "certify", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "didToTokenId",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "getApproved",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "getCapabilities",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(functionFragment: "getCard", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getCardByDID",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "getCardsByOwner",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "getCertifiedAgents",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "getRestrictions",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "getRoleAdmin",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "isCertified",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceRole",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "revokeCertification",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "safeTransferFrom(address,address,uint256)",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "setApprovalForAll",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "tokenByIndex",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "tokenOfOwnerByIndex",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "totalSupply",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferFrom",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
   decodeFunctionResult(
     functionFragment: "updateTrustScore",
-    data: BytesLike
+    data: BytesLike,
   ): Result;
 }
 
@@ -398,13 +398,13 @@ export namespace AgentCardMintedEvent {
     tokenId: BigNumberish,
     did: string,
     owner: AddressLike,
-    name: string
+    name: string,
   ];
   export type OutputTuple = [
     tokenId: bigint,
     did: string,
     owner: string,
-    name: string
+    name: string,
   ];
   export interface OutputObject {
     tokenId: bigint;
@@ -424,14 +424,14 @@ export namespace AgentCertifiedEvent {
     did: string,
     certifier: AddressLike,
     trustScore: BigNumberish,
-    tier: BigNumberish
+    tier: BigNumberish,
   ];
   export type OutputTuple = [
     tokenId: bigint,
     did: string,
     certifier: string,
     trustScore: bigint,
-    tier: bigint
+    tier: bigint,
   ];
   export interface OutputObject {
     tokenId: bigint;
@@ -450,7 +450,7 @@ export namespace ApprovalEvent {
   export type InputTuple = [
     owner: AddressLike,
     approved: AddressLike,
-    tokenId: BigNumberish
+    tokenId: BigNumberish,
   ];
   export type OutputTuple = [owner: string, approved: string, tokenId: bigint];
   export interface OutputObject {
@@ -468,12 +468,12 @@ export namespace ApprovalForAllEvent {
   export type InputTuple = [
     owner: AddressLike,
     operator: AddressLike,
-    approved: boolean
+    approved: boolean,
   ];
   export type OutputTuple = [
     owner: string,
     operator: string,
-    approved: boolean
+    approved: boolean,
   ];
   export interface OutputObject {
     owner: string;
@@ -489,7 +489,7 @@ export namespace ApprovalForAllEvent {
 export namespace BatchMetadataUpdateEvent {
   export type InputTuple = [
     _fromTokenId: BigNumberish,
-    _toTokenId: BigNumberish
+    _toTokenId: BigNumberish,
   ];
   export type OutputTuple = [_fromTokenId: bigint, _toTokenId: bigint];
   export interface OutputObject {
@@ -506,12 +506,12 @@ export namespace CapabilitiesUpdatedEvent {
   export type InputTuple = [
     tokenId: BigNumberish,
     did: string,
-    capabilityCount: BigNumberish
+    capabilityCount: BigNumberish,
   ];
   export type OutputTuple = [
     tokenId: bigint,
     did: string,
-    capabilityCount: bigint
+    capabilityCount: bigint,
   ];
   export interface OutputObject {
     tokenId: bigint;
@@ -529,13 +529,13 @@ export namespace CertificationRevokedEvent {
     tokenId: BigNumberish,
     did: string,
     certifier: AddressLike,
-    reason: string
+    reason: string,
   ];
   export type OutputTuple = [
     tokenId: bigint,
     did: string,
     certifier: string,
-    reason: string
+    reason: string,
   ];
   export interface OutputObject {
     tokenId: bigint;
@@ -565,12 +565,12 @@ export namespace RoleAdminChangedEvent {
   export type InputTuple = [
     role: BytesLike,
     previousAdminRole: BytesLike,
-    newAdminRole: BytesLike
+    newAdminRole: BytesLike,
   ];
   export type OutputTuple = [
     role: string,
     previousAdminRole: string,
-    newAdminRole: string
+    newAdminRole: string,
   ];
   export interface OutputObject {
     role: string;
@@ -587,7 +587,7 @@ export namespace RoleGrantedEvent {
   export type InputTuple = [
     role: BytesLike,
     account: AddressLike,
-    sender: AddressLike
+    sender: AddressLike,
   ];
   export type OutputTuple = [role: string, account: string, sender: string];
   export interface OutputObject {
@@ -605,7 +605,7 @@ export namespace RoleRevokedEvent {
   export type InputTuple = [
     role: BytesLike,
     account: AddressLike,
-    sender: AddressLike
+    sender: AddressLike,
   ];
   export type OutputTuple = [role: string, account: string, sender: string];
   export interface OutputObject {
@@ -623,7 +623,7 @@ export namespace TransferEvent {
   export type InputTuple = [
     from: AddressLike,
     to: AddressLike,
-    tokenId: BigNumberish
+    tokenId: BigNumberish,
   ];
   export type OutputTuple = [from: string, to: string, tokenId: bigint];
   export interface OutputObject {
@@ -643,14 +643,14 @@ export namespace TrustScoreUpdatedEvent {
     did: string,
     oldScore: BigNumberish,
     newScore: BigNumberish,
-    newTier: BigNumberish
+    newTier: BigNumberish,
   ];
   export type OutputTuple = [
     tokenId: bigint,
     did: string,
     oldScore: bigint,
     newScore: bigint,
-    newTier: bigint
+    newTier: bigint,
   ];
   export interface OutputObject {
     tokenId: bigint;
@@ -674,38 +674,38 @@ export interface AgentCard extends BaseContract {
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
+    toBlock?: string | number | undefined,
   ): Promise<Array<TypedEventLog<TCEvent>>>;
   queryFilter<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
+    toBlock?: string | number | undefined,
   ): Promise<Array<TypedEventLog<TCEvent>>>;
 
   on<TCEvent extends TypedContractEvent>(
     event: TCEvent,
-    listener: TypedListener<TCEvent>
+    listener: TypedListener<TCEvent>,
   ): Promise<this>;
   on<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
+    listener: TypedListener<TCEvent>,
   ): Promise<this>;
 
   once<TCEvent extends TypedContractEvent>(
     event: TCEvent,
-    listener: TypedListener<TCEvent>
+    listener: TypedListener<TCEvent>,
   ): Promise<this>;
   once<TCEvent extends TypedContractEvent>(
     filter: TypedDeferredTopicFilter<TCEvent>,
-    listener: TypedListener<TCEvent>
+    listener: TypedListener<TCEvent>,
   ): Promise<this>;
 
   listeners<TCEvent extends TypedContractEvent>(
-    event: TCEvent
+    event: TCEvent,
   ): Promise<Array<TypedListener<TCEvent>>>;
   listeners(eventName?: string): Promise<Array<Listener>>;
   removeAllListeners<TCEvent extends TypedContractEvent>(
-    event?: TCEvent
+    event?: TCEvent,
   ): Promise<this>;
 
   CERTIFIER_ROLE: TypedContractMethod<[], [string], "view">;
@@ -748,7 +748,7 @@ export interface AgentCard extends BaseContract {
         bigint,
         bigint,
         string,
-        boolean
+        boolean,
       ] & {
         did: string;
         name: string;
@@ -761,7 +761,7 @@ export interface AgentCard extends BaseContract {
         certificationExpiry: bigint;
         metadataURI: string;
         revoked: boolean;
-      }
+      },
     ],
     "view"
   >;
@@ -770,7 +770,7 @@ export interface AgentCard extends BaseContract {
     [
       tokenId: BigNumberish,
       trustScore: BigNumberish,
-      expiryTimestamp: BigNumberish
+      expiryTimestamp: BigNumberish,
     ],
     [void],
     "nonpayable"
@@ -845,7 +845,7 @@ export interface AgentCard extends BaseContract {
       name: string,
       description: string,
       capabilities: string[],
-      metadataURI: string
+      metadataURI: string,
     ],
     [bigint],
     "nonpayable"
@@ -884,7 +884,7 @@ export interface AgentCard extends BaseContract {
       from: AddressLike,
       to: AddressLike,
       tokenId: BigNumberish,
-      data: BytesLike
+      data: BytesLike,
     ],
     [void],
     "nonpayable"
@@ -929,45 +929,43 @@ export interface AgentCard extends BaseContract {
   >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
-    key: string | FunctionFragment
+    key: string | FunctionFragment,
   ): T;
 
   getFunction(
-    nameOrSignature: "CERTIFIER_ROLE"
+    nameOrSignature: "CERTIFIER_ROLE",
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "DEFAULT_ADMIN_ROLE"
+    nameOrSignature: "DEFAULT_ADMIN_ROLE",
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "MINTER_ROLE"
+    nameOrSignature: "MINTER_ROLE",
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "addCapabilities"
+    nameOrSignature: "addCapabilities",
   ): TypedContractMethod<
     [tokenId: BigNumberish, capabilities: string[]],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "addRestrictions"
+    nameOrSignature: "addRestrictions",
   ): TypedContractMethod<
     [tokenId: BigNumberish, restrictions: string[]],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "approve"
+    nameOrSignature: "approve",
   ): TypedContractMethod<
     [to: AddressLike, tokenId: BigNumberish],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "balanceOf"
+    nameOrSignature: "balanceOf",
   ): TypedContractMethod<[owner: AddressLike], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "cards"
-  ): TypedContractMethod<
+  getFunction(nameOrSignature: "cards"): TypedContractMethod<
     [arg0: BigNumberish],
     [
       [
@@ -981,7 +979,7 @@ export interface AgentCard extends BaseContract {
         bigint,
         bigint,
         string,
-        boolean
+        boolean,
       ] & {
         did: string;
         name: string;
@@ -994,86 +992,86 @@ export interface AgentCard extends BaseContract {
         certificationExpiry: bigint;
         metadataURI: string;
         revoked: boolean;
-      }
+      },
     ],
     "view"
   >;
   getFunction(
-    nameOrSignature: "certify"
+    nameOrSignature: "certify",
   ): TypedContractMethod<
     [
       tokenId: BigNumberish,
       trustScore: BigNumberish,
-      expiryTimestamp: BigNumberish
+      expiryTimestamp: BigNumberish,
     ],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "didToTokenId"
+    nameOrSignature: "didToTokenId",
   ): TypedContractMethod<[arg0: string], [bigint], "view">;
   getFunction(
-    nameOrSignature: "getApproved"
+    nameOrSignature: "getApproved",
   ): TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
   getFunction(
-    nameOrSignature: "getCapabilities"
+    nameOrSignature: "getCapabilities",
   ): TypedContractMethod<[tokenId: BigNumberish], [string[]], "view">;
   getFunction(
-    nameOrSignature: "getCard"
+    nameOrSignature: "getCard",
   ): TypedContractMethod<
     [tokenId: BigNumberish],
     [AgentCard.AgentCardDataStructOutput],
     "view"
   >;
   getFunction(
-    nameOrSignature: "getCardByDID"
+    nameOrSignature: "getCardByDID",
   ): TypedContractMethod<
     [did: string],
     [AgentCard.AgentCardDataStructOutput],
     "view"
   >;
   getFunction(
-    nameOrSignature: "getCardsByOwner"
+    nameOrSignature: "getCardsByOwner",
   ): TypedContractMethod<[owner: AddressLike], [bigint[]], "view">;
   getFunction(
-    nameOrSignature: "getCertifiedAgents"
+    nameOrSignature: "getCertifiedAgents",
   ): TypedContractMethod<
     [offset: BigNumberish, limit: BigNumberish],
     [bigint[]],
     "view"
   >;
   getFunction(
-    nameOrSignature: "getRestrictions"
+    nameOrSignature: "getRestrictions",
   ): TypedContractMethod<[tokenId: BigNumberish], [string[]], "view">;
   getFunction(
-    nameOrSignature: "getRoleAdmin"
+    nameOrSignature: "getRoleAdmin",
   ): TypedContractMethod<[role: BytesLike], [string], "view">;
   getFunction(
-    nameOrSignature: "grantRole"
+    nameOrSignature: "grantRole",
   ): TypedContractMethod<
     [role: BytesLike, account: AddressLike],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "hasRole"
+    nameOrSignature: "hasRole",
   ): TypedContractMethod<
     [role: BytesLike, account: AddressLike],
     [boolean],
     "view"
   >;
   getFunction(
-    nameOrSignature: "isApprovedForAll"
+    nameOrSignature: "isApprovedForAll",
   ): TypedContractMethod<
     [owner: AddressLike, operator: AddressLike],
     [boolean],
     "view"
   >;
   getFunction(
-    nameOrSignature: "isCertified"
+    nameOrSignature: "isCertified",
   ): TypedContractMethod<[tokenId: BigNumberish], [boolean], "view">;
   getFunction(
-    nameOrSignature: "mint"
+    nameOrSignature: "mint",
   ): TypedContractMethod<
     [
       to: AddressLike,
@@ -1081,95 +1079,95 @@ export interface AgentCard extends BaseContract {
       name: string,
       description: string,
       capabilities: string[],
-      metadataURI: string
+      metadataURI: string,
     ],
     [bigint],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "name"
+    nameOrSignature: "name",
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "ownerOf"
+    nameOrSignature: "ownerOf",
   ): TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
   getFunction(
-    nameOrSignature: "renounceRole"
+    nameOrSignature: "renounceRole",
   ): TypedContractMethod<
     [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "revokeCertification"
+    nameOrSignature: "revokeCertification",
   ): TypedContractMethod<
     [tokenId: BigNumberish, reason: string],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "revokeRole"
+    nameOrSignature: "revokeRole",
   ): TypedContractMethod<
     [role: BytesLike, account: AddressLike],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "safeTransferFrom(address,address,uint256)"
+    nameOrSignature: "safeTransferFrom(address,address,uint256)",
   ): TypedContractMethod<
     [from: AddressLike, to: AddressLike, tokenId: BigNumberish],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "safeTransferFrom(address,address,uint256,bytes)"
+    nameOrSignature: "safeTransferFrom(address,address,uint256,bytes)",
   ): TypedContractMethod<
     [
       from: AddressLike,
       to: AddressLike,
       tokenId: BigNumberish,
-      data: BytesLike
+      data: BytesLike,
     ],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "setApprovalForAll"
+    nameOrSignature: "setApprovalForAll",
   ): TypedContractMethod<
     [operator: AddressLike, approved: boolean],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "supportsInterface"
+    nameOrSignature: "supportsInterface",
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
   getFunction(
-    nameOrSignature: "symbol"
+    nameOrSignature: "symbol",
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "tokenByIndex"
+    nameOrSignature: "tokenByIndex",
   ): TypedContractMethod<[index: BigNumberish], [bigint], "view">;
   getFunction(
-    nameOrSignature: "tokenOfOwnerByIndex"
+    nameOrSignature: "tokenOfOwnerByIndex",
   ): TypedContractMethod<
     [owner: AddressLike, index: BigNumberish],
     [bigint],
     "view"
   >;
   getFunction(
-    nameOrSignature: "tokenURI"
+    nameOrSignature: "tokenURI",
   ): TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
   getFunction(
-    nameOrSignature: "totalSupply"
+    nameOrSignature: "totalSupply",
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "transferFrom"
+    nameOrSignature: "transferFrom",
   ): TypedContractMethod<
     [from: AddressLike, to: AddressLike, tokenId: BigNumberish],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "updateTrustScore"
+    nameOrSignature: "updateTrustScore",
   ): TypedContractMethod<
     [tokenId: BigNumberish, newTrustScore: BigNumberish],
     [void],
@@ -1177,91 +1175,91 @@ export interface AgentCard extends BaseContract {
   >;
 
   getEvent(
-    key: "AgentCardMinted"
+    key: "AgentCardMinted",
   ): TypedContractEvent<
     AgentCardMintedEvent.InputTuple,
     AgentCardMintedEvent.OutputTuple,
     AgentCardMintedEvent.OutputObject
   >;
   getEvent(
-    key: "AgentCertified"
+    key: "AgentCertified",
   ): TypedContractEvent<
     AgentCertifiedEvent.InputTuple,
     AgentCertifiedEvent.OutputTuple,
     AgentCertifiedEvent.OutputObject
   >;
   getEvent(
-    key: "Approval"
+    key: "Approval",
   ): TypedContractEvent<
     ApprovalEvent.InputTuple,
     ApprovalEvent.OutputTuple,
     ApprovalEvent.OutputObject
   >;
   getEvent(
-    key: "ApprovalForAll"
+    key: "ApprovalForAll",
   ): TypedContractEvent<
     ApprovalForAllEvent.InputTuple,
     ApprovalForAllEvent.OutputTuple,
     ApprovalForAllEvent.OutputObject
   >;
   getEvent(
-    key: "BatchMetadataUpdate"
+    key: "BatchMetadataUpdate",
   ): TypedContractEvent<
     BatchMetadataUpdateEvent.InputTuple,
     BatchMetadataUpdateEvent.OutputTuple,
     BatchMetadataUpdateEvent.OutputObject
   >;
   getEvent(
-    key: "CapabilitiesUpdated"
+    key: "CapabilitiesUpdated",
   ): TypedContractEvent<
     CapabilitiesUpdatedEvent.InputTuple,
     CapabilitiesUpdatedEvent.OutputTuple,
     CapabilitiesUpdatedEvent.OutputObject
   >;
   getEvent(
-    key: "CertificationRevoked"
+    key: "CertificationRevoked",
   ): TypedContractEvent<
     CertificationRevokedEvent.InputTuple,
     CertificationRevokedEvent.OutputTuple,
     CertificationRevokedEvent.OutputObject
   >;
   getEvent(
-    key: "MetadataUpdate"
+    key: "MetadataUpdate",
   ): TypedContractEvent<
     MetadataUpdateEvent.InputTuple,
     MetadataUpdateEvent.OutputTuple,
     MetadataUpdateEvent.OutputObject
   >;
   getEvent(
-    key: "RoleAdminChanged"
+    key: "RoleAdminChanged",
   ): TypedContractEvent<
     RoleAdminChangedEvent.InputTuple,
     RoleAdminChangedEvent.OutputTuple,
     RoleAdminChangedEvent.OutputObject
   >;
   getEvent(
-    key: "RoleGranted"
+    key: "RoleGranted",
   ): TypedContractEvent<
     RoleGrantedEvent.InputTuple,
     RoleGrantedEvent.OutputTuple,
     RoleGrantedEvent.OutputObject
   >;
   getEvent(
-    key: "RoleRevoked"
+    key: "RoleRevoked",
   ): TypedContractEvent<
     RoleRevokedEvent.InputTuple,
     RoleRevokedEvent.OutputTuple,
     RoleRevokedEvent.OutputObject
   >;
   getEvent(
-    key: "Transfer"
+    key: "Transfer",
   ): TypedContractEvent<
     TransferEvent.InputTuple,
     TransferEvent.OutputTuple,
     TransferEvent.OutputObject
   >;
   getEvent(
-    key: "TrustScoreUpdated"
+    key: "TrustScoreUpdated",
   ): TypedContractEvent<
     TrustScoreUpdatedEvent.InputTuple,
     TrustScoreUpdatedEvent.OutputTuple,

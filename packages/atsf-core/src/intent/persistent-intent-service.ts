@@ -14,11 +14,15 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { Intent, ID, IntentStatus } from '../common/types.js';
-import type { IIntentService, IntentSubmission, SubmitOptions } from './index.js';
+import { createLogger } from "../common/logger.js";
+import type { Intent, ID, IntentStatus } from "../common/types.js";
+import type {
+  IIntentService,
+  IntentSubmission,
+  SubmitOptions,
+} from "./types.js";
 
-const logger = createLogger({ component: 'persistent-intent-service' });
+const logger = createLogger({ component: "persistent-intent-service" });
 
 // =============================================================================
 // STATE MACHINE
@@ -29,14 +33,14 @@ const logger = createLogger({ component: 'persistent-intent-service' });
  * Any transition not listed here is rejected.
  */
 const VALID_TRANSITIONS: Record<IntentStatus, IntentStatus[]> = {
-  pending: ['evaluating', 'cancelled'],
-  evaluating: ['approved', 'denied', 'escalated', 'failed'],
-  approved: ['executing', 'cancelled'],
+  pending: ["evaluating", "cancelled"],
+  evaluating: ["approved", "denied", "escalated", "failed"],
+  approved: ["executing", "cancelled"],
   denied: [],
-  escalated: ['approved', 'denied', 'cancelled'],
-  executing: ['completed', 'failed'],
+  escalated: ["approved", "denied", "cancelled"],
+  executing: ["completed", "failed"],
   completed: [],
-  failed: ['pending'], // allow retry
+  failed: ["pending"], // allow retry
   cancelled: [],
 };
 
@@ -47,24 +51,27 @@ const VALID_TRANSITIONS: Record<IntentStatus, IntentStatus[]> = {
 function validateSubmission(submission: IntentSubmission): string[] {
   const errors: string[] = [];
 
-  if (!submission.entityId || typeof submission.entityId !== 'string') {
-    errors.push('entityId is required and must be a non-empty string');
+  if (!submission.entityId || typeof submission.entityId !== "string") {
+    errors.push("entityId is required and must be a non-empty string");
   }
-  if (!submission.goal || typeof submission.goal !== 'string') {
-    errors.push('goal is required and must be a non-empty string');
+  if (!submission.goal || typeof submission.goal !== "string") {
+    errors.push("goal is required and must be a non-empty string");
   }
   if (submission.goal && submission.goal.length > 10_000) {
-    errors.push('goal must be 10,000 characters or fewer');
+    errors.push("goal must be 10,000 characters or fewer");
   }
-  if (submission.context !== undefined && (typeof submission.context !== 'object' || submission.context === null)) {
-    errors.push('context must be a plain object');
+  if (
+    submission.context !== undefined &&
+    (typeof submission.context !== "object" || submission.context === null)
+  ) {
+    errors.push("context must be a plain object");
   }
   if (submission.expiresIn !== undefined) {
-    if (typeof submission.expiresIn !== 'number' || submission.expiresIn <= 0) {
-      errors.push('expiresIn must be a positive number (milliseconds)');
+    if (typeof submission.expiresIn !== "number" || submission.expiresIn <= 0) {
+      errors.push("expiresIn must be a positive number (milliseconds)");
     }
     if (submission.expiresIn > 86_400_000) {
-      errors.push('expiresIn cannot exceed 24 hours (86400000ms)');
+      errors.push("expiresIn cannot exceed 24 hours (86400000ms)");
     }
   }
 
@@ -106,10 +113,14 @@ export class PersistentIntentService implements IIntentService {
     if (this.config.expirationSweepIntervalMs > 0) {
       this.sweepTimer = setInterval(
         () => this.sweepExpired(),
-        this.config.expirationSweepIntervalMs
+        this.config.expirationSweepIntervalMs,
       );
       // Don't prevent Node.js from exiting
-      if (this.sweepTimer && typeof this.sweepTimer === 'object' && 'unref' in this.sweepTimer) {
+      if (
+        this.sweepTimer &&
+        typeof this.sweepTimer === "object" &&
+        "unref" in this.sweepTimer
+      ) {
         this.sweepTimer.unref();
       }
     }
@@ -118,15 +129,18 @@ export class PersistentIntentService implements IIntentService {
   /**
    * Submit a new intent with full validation.
    */
-  async submit(submission: IntentSubmission, options: SubmitOptions): Promise<Intent> {
+  async submit(
+    submission: IntentSubmission,
+    options: SubmitOptions,
+  ): Promise<Intent> {
     // Validate input
     const errors = validateSubmission(submission);
     if (errors.length > 0) {
-      throw new Error(`Invalid intent submission: ${errors.join('; ')}`);
+      throw new Error(`Invalid intent submission: ${errors.join("; ")}`);
     }
 
     if (!options.tenantId) {
-      throw new Error('tenantId is required in SubmitOptions');
+      throw new Error("tenantId is required in SubmitOptions");
     }
 
     // Check per-entity limit
@@ -134,7 +148,7 @@ export class PersistentIntentService implements IIntentService {
     const existingIds = this.entityIndex.get(indexKey);
     if (existingIds && existingIds.size >= this.config.maxIntentsPerEntity) {
       throw new Error(
-        `Entity '${submission.entityId}' has reached the maximum of ${this.config.maxIntentsPerEntity} active intents`
+        `Entity '${submission.entityId}' has reached the maximum of ${this.config.maxIntentsPerEntity} active intents`,
       );
     }
 
@@ -151,7 +165,7 @@ export class PersistentIntentService implements IIntentService {
       goal: submission.goal,
       context: submission.context ?? {},
       metadata: submission.metadata ?? {},
-      status: 'pending',
+      status: "pending",
       createdAt: now,
       updatedAt: now,
       trustSnapshot: options.trustSnapshot ?? null,
@@ -183,7 +197,7 @@ export class PersistentIntentService implements IIntentService {
         correlationId,
         actionType: intent.actionType,
       },
-      'Intent submitted'
+      "Intent submitted",
     );
 
     return intent;
@@ -210,7 +224,11 @@ export class PersistentIntentService implements IIntentService {
   /**
    * Update intent status with state machine enforcement.
    */
-  async updateStatus(id: ID, tenantId: ID, status: IntentStatus): Promise<Intent | undefined> {
+  async updateStatus(
+    id: ID,
+    tenantId: ID,
+    status: IntentStatus,
+  ): Promise<Intent | undefined> {
     const intent = this.intents.get(id);
     if (!intent || intent.tenantId !== tenantId) {
       return undefined;
@@ -221,7 +239,7 @@ export class PersistentIntentService implements IIntentService {
     if (!allowed || !allowed.includes(status)) {
       throw new Error(
         `Invalid status transition: '${intent.status}' → '${status}'. ` +
-        `Allowed transitions from '${intent.status}': [${allowed?.join(', ') ?? 'none'}]`
+          `Allowed transitions from '${intent.status}': [${allowed?.join(", ") ?? "none"}]`,
       );
     }
 
@@ -230,14 +248,18 @@ export class PersistentIntentService implements IIntentService {
     intent.updatedAt = new Date().toISOString();
 
     // Clean up terminal intents from entity index
-    if (status === 'completed' || status === 'cancelled' || status === 'denied') {
+    if (
+      status === "completed" ||
+      status === "cancelled" ||
+      status === "denied"
+    ) {
       const indexKey = `${tenantId}:${intent.entityId}`;
       this.entityIndex.get(indexKey)?.delete(id);
     }
 
     logger.info(
       { intentId: id, from: previousStatus, to: status },
-      'Intent status updated'
+      "Intent status updated",
     );
 
     return intent;
@@ -298,10 +320,14 @@ export class PersistentIntentService implements IIntentService {
   }
 
   private async expireIntent(intent: Intent): Promise<void> {
-    if (intent.status !== 'completed' && intent.status !== 'cancelled' && intent.status !== 'denied') {
-      intent.status = 'cancelled';
+    if (
+      intent.status !== "completed" &&
+      intent.status !== "cancelled" &&
+      intent.status !== "denied"
+    ) {
+      intent.status = "cancelled";
       intent.updatedAt = new Date().toISOString();
-      logger.debug({ intentId: intent.id }, 'Intent expired');
+      logger.debug({ intentId: intent.id }, "Intent expired");
     }
   }
 
@@ -310,7 +336,12 @@ export class PersistentIntentService implements IIntentService {
     for (const [id, intent] of this.intents) {
       if (this.isExpired(intent)) {
         // Remove terminal intents entirely, expire active ones
-        const isTerminal = ['completed', 'cancelled', 'denied', 'failed'].includes(intent.status);
+        const isTerminal = [
+          "completed",
+          "cancelled",
+          "denied",
+          "failed",
+        ].includes(intent.status);
         if (isTerminal) {
           this.intents.delete(id);
           const indexKey = `${intent.tenantId}:${intent.entityId}`;
@@ -323,7 +354,7 @@ export class PersistentIntentService implements IIntentService {
       }
     }
     if (swept > 0) {
-      logger.debug({ swept }, 'Expired intents swept');
+      logger.debug({ swept }, "Expired intents swept");
     }
   }
 }

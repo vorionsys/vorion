@@ -42,15 +42,15 @@ export enum TrustBand {
  */
 export enum ObservationTier {
   /** I/O only - API accessed proprietary models (max 60%) */
-  BLACK_BOX = 'BLACK_BOX',
+  BLACK_BOX = "BLACK_BOX",
   /** I/O + logs - Platform-hosted models (max 75%) */
-  GRAY_BOX = 'GRAY_BOX',
+  GRAY_BOX = "GRAY_BOX",
   /** Full code access - Open-source models (max 90%, reduced for sleeper risk) */
-  WHITE_BOX = 'WHITE_BOX',
+  WHITE_BOX = "WHITE_BOX",
   /** TEE verified - Models in secure enclaves (max 95%, reduced for side-channel risk) */
-  ATTESTED_BOX = 'ATTESTED_BOX',
+  ATTESTED_BOX = "ATTESTED_BOX",
   /** Full verification: TEE + zkML + interpretability (max 100%) */
-  VERIFIED_BOX = 'VERIFIED_BOX',
+  VERIFIED_BOX = "VERIFIED_BOX",
 }
 
 /**
@@ -60,8 +60,8 @@ export enum ObservationTier {
 export const OBSERVATION_CEILINGS: Record<ObservationTier, number> = {
   [ObservationTier.BLACK_BOX]: 600,
   [ObservationTier.GRAY_BOX]: 750,
-  [ObservationTier.WHITE_BOX]: 900,     // Reduced from 950 (sleeper agent risk)
-  [ObservationTier.ATTESTED_BOX]: 950,  // Reduced from 1000 (TEE side-channel risk)
+  [ObservationTier.WHITE_BOX]: 900, // Reduced from 950 (sleeper agent risk)
+  [ObservationTier.ATTESTED_BOX]: 950, // Reduced from 1000 (TEE side-channel risk)
   [ObservationTier.VERIFIED_BOX]: 1000, // New: requires full verification stack
 };
 
@@ -69,76 +69,76 @@ export const OBSERVATION_CEILINGS: Record<ObservationTier, number> = {
  * Data sensitivity levels for intent classification
  */
 export enum DataSensitivity {
-  PUBLIC = 'PUBLIC',
-  INTERNAL = 'INTERNAL',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  RESTRICTED = 'RESTRICTED',
+  PUBLIC = "PUBLIC",
+  INTERNAL = "INTERNAL",
+  CONFIDENTIAL = "CONFIDENTIAL",
+  RESTRICTED = "RESTRICTED",
 }
 
 /**
  * Action reversibility classification
  */
 export enum Reversibility {
-  REVERSIBLE = 'REVERSIBLE',
-  PARTIALLY_REVERSIBLE = 'PARTIALLY_REVERSIBLE',
-  IRREVERSIBLE = 'IRREVERSIBLE',
+  REVERSIBLE = "REVERSIBLE",
+  PARTIALLY_REVERSIBLE = "PARTIALLY_REVERSIBLE",
+  IRREVERSIBLE = "IRREVERSIBLE",
 }
 
 /**
  * Action types for categorizing intents
  */
 export enum ActionType {
-  READ = 'read',
-  WRITE = 'write',
-  DELETE = 'delete',
-  EXECUTE = 'execute',
-  COMMUNICATE = 'communicate',
-  TRANSFER = 'transfer',
+  READ = "read",
+  WRITE = "write",
+  DELETE = "delete",
+  EXECUTE = "execute",
+  COMMUNICATE = "communicate",
+  TRANSFER = "transfer",
 }
 
 /**
  * Proof event types for the audit trail
  */
 export enum ProofEventType {
-  INTENT_RECEIVED = 'intent_received',
-  DECISION_MADE = 'decision_made',
-  TRUST_DELTA = 'trust_delta',
-  EXECUTION_STARTED = 'execution_started',
-  EXECUTION_COMPLETED = 'execution_completed',
-  EXECUTION_FAILED = 'execution_failed',
-  INCIDENT_DETECTED = 'incident_detected',
-  ROLLBACK_INITIATED = 'rollback_initiated',
-  COMPONENT_REGISTERED = 'component_registered',
-  COMPONENT_UPDATED = 'component_updated',
+  INTENT_RECEIVED = "intent_received",
+  DECISION_MADE = "decision_made",
+  TRUST_DELTA = "trust_delta",
+  EXECUTION_STARTED = "execution_started",
+  EXECUTION_COMPLETED = "execution_completed",
+  EXECUTION_FAILED = "execution_failed",
+  INCIDENT_DETECTED = "incident_detected",
+  ROLLBACK_INITIATED = "rollback_initiated",
+  COMPONENT_REGISTERED = "component_registered",
+  COMPONENT_UPDATED = "component_updated",
 }
 
 /**
  * Component types in the registry
  */
 export enum ComponentType {
-  AGENT = 'agent',
-  SERVICE = 'service',
-  ADAPTER = 'adapter',
-  POLICY_BUNDLE = 'policy_bundle',
+  AGENT = "agent",
+  SERVICE = "service",
+  ADAPTER = "adapter",
+  POLICY_BUNDLE = "policy_bundle",
 }
 
 /**
  * Component lifecycle status
  */
 export enum ComponentStatus {
-  ACTIVE = 'active',
-  DEPRECATED = 'deprecated',
-  RETIRED = 'retired',
+  ACTIVE = "active",
+  DEPRECATED = "deprecated",
+  RETIRED = "retired",
 }
 
 /**
  * Approval requirement types
  */
 export enum ApprovalType {
-  NONE = 'none',
-  HUMAN_REVIEW = 'human_review',
-  AUTOMATED_CHECK = 'automated_check',
-  MULTI_PARTY = 'multi_party',
+  NONE = "none",
+  HUMAN_REVIEW = "human_review",
+  AUTOMATED_CHECK = "automated_check",
+  MULTI_PARTY = "multi_party",
 }
 
 /**
@@ -154,11 +154,11 @@ export enum ApprovalType {
  */
 export enum DecisionTier {
   /** Auto-approved - proceed with constraints */
-  GREEN = 'GREEN',
+  GREEN = "GREEN",
   /** Requires refinement or review - can be upgraded to GREEN */
-  YELLOW = 'YELLOW',
+  YELLOW = "YELLOW",
   /** Denied - hard policy violation, cannot proceed */
-  RED = 'RED',
+  RED = "RED",
 }
 
 /**
@@ -166,17 +166,17 @@ export enum DecisionTier {
  */
 export enum RefinementAction {
   /** Reduce the scope of the request */
-  REDUCE_SCOPE = 'REDUCE_SCOPE',
+  REDUCE_SCOPE = "REDUCE_SCOPE",
   /** Add safety constraints */
-  ADD_CONSTRAINTS = 'ADD_CONSTRAINTS',
+  ADD_CONSTRAINTS = "ADD_CONSTRAINTS",
   /** Request human approval */
-  REQUEST_APPROVAL = 'REQUEST_APPROVAL',
+  REQUEST_APPROVAL = "REQUEST_APPROVAL",
   /** Provide additional context/justification */
-  PROVIDE_CONTEXT = 'PROVIDE_CONTEXT',
+  PROVIDE_CONTEXT = "PROVIDE_CONTEXT",
   /** Split into smaller sub-requests */
-  DECOMPOSE = 'DECOMPOSE',
+  DECOMPOSE = "DECOMPOSE",
   /** Wait for trust score to improve */
-  WAIT_FOR_TRUST = 'WAIT_FOR_TRUST',
+  WAIT_FOR_TRUST = "WAIT_FOR_TRUST",
 }
 
 /**
@@ -184,25 +184,25 @@ export enum RefinementAction {
  */
 export enum WorkflowState {
   /** Initial submission of intent */
-  SUBMITTED = 'SUBMITTED',
+  SUBMITTED = "SUBMITTED",
   /** Being evaluated by decision engine */
-  EVALUATING = 'EVALUATING',
+  EVALUATING = "EVALUATING",
   /** GREEN - approved and ready for execution */
-  APPROVED = 'APPROVED',
+  APPROVED = "APPROVED",
   /** YELLOW - awaiting refinement */
-  PENDING_REFINEMENT = 'PENDING_REFINEMENT',
+  PENDING_REFINEMENT = "PENDING_REFINEMENT",
   /** YELLOW - awaiting human review */
-  PENDING_REVIEW = 'PENDING_REVIEW',
+  PENDING_REVIEW = "PENDING_REVIEW",
   /** RED - denied */
-  DENIED = 'DENIED',
+  DENIED = "DENIED",
   /** Currently executing */
-  EXECUTING = 'EXECUTING',
+  EXECUTING = "EXECUTING",
   /** Completed successfully */
-  COMPLETED = 'COMPLETED',
+  COMPLETED = "COMPLETED",
   /** Failed during execution */
-  FAILED = 'FAILED',
+  FAILED = "FAILED",
   /** Cancelled by user/system */
-  CANCELLED = 'CANCELLED',
+  CANCELLED = "CANCELLED",
   /** Expired before completion */
-  EXPIRED = 'EXPIRED',
+  EXPIRED = "EXPIRED",
 }

@@ -16,15 +16,15 @@
  */
 export enum CanaryCategory {
   /** Factual/Math probes - verifiable computations (761 probes) */
-  FACTUAL = 'FACTUAL',
+  FACTUAL = "FACTUAL",
   /** Logical probes - reasoning verification (90 probes) */
-  LOGICAL = 'LOGICAL',
+  LOGICAL = "LOGICAL",
   /** Ethical probes - alignment verification (75 probes) */
-  ETHICAL = 'ETHICAL',
+  ETHICAL = "ETHICAL",
   /** Behavioral probes - self-awareness verification (50 probes) */
-  BEHAVIORAL = 'BEHAVIORAL',
+  BEHAVIORAL = "BEHAVIORAL",
   /** Consistency probes - stability verification (31 probes) */
-  CONSISTENCY = 'CONSISTENCY',
+  CONSISTENCY = "CONSISTENCY",
 }
 
 /**
@@ -32,39 +32,39 @@ export enum CanaryCategory {
  */
 export enum CanarySubcategory {
   // Factual subcategories
-  MATH_ARITHMETIC = 'MATH_ARITHMETIC',
-  MATH_POWERS = 'MATH_POWERS',
-  MATH_PERCENTAGES = 'MATH_PERCENTAGES',
-  MATH_WORD_PROBLEMS = 'MATH_WORD_PROBLEMS',
-  SCIENCE = 'SCIENCE',
-  GEOGRAPHY = 'GEOGRAPHY',
-  HISTORY = 'HISTORY',
-  UNITS = 'UNITS',
-  TEMPORAL = 'TEMPORAL',
-  LANGUAGE = 'LANGUAGE',
+  MATH_ARITHMETIC = "MATH_ARITHMETIC",
+  MATH_POWERS = "MATH_POWERS",
+  MATH_PERCENTAGES = "MATH_PERCENTAGES",
+  MATH_WORD_PROBLEMS = "MATH_WORD_PROBLEMS",
+  SCIENCE = "SCIENCE",
+  GEOGRAPHY = "GEOGRAPHY",
+  HISTORY = "HISTORY",
+  UNITS = "UNITS",
+  TEMPORAL = "TEMPORAL",
+  LANGUAGE = "LANGUAGE",
 
   // Logical subcategories
-  SYLLOGISMS = 'SYLLOGISMS',
-  COMPARISONS = 'COMPARISONS',
-  SEQUENCES = 'SEQUENCES',
-  BOOLEAN = 'BOOLEAN',
-  CONDITIONALS = 'CONDITIONALS',
+  SYLLOGISMS = "SYLLOGISMS",
+  COMPARISONS = "COMPARISONS",
+  SEQUENCES = "SEQUENCES",
+  BOOLEAN = "BOOLEAN",
+  CONDITIONALS = "CONDITIONALS",
 
   // Ethical subcategories
-  HARMFUL_REFUSAL = 'HARMFUL_REFUSAL',
-  POSITIVE_VALUES = 'POSITIVE_VALUES',
-  EDGE_CASES = 'EDGE_CASES',
-  SAFETY_CRITICAL = 'SAFETY_CRITICAL',
+  HARMFUL_REFUSAL = "HARMFUL_REFUSAL",
+  POSITIVE_VALUES = "POSITIVE_VALUES",
+  EDGE_CASES = "EDGE_CASES",
+  SAFETY_CRITICAL = "SAFETY_CRITICAL",
 
   // Behavioral subcategories
-  IDENTITY = 'IDENTITY',
-  CAPABILITY_HONESTY = 'CAPABILITY_HONESTY',
-  RESPONSE_QUALITY = 'RESPONSE_QUALITY',
-  INTERACTION = 'INTERACTION',
+  IDENTITY = "IDENTITY",
+  CAPABILITY_HONESTY = "CAPABILITY_HONESTY",
+  RESPONSE_QUALITY = "RESPONSE_QUALITY",
+  INTERACTION = "INTERACTION",
 
   // Consistency subcategories
-  EQUIVALENT_QUESTIONS = 'EQUIVALENT_QUESTIONS',
-  DIFFERENT_PHRASING = 'DIFFERENT_PHRASING',
+  EQUIVALENT_QUESTIONS = "EQUIVALENT_QUESTIONS",
+  DIFFERENT_PHRASING = "DIFFERENT_PHRASING",
 }
 
 /**
@@ -72,17 +72,17 @@ export enum CanarySubcategory {
  */
 export enum ValidationMode {
   /** Exact string match (case-insensitive) */
-  EXACT = 'EXACT',
+  EXACT = "EXACT",
   /** Response must contain expected substring */
-  CONTAINS = 'CONTAINS',
+  CONTAINS = "CONTAINS",
   /** Response must NOT contain substring */
-  NOT_CONTAINS = 'NOT_CONTAINS',
+  NOT_CONTAINS = "NOT_CONTAINS",
   /** Custom regex pattern match */
-  REGEX = 'REGEX',
+  REGEX = "REGEX",
   /** Semantic equivalence check */
-  SEMANTIC = 'SEMANTIC',
+  SEMANTIC = "SEMANTIC",
   /** Multiple acceptable answers */
-  ONE_OF = 'ONE_OF',
+  ONE_OF = "ONE_OF",
 }
 
 /**
@@ -172,10 +172,10 @@ export const DEFAULT_CANARY_CONFIG: CanaryInjectionConfig = {
   lambda: 0.2, // ~5 probes/day
   minIntervalMs: 60 * 1000, // 1 minute minimum
   categoryWeights: {
-    [CanaryCategory.FACTUAL]: 0.50, // 50% factual
-    [CanaryCategory.LOGICAL]: 0.20, // 20% logical
+    [CanaryCategory.FACTUAL]: 0.5, // 50% factual
+    [CanaryCategory.LOGICAL]: 0.2, // 20% logical
     [CanaryCategory.ETHICAL]: 0.15, // 15% ethical
-    [CanaryCategory.BEHAVIORAL]: 0.10, // 10% behavioral
+    [CanaryCategory.BEHAVIORAL]: 0.1, // 10% behavioral
     [CanaryCategory.CONSISTENCY]: 0.05, // 5% consistency
   },
   pauseDuringCooldown: false, // Continue probing during cooldown
@@ -211,7 +211,7 @@ export interface CanaryProbeStats {
  */
 export interface CanaryFailureEvent {
   /** Event type */
-  type: 'CANARY_FAILURE';
+  type: "CANARY_FAILURE";
   /** Agent that failed */
   agentId: string;
   /** Probe that was failed */

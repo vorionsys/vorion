@@ -14,7 +14,13 @@
 /**
  * Provider identifier
  */
-export type ProviderId = 'anthropic' | 'google' | 'ollama' | 'openai' | 'azure' | 'bedrock';
+export type ProviderId =
+  | "anthropic"
+  | "google"
+  | "ollama"
+  | "openai"
+  | "azure"
+  | "bedrock";
 
 /**
  * Model identifier (provider:model format)
@@ -24,7 +30,7 @@ export type ModelId = string;
 /**
  * Health status
  */
-export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+export type HealthStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
 
 /**
  * Provider health record
@@ -99,19 +105,19 @@ const DEFAULT_CONFIG: HealthCheckerConfig = {
   recoveryThreshold: 2,
   rateWindowSize: 100,
   enableActiveProbing: true,
-  providers: ['anthropic', 'google', 'ollama'],
+  providers: ["anthropic", "google", "ollama"],
 };
 
 /**
  * Provider endpoints for health checks
  */
 const PROVIDER_HEALTH_ENDPOINTS: Record<ProviderId, string> = {
-  anthropic: 'https://api.anthropic.com/v1/messages',
-  google: 'https://generativelanguage.googleapis.com/v1beta/models',
-  openai: 'https://api.openai.com/v1/models',
-  ollama: 'http://localhost:11434/api/tags',
-  azure: '', // Configured per deployment
-  bedrock: '', // Uses AWS SDK
+  anthropic: "https://api.anthropic.com/v1/messages",
+  google: "https://generativelanguage.googleapis.com/v1beta/models",
+  openai: "https://api.openai.com/v1/models",
+  ollama: "http://localhost:11434/api/tags",
+  azure: "", // Configured per deployment
+  bedrock: "", // Uses AWS SDK
 };
 
 // =============================================================================
@@ -134,7 +140,9 @@ export class HealthChecker {
   private providerHealth: Map<ProviderId, ProviderHealth> = new Map();
   private checkTimer: NodeJS.Timeout | null = null;
   private recentResults: Map<ProviderId, HealthCheckResult[]> = new Map();
-  private listeners: Set<(provider: ProviderId, health: ProviderHealth) => void> = new Set();
+  private listeners: Set<
+    (provider: ProviderId, health: ProviderHealth) => void
+  > = new Set();
 
   constructor(config?: Partial<HealthCheckerConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -152,7 +160,7 @@ export class HealthChecker {
   private createInitialHealth(provider: ProviderId): ProviderHealth {
     return {
       provider,
-      status: 'unknown',
+      status: "unknown",
       latencyMs: 0,
       lastCheck: new Date(0),
       lastSuccess: null,
@@ -173,7 +181,7 @@ export class HealthChecker {
       return;
     }
 
-    console.log('[HEALTH] Starting health checker...');
+    console.log("[HEALTH] Starting health checker...");
 
     // Run initial check
     this.checkAllProviders();
@@ -182,7 +190,7 @@ export class HealthChecker {
     if (this.config.enableActiveProbing) {
       this.checkTimer = setInterval(
         () => this.checkAllProviders(),
-        this.config.checkIntervalMs
+        this.config.checkIntervalMs,
       );
     }
   }
@@ -195,7 +203,7 @@ export class HealthChecker {
       clearInterval(this.checkTimer);
       this.checkTimer = null;
     }
-    console.log('[HEALTH] Health checker stopped');
+    console.log("[HEALTH] Health checker stopped");
   }
 
   /**
@@ -205,7 +213,7 @@ export class HealthChecker {
     const checks = this.config.providers.map((provider) =>
       this.checkProvider(provider).catch((error) => {
         console.error(`[HEALTH] Check failed for ${provider}:`, error);
-      })
+      }),
     );
 
     await Promise.allSettled(checks);
@@ -223,8 +231,8 @@ export class HealthChecker {
         provider,
         healthy: false,
         latencyMs: 0,
-        error: 'No health endpoint configured',
-        errorType: 'configuration',
+        error: "No health endpoint configured",
+        errorType: "configuration",
         timestamp: new Date(),
       };
     }
@@ -233,11 +241,11 @@ export class HealthChecker {
       const controller = new AbortController();
       const timeoutId = setTimeout(
         () => controller.abort(),
-        this.config.checkTimeoutMs
+        this.config.checkTimeoutMs,
       );
 
       const response = await fetch(endpoint, {
-        method: 'GET',
+        method: "GET",
         headers: this.getHealthCheckHeaders(provider),
         signal: controller.signal,
       });
@@ -252,7 +260,7 @@ export class HealthChecker {
         healthy,
         latencyMs,
         error: healthy ? undefined : `HTTP ${response.status}`,
-        errorType: healthy ? undefined : 'http_error',
+        errorType: healthy ? undefined : "http_error",
         timestamp: new Date(),
       };
 
@@ -282,25 +290,25 @@ export class HealthChecker {
    */
   private getHealthCheckHeaders(provider: ProviderId): Record<string, string> {
     const headers: Record<string, string> = {
-      'User-Agent': 'Vorion-HealthChecker/1.0',
+      "User-Agent": "Vorion-HealthChecker/1.0",
     };
 
     // Add API keys from environment
     switch (provider) {
-      case 'anthropic':
-        if (process.env['ANTHROPIC_API_KEY']) {
-          headers['x-api-key'] = process.env['ANTHROPIC_API_KEY'];
-          headers['anthropic-version'] = '2024-01-01';
+      case "anthropic":
+        if (process.env["ANTHROPIC_API_KEY"]) {
+          headers["x-api-key"] = process.env["ANTHROPIC_API_KEY"];
+          headers["anthropic-version"] = "2024-01-01";
         }
         break;
-      case 'google':
-        if (process.env['GOOGLE_API_KEY']) {
-          headers['x-goog-api-key'] = process.env['GOOGLE_API_KEY'];
+      case "google":
+        if (process.env["GOOGLE_API_KEY"]) {
+          headers["x-goog-api-key"] = process.env["GOOGLE_API_KEY"];
         }
         break;
-      case 'openai':
-        if (process.env['OPENAI_API_KEY']) {
-          headers['Authorization'] = `Bearer ${process.env['OPENAI_API_KEY']}`;
+      case "openai":
+        if (process.env["OPENAI_API_KEY"]) {
+          headers["Authorization"] = `Bearer ${process.env["OPENAI_API_KEY"]}`;
         }
         break;
     }
@@ -314,23 +322,31 @@ export class HealthChecker {
   private classifyError(errorMessage: string): string {
     const lower = errorMessage.toLowerCase();
 
-    if (lower.includes('timeout') || lower.includes('abort')) {
-      return 'timeout';
+    if (lower.includes("timeout") || lower.includes("abort")) {
+      return "timeout";
     }
-    if (lower.includes('econnrefused') || lower.includes('enotfound')) {
-      return 'connection';
+    if (lower.includes("econnrefused") || lower.includes("enotfound")) {
+      return "connection";
     }
-    if (lower.includes('rate limit') || lower.includes('429')) {
-      return 'rate_limit';
+    if (lower.includes("rate limit") || lower.includes("429")) {
+      return "rate_limit";
     }
-    if (lower.includes('auth') || lower.includes('401') || lower.includes('403')) {
-      return 'auth';
+    if (
+      lower.includes("auth") ||
+      lower.includes("401") ||
+      lower.includes("403")
+    ) {
+      return "auth";
     }
-    if (lower.includes('500') || lower.includes('502') || lower.includes('503')) {
-      return 'server_error';
+    if (
+      lower.includes("500") ||
+      lower.includes("502") ||
+      lower.includes("503")
+    ) {
+      return "server_error";
     }
 
-    return 'unknown';
+    return "unknown";
   }
 
   /**
@@ -370,9 +386,8 @@ export class HealthChecker {
 
     // Calculate success rate
     const successCount = results.filter((r) => r.healthy).length;
-    health.successRate = results.length > 0
-      ? (successCount / results.length) * 100
-      : 100;
+    health.successRate =
+      results.length > 0 ? (successCount / results.length) * 100 : 100;
 
     // Determine status
     health.status = this.determineStatus(health);
@@ -389,7 +404,7 @@ export class HealthChecker {
     model: string,
     success: boolean,
     latencyMs: number,
-    error?: string
+    error?: string,
   ): void {
     const result: HealthCheckResult = {
       provider,
@@ -410,7 +425,7 @@ export class HealthChecker {
       if (!modelHealth) {
         modelHealth = {
           modelId: model,
-          status: 'unknown',
+          status: "unknown",
           latencyMs: 0,
           successRate: 100,
           lastCheck: new Date(0),
@@ -421,7 +436,7 @@ export class HealthChecker {
 
       modelHealth.latencyMs = latencyMs;
       modelHealth.lastCheck = result.timestamp;
-      modelHealth.status = success ? 'healthy' : 'unhealthy';
+      modelHealth.status = success ? "healthy" : "unhealthy";
     }
   }
 
@@ -431,29 +446,29 @@ export class HealthChecker {
   private determineStatus(health: ProviderHealth): HealthStatus {
     // Check for unhealthy conditions
     if (health.consecutiveFailures >= this.config.unhealthyThreshold) {
-      return 'unhealthy';
+      return "unhealthy";
     }
 
     // Check for degraded conditions
     if (health.successRate < 90) {
-      return 'degraded';
+      return "degraded";
     }
 
     if (health.consecutiveFailures > 0) {
-      return 'degraded';
+      return "degraded";
     }
 
     // Check for healthy conditions
     if (health.consecutiveSuccesses >= this.config.recoveryThreshold) {
-      return 'healthy';
+      return "healthy";
     }
 
     // If we have enough data and success rate is good
     if (health.successRate >= 95 && health.lastSuccess) {
-      return 'healthy';
+      return "healthy";
     }
 
-    return 'unknown';
+    return "unknown";
   }
 
   /**
@@ -477,14 +492,15 @@ export class HealthChecker {
     const health = this.providerHealth.get(provider);
     if (!health) return false;
 
-    return health.status === 'healthy' || health.status === 'degraded';
+    return health.status === "healthy" || health.status === "degraded";
   }
 
   /**
    * Get available providers sorted by health
    */
   getAvailableProviders(): ProviderId[] {
-    const available: Array<{ provider: ProviderId; health: ProviderHealth }> = [];
+    const available: Array<{ provider: ProviderId; health: ProviderHealth }> =
+      [];
 
     for (const [provider, health] of this.providerHealth) {
       if (this.isAvailable(provider)) {
@@ -496,7 +512,7 @@ export class HealthChecker {
     return available
       .sort((a, b) => {
         if (a.health.status !== b.health.status) {
-          return a.health.status === 'healthy' ? -1 : 1;
+          return a.health.status === "healthy" ? -1 : 1;
         }
         return a.health.latencyMs - b.health.latencyMs;
       })
@@ -507,7 +523,7 @@ export class HealthChecker {
    * Add health change listener
    */
   onHealthChange(
-    listener: (provider: ProviderId, health: ProviderHealth) => void
+    listener: (provider: ProviderId, health: ProviderHealth) => void,
   ): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -521,7 +537,7 @@ export class HealthChecker {
       try {
         listener(provider, health);
       } catch (error) {
-        console.error('[HEALTH] Listener error:', error);
+        console.error("[HEALTH] Listener error:", error);
       }
     }
   }
@@ -545,13 +561,13 @@ export class HealthChecker {
       providers[provider] = health.status;
 
       switch (health.status) {
-        case 'healthy':
+        case "healthy":
           healthyCount++;
           break;
-        case 'degraded':
+        case "degraded":
           degradedCount++;
           break;
-        case 'unhealthy':
+        case "unhealthy":
           unhealthyCount++;
           break;
       }
@@ -571,7 +587,7 @@ export class HealthChecker {
  * Create health checker instance
  */
 export function createHealthChecker(
-  config?: Partial<HealthCheckerConfig>
+  config?: Partial<HealthCheckerConfig>,
 ): HealthChecker {
   return new HealthChecker(config);
 }

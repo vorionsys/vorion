@@ -3,7 +3,7 @@
  * Real-time anomaly detection + trust scoring
  */
 
-import { AnomalyAlert, BehaviorProfile, DatabaseConfig } from './types.js';
+import { AnomalyAlert, BehaviorProfile, DatabaseConfig } from "./types.js";
 
 export class BehaviorMonitor {
   private profiles: Map<string, BehaviorProfile>;
@@ -23,37 +23,39 @@ export class BehaviorMonitor {
 
     // 1. Rate spike detection
     const zScore =
-      (profile.recentWindow.actionsInLastHour - profile.baseline.actionsPerHour.mean) /
+      (profile.recentWindow.actionsInLastHour -
+        profile.baseline.actionsPerHour.mean) /
       profile.baseline.actionsPerHour.stddev;
 
     if (zScore > 3) {
       alerts.push({
-        severity: 'high',
-        type: 'rate_spike',
+        severity: "high",
+        type: "rate_spike",
         description: `Action rate is ${zScore.toFixed(1)} standard deviations above baseline`,
         evidence: {
           baseline: profile.baseline.actionsPerHour.mean,
           current: profile.recentWindow.actionsInLastHour,
         },
-        recommendedAction: 'throttle',
+        recommendedAction: "throttle",
         trustImpact: -50,
       });
     }
 
     // 2. Success rate drop
     const successDrop =
-      profile.baseline.successRate.mean - profile.recentWindow.successRateLastHour;
+      profile.baseline.successRate.mean -
+      profile.recentWindow.successRateLastHour;
 
     if (successDrop > 0.2) {
       alerts.push({
-        severity: 'medium',
-        type: 'success_rate_drop',
+        severity: "medium",
+        type: "success_rate_drop",
         description: `Success rate dropped ${(successDrop * 100).toFixed(1)}%`,
         evidence: {
           baseline: profile.baseline.successRate.mean,
           current: profile.recentWindow.successRateLastHour,
         },
-        recommendedAction: 'warn',
+        recommendedAction: "warn",
         trustImpact: -20,
       });
     }
@@ -61,31 +63,35 @@ export class BehaviorMonitor {
     // 3. New capability usage
     if (profile.recentWindow.newActionsInLastHour.length > 3) {
       alerts.push({
-        severity: 'low',
-        type: 'new_capabilities',
+        severity: "low",
+        type: "new_capabilities",
         description: `Agent using ${profile.recentWindow.newActionsInLastHour.length} new capabilities`,
         evidence: {
           newActions: profile.recentWindow.newActionsInLastHour,
         },
-        recommendedAction: 'log',
+        recommendedAction: "log",
         trustImpact: -5,
       });
     }
 
     // 4. Suspicious resource access
-    const suspiciousResources = profile.recentWindow.newResourcesInLastHour.filter((r: string) =>
-      r.includes('.env') || r.includes('credentials') || r.includes('secret')
-    );
+    const suspiciousResources =
+      profile.recentWindow.newResourcesInLastHour.filter(
+        (r: string) =>
+          r.includes(".env") ||
+          r.includes("credentials") ||
+          r.includes("secret"),
+      );
 
     if (suspiciousResources.length > 0) {
       alerts.push({
-        severity: 'critical',
-        type: 'suspicious_resource_access',
-        description: 'Agent accessing sensitive resources',
+        severity: "critical",
+        type: "suspicious_resource_access",
+        description: "Agent accessing sensitive resources",
         evidence: {
           resources: suspiciousResources,
         },
-        recommendedAction: 'suspend',
+        recommendedAction: "suspend",
         trustImpact: -150,
       });
     }
@@ -127,12 +133,15 @@ export class BehaviorMonitor {
    */
   async updateTrustScoreFromBehavior(
     agentDID: string,
-    anomalies: AnomalyAlert[]
+    anomalies: AnomalyAlert[],
   ): Promise<number> {
     const currentScore = this.trustScores.get(agentDID) || 500; // Default: T3
 
     // Apply trust impact from anomalies
-    const totalImpact = anomalies.reduce((sum, alert) => sum + alert.trustImpact, 0);
+    const totalImpact = anomalies.reduce(
+      (sum, alert) => sum + alert.trustImpact,
+      0,
+    );
 
     // Update trust score
     const newScore = Math.max(0, Math.min(1000, currentScore + totalImpact));
@@ -142,16 +151,16 @@ export class BehaviorMonitor {
     // Take recommended actions
     for (const alert of anomalies) {
       switch (alert.recommendedAction) {
-        case 'suspend':
+        case "suspend":
           console.warn(`SUSPEND agent ${agentDID}:`, alert.description);
           break;
-        case 'throttle':
+        case "throttle":
           console.warn(`THROTTLE agent ${agentDID}:`, alert.description);
           break;
-        case 'warn':
+        case "warn":
           console.warn(`WARNING for agent ${agentDID}:`, alert.description);
           break;
-        case 'log':
+        case "log":
           console.log(`LOG for agent ${agentDID}:`, alert.description);
           break;
       }

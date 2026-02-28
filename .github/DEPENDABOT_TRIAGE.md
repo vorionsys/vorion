@@ -2,13 +2,13 @@
 
 **Owner:** @chunkstar
 **Triaged:** February 27, 2026
-**Security alerts page:** https://github.com/voriongit/vorion/security/dependabot
+**Security alerts page:** https://github.com/vorionsys/vorion/security/dependabot
 
 ---
 
 ## Branch Architecture — Critical Context
 
-`voriongit/vorion` has **two branches**:
+`vorionsys/vorion` has **two branches**:
 
 | Branch | Purpose | Default? | Where dependabot PRs targeted |
 |--------|---------|----------|-------------------------------|
@@ -21,7 +21,7 @@
 
 ## Summary
 
-As of push `c9f19be4` to `main`, GitHub reported **25 security advisories** on `voriongit/vorion`:
+As of push `c9f19be4` to `main`, GitHub reported **25 security advisories** on `vorionsys/vorion`:
 - 1 Critical
 - 20 High
 - 3 Moderate
@@ -37,14 +37,14 @@ As of push `c9f19be4` to `main`, GitHub reported **25 security advisories** on `
 
 | PR | Package | Severity | Path | Outcome |
 |----|---------|----------|------|---------|
-| [#79](https://github.com/voriongit/vorion/pull/79) | `ajv` 6.12.6 → 6.14.0 | **Critical** (CVE-2025) | `/apps/agentanchor-www` | ✅ **Merged** Feb 27, 2026 |
-| [#80](https://github.com/voriongit/vorion/pull/80) | `aquasecurity/trivy-action` 0.28 → 0.34.1 | None (CI tooling) | `.github/workflows` | ✅ **Merged** Feb 27, 2026 |
-| [#81](https://github.com/voriongit/vorion/pull/81) | `fastapi` 0.129 → 0.131 + `uvicorn` 0.40 → 0.41 | None (routine) | `/cognigate-api` | ✅ **Merged** Feb 27, 2026 |
-| [#82](https://github.com/voriongit/vorion/pull/82) | `minimatch` + `eslint` | High (ReDoS) | `/apps/agentanchor-www` | ♻️ **Superseded by #86** (conflict after #79 modified lockfile) |
-| [#83](https://github.com/voriongit/vorion/pull/83) | `ajv` 6.12.6 → 6.14.0 | **Critical** (CVE-2025) | `/vorion-www` | ✅ **Merged** Feb 27, 2026 |
-| [#84](https://github.com/voriongit/vorion/pull/84) | `minimatch` 3.1.2 → 3.1.4 + 9.0.5 → 9.0.7 | High (ReDoS) | `/vorion-www` | ✅ **Merged** Feb 27, 2026 |
-| [#85](https://github.com/voriongit/vorion/pull/85) | `storybook` 8.6.15 → 8.6.17 | Low (WebSocket) | `/vorion-www` | ❌ **Closed** — conflict after #83/#84; dev-only, no security impact |
-| [#86](https://github.com/voriongit/vorion/pull/86) | `minimatch` 3.1.3 → 3.1.5 | High (ReDoS) | `/apps/agentanchor-www` | ✅ **Merged** Feb 27, 2026 (replaces #82) |
+| [#79](https://github.com/vorionsys/vorion/pull/79) | `ajv` 6.12.6 → 6.14.0 | **Critical** (CVE-2025) | `/apps/agentanchor-www` | ✅ **Merged** Feb 27, 2026 |
+| [#80](https://github.com/vorionsys/vorion/pull/80) | `aquasecurity/trivy-action` 0.28 → 0.34.1 | None (CI tooling) | `.github/workflows` | ✅ **Merged** Feb 27, 2026 |
+| [#81](https://github.com/vorionsys/vorion/pull/81) | `fastapi` 0.129 → 0.131 + `uvicorn` 0.40 → 0.41 | None (routine) | `/cognigate-api` | ✅ **Merged** Feb 27, 2026 |
+| [#82](https://github.com/vorionsys/vorion/pull/82) | `minimatch` + `eslint` | High (ReDoS) | `/apps/agentanchor-www` | ♻️ **Superseded by #86** (conflict after #79 modified lockfile) |
+| [#83](https://github.com/vorionsys/vorion/pull/83) | `ajv` 6.12.6 → 6.14.0 | **Critical** (CVE-2025) | `/vorion-www` | ✅ **Merged** Feb 27, 2026 |
+| [#84](https://github.com/vorionsys/vorion/pull/84) | `minimatch` 3.1.2 → 3.1.4 + 9.0.5 → 9.0.7 | High (ReDoS) | `/vorion-www` | ✅ **Merged** Feb 27, 2026 |
+| [#85](https://github.com/vorionsys/vorion/pull/85) | `storybook` 8.6.15 → 8.6.17 | Low (WebSocket) | `/vorion-www` | ❌ **Closed** — conflict after #83/#84; dev-only, no security impact |
+| [#86](https://github.com/vorionsys/vorion/pull/86) | `minimatch` 3.1.3 → 3.1.5 | High (ReDoS) | `/apps/agentanchor-www` | ✅ **Merged** Feb 27, 2026 (replaces #82) |
 
 **`master` now at `7184d643a0be924954ab0d6b318d3f0a65447903`**. All critical and high advisories on `master` resolved.
 
@@ -93,13 +93,13 @@ All 20 High advisories were in `vorion-www` or `apps/agentanchor-www` on `master
 ## Merge commands — ✅ COMPLETED Feb 27, 2026
 
 ```bash
-# All executed against voriongit/vorion (targeted master — the default branch)
-gh pr merge 79 --merge --repo voriongit/vorion   # ✅
-gh pr merge 83 --merge --repo voriongit/vorion   # ✅
-gh pr merge 80 --merge --repo voriongit/vorion   # ✅
-gh pr merge 81 --merge --repo voriongit/vorion   # ✅
-gh pr merge 84 --merge --repo voriongit/vorion   # ✅
-gh pr merge 86 --merge --repo voriongit/vorion   # ✅ (replaced #82, minimatch rebase)
+# All executed against vorionsys/vorion (targeted master — the default branch)
+gh pr merge 79 --merge --repo vorionsys/vorion   # ✅
+gh pr merge 83 --merge --repo vorionsys/vorion   # ✅
+gh pr merge 80 --merge --repo vorionsys/vorion   # ✅
+gh pr merge 81 --merge --repo vorionsys/vorion   # ✅
+gh pr merge 84 --merge --repo vorionsys/vorion   # ✅
+gh pr merge 86 --merge --repo vorionsys/vorion   # ✅ (replaced #82, minimatch rebase)
 # PR #85 (storybook, low severity, dev-only) — closed due to conflict, no action needed
 ```
 
@@ -117,4 +117,4 @@ npm audit --audit-level=high
 ---
 
 *Last updated: February 27, 2026 — all merges complete, main surface clean.*
-*Full advisories list: https://github.com/voriongit/vorion/security/dependabot*
+*Full advisories list: https://github.com/vorionsys/vorion/security/dependabot*

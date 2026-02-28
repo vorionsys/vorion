@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Award, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Award, ArrowRight } from 'lucide-react';
 import { Navbar } from '@/components/nexus';
 
 export default function CertificatesPage() {

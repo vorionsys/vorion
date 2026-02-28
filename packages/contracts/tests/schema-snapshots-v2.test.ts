@@ -4,8 +4,8 @@
  * Tests evidence, retention, and other v2 module schemas.
  */
 
-import { describe, it, expect } from 'vitest';
-import { describeSchema } from './helpers/schema-descriptor';
+import { describe, it, expect } from "vitest";
+import { describeSchema } from "./helpers/schema-descriptor";
 
 import {
   EvidenceTypeSchema,
@@ -13,16 +13,16 @@ import {
   EvidenceItemSchema,
   EvidencePackSchema,
   ProofEventSchema,
-} from '../src/v2/evidence';
+} from "../src/v2/evidence";
 
 import {
   RetentionPolicySchema,
   LegalHoldSchema,
   SealEventSchema,
   RetentionScheduleSchema,
-} from '../src/v2/retention';
+} from "../src/v2/retention";
 
-describe('V2 Evidence Schemas', () => {
+describe("V2 Evidence Schemas", () => {
   const schemas = {
     EvidenceTypeSchema,
     EvidenceClassificationSchema,
@@ -37,29 +37,31 @@ describe('V2 Evidence Schemas', () => {
     });
   }
 
-  it('EvidenceTypeSchema accepts INTENT_SUBMISSION', () => {
-    expect(EvidenceTypeSchema.safeParse('INTENT_SUBMISSION').success).toBe(true);
+  it("EvidenceTypeSchema accepts INTENT_SUBMISSION", () => {
+    expect(EvidenceTypeSchema.safeParse("INTENT_SUBMISSION").success).toBe(
+      true,
+    );
   });
 
-  it('EvidenceTypeSchema rejects invalid type', () => {
-    expect(EvidenceTypeSchema.safeParse('UNKNOWN_TYPE').success).toBe(false);
+  it("EvidenceTypeSchema rejects invalid type", () => {
+    expect(EvidenceTypeSchema.safeParse("UNKNOWN_TYPE").success).toBe(false);
   });
 
-  it('EvidenceClassificationSchema accepts all classifications', () => {
+  it("EvidenceClassificationSchema accepts all classifications", () => {
     for (const c of [
-      'ROUTINE',
-      'SIGNIFICANT',
-      'COMPLIANCE_RELEVANT',
-      'SECURITY_RELEVANT',
-      'INCIDENT_RELATED',
-      'LEGAL_HOLD',
+      "ROUTINE",
+      "SIGNIFICANT",
+      "COMPLIANCE_RELEVANT",
+      "SECURITY_RELEVANT",
+      "INCIDENT_RELATED",
+      "LEGAL_HOLD",
     ]) {
       expect(EvidenceClassificationSchema.safeParse(c).success).toBe(true);
     }
   });
 });
 
-describe('V2 Retention Schemas', () => {
+describe("V2 Retention Schemas", () => {
   const schemas = {
     RetentionPolicySchema,
     LegalHoldSchema,

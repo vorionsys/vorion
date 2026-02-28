@@ -15,11 +15,11 @@
  * @packageDocumentation
  */
 
-import * as nodeCrypto from 'node:crypto';
-import { createLogger } from '../common/logger.js';
-import type { ID, Proof } from '../common/types.js';
+import * as nodeCrypto from "node:crypto";
+import { createLogger } from "../common/logger.js";
+import type { ID, Proof } from "../common/types.js";
 
-const logger = createLogger({ component: 'proof:merkle' });
+const logger = createLogger({ component: "proof:merkle" });
 
 // =============================================================================
 // TYPES
@@ -44,7 +44,7 @@ export interface MerkleProof {
   /** Proof path (sibling hashes) */
   path: Array<{
     hash: string;
-    position: 'left' | 'right';
+    position: "left" | "right";
   }>;
   /** Root hash */
   root: string;
@@ -77,7 +77,7 @@ export interface MerkleAnchor {
  */
 export interface ExternalAnchor {
   /** Type of external anchor */
-  type: 'ethereum' | 'bitcoin' | 'rfc3161' | 'custom';
+  type: "ethereum" | "bitcoin" | "rfc3161" | "custom";
   /** Transaction hash or reference ID */
   reference: string;
   /** Anchor timestamp */
@@ -106,7 +106,7 @@ export interface BatchAggregationResult {
  * Compute SHA-256 hash
  */
 function sha256(data: string | Buffer): string {
-  return nodeCrypto.createHash('sha256').update(data).digest('hex');
+  return nodeCrypto.createHash("sha256").update(data).digest("hex");
 }
 
 /**
@@ -158,7 +158,7 @@ export function buildMerkleTree(leafHashes: string[]): MerkleNode | null {
  */
 export function generateMerkleProof(
   leafHashes: string[],
-  leafIndex: number
+  leafIndex: number,
 ): MerkleProof | null {
   if (leafIndex < 0 || leafIndex >= leafHashes.length) {
     return null;
@@ -169,7 +169,7 @@ export function generateMerkleProof(
     return null;
   }
 
-  const path: MerkleProof['path'] = [];
+  const path: MerkleProof["path"] = [];
   let currentIndex = leafIndex;
   let levelSize = leafHashes.length;
 
@@ -177,13 +177,15 @@ export function generateMerkleProof(
   let currentLevel = leafHashes;
 
   while (currentLevel.length > 1) {
-    const siblingIndex = currentIndex % 2 === 0 ? currentIndex + 1 : currentIndex - 1;
-    const siblingHash = currentLevel[siblingIndex] ?? currentLevel[currentIndex]!;
+    const siblingIndex =
+      currentIndex % 2 === 0 ? currentIndex + 1 : currentIndex - 1;
+    const siblingHash =
+      currentLevel[siblingIndex] ?? currentLevel[currentIndex]!;
 
     if (siblingIndex !== currentIndex) {
       path.push({
         hash: siblingHash!,
-        position: currentIndex % 2 === 0 ? 'right' : 'left',
+        position: currentIndex % 2 === 0 ? "right" : "left",
       });
     }
 
@@ -215,7 +217,7 @@ export function verifyMerkleProof(proof: MerkleProof): boolean {
   let currentHash = proof.leafHash;
 
   for (const step of proof.path) {
-    if (step.position === 'left') {
+    if (step.position === "left") {
       currentHash = hashNodes(step.hash, currentHash);
     } else {
       currentHash = hashNodes(currentHash, step.hash);
@@ -287,12 +289,12 @@ export class MerkleAggregationService {
     if (config.signingKey) {
       try {
         this.signingKey = nodeCrypto.createPrivateKey({
-          key: Buffer.from(config.signingKey, 'base64'),
-          format: 'der',
-          type: 'pkcs8',
+          key: Buffer.from(config.signingKey, "base64"),
+          format: "der",
+          type: "pkcs8",
         });
       } catch (error) {
-        logger.warn({ error }, 'Failed to load signing key');
+        logger.warn({ error }, "Failed to load signing key");
       }
     }
 
@@ -302,7 +304,7 @@ export class MerkleAggregationService {
         maxBatchSize: this.config.maxBatchSize,
         maxBatchAgeMs: this.config.maxBatchAgeMs,
       },
-      'Merkle aggregation service initialized'
+      "Merkle aggregation service initialized",
     );
   }
 
@@ -318,12 +320,18 @@ export class MerkleAggregationService {
       addedAt: new Date(),
     });
 
-    logger.debug({ id, hash: hash.substring(0, 16) }, 'Item added to aggregation queue');
+    logger.debug(
+      { id, hash: hash.substring(0, 16) },
+      "Item added to aggregation queue",
+    );
 
     // Check if we should auto-anchor
     if (this.pending.length >= this.config.maxBatchSize) {
       await this.anchor();
-    } else if (this.pending.length >= this.config.minBatchSize && !this.anchorTimer) {
+    } else if (
+      this.pending.length >= this.config.minBatchSize &&
+      !this.anchorTimer
+    ) {
       // Start timer for auto-anchor
       this.anchorTimer = setTimeout(async () => {
         await this.anchor();
@@ -366,7 +374,7 @@ export class MerkleAggregationService {
     const tree = buildMerkleTree(leafHashes);
 
     if (!tree) {
-      logger.error('Failed to build Merkle tree');
+      logger.error("Failed to build Merkle tree");
       return null;
     }
 
@@ -398,8 +406,12 @@ export class MerkleAggregationService {
         timestamp: anchor.timestamp.toISOString(),
       });
 
-      const signature = nodeCrypto.sign(null, Buffer.from(dataToSign), this.signingKey);
-      anchor.signature = signature.toString('base64');
+      const signature = nodeCrypto.sign(
+        null,
+        Buffer.from(dataToSign),
+        this.signingKey,
+      );
+      anchor.signature = signature.toString("base64");
     }
 
     // External anchoring
@@ -422,7 +434,7 @@ export class MerkleAggregationService {
         externalAnchors: anchor.externalAnchors.length,
         durationMs,
       },
-      'Merkle anchor created'
+      "Merkle anchor created",
     );
 
     return { anchor, proofs, durationMs };
@@ -431,7 +443,9 @@ export class MerkleAggregationService {
   /**
    * Submit to external anchoring services
    */
-  private async submitExternalAnchors(rootHash: string): Promise<ExternalAnchor[]> {
+  private async submitExternalAnchors(
+    rootHash: string,
+  ): Promise<ExternalAnchor[]> {
     const anchors: ExternalAnchor[] = [];
 
     // RFC 3161 timestamp
@@ -439,13 +453,13 @@ export class MerkleAggregationService {
       try {
         const result = await this.submitRFC3161Timestamp(
           rootHash,
-          this.config.externalAnchorServices.rfc3161
+          this.config.externalAnchorServices.rfc3161,
         );
         if (result) {
           anchors.push(result);
         }
       } catch (error) {
-        logger.warn({ error }, 'RFC 3161 anchoring failed');
+        logger.warn({ error }, "RFC 3161 anchoring failed");
       }
     }
 
@@ -454,13 +468,13 @@ export class MerkleAggregationService {
       try {
         const result = await this.submitEthereumAnchor(
           rootHash,
-          this.config.externalAnchorServices.ethereum
+          this.config.externalAnchorServices.ethereum,
         );
         if (result) {
           anchors.push(result);
         }
       } catch (error) {
-        logger.warn({ error }, 'Ethereum anchoring failed');
+        logger.warn({ error }, "Ethereum anchoring failed");
       }
     }
 
@@ -472,21 +486,21 @@ export class MerkleAggregationService {
    */
   private async submitRFC3161Timestamp(
     rootHash: string,
-    tsaUrl: string
+    tsaUrl: string,
   ): Promise<ExternalAnchor | null> {
     try {
       // Create timestamp request
       // In a full implementation, this would create a proper ASN.1 TSP request
       const response = await fetch(tsaUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/timestamp-query',
+          "Content-Type": "application/timestamp-query",
         },
-        body: Buffer.from(rootHash, 'hex'),
+        body: Buffer.from(rootHash, "hex"),
       });
 
       if (!response.ok) {
-        logger.warn({ status: response.status }, 'TSA request failed');
+        logger.warn({ status: response.status }, "TSA request failed");
         return null;
       }
 
@@ -494,13 +508,13 @@ export class MerkleAggregationService {
       const reference = sha256(Buffer.from(responseData)).substring(0, 32);
 
       return {
-        type: 'rfc3161',
+        type: "rfc3161",
         reference,
         timestamp: new Date(),
         confirmed: true,
       };
     } catch (error) {
-      logger.error({ error }, 'RFC 3161 timestamp failed');
+      logger.error({ error }, "RFC 3161 timestamp failed");
       return null;
     }
   }
@@ -510,7 +524,7 @@ export class MerkleAggregationService {
    */
   private async submitEthereumAnchor(
     rootHash: string,
-    rpcUrl: string
+    rpcUrl: string,
   ): Promise<ExternalAnchor | null> {
     // Placeholder for Ethereum anchoring
     // In production, this would:
@@ -518,7 +532,7 @@ export class MerkleAggregationService {
     // 2. Sign and submit transaction
     // 3. Wait for confirmation
 
-    logger.debug({ rpcUrl }, 'Ethereum anchoring not fully implemented');
+    logger.debug({ rpcUrl }, "Ethereum anchoring not fully implemented");
     return null;
   }
 
@@ -612,7 +626,7 @@ export class MerkleAggregationService {
  * Create a Merkle aggregation service
  */
 export function createMerkleAggregationService(
-  config?: Partial<MerkleAggregationConfig>
+  config?: Partial<MerkleAggregationConfig>,
 ): MerkleAggregationService {
   return new MerkleAggregationService(config);
 }

@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { ID, TrustLevel, ControlAction } from '../common/types.js';
+import { createLogger } from "../common/logger.js";
+import type { ID, TrustLevel, ControlAction } from "../common/types.js";
 import type {
   ArbitrationAgent,
   ArbitrationVote,
@@ -24,17 +24,17 @@ import type {
   DecayFactor,
   ConsensusMetrics,
   AgentRole,
-} from './types.js';
+} from "./types.js";
 
-export * from './types.js';
+export * from "./types.js";
 
-const logger = createLogger({ component: 'trust-arbitration' });
+const logger = createLogger({ component: "trust-arbitration" });
 
 /**
  * Default arbitration configuration
  */
 const DEFAULT_CONFIG: ArbitrationConfig = {
-  defaultMethod: 'weighted_majority',
+  defaultMethod: "weighted_majority",
   maxRounds: 3,
   timeoutMs: 30000,
   minConsensusLevel: 0.6,
@@ -50,14 +50,14 @@ const DEFAULT_CONFIG: ArbitrationConfig = {
     observer: 0.3,
   },
   trustWeights: {
-    0: 0.1,   // T0 Sandbox
-    1: 0.2,   // T1 Observed
-    2: 0.35,  // T2 Provisional
-    3: 0.5,   // T3 Monitored
-    4: 0.7,   // T4 Standard
-    5: 0.85,  // T5 Trusted
-    6: 0.95,  // T6 Certified
-    7: 1.0,   // T7 Autonomous
+    0: 0.1, // T0 Sandbox
+    1: 0.2, // T1 Observed
+    2: 0.35, // T2 Provisional
+    3: 0.5, // T3 Monitored
+    4: 0.7, // T4 Standard
+    5: 0.85, // T5 Trusted
+    6: 0.95, // T6 Certified
+    7: 1.0, // T7 Autonomous
   },
 };
 
@@ -85,7 +85,10 @@ export class TrustArbitrationEngine {
     agent.votingWeight = roleWeight * trustWeight * accuracyWeight;
 
     this.agents.set(agent.agentId, agent);
-    logger.debug({ agentId: agent.agentId, votingWeight: agent.votingWeight }, 'Agent registered for arbitration');
+    logger.debug(
+      { agentId: agent.agentId, votingWeight: agent.votingWeight },
+      "Agent registered for arbitration",
+    );
   }
 
   /**
@@ -116,7 +119,7 @@ export class TrustArbitrationEngine {
         agentCount: request.conflict.agents.length,
         urgency: request.urgency,
       },
-      'Starting trust arbitration'
+      "Starting trust arbitration",
     );
 
     const method = request.preferredMethod ?? this.config.defaultMethod;
@@ -124,22 +127,22 @@ export class TrustArbitrationEngine {
     let result: ArbitrationResult;
 
     switch (method) {
-      case 'weighted_majority':
+      case "weighted_majority":
         result = await this.arbitrateWeightedMajority(resultId, request);
         break;
-      case 'unanimous_required':
+      case "unanimous_required":
         result = await this.arbitrateUnanimous(resultId, request);
         break;
-      case 'supervisor_override':
+      case "supervisor_override":
         result = await this.arbitrateSupervisorOverride(resultId, request);
         break;
-      case 'consensus_building':
+      case "consensus_building":
         result = await this.arbitrateConsensusBuilding(resultId, request);
         break;
-      case 'escalate_human':
+      case "escalate_human":
         result = await this.arbitrateEscalateHuman(resultId, request);
         break;
-      case 'default_deny':
+      case "default_deny":
       default:
         result = await this.arbitrateDefaultDeny(resultId, request);
         break;
@@ -163,7 +166,7 @@ export class TrustArbitrationEngine {
         consensusReached: result.decision.consensusReached,
         durationMs: result.durationMs,
       },
-      'Trust arbitration completed'
+      "Trust arbitration completed",
     );
 
     return result;
@@ -174,7 +177,7 @@ export class TrustArbitrationEngine {
    */
   private async arbitrateWeightedMajority(
     resultId: ID,
-    request: ArbitrationRequest
+    request: ArbitrationRequest,
   ): Promise<ArbitrationResult> {
     const votes = this.collectVotes(request.conflict);
     const confidenceDecay = this.applyConfidenceDecay(votes, request.conflict);
@@ -186,17 +189,21 @@ export class TrustArbitrationEngine {
     for (const vote of votes) {
       const agent = this.agents.get(vote.agentId);
       const weight = agent?.votingWeight ?? 1.0;
-      const decayedConfidence = confidenceDecay.final.get(vote.agentId) ?? vote.confidence;
+      const decayedConfidence =
+        confidenceDecay.final.get(vote.agentId) ?? vote.confidence;
 
       const currentScore = weightedScores.get(vote.action) ?? 0;
-      weightedScores.set(vote.action, currentScore + weight * decayedConfidence);
+      weightedScores.set(
+        vote.action,
+        currentScore + weight * decayedConfidence,
+      );
 
       const currentCount = voteCounts.get(vote.action) ?? 0;
       voteCounts.set(vote.action, currentCount + 1);
     }
 
     // Find winning action
-    let winningAction: ControlAction = 'deny';
+    let winningAction: ControlAction = "deny";
     let maxScore = 0;
 
     for (const [action, score] of weightedScores) {
@@ -207,16 +214,28 @@ export class TrustArbitrationEngine {
     }
 
     // Calculate consensus metrics
-    const totalWeight = Array.from(weightedScores.values()).reduce((a, b) => a + b, 0);
+    const totalWeight = Array.from(weightedScores.values()).reduce(
+      (a, b) => a + b,
+      0,
+    );
     const consensusLevel = maxScore / totalWeight;
 
-    const decision = this.createDecision(votes, winningAction, consensusLevel, confidenceDecay);
-    const consensusMetrics = this.calculateConsensusMetrics(votes, decision, []);
+    const decision = this.createDecision(
+      votes,
+      winningAction,
+      consensusLevel,
+      confidenceDecay,
+    );
+    const consensusMetrics = this.calculateConsensusMetrics(
+      votes,
+      decision,
+      [],
+    );
 
     return {
       resultId,
       conflictId: request.conflict.conflictId,
-      method: 'weighted_majority',
+      method: "weighted_majority",
       decision,
       votes,
       rounds: [
@@ -225,8 +244,14 @@ export class TrustArbitrationEngine {
           votes,
           intermediateResult: {
             leadingAction: winningAction,
-            voteCount: Object.fromEntries(voteCounts) as Record<ControlAction, number>,
-            weightedScore: Object.fromEntries(weightedScores) as Record<ControlAction, number>,
+            voteCount: Object.fromEntries(voteCounts) as Record<
+              ControlAction,
+              number
+            >,
+            weightedScore: Object.fromEntries(weightedScores) as Record<
+              ControlAction,
+              number
+            >,
             consensusLevel,
           },
           feedback: [],
@@ -245,7 +270,7 @@ export class TrustArbitrationEngine {
    */
   private async arbitrateUnanimous(
     resultId: ID,
-    request: ArbitrationRequest
+    request: ArbitrationRequest,
   ): Promise<ArbitrationResult> {
     const votes = this.collectVotes(request.conflict);
     const confidenceDecay = this.applyConfidenceDecay(votes, request.conflict);
@@ -256,11 +281,16 @@ export class TrustArbitrationEngine {
 
     const winningAction: ControlAction = unanimous
       ? votes[0]!.action
-      : 'escalate'; // Escalate if no unanimity
+      : "escalate"; // Escalate if no unanimity
 
     const consensusLevel = unanimous ? 1.0 : 0;
 
-    const decision = this.createDecision(votes, winningAction, consensusLevel, confidenceDecay);
+    const decision = this.createDecision(
+      votes,
+      winningAction,
+      consensusLevel,
+      confidenceDecay,
+    );
     decision.explanation = unanimous
       ? `Unanimous agreement on ${winningAction}`
       : `No unanimity reached (${actions.size} different positions) - escalating`;
@@ -268,7 +298,7 @@ export class TrustArbitrationEngine {
     return {
       resultId,
       conflictId: request.conflict.conflictId,
-      method: 'unanimous_required',
+      method: "unanimous_required",
       decision,
       votes,
       rounds: [
@@ -297,7 +327,7 @@ export class TrustArbitrationEngine {
    */
   private async arbitrateSupervisorOverride(
     resultId: ID,
-    request: ArbitrationRequest
+    request: ArbitrationRequest,
   ): Promise<ArbitrationResult> {
     const votes = this.collectVotes(request.conflict);
     const confidenceDecay = this.applyConfidenceDecay(votes, request.conflict);
@@ -305,21 +335,26 @@ export class TrustArbitrationEngine {
     // Find supervisor vote
     const supervisorVote = votes.find((v) => {
       const agent = this.agents.get(v.agentId);
-      return agent?.role === 'supervisor';
+      return agent?.role === "supervisor";
     });
 
-    const winningAction: ControlAction = supervisorVote?.action ?? 'escalate';
+    const winningAction: ControlAction = supervisorVote?.action ?? "escalate";
     const consensusLevel = supervisorVote ? 1.0 : 0;
 
-    const decision = this.createDecision(votes, winningAction, consensusLevel, confidenceDecay);
+    const decision = this.createDecision(
+      votes,
+      winningAction,
+      consensusLevel,
+      confidenceDecay,
+    );
     decision.explanation = supervisorVote
       ? `Supervisor override: ${supervisorVote.reasoning}`
-      : 'No supervisor available - escalating';
+      : "No supervisor available - escalating";
 
     return {
       resultId,
       conflictId: request.conflict.conflictId,
-      method: 'supervisor_override',
+      method: "supervisor_override",
       decision,
       votes,
       rounds: [
@@ -348,12 +383,12 @@ export class TrustArbitrationEngine {
    */
   private async arbitrateConsensusBuilding(
     resultId: ID,
-    request: ArbitrationRequest
+    request: ArbitrationRequest,
   ): Promise<ArbitrationResult> {
     const rounds: ArbitrationRound[] = [];
     let currentVotes = this.collectVotes(request.conflict);
     let consensusLevel = 0;
-    let winningAction: ControlAction = 'deny';
+    let winningAction: ControlAction = "deny";
 
     for (let round = 1; round <= this.config.maxRounds; round++) {
       // Calculate current consensus
@@ -379,7 +414,10 @@ export class TrustArbitrationEngine {
         votes: [...currentVotes],
         intermediateResult: {
           leadingAction: winningAction,
-          voteCount: Object.fromEntries(actionCounts) as Record<ControlAction, number>,
+          voteCount: Object.fromEntries(actionCounts) as Record<
+            ControlAction,
+            number
+          >,
           weightedScore: {} as Record<ControlAction, number>,
           consensusLevel,
         },
@@ -397,18 +435,30 @@ export class TrustArbitrationEngine {
       currentVotes = this.simulateVoteAdjustment(currentVotes, winningAction);
     }
 
-    const confidenceDecay = this.applyConfidenceDecay(currentVotes, request.conflict);
-    const decision = this.createDecision(currentVotes, winningAction, consensusLevel, confidenceDecay);
+    const confidenceDecay = this.applyConfidenceDecay(
+      currentVotes,
+      request.conflict,
+    );
+    const decision = this.createDecision(
+      currentVotes,
+      winningAction,
+      consensusLevel,
+      confidenceDecay,
+    );
 
     return {
       resultId,
       conflictId: request.conflict.conflictId,
-      method: 'consensus_building',
+      method: "consensus_building",
       decision,
       votes: currentVotes,
       rounds,
       confidenceDecay,
-      consensusMetrics: this.calculateConsensusMetrics(currentVotes, decision, rounds),
+      consensusMetrics: this.calculateConsensusMetrics(
+        currentVotes,
+        decision,
+        rounds,
+      ),
       completedAt: new Date().toISOString(),
       durationMs: 0,
     };
@@ -419,26 +469,26 @@ export class TrustArbitrationEngine {
    */
   private async arbitrateEscalateHuman(
     resultId: ID,
-    request: ArbitrationRequest
+    request: ArbitrationRequest,
   ): Promise<ArbitrationResult> {
     const votes = this.collectVotes(request.conflict);
     const confidenceDecay = this.applyConfidenceDecay(votes, request.conflict);
 
     const decision: ArbitrationDecision = {
-      action: 'escalate',
+      action: "escalate",
       confidence: 1.0,
       consensusReached: false,
       agreeingAgents: [],
       disagreeingAgents: votes.map((v) => v.agentId),
       abstainingAgents: [],
-      explanation: 'Conflict escalated to human decision-maker for resolution',
-      invalidityConditions: ['Human decision received', 'Timeout exceeded'],
+      explanation: "Conflict escalated to human decision-maker for resolution",
+      invalidityConditions: ["Human decision received", "Timeout exceeded"],
     };
 
     return {
       resultId,
       conflictId: request.conflict.conflictId,
-      method: 'escalate_human',
+      method: "escalate_human",
       decision,
       votes,
       rounds: [],
@@ -454,26 +504,31 @@ export class TrustArbitrationEngine {
    */
   private async arbitrateDefaultDeny(
     resultId: ID,
-    request: ArbitrationRequest
+    request: ArbitrationRequest,
   ): Promise<ArbitrationResult> {
     const votes = this.collectVotes(request.conflict);
     const confidenceDecay = this.applyConfidenceDecay(votes, request.conflict);
 
     const decision: ArbitrationDecision = {
-      action: 'deny',
+      action: "deny",
       confidence: 1.0,
       consensusReached: false,
-      agreeingAgents: votes.filter((v) => v.action === 'deny').map((v) => v.agentId),
-      disagreeingAgents: votes.filter((v) => v.action !== 'deny').map((v) => v.agentId),
+      agreeingAgents: votes
+        .filter((v) => v.action === "deny")
+        .map((v) => v.agentId),
+      disagreeingAgents: votes
+        .filter((v) => v.action !== "deny")
+        .map((v) => v.agentId),
       abstainingAgents: [],
-      explanation: 'Conflict resolved by defaulting to most restrictive action (deny)',
+      explanation:
+        "Conflict resolved by defaulting to most restrictive action (deny)",
       invalidityConditions: [],
     };
 
     return {
       resultId,
       conflictId: request.conflict.conflictId,
-      method: 'default_deny',
+      method: "default_deny",
       decision,
       votes,
       rounds: [],
@@ -496,7 +551,7 @@ export class TrustArbitrationEngine {
    */
   private applyConfidenceDecay(
     votes: ArbitrationVote[],
-    _conflict: TrustConflict
+    _conflict: TrustConflict,
   ): ConfidenceDecayRecord {
     const initial = new Map<ID, number>();
     const final = new Map<ID, number>();
@@ -523,7 +578,7 @@ export class TrustArbitrationEngine {
     // If there's disagreement, reduce confidence of minority positions
     if (actionGroups.size > 1) {
       let maxGroupSize = 0;
-      let majorityAction: ControlAction = 'deny';
+      let majorityAction: ControlAction = "deny";
 
       for (const [action, agents] of actionGroups) {
         if (agents.length > maxGroupSize) {
@@ -542,7 +597,7 @@ export class TrustArbitrationEngine {
           }
 
           decayFactors.push({
-            type: 'cross_agent_disagreement',
+            type: "cross_agent_disagreement",
             affectedAgents: agents,
             decayAmount,
             reason: `Minority position on ${action} vs majority ${majorityAction}`,
@@ -560,7 +615,7 @@ export class TrustArbitrationEngine {
         final.set(vote.agentId, Math.max(0, current - decayAmount));
 
         decayFactors.push({
-          type: 'historical_inaccuracy',
+          type: "historical_inaccuracy",
           affectedAgents: [vote.agentId],
           decayAmount,
           reason: `Historical accuracy of ${(agent.historicalAccuracy * 100).toFixed(1)}%`,
@@ -575,7 +630,8 @@ export class TrustArbitrationEngine {
       totalInitial += initial.get(agentId) ?? 0;
       totalFinal += final.get(agentId) ?? 0;
     }
-    const totalDecayPercent = totalInitial > 0 ? ((totalInitial - totalFinal) / totalInitial) * 100 : 0;
+    const totalDecayPercent =
+      totalInitial > 0 ? ((totalInitial - totalFinal) / totalInitial) * 100 : 0;
 
     return { initial, final, decayFactors, totalDecayPercent };
   }
@@ -587,7 +643,7 @@ export class TrustArbitrationEngine {
     votes: ArbitrationVote[],
     action: ControlAction,
     consensusLevel: number,
-    confidenceDecay: ConfidenceDecayRecord
+    confidenceDecay: ConfidenceDecayRecord,
   ): ArbitrationDecision {
     const agreeing = votes.filter((v) => v.action === action);
     const disagreeing = votes.filter((v) => v.action !== action);
@@ -595,9 +651,11 @@ export class TrustArbitrationEngine {
     // Calculate confidence from agreeing agents with decay applied
     let totalConfidence = 0;
     for (const vote of agreeing) {
-      totalConfidence += confidenceDecay.final.get(vote.agentId) ?? vote.confidence;
+      totalConfidence +=
+        confidenceDecay.final.get(vote.agentId) ?? vote.confidence;
     }
-    const avgConfidence = agreeing.length > 0 ? totalConfidence / agreeing.length : 0;
+    const avgConfidence =
+      agreeing.length > 0 ? totalConfidence / agreeing.length : 0;
 
     const consensusReached = consensusLevel >= this.config.minConsensusLevel;
 
@@ -608,7 +666,12 @@ export class TrustArbitrationEngine {
       agreeingAgents: agreeing.map((v) => v.agentId),
       disagreeingAgents: disagreeing.map((v) => v.agentId),
       abstainingAgents: [],
-      explanation: this.generateExplanation(votes, action, consensusLevel, consensusReached),
+      explanation: this.generateExplanation(
+        votes,
+        action,
+        consensusLevel,
+        consensusReached,
+      ),
       invalidityConditions: this.generateInvalidityConditions(votes, action),
     };
   }
@@ -620,10 +683,10 @@ export class TrustArbitrationEngine {
     votes: ArbitrationVote[],
     action: ControlAction,
     consensusLevel: number,
-    consensusReached: boolean
+    consensusReached: boolean,
   ): string {
     const agreeing = votes.filter((v) => v.action === action);
-    const reasons = agreeing.map((v) => v.reasoning).join('; ');
+    const reasons = agreeing.map((v) => v.reasoning).join("; ");
 
     if (consensusReached) {
       return `Consensus reached (${(consensusLevel * 100).toFixed(1)}%) on ${action}: ${reasons}`;
@@ -635,7 +698,10 @@ export class TrustArbitrationEngine {
   /**
    * Generate conditions that would invalidate the decision
    */
-  private generateInvalidityConditions(votes: ArbitrationVote[], _action: ControlAction): string[] {
+  private generateInvalidityConditions(
+    votes: ArbitrationVote[],
+    _action: ControlAction,
+  ): string[] {
     const conditions: string[] = [];
 
     // Conditions based on concerns from voting agents
@@ -648,8 +714,10 @@ export class TrustArbitrationEngine {
     }
 
     // Add standard conditions
-    conditions.push('Trust scores of participating agents change significantly');
-    conditions.push('New evidence emerges contradicting the decision');
+    conditions.push(
+      "Trust scores of participating agents change significantly",
+    );
+    conditions.push("New evidence emerges contradicting the decision");
 
     return conditions;
   }
@@ -660,7 +728,7 @@ export class TrustArbitrationEngine {
   private calculateConsensusMetrics(
     votes: ArbitrationVote[],
     decision: ArbitrationDecision,
-    rounds: ArbitrationRound[]
+    rounds: ArbitrationRound[],
   ): ConsensusMetrics {
     // Calculate vote entropy
     const actionCounts = new Map<ControlAction, number>();
@@ -679,10 +747,12 @@ export class TrustArbitrationEngine {
     }
 
     // Find strongest dissent
-    let strongestDissent: ConsensusMetrics['strongestDissent'] = undefined;
+    let strongestDissent: ConsensusMetrics["strongestDissent"] = undefined;
     const disagreeing = votes.filter((v) => v.action !== decision.action);
     if (disagreeing.length > 0) {
-      const strongest = disagreeing.reduce((max, v) => (v.confidence > max.confidence ? v : max));
+      const strongest = disagreeing.reduce((max, v) =>
+        v.confidence > max.confidence ? v : max,
+      );
       strongestDissent = {
         agentId: strongest.agentId,
         originalVote: strongest.action,
@@ -705,7 +775,7 @@ export class TrustArbitrationEngine {
    */
   private simulateVoteAdjustment(
     votes: ArbitrationVote[],
-    leadingAction: ControlAction
+    leadingAction: ControlAction,
   ): ArbitrationVote[] {
     return votes.map((vote) => {
       // Low-confidence voters tend to move toward consensus
@@ -735,7 +805,10 @@ export class TrustArbitrationEngine {
       const matched = vote.action === result.decision.action;
       const adjustment = matched ? 0.01 : -0.01;
 
-      agent.historicalAccuracy = Math.max(0, Math.min(1, agent.historicalAccuracy + adjustment));
+      agent.historicalAccuracy = Math.max(
+        0,
+        Math.min(1, agent.historicalAccuracy + adjustment),
+      );
       agent.participationCount++;
 
       // Recalculate voting weight
@@ -753,7 +826,7 @@ export class TrustArbitrationEngine {
 
     if (query.agentId) {
       results = results.filter((r) =>
-        r.votes.some((v) => v.agentId === query.agentId)
+        r.votes.some((v) => v.agentId === query.agentId),
       );
     }
 
@@ -766,7 +839,9 @@ export class TrustArbitrationEngine {
     }
 
     if (query.consensusReached !== undefined) {
-      results = results.filter((r) => r.decision.consensusReached === query.consensusReached);
+      results = results.filter(
+        (r) => r.decision.consensusReached === query.consensusReached,
+      );
     }
 
     if (query.startDate) {
@@ -820,7 +895,8 @@ export class TrustArbitrationEngine {
       totalArbitrations: results.length,
       byMethod,
       consensusRate: results.length > 0 ? consensusCount / results.length : 0,
-      averageDurationMs: results.length > 0 ? totalDuration / results.length : 0,
+      averageDurationMs:
+        results.length > 0 ? totalDuration / results.length : 0,
       agentCount: this.agents.size,
     };
   }
@@ -830,7 +906,7 @@ export class TrustArbitrationEngine {
  * Create a new trust arbitration engine
  */
 export function createTrustArbitrationEngine(
-  config?: Partial<ArbitrationConfig>
+  config?: Partial<ArbitrationConfig>,
 ): TrustArbitrationEngine {
   return new TrustArbitrationEngine(config);
 }
@@ -846,7 +922,7 @@ export function createArbitrationAgent(
     trustLevel: TrustLevel;
     role: AgentRole;
     historicalAccuracy?: number;
-  }
+  },
 ): ArbitrationAgent {
   return {
     agentId,
@@ -864,10 +940,10 @@ export function createArbitrationAgent(
  * Helper to create a trust conflict
  */
 export function createTrustConflict(
-  conflictType: TrustConflict['conflictType'],
-  subject: TrustConflict['subject'],
+  conflictType: TrustConflict["conflictType"],
+  subject: TrustConflict["subject"],
   agents: ArbitrationAgent[],
-  initialPositions: ArbitrationVote[]
+  initialPositions: ArbitrationVote[],
 ): TrustConflict {
   const positionsMap = new Map<ID, ArbitrationVote>();
   for (const vote of initialPositions) {
@@ -881,6 +957,6 @@ export function createTrustConflict(
     agents,
     initialPositions: positionsMap,
     detectedAt: new Date().toISOString(),
-    severity: 'medium',
+    severity: "medium",
   };
 }

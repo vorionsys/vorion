@@ -12,7 +12,7 @@
  * @module @vorionsys/contracts/canonical/trust-signal
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 // import { trustScoreSchema } from './trust-score.js';
 
 // ============================================================================
@@ -28,64 +28,66 @@ import { z } from 'zod';
  */
 export enum SignalType {
   /** Agent successfully completed an action */
-  ACTION_SUCCESS = 'action_success',
+  ACTION_SUCCESS = "action_success",
   /** Agent failed to complete an action */
-  ACTION_FAILURE = 'action_failure',
+  ACTION_FAILURE = "action_failure",
   /** Agent complied with a policy requirement */
-  COMPLIANCE_MET = 'compliance_met',
+  COMPLIANCE_MET = "compliance_met",
   /** Agent violated a policy requirement */
-  COMPLIANCE_VIOLATION = 'compliance_violation',
+  COMPLIANCE_VIOLATION = "compliance_violation",
   /** Agent's credential was verified */
-  CREDENTIAL_VERIFIED = 'credential_verified',
+  CREDENTIAL_VERIFIED = "credential_verified",
   /** Agent's credential expired or was revoked */
-  CREDENTIAL_EXPIRED = 'credential_expired',
+  CREDENTIAL_EXPIRED = "credential_expired",
   /** Agent exhibited anomalous behavior */
-  ANOMALY_DETECTED = 'anomaly_detected',
+  ANOMALY_DETECTED = "anomaly_detected",
   /** Manual trust adjustment by administrator */
-  MANUAL_ADJUSTMENT = 'manual_adjustment',
+  MANUAL_ADJUSTMENT = "manual_adjustment",
   /** Trust decay due to inactivity */
-  DECAY = 'decay',
+  DECAY = "decay",
   /** Initial trust assignment for new agent */
-  INITIAL_TRUST = 'initial_trust',
+  INITIAL_TRUST = "initial_trust",
   /** Trust transfer from another system */
-  TRUST_TRANSFER = 'trust_transfer',
+  TRUST_TRANSFER = "trust_transfer",
   /** Agent passed a canary probe test */
-  CANARY_PASSED = 'canary_passed',
+  CANARY_PASSED = "canary_passed",
   /** Agent failed a canary probe test */
-  CANARY_FAILED = 'canary_failed',
+  CANARY_FAILED = "canary_failed",
   /** Third-party attestation received */
-  ATTESTATION = 'attestation',
+  ATTESTATION = "attestation",
   /** Peer review or endorsement */
-  PEER_ENDORSEMENT = 'peer_endorsement',
+  PEER_ENDORSEMENT = "peer_endorsement",
   /** Outcome reversal (provisional success became failure) */
-  OUTCOME_REVERSAL = 'outcome_reversal',
+  OUTCOME_REVERSAL = "outcome_reversal",
 }
 
 /**
  * Signal polarity - whether the signal is positive or negative for trust.
  */
-export type SignalPolarity = 'positive' | 'negative' | 'neutral';
+export type SignalPolarity = "positive" | "negative" | "neutral";
 
 /**
  * Mapping of signal types to their default polarity.
  */
-export const SIGNAL_TYPE_POLARITY: Readonly<Record<SignalType, SignalPolarity>> = {
-  [SignalType.ACTION_SUCCESS]: 'positive',
-  [SignalType.ACTION_FAILURE]: 'negative',
-  [SignalType.COMPLIANCE_MET]: 'positive',
-  [SignalType.COMPLIANCE_VIOLATION]: 'negative',
-  [SignalType.CREDENTIAL_VERIFIED]: 'positive',
-  [SignalType.CREDENTIAL_EXPIRED]: 'negative',
-  [SignalType.ANOMALY_DETECTED]: 'negative',
-  [SignalType.MANUAL_ADJUSTMENT]: 'neutral',
-  [SignalType.DECAY]: 'negative',
-  [SignalType.INITIAL_TRUST]: 'neutral',
-  [SignalType.TRUST_TRANSFER]: 'neutral',
-  [SignalType.CANARY_PASSED]: 'positive',
-  [SignalType.CANARY_FAILED]: 'negative',
-  [SignalType.ATTESTATION]: 'positive',
-  [SignalType.PEER_ENDORSEMENT]: 'positive',
-  [SignalType.OUTCOME_REVERSAL]: 'negative',
+export const SIGNAL_TYPE_POLARITY: Readonly<
+  Record<SignalType, SignalPolarity>
+> = {
+  [SignalType.ACTION_SUCCESS]: "positive",
+  [SignalType.ACTION_FAILURE]: "negative",
+  [SignalType.COMPLIANCE_MET]: "positive",
+  [SignalType.COMPLIANCE_VIOLATION]: "negative",
+  [SignalType.CREDENTIAL_VERIFIED]: "positive",
+  [SignalType.CREDENTIAL_EXPIRED]: "negative",
+  [SignalType.ANOMALY_DETECTED]: "negative",
+  [SignalType.MANUAL_ADJUSTMENT]: "neutral",
+  [SignalType.DECAY]: "negative",
+  [SignalType.INITIAL_TRUST]: "neutral",
+  [SignalType.TRUST_TRANSFER]: "neutral",
+  [SignalType.CANARY_PASSED]: "positive",
+  [SignalType.CANARY_FAILED]: "negative",
+  [SignalType.ATTESTATION]: "positive",
+  [SignalType.PEER_ENDORSEMENT]: "positive",
+  [SignalType.OUTCOME_REVERSAL]: "negative",
 } as const;
 
 /**
@@ -95,43 +97,43 @@ export const SIGNAL_TYPE_POLARITY: Readonly<Record<SignalType, SignalPolarity>> 
  */
 export type SignalSource =
   /** A3I authorization system */
-  | 'a3i'
+  | "a3i"
   /** ERA execution system */
-  | 'era'
+  | "era"
   /** Agent Trust Scoring Framework */
-  | 'atsf'
+  | "atsf"
   /** Canary probe system */
-  | 'canary'
+  | "canary"
   /** Human administrator */
-  | 'admin'
+  | "admin"
   /** External attestation service */
-  | 'external'
+  | "external"
   /** Automated compliance checker */
-  | 'compliance'
+  | "compliance"
   /** Anomaly detection system */
-  | 'anomaly'
+  | "anomaly"
   /** Peer agent */
-  | 'peer'
+  | "peer"
   /** System scheduler (for decay) */
-  | 'scheduler'
+  | "scheduler"
   /** Unknown or unspecified source */
-  | 'unknown';
+  | "unknown";
 
 /**
  * All valid signal sources as an array.
  */
 export const SIGNAL_SOURCES: readonly SignalSource[] = [
-  'a3i',
-  'era',
-  'atsf',
-  'canary',
-  'admin',
-  'external',
-  'compliance',
-  'anomaly',
-  'peer',
-  'scheduler',
-  'unknown',
+  "a3i",
+  "era",
+  "atsf",
+  "canary",
+  "admin",
+  "external",
+  "compliance",
+  "anomaly",
+  "peer",
+  "scheduler",
+  "unknown",
 ] as const;
 
 /**
@@ -141,25 +143,25 @@ export const SIGNAL_SOURCES: readonly SignalSource[] = [
  */
 export type TrustDimension =
   /** Capability Trust - Does the agent have the skills? */
-  | 'capability'
+  | "capability"
   /** Behavioral Trust - Has the agent acted reliably? */
-  | 'behavioral'
+  | "behavioral"
   /** Governance Trust - Is the agent properly governed? */
-  | 'governance'
+  | "governance"
   /** Contextual Trust - Is this the right context? */
-  | 'contextual'
+  | "contextual"
   /** Assurance Confidence - How confident are we? */
-  | 'assurance';
+  | "assurance";
 
 /**
  * All trust dimensions as an array.
  */
 export const TRUST_DIMENSIONS: readonly TrustDimension[] = [
-  'capability',
-  'behavioral',
-  'governance',
-  'contextual',
-  'assurance',
+  "capability",
+  "behavioral",
+  "governance",
+  "contextual",
+  "assurance",
 ] as const;
 
 // ============================================================================
@@ -410,7 +412,7 @@ export function getSignalPolarity(type: SignalType): SignalPolarity {
  * @returns True if the signal type is positive
  */
 export function isPositiveSignal(type: SignalType): boolean {
-  return SIGNAL_TYPE_POLARITY[type] === 'positive';
+  return SIGNAL_TYPE_POLARITY[type] === "positive";
 }
 
 /**
@@ -420,7 +422,7 @@ export function isPositiveSignal(type: SignalType): boolean {
  * @returns True if the signal type is negative
  */
 export function isNegativeSignal(type: SignalType): boolean {
-  return SIGNAL_TYPE_POLARITY[type] === 'negative';
+  return SIGNAL_TYPE_POLARITY[type] === "negative";
 }
 
 /**
@@ -445,7 +447,10 @@ export function calculateEffectiveImpact(signal: TrustSignal): number {
  * @param now - Current time (defaults to now)
  * @returns True if signal has expired
  */
-export function isSignalExpired(signal: TrustSignal, now: Date = new Date()): boolean {
+export function isSignalExpired(
+  signal: TrustSignal,
+  now: Date = new Date(),
+): boolean {
   if (!signal.expiresAt) return false;
   return signal.expiresAt < now;
 }
@@ -457,7 +462,10 @@ export function isSignalExpired(signal: TrustSignal, now: Date = new Date()): bo
  * @param now - Current time (defaults to now)
  * @returns Array of non-expired signals
  */
-export function filterExpiredSignals(signals: TrustSignal[], now: Date = new Date()): TrustSignal[] {
+export function filterExpiredSignals(
+  signals: TrustSignal[],
+  now: Date = new Date(),
+): TrustSignal[] {
   return signals.filter((s) => !isSignalExpired(s, now));
 }
 
@@ -474,13 +482,13 @@ export function aggregateSignals(
   signals: TrustSignal[],
   agentId: string,
   periodStart: Date,
-  periodEnd: Date
+  periodEnd: Date,
 ): SignalAggregation {
   const periodSignals = signals.filter(
     (s) =>
       s.agentId === agentId &&
       s.timestamp >= periodStart &&
-      s.timestamp <= periodEnd
+      s.timestamp <= periodEnd,
   );
 
   const byType: Partial<Record<SignalType, number>> = {};
@@ -554,40 +562,40 @@ export function isTrustDimension(value: unknown): value is TrustDimension {
  * Zod schema for SignalType enum.
  */
 export const signalTypeSchema = z.nativeEnum(SignalType, {
-  errorMap: () => ({ message: 'Invalid signal type' }),
+  errorMap: () => ({ message: "Invalid signal type" }),
 });
 
 /**
  * Zod schema for SignalSource.
  */
-export const signalSourceSchema = z.enum([
-  'a3i',
-  'era',
-  'atsf',
-  'canary',
-  'admin',
-  'external',
-  'compliance',
-  'anomaly',
-  'peer',
-  'scheduler',
-  'unknown',
-], {
-  errorMap: () => ({ message: 'Invalid signal source' }),
-});
+export const signalSourceSchema = z.enum(
+  [
+    "a3i",
+    "era",
+    "atsf",
+    "canary",
+    "admin",
+    "external",
+    "compliance",
+    "anomaly",
+    "peer",
+    "scheduler",
+    "unknown",
+  ],
+  {
+    errorMap: () => ({ message: "Invalid signal source" }),
+  },
+);
 
 /**
  * Zod schema for TrustDimension.
  */
-export const trustDimensionSchema = z.enum([
-  'capability',
-  'behavioral',
-  'governance',
-  'contextual',
-  'assurance',
-], {
-  errorMap: () => ({ message: 'Invalid trust dimension' }),
-});
+export const trustDimensionSchema = z.enum(
+  ["capability", "behavioral", "governance", "contextual", "assurance"],
+  {
+    errorMap: () => ({ message: "Invalid trust dimension" }),
+  },
+);
 
 /**
  * Zod schema for SignalImpact.
@@ -679,4 +687,6 @@ export type TrustSignalInput = z.input<typeof trustSignalSchema>;
 /**
  * Inferred CreateTrustSignalRequest type from Zod schema.
  */
-export type CreateTrustSignalRequestInput = z.input<typeof createTrustSignalRequestSchema>;
+export type CreateTrustSignalRequestInput = z.input<
+  typeof createTrustSignalRequestSchema
+>;

@@ -6,12 +6,12 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { TrustSignal } from '../common/types.js';
-import type { TrustEngine } from '../trust-engine/index.js';
-import type { TrustAwareAgentConfig, TrustSignalSource } from './types.js';
+import { createLogger } from "../common/logger.js";
+import type { TrustSignal } from "../common/types.js";
+import type { TrustEngine } from "../trust-engine/index.js";
+import type { TrustAwareAgentConfig, TrustSignalSource } from "./types.js";
 
-const logger = createLogger({ component: 'langchain-callback' });
+const logger = createLogger({ component: "langchain-callback" });
 
 /**
  * Default signal weights
@@ -75,9 +75,12 @@ export class TrustCallbackHandler {
     if (!existing) {
       await this.trustEngine.initializeEntity(
         this.config.agentId,
-        this.config.initialTrustLevel
+        this.config.initialTrustLevel,
       );
-      logger.info({ agentId: this.config.agentId }, 'Initialized trust for agent');
+      logger.info(
+        { agentId: this.config.agentId },
+        "Initialized trust for agent",
+      );
     }
   }
 
@@ -90,30 +93,30 @@ export class TrustCallbackHandler {
     let signalType: string;
 
     switch (source.event) {
-      case 'tool_end':
+      case "tool_end":
         value = weights.toolSuccess ?? DEFAULT_WEIGHTS.toolSuccess;
-        signalType = `behavioral.tool_success.${source.toolName ?? 'unknown'}`;
+        signalType = `behavioral.tool_success.${source.toolName ?? "unknown"}`;
         break;
-      case 'tool_error':
+      case "tool_error":
         value = weights.toolFailure ?? DEFAULT_WEIGHTS.toolFailure;
-        signalType = `behavioral.tool_failure.${source.toolName ?? 'unknown'}`;
+        signalType = `behavioral.tool_failure.${source.toolName ?? "unknown"}`;
         break;
-      case 'llm_end':
+      case "llm_end":
         value = weights.llmSuccess ?? DEFAULT_WEIGHTS.llmSuccess;
-        signalType = `behavioral.llm_success.${source.modelName ?? 'unknown'}`;
+        signalType = `behavioral.llm_success.${source.modelName ?? "unknown"}`;
         break;
-      case 'llm_error':
+      case "llm_error":
         value = weights.llmFailure ?? DEFAULT_WEIGHTS.llmFailure;
-        signalType = `behavioral.llm_failure.${source.modelName ?? 'unknown'}`;
+        signalType = `behavioral.llm_failure.${source.modelName ?? "unknown"}`;
         break;
-      case 'chain_end':
-      case 'agent_finish':
+      case "chain_end":
+      case "agent_finish":
         value = weights.chainSuccess ?? DEFAULT_WEIGHTS.chainSuccess;
-        signalType = `behavioral.chain_success.${source.chainType ?? 'agent'}`;
+        signalType = `behavioral.chain_success.${source.chainType ?? "agent"}`;
         break;
-      case 'chain_error':
+      case "chain_error":
         value = weights.chainFailure ?? DEFAULT_WEIGHTS.chainFailure;
-        signalType = `behavioral.chain_failure.${source.chainType ?? 'agent'}`;
+        signalType = `behavioral.chain_failure.${source.chainType ?? "agent"}`;
         break;
       default:
         return; // Don't record start events as signals
@@ -124,7 +127,7 @@ export class TrustCallbackHandler {
       entityId: this.config.agentId,
       type: signalType,
       value,
-      source: 'langchain',
+      source: "langchain",
       timestamp: new Date().toISOString(),
       metadata: {
         event: source.event,
@@ -140,7 +143,7 @@ export class TrustCallbackHandler {
     await this.trustEngine.recordSignal(signal);
     this.signalCount++;
 
-    logger.debug({ signal }, 'Recorded trust signal from LangChain');
+    logger.debug({ signal }, "Recorded trust signal from LangChain");
   }
 
   /**
@@ -169,11 +172,11 @@ export class TrustCallbackHandler {
   async handleToolStart(
     tool: { name: string },
     _input: string,
-    runId: string
+    runId: string,
   ): Promise<void> {
     if (!this.config.recordToolUsage) return;
     this.startTimer(runId);
-    logger.debug({ toolName: tool.name, runId }, 'Tool started');
+    logger.debug({ toolName: tool.name, runId }, "Tool started");
   }
 
   /**
@@ -183,7 +186,7 @@ export class TrustCallbackHandler {
     if (!this.config.recordToolUsage) return;
     const duration = this.endTimer(runId);
     await this.recordSignal({
-      event: 'tool_end',
+      event: "tool_end",
       duration,
     });
   }
@@ -195,7 +198,7 @@ export class TrustCallbackHandler {
     if (!this.config.recordErrors) return;
     const duration = this.endTimer(runId);
     await this.recordSignal({
-      event: 'tool_error',
+      event: "tool_error",
       duration,
       error,
     });
@@ -207,24 +210,27 @@ export class TrustCallbackHandler {
   async handleLLMStart(
     llm: { name: string },
     _prompts: string[],
-    runId: string
+    runId: string,
   ): Promise<void> {
     if (!this.config.recordLlmCalls) return;
     this.startTimer(runId);
-    logger.debug({ modelName: llm.name, runId }, 'LLM started');
+    logger.debug({ modelName: llm.name, runId }, "LLM started");
   }
 
   /**
    * Called when an LLM ends successfully
    */
   async handleLLMEnd(
-    output: { generations: unknown[][]; llmOutput?: { tokenUsage?: { totalTokens?: number } } },
-    runId: string
+    output: {
+      generations: unknown[][];
+      llmOutput?: { tokenUsage?: { totalTokens?: number } };
+    },
+    runId: string,
   ): Promise<void> {
     if (!this.config.recordLlmCalls) return;
     const duration = this.endTimer(runId);
     await this.recordSignal({
-      event: 'llm_end',
+      event: "llm_end",
       duration,
       tokenCount: output.llmOutput?.tokenUsage?.totalTokens,
     });
@@ -237,7 +243,7 @@ export class TrustCallbackHandler {
     if (!this.config.recordErrors) return;
     const duration = this.endTimer(runId);
     await this.recordSignal({
-      event: 'llm_error',
+      event: "llm_error",
       duration,
       error,
     });
@@ -249,10 +255,10 @@ export class TrustCallbackHandler {
   async handleChainStart(
     chain: { name: string },
     _inputs: Record<string, unknown>,
-    runId: string
+    runId: string,
   ): Promise<void> {
     this.startTimer(runId);
-    logger.debug({ chainType: chain.name, runId }, 'Chain started');
+    logger.debug({ chainType: chain.name, runId }, "Chain started");
   }
 
   /**
@@ -260,11 +266,11 @@ export class TrustCallbackHandler {
    */
   async handleChainEnd(
     _outputs: Record<string, unknown>,
-    runId: string
+    runId: string,
   ): Promise<void> {
     const duration = this.endTimer(runId);
     await this.recordSignal({
-      event: 'chain_end',
+      event: "chain_end",
       duration,
     });
   }
@@ -276,7 +282,7 @@ export class TrustCallbackHandler {
     if (!this.config.recordErrors) return;
     const duration = this.endTimer(runId);
     await this.recordSignal({
-      event: 'chain_error',
+      event: "chain_error",
       duration,
       error,
     });
@@ -287,9 +293,9 @@ export class TrustCallbackHandler {
    */
   async handleAgentAction(
     action: { tool: string; toolInput: string; log: string },
-    runId: string
+    runId: string,
   ): Promise<void> {
-    logger.debug({ tool: action.tool, runId }, 'Agent action');
+    logger.debug({ tool: action.tool, runId }, "Agent action");
   }
 
   /**
@@ -297,11 +303,11 @@ export class TrustCallbackHandler {
    */
   async handleAgentEnd(
     _finish: { returnValues: Record<string, unknown>; log: string },
-    _runId: string
+    _runId: string,
   ): Promise<void> {
     await this.recordSignal({
-      event: 'agent_finish',
-      chainType: 'agent',
+      event: "agent_finish",
+      chainType: "agent",
     });
   }
 }
@@ -311,7 +317,7 @@ export class TrustCallbackHandler {
  */
 export function createTrustCallback(
   trustEngine: TrustEngine,
-  config: TrustAwareAgentConfig
+  config: TrustAwareAgentConfig,
 ): TrustCallbackHandler {
   return new TrustCallbackHandler(trustEngine, config);
 }

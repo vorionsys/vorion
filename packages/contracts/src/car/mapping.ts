@@ -13,12 +13,9 @@
  * @module @vorionsys/contracts/car/mapping
  */
 
-import { z } from 'zod';
-import {
-  type DomainCode,
-  domainCodeSchema,
-} from './domains.js';
-import { CapabilityLevel } from './levels.js';
+import { z } from "zod";
+import { type DomainCode, domainCodeSchema } from "./domains.js";
+import { CapabilityLevel } from "./levels.js";
 import {
   CertificationTier,
   RuntimeTier,
@@ -28,7 +25,7 @@ import {
   RUNTIME_TIER_SCORES,
   scoreToCertificationTier,
   scoreToRuntimeTier,
-} from './tiers.js';
+} from "./tiers.js";
 
 // ============================================================================
 // Tier Mappings
@@ -52,7 +49,7 @@ import {
  * ```
  */
 export function certificationTierToRuntimeTier(
-  certificationTier: CertificationTier
+  certificationTier: CertificationTier,
 ): RuntimeTier {
   // Direct mapping based on numeric value
   return certificationTier as unknown as RuntimeTier;
@@ -71,7 +68,7 @@ export function certificationTierToRuntimeTier(
  * ```
  */
 export function runtimeTierToCertificationTier(
-  runtimeTier: RuntimeTier
+  runtimeTier: RuntimeTier,
 ): CertificationTier {
   return runtimeTier as unknown as CertificationTier;
 }
@@ -141,7 +138,7 @@ export enum TrustBand {
  * Zod schema for TrustBand validation.
  */
 export const trustBandSchema = z.nativeEnum(TrustBand, {
-  errorMap: () => ({ message: 'Invalid trust band. Must be T0-T7 (0-7).' }),
+  errorMap: () => ({ message: "Invalid trust band. Must be T0-T7 (0-7)." }),
 });
 
 /**
@@ -156,7 +153,9 @@ export const trustBandSchema = z.nativeEnum(TrustBand, {
  * // CertificationTier.T3_MONITORED
  * ```
  */
-export function trustBandToCertificationTier(trustBand: TrustBand): CertificationTier {
+export function trustBandToCertificationTier(
+  trustBand: TrustBand,
+): CertificationTier {
   return trustBand as unknown as CertificationTier;
 }
 
@@ -183,7 +182,7 @@ export function trustBandToRuntimeTier(trustBand: TrustBand): RuntimeTier {
  * @returns Corresponding Vorion trust band
  */
 export function certificationTierToTrustBand(
-  certificationTier: CertificationTier
+  certificationTier: CertificationTier,
 ): TrustBand {
   return certificationTier as unknown as TrustBand;
 }
@@ -240,36 +239,40 @@ export function scoreToBothTiers(score: number): {
  */
 export function normalizeScoreBetweenScales(
   score: number,
-  fromScale: 'carId' | 'vorion',
-  toScale: 'carId' | 'vorion'
+  fromScale: "carId" | "vorion",
+  toScale: "carId" | "vorion",
 ): number {
   if (fromScale === toScale) {
     return score;
   }
 
   // Determine the tier in the source scale
-  const sourceTier = fromScale === 'carId'
-    ? scoreToCertificationTier(score)
-    : scoreToRuntimeTier(score);
+  const sourceTier =
+    fromScale === "carId"
+      ? scoreToCertificationTier(score)
+      : scoreToRuntimeTier(score);
 
   // Get the source tier's score range
-  const sourceRange = fromScale === 'carId'
-    ? CERTIFICATION_TIER_SCORES[sourceTier as CertificationTier]
-    : RUNTIME_TIER_SCORES[sourceTier as RuntimeTier];
+  const sourceRange =
+    fromScale === "carId"
+      ? CERTIFICATION_TIER_SCORES[sourceTier as CertificationTier]
+      : RUNTIME_TIER_SCORES[sourceTier as RuntimeTier];
 
   // Calculate position within source tier (0-1)
-  const positionInTier = sourceRange.max === sourceRange.min
-    ? 0.5
-    : (score - sourceRange.min) / (sourceRange.max - sourceRange.min);
+  const positionInTier =
+    sourceRange.max === sourceRange.min
+      ? 0.5
+      : (score - sourceRange.min) / (sourceRange.max - sourceRange.min);
 
   // Get the target tier's score range (same tier index, different scale)
-  const targetRange = toScale === 'carId'
-    ? CERTIFICATION_TIER_SCORES[sourceTier as CertificationTier]
-    : RUNTIME_TIER_SCORES[sourceTier as RuntimeTier];
+  const targetRange =
+    toScale === "carId"
+      ? CERTIFICATION_TIER_SCORES[sourceTier as CertificationTier]
+      : RUNTIME_TIER_SCORES[sourceTier as RuntimeTier];
 
   // Map to target scale
   return Math.round(
-    targetRange.min + positionInTier * (targetRange.max - targetRange.min)
+    targetRange.min + positionInTier * (targetRange.max - targetRange.min),
   );
 }
 
@@ -281,159 +284,163 @@ export function normalizeScoreBetweenScales(
  * Vorion namespace strings corresponding to CAR ID domains.
  */
 export type VorionNamespace =
-  | 'administration'
-  | 'business'
-  | 'communications'
-  | 'data'
-  | 'external'
-  | 'finance'
-  | 'governance'
-  | 'healthcare'
-  | 'infrastructure'
-  | 'judicial'
-  | 'knowledge'
-  | 'logistics'
-  | 'manufacturing'
-  | 'nlp'
-  | 'operations'
-  | 'people'
-  | 'quality'
-  | 'research'
-  | 'security'
-  | 'training'
-  | 'utilities'
-  | 'verification'
-  | 'web'
-  | 'cross-domain'
-  | 'yield'
-  | 'reserved';
+  | "administration"
+  | "business"
+  | "communications"
+  | "data"
+  | "external"
+  | "finance"
+  | "governance"
+  | "healthcare"
+  | "infrastructure"
+  | "judicial"
+  | "knowledge"
+  | "logistics"
+  | "manufacturing"
+  | "nlp"
+  | "operations"
+  | "people"
+  | "quality"
+  | "research"
+  | "security"
+  | "training"
+  | "utilities"
+  | "verification"
+  | "web"
+  | "cross-domain"
+  | "yield"
+  | "reserved";
 
 /**
  * Array of all Vorion namespaces.
  */
 export const VORION_NAMESPACES: readonly VorionNamespace[] = [
-  'administration',
-  'business',
-  'communications',
-  'cross-domain',
-  'data',
-  'external',
-  'finance',
-  'governance',
-  'healthcare',
-  'infrastructure',
-  'judicial',
-  'knowledge',
-  'logistics',
-  'manufacturing',
-  'nlp',
-  'operations',
-  'people',
-  'quality',
-  'research',
-  'reserved',
-  'security',
-  'training',
-  'utilities',
-  'verification',
-  'web',
-  'yield',
+  "administration",
+  "business",
+  "communications",
+  "cross-domain",
+  "data",
+  "external",
+  "finance",
+  "governance",
+  "healthcare",
+  "infrastructure",
+  "judicial",
+  "knowledge",
+  "logistics",
+  "manufacturing",
+  "nlp",
+  "operations",
+  "people",
+  "quality",
+  "research",
+  "reserved",
+  "security",
+  "training",
+  "utilities",
+  "verification",
+  "web",
+  "yield",
 ] as const;
 
 /**
  * Zod schema for VorionNamespace validation.
  */
 export const vorionNamespaceSchema = z.enum([
-  'administration',
-  'business',
-  'communications',
-  'cross-domain',
-  'data',
-  'external',
-  'finance',
-  'governance',
-  'healthcare',
-  'infrastructure',
-  'judicial',
-  'knowledge',
-  'logistics',
-  'manufacturing',
-  'nlp',
-  'operations',
-  'people',
-  'quality',
-  'research',
-  'reserved',
-  'security',
-  'training',
-  'utilities',
-  'verification',
-  'web',
-  'yield',
+  "administration",
+  "business",
+  "communications",
+  "cross-domain",
+  "data",
+  "external",
+  "finance",
+  "governance",
+  "healthcare",
+  "infrastructure",
+  "judicial",
+  "knowledge",
+  "logistics",
+  "manufacturing",
+  "nlp",
+  "operations",
+  "people",
+  "quality",
+  "research",
+  "reserved",
+  "security",
+  "training",
+  "utilities",
+  "verification",
+  "web",
+  "yield",
 ]);
 
 /**
  * Mapping from CAR ID domain codes to Vorion namespaces.
  */
-export const DOMAIN_TO_NAMESPACE_MAP: Readonly<Record<DomainCode, VorionNamespace>> = {
-  A: 'administration',
-  B: 'business',
-  C: 'communications',
-  D: 'data',
-  E: 'external',
-  F: 'finance',
-  G: 'governance',
-  H: 'healthcare',
-  I: 'infrastructure',
-  J: 'judicial',
-  K: 'knowledge',
-  L: 'logistics',
-  M: 'manufacturing',
-  N: 'nlp',
-  O: 'operations',
-  P: 'people',
-  Q: 'quality',
-  R: 'research',
-  S: 'security',
-  T: 'training',
-  U: 'utilities',
-  V: 'verification',
-  W: 'web',
-  X: 'cross-domain',
-  Y: 'yield',
-  Z: 'reserved',
+export const DOMAIN_TO_NAMESPACE_MAP: Readonly<
+  Record<DomainCode, VorionNamespace>
+> = {
+  A: "administration",
+  B: "business",
+  C: "communications",
+  D: "data",
+  E: "external",
+  F: "finance",
+  G: "governance",
+  H: "healthcare",
+  I: "infrastructure",
+  J: "judicial",
+  K: "knowledge",
+  L: "logistics",
+  M: "manufacturing",
+  N: "nlp",
+  O: "operations",
+  P: "people",
+  Q: "quality",
+  R: "research",
+  S: "security",
+  T: "training",
+  U: "utilities",
+  V: "verification",
+  W: "web",
+  X: "cross-domain",
+  Y: "yield",
+  Z: "reserved",
 } as const;
 
 /**
  * Mapping from Vorion namespaces to CAR ID domain codes.
  */
-export const NAMESPACE_TO_DOMAIN_MAP: Readonly<Record<VorionNamespace, DomainCode>> = {
-  administration: 'A',
-  business: 'B',
-  communications: 'C',
-  data: 'D',
-  external: 'E',
-  finance: 'F',
-  governance: 'G',
-  healthcare: 'H',
-  infrastructure: 'I',
-  judicial: 'J',
-  knowledge: 'K',
-  logistics: 'L',
-  manufacturing: 'M',
-  nlp: 'N',
-  operations: 'O',
-  people: 'P',
-  quality: 'Q',
-  research: 'R',
-  security: 'S',
-  training: 'T',
-  utilities: 'U',
-  verification: 'V',
-  web: 'W',
-  'cross-domain': 'X',
-  yield: 'Y',
-  reserved: 'Z',
+export const NAMESPACE_TO_DOMAIN_MAP: Readonly<
+  Record<VorionNamespace, DomainCode>
+> = {
+  administration: "A",
+  business: "B",
+  communications: "C",
+  data: "D",
+  external: "E",
+  finance: "F",
+  governance: "G",
+  healthcare: "H",
+  infrastructure: "I",
+  judicial: "J",
+  knowledge: "K",
+  logistics: "L",
+  manufacturing: "M",
+  nlp: "N",
+  operations: "O",
+  people: "P",
+  quality: "Q",
+  research: "R",
+  security: "S",
+  training: "T",
+  utilities: "U",
+  verification: "V",
+  web: "W",
+  "cross-domain": "X",
+  yield: "Y",
+  reserved: "Z",
 } as const;
 
 /**
@@ -448,7 +455,9 @@ export const NAMESPACE_TO_DOMAIN_MAP: Readonly<Record<VorionNamespace, DomainCod
  * carIdDomainToVorionNamespace('S');  // 'security'
  * ```
  */
-export function carIdDomainToVorionNamespace(domain: DomainCode): VorionNamespace {
+export function carIdDomainToVorionNamespace(
+  domain: DomainCode,
+): VorionNamespace {
   return DOMAIN_TO_NAMESPACE_MAP[domain];
 }
 
@@ -464,7 +473,9 @@ export function carIdDomainToVorionNamespace(domain: DomainCode): VorionNamespac
  * vorionNamespaceToCarIdDomain('security'); // 'S'
  * ```
  */
-export function vorionNamespaceToCarIdDomain(namespace: VorionNamespace): DomainCode {
+export function vorionNamespaceToCarIdDomain(
+  namespace: VorionNamespace,
+): DomainCode {
   return NAMESPACE_TO_DOMAIN_MAP[namespace];
 }
 
@@ -475,7 +486,7 @@ export function vorionNamespaceToCarIdDomain(namespace: VorionNamespace): Domain
  * @returns Array of Vorion namespaces
  */
 export function carIdDomainsToVorionNamespaces(
-  domains: readonly DomainCode[]
+  domains: readonly DomainCode[],
 ): VorionNamespace[] {
   return domains.map(carIdDomainToVorionNamespace);
 }
@@ -487,7 +498,7 @@ export function carIdDomainsToVorionNamespaces(
  * @returns Array of CAR ID domain codes
  */
 export function vorionNamespacesToCarIdDomains(
-  namespaces: readonly VorionNamespace[]
+  namespaces: readonly VorionNamespace[],
 ): DomainCode[] {
   return namespaces.map(vorionNamespaceToCarIdDomain);
 }
@@ -502,16 +513,18 @@ export function vorionNamespacesToCarIdDomains(
  * @param level - Capability level
  * @returns Autonomy description
  */
-export function capabilityLevelToAutonomyDescription(level: CapabilityLevel): string {
+export function capabilityLevelToAutonomyDescription(
+  level: CapabilityLevel,
+): string {
   const descriptions: Record<CapabilityLevel, string> = {
-    [CapabilityLevel.L0_OBSERVE]: 'Read-only, no autonomy',
-    [CapabilityLevel.L1_ADVISE]: 'Advisory only, cannot act',
-    [CapabilityLevel.L2_DRAFT]: 'Can draft, requires approval',
-    [CapabilityLevel.L3_EXECUTE]: 'Can execute with approval',
-    [CapabilityLevel.L4_AUTONOMOUS]: 'Autonomous within bounds',
-    [CapabilityLevel.L5_TRUSTED]: 'Expanded autonomy, minimal oversight',
-    [CapabilityLevel.L6_CERTIFIED]: 'Independent operation, audit trail',
-    [CapabilityLevel.L7_AUTONOMOUS]: 'Full autonomy',
+    [CapabilityLevel.L0_OBSERVE]: "Read-only, no autonomy",
+    [CapabilityLevel.L1_ADVISE]: "Advisory only, cannot act",
+    [CapabilityLevel.L2_DRAFT]: "Can draft, requires approval",
+    [CapabilityLevel.L3_EXECUTE]: "Can execute with approval",
+    [CapabilityLevel.L4_AUTONOMOUS]: "Autonomous within bounds",
+    [CapabilityLevel.L5_TRUSTED]: "Expanded autonomy, minimal oversight",
+    [CapabilityLevel.L6_CERTIFIED]: "Independent operation, audit trail",
+    [CapabilityLevel.L7_AUTONOMOUS]: "Full autonomy",
   };
   return descriptions[level];
 }
@@ -524,7 +537,9 @@ export function capabilityLevelToAutonomyDescription(level: CapabilityLevel): st
  * @param level - Capability level
  * @returns Minimum runtime tier required
  */
-export function capabilityLevelToMinRuntimeTier(level: CapabilityLevel): RuntimeTier {
+export function capabilityLevelToMinRuntimeTier(
+  level: CapabilityLevel,
+): RuntimeTier {
   return level as unknown as RuntimeTier;
 }
 
@@ -548,9 +563,10 @@ export interface BidirectionalMap<A, B> {
  * @param mapping - Object mapping A values to B values
  * @returns Bidirectional map with forward and reverse functions
  */
-export function createBidirectionalMap<A extends string | number, B extends string | number>(
-  mapping: Record<A, B>
-): BidirectionalMap<A, B> {
+export function createBidirectionalMap<
+  A extends string | number,
+  B extends string | number,
+>(mapping: Record<A, B>): BidirectionalMap<A, B> {
   const reverseMapping = {} as Record<B, A>;
 
   for (const [key, value] of Object.entries(mapping)) {
@@ -568,13 +584,15 @@ export function createBidirectionalMap<A extends string | number, B extends stri
 /**
  * Pre-built bidirectional map for domain <-> namespace.
  */
-export const domainNamespaceMap = createBidirectionalMap(DOMAIN_TO_NAMESPACE_MAP);
+export const domainNamespaceMap = createBidirectionalMap(
+  DOMAIN_TO_NAMESPACE_MAP,
+);
 
 /**
  * Pre-built bidirectional map for certification <-> runtime tier.
  */
 export const certificationRuntimeMap = createBidirectionalMap(
-  CERTIFICATION_TO_RUNTIME_TIER_MAP
+  CERTIFICATION_TO_RUNTIME_TIER_MAP,
 );
 
 // ============================================================================
@@ -606,7 +624,7 @@ export const domainMappingResultSchema = z.object({
  */
 export function isVorionNamespace(value: unknown): value is VorionNamespace {
   return (
-    typeof value === 'string' &&
+    typeof value === "string" &&
     VORION_NAMESPACES.includes(value as VorionNamespace)
   );
 }
@@ -616,7 +634,7 @@ export function isVorionNamespace(value: unknown): value is VorionNamespace {
  */
 export function isTrustBand(value: unknown): value is TrustBand {
   return (
-    typeof value === 'number' &&
+    typeof value === "number" &&
     Number.isInteger(value) &&
     value >= 0 &&
     value <= 7

@@ -11,9 +11,9 @@
  * @packageDocumentation
  */
 
-import { z } from 'zod';
-import type { ProofPlane } from '../proof-plane/proof-plane.js';
-import { ProofEventType } from '@vorionsys/contracts';
+import { z } from "zod";
+import type { ProofPlane } from "../proof-plane/proof-plane.js";
+import { ProofEventType } from "@vorionsys/contracts";
 
 /**
  * Zod schema for proof event submission
@@ -88,7 +88,7 @@ interface RouteContext {
     id?: string;
   };
   reply: {
-    status(code: number): RouteContext['reply'];
+    status(code: number): RouteContext["reply"];
     send(data: unknown): void;
   };
 }
@@ -97,7 +97,7 @@ interface RouteContext {
  * Route definition for registration
  */
 export interface ProofRoute {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "DELETE";
   path: string;
   handler: (ctx: RouteContext, proofPlane: ProofPlane) => Promise<void>;
   schema?: {
@@ -140,8 +140,8 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
   return [
     // POST /proof - Submit a new proof event
     {
-      method: 'POST',
-      path: '/proof',
+      method: "POST",
+      path: "/proof",
       schema: { body: submitProofSchema },
       handler: async (ctx) => {
         const body = submitProofSchema.parse(ctx.request.body ?? {});
@@ -151,7 +151,7 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
             body.eventType,
             body.correlationId,
             body.payload as any,
-            body.agentId
+            body.agentId,
           );
 
           ctx.reply.status(201).send(
@@ -165,14 +165,14 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
                 occurredAt: result.event.occurredAt,
                 recordedAt: result.event.recordedAt,
               },
-              ctx.request.id
-            )
+              ctx.request.id,
+            ),
           );
         } catch (err) {
           ctx.reply.status(500).send(
-            error('EMIT_FAILED', 'Failed to emit proof event', {
+            error("EMIT_FAILED", "Failed to emit proof event", {
               message: err instanceof Error ? err.message : String(err),
-            })
+            }),
           );
         }
       },
@@ -180,8 +180,8 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
 
     // GET /proof/:id - Get proof event by ID
     {
-      method: 'GET',
-      path: '/proof/:id',
+      method: "GET",
+      path: "/proof/:id",
       schema: { params: eventIdParamsSchema },
       handler: async (ctx) => {
         const params = eventIdParamsSchema.parse(ctx.request.params ?? {});
@@ -189,9 +189,11 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
         const event = await proofPlane.getEvent(params.id);
 
         if (!event) {
-          ctx.reply.status(404).send(
-            error('EVENT_NOT_FOUND', `Proof event ${params.id} not found`)
-          );
+          ctx.reply
+            .status(404)
+            .send(
+              error("EVENT_NOT_FOUND", `Proof event ${params.id} not found`),
+            );
           return;
         }
 
@@ -201,8 +203,8 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
 
     // GET /proof/verify/:id - Verify a single proof event
     {
-      method: 'GET',
-      path: '/proof/verify/:id',
+      method: "GET",
+      path: "/proof/verify/:id",
       schema: { params: eventIdParamsSchema },
       handler: async (ctx) => {
         const params = eventIdParamsSchema.parse(ctx.request.params ?? {});
@@ -210,14 +212,17 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
         const event = await proofPlane.getEvent(params.id);
 
         if (!event) {
-          ctx.reply.status(404).send(
-            error('EVENT_NOT_FOUND', `Proof event ${params.id} not found`)
-          );
+          ctx.reply
+            .status(404)
+            .send(
+              error("EVENT_NOT_FOUND", `Proof event ${params.id} not found`),
+            );
           return;
         }
 
         // Verify hash integrity (dual-hash: SHA-256 + SHA3-256)
-        const { computeEventHash, verifyEventHash3 } = await import('../events/hash-chain.js');
+        const { computeEventHash, verifyEventHash3 } =
+          await import("../events/hash-chain.js");
         const computedHash = await computeEventHash(event);
         const hashValid = computedHash === event.eventHash;
         const hash3Valid = verifyEventHash3(event);
@@ -244,30 +249,37 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
                 verifiedAt: new Date().toISOString(),
               },
             },
-            ctx.request.id
-          )
+            ctx.request.id,
+          ),
         );
       },
     },
 
     // GET /proof/chain/:correlationId - Get event trace by correlation ID
     {
-      method: 'GET',
-      path: '/proof/chain/:correlationId',
+      method: "GET",
+      path: "/proof/chain/:correlationId",
       schema: {
         params: correlationIdParamsSchema,
         query: queryOptionsSchema,
       },
       handler: async (ctx) => {
-        const params = correlationIdParamsSchema.parse(ctx.request.params ?? {});
+        const params = correlationIdParamsSchema.parse(
+          ctx.request.params ?? {},
+        );
         const query = queryOptionsSchema.parse(ctx.request.query ?? {});
 
         const events = await proofPlane.getTrace(params.correlationId);
 
         if (events.length === 0) {
-          ctx.reply.status(404).send(
-            error('TRACE_NOT_FOUND', `No events found for correlation ${params.correlationId}`)
-          );
+          ctx.reply
+            .status(404)
+            .send(
+              error(
+                "TRACE_NOT_FOUND",
+                `No events found for correlation ${params.correlationId}`,
+              ),
+            );
           return;
         }
 
@@ -288,28 +300,31 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
                 hasMore: offset + limit < events.length,
               },
             },
-            ctx.request.id
-          )
+            ctx.request.id,
+          ),
         );
       },
     },
 
     // POST /proof/chain/verify - Verify chain integrity
     {
-      method: 'POST',
-      path: '/proof/chain/verify',
+      method: "POST",
+      path: "/proof/chain/verify",
       schema: { body: verifyChainBodySchema },
       handler: async (ctx) => {
         const body = verifyChainBodySchema.parse(ctx.request.body ?? {});
 
-        const chainResult = await proofPlane.verifyChain(body.fromEventId, body.limit);
+        const chainResult = await proofPlane.verifyChain(
+          body.fromEventId,
+          body.limit,
+        );
 
         // Optionally verify signatures
         let signaturesResult = null;
         if (proofPlane.isSignatureVerificationEnabled()) {
           const fullResult = await proofPlane.verifyChainAndSignatures(
             body.fromEventId,
-            body.limit
+            body.limit,
           );
           signaturesResult = fullResult.signatures;
         }
@@ -336,19 +351,20 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
                     success: signaturesResult.success,
                   }
                 : null,
-              fullyVerified: chainResult.valid && (signaturesResult?.success ?? true),
+              fullyVerified:
+                chainResult.valid && (signaturesResult?.success ?? true),
               verifiedAt: new Date().toISOString(),
             },
-            ctx.request.id
-          )
+            ctx.request.id,
+          ),
         );
       },
     },
 
     // GET /proof/stats - Get event statistics
     {
-      method: 'GET',
-      path: '/proof/stats',
+      method: "GET",
+      path: "/proof/stats",
       handler: async (ctx) => {
         const stats = await proofPlane.getStats();
 
@@ -362,23 +378,23 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
               newestEvent: stats.newestEvent,
               shadowModeStats: stats.byShadowMode,
             },
-            ctx.request.id
-          )
+            ctx.request.id,
+          ),
         );
       },
     },
 
     // GET /proof/latest - Get most recent event
     {
-      method: 'GET',
-      path: '/proof/latest',
+      method: "GET",
+      path: "/proof/latest",
       handler: async (ctx) => {
         const event = await proofPlane.getLatestEvent();
 
         if (!event) {
-          ctx.reply.status(404).send(
-            error('NO_EVENTS', 'No proof events recorded yet')
-          );
+          ctx.reply
+            .status(404)
+            .send(error("NO_EVENTS", "No proof events recorded yet"));
           return;
         }
 
@@ -407,10 +423,16 @@ export function createProofRoutes(proofPlane: ProofPlane): ProofRoute[] {
  */
 export function registerProofRoutes(
   fastify: {
-    get: (path: string, handler: (request: any, reply: any) => Promise<void>) => void;
-    post: (path: string, handler: (request: any, reply: any) => Promise<void>) => void;
+    get: (
+      path: string,
+      handler: (request: any, reply: any) => Promise<void>,
+    ) => void;
+    post: (
+      path: string,
+      handler: (request: any, reply: any) => Promise<void>,
+    ) => void;
   },
-  proofPlane: ProofPlane
+  proofPlane: ProofPlane,
 ): void {
   const routes = createProofRoutes(proofPlane);
 
@@ -438,18 +460,24 @@ export function registerProofRoutes(
         await route.handler(ctx, proofPlane);
       } catch (err) {
         if (err instanceof z.ZodError) {
-          reply.status(400).send(
-            error('VALIDATION_ERROR', 'Request validation failed', err.errors)
-          );
+          reply
+            .status(400)
+            .send(
+              error(
+                "VALIDATION_ERROR",
+                "Request validation failed",
+                err.errors,
+              ),
+            );
           return;
         }
         throw err;
       }
     };
 
-    if (route.method === 'GET') {
+    if (route.method === "GET") {
       fastify.get(route.path, handler);
-    } else if (route.method === 'POST') {
+    } else if (route.method === "POST") {
       fastify.post(route.path, handler);
     }
   }
@@ -478,9 +506,7 @@ export function createProofExpressRouter(proofPlane: ProofPlane): {
 
   const handler = async (req: any, res: any, next: any) => {
     const matchedRoute = routes.find(
-      (r) =>
-        r.method === req.method &&
-        matchPath(r.path, req.path)
+      (r) => r.method === req.method && matchPath(r.path, req.path),
     );
 
     if (!matchedRoute) {
@@ -493,7 +519,7 @@ export function createProofExpressRouter(proofPlane: ProofPlane): {
         params: extractParams(matchedRoute.path, req.path),
         query: req.query,
         body: req.body,
-        id: req.headers['x-request-id'],
+        id: req.headers["x-request-id"],
       },
       reply: {
         status(code: number) {
@@ -510,9 +536,11 @@ export function createProofExpressRouter(proofPlane: ProofPlane): {
       await matchedRoute.handler(ctx, proofPlane);
     } catch (err) {
       if (err instanceof z.ZodError) {
-        res.status(400).json(
-          error('VALIDATION_ERROR', 'Request validation failed', err.errors)
-        );
+        res
+          .status(400)
+          .json(
+            error("VALIDATION_ERROR", "Request validation failed", err.errors),
+          );
         return;
       }
       next(err);
@@ -526,15 +554,15 @@ export function createProofExpressRouter(proofPlane: ProofPlane): {
  * Simple path matching for Express adapter
  */
 function matchPath(pattern: string, path: string): boolean {
-  const patternParts = pattern.split('/');
-  const pathParts = path.split('/');
+  const patternParts = pattern.split("/");
+  const pathParts = path.split("/");
 
   if (patternParts.length !== pathParts.length) {
     return false;
   }
 
   return patternParts.every((part, i) => {
-    if (part.startsWith(':')) {
+    if (part.startsWith(":")) {
       return true; // Parameter matches anything
     }
     return part === pathParts[i];
@@ -544,16 +572,13 @@ function matchPath(pattern: string, path: string): boolean {
 /**
  * Extract parameters from path
  */
-function extractParams(
-  pattern: string,
-  path: string
-): Record<string, string> {
+function extractParams(pattern: string, path: string): Record<string, string> {
   const params: Record<string, string> = {};
-  const patternParts = pattern.split('/');
-  const pathParts = path.split('/');
+  const patternParts = pattern.split("/");
+  const pathParts = path.split("/");
 
   patternParts.forEach((part, i) => {
-    if (part.startsWith(':')) {
+    if (part.startsWith(":")) {
       const paramName = part.slice(1);
       params[paramName] = pathParts[i];
     }

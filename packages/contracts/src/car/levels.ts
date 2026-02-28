@@ -18,7 +18,7 @@
  * @module @vorionsys/contracts/car/levels
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Capability Level Enum
@@ -76,7 +76,9 @@ export const CAPABILITY_LEVELS = [
  * Zod schema for CapabilityLevel enum validation.
  */
 export const capabilityLevelSchema = z.nativeEnum(CapabilityLevel, {
-  errorMap: () => ({ message: 'Invalid capability level. Must be L0-L7 (0-7).' }),
+  errorMap: () => ({
+    message: "Invalid capability level. Must be L0-L7 (0-7).",
+  }),
 });
 
 // ============================================================================
@@ -86,89 +88,159 @@ export const capabilityLevelSchema = z.nativeEnum(CapabilityLevel, {
 /**
  * Human-readable names for capability levels.
  */
-export const CAPABILITY_LEVEL_NAMES: Readonly<Record<CapabilityLevel, string>> = {
-  [CapabilityLevel.L0_OBSERVE]: 'Observe',
-  [CapabilityLevel.L1_ADVISE]: 'Advise',
-  [CapabilityLevel.L2_DRAFT]: 'Draft',
-  [CapabilityLevel.L3_EXECUTE]: 'Execute',
-  [CapabilityLevel.L4_AUTONOMOUS]: 'Autonomous',
-  [CapabilityLevel.L5_TRUSTED]: 'Trusted',
-  [CapabilityLevel.L6_CERTIFIED]: 'Certified',
-  [CapabilityLevel.L7_AUTONOMOUS]: 'Sovereign',
-} as const;
+export const CAPABILITY_LEVEL_NAMES: Readonly<Record<CapabilityLevel, string>> =
+  {
+    [CapabilityLevel.L0_OBSERVE]: "Observe",
+    [CapabilityLevel.L1_ADVISE]: "Advise",
+    [CapabilityLevel.L2_DRAFT]: "Draft",
+    [CapabilityLevel.L3_EXECUTE]: "Execute",
+    [CapabilityLevel.L4_AUTONOMOUS]: "Autonomous",
+    [CapabilityLevel.L5_TRUSTED]: "Trusted",
+    [CapabilityLevel.L6_CERTIFIED]: "Certified",
+    [CapabilityLevel.L7_AUTONOMOUS]: "Sovereign",
+  } as const;
 
 /**
  * Short codes for capability levels (without the L prefix).
  */
-export const CAPABILITY_LEVEL_CODES: Readonly<Record<CapabilityLevel, string>> = {
-  [CapabilityLevel.L0_OBSERVE]: 'L0',
-  [CapabilityLevel.L1_ADVISE]: 'L1',
-  [CapabilityLevel.L2_DRAFT]: 'L2',
-  [CapabilityLevel.L3_EXECUTE]: 'L3',
-  [CapabilityLevel.L4_AUTONOMOUS]: 'L4',
-  [CapabilityLevel.L5_TRUSTED]: 'L5',
-  [CapabilityLevel.L6_CERTIFIED]: 'L6',
-  [CapabilityLevel.L7_AUTONOMOUS]: 'L7',
-} as const;
+export const CAPABILITY_LEVEL_CODES: Readonly<Record<CapabilityLevel, string>> =
+  {
+    [CapabilityLevel.L0_OBSERVE]: "L0",
+    [CapabilityLevel.L1_ADVISE]: "L1",
+    [CapabilityLevel.L2_DRAFT]: "L2",
+    [CapabilityLevel.L3_EXECUTE]: "L3",
+    [CapabilityLevel.L4_AUTONOMOUS]: "L4",
+    [CapabilityLevel.L5_TRUSTED]: "L5",
+    [CapabilityLevel.L6_CERTIFIED]: "L6",
+    [CapabilityLevel.L7_AUTONOMOUS]: "L7",
+  } as const;
 
 /**
  * Detailed descriptions for each capability level.
  */
-export const CAPABILITY_LEVEL_DESCRIPTIONS: Readonly<Record<CapabilityLevel, string>> = {
+export const CAPABILITY_LEVEL_DESCRIPTIONS: Readonly<
+  Record<CapabilityLevel, string>
+> = {
   [CapabilityLevel.L0_OBSERVE]:
-    'Read-only access for monitoring and observation. Cannot modify state or interact with systems.',
+    "Read-only access for monitoring and observation. Cannot modify state or interact with systems.",
   [CapabilityLevel.L1_ADVISE]:
-    'Can analyze and provide recommendations. May suggest actions but cannot execute them.',
+    "Can analyze and provide recommendations. May suggest actions but cannot execute them.",
   [CapabilityLevel.L2_DRAFT]:
-    'Can prepare drafts, stage changes, and create proposals. All changes require review before application.',
+    "Can prepare drafts, stage changes, and create proposals. All changes require review before application.",
   [CapabilityLevel.L3_EXECUTE]:
-    'Can execute operations with explicit human approval. Each action requires confirmation.',
+    "Can execute operations with explicit human approval. Each action requires confirmation.",
   [CapabilityLevel.L4_AUTONOMOUS]:
-    'Self-directed operation within predefined bounds. Can act independently within policy constraints.',
+    "Self-directed operation within predefined bounds. Can act independently within policy constraints.",
   [CapabilityLevel.L5_TRUSTED]:
-    'Expanded capabilities with minimal oversight. Trusted for complex operations.',
+    "Expanded capabilities with minimal oversight. Trusted for complex operations.",
   [CapabilityLevel.L6_CERTIFIED]:
-    'Independent operation with comprehensive audit trail. Certified for mission-critical tasks.',
+    "Independent operation with comprehensive audit trail. Certified for mission-critical tasks.",
   [CapabilityLevel.L7_AUTONOMOUS]:
-    'Full autonomy for mission-critical operations. Reserved for highest-certified agents.',
+    "Full autonomy for mission-critical operations. Reserved for highest-certified agents.",
 } as const;
 
 /**
  * Capabilities granted at each level (cumulative).
  */
-export const CAPABILITY_LEVEL_ABILITIES: Readonly<Record<CapabilityLevel, readonly string[]>> = {
-  [CapabilityLevel.L0_OBSERVE]: ['read', 'monitor', 'report'],
-  [CapabilityLevel.L1_ADVISE]: ['read', 'monitor', 'report', 'analyze', 'recommend'],
-  [CapabilityLevel.L2_DRAFT]: ['read', 'monitor', 'report', 'analyze', 'recommend', 'draft', 'stage'],
+export const CAPABILITY_LEVEL_ABILITIES: Readonly<
+  Record<CapabilityLevel, readonly string[]>
+> = {
+  [CapabilityLevel.L0_OBSERVE]: ["read", "monitor", "report"],
+  [CapabilityLevel.L1_ADVISE]: [
+    "read",
+    "monitor",
+    "report",
+    "analyze",
+    "recommend",
+  ],
+  [CapabilityLevel.L2_DRAFT]: [
+    "read",
+    "monitor",
+    "report",
+    "analyze",
+    "recommend",
+    "draft",
+    "stage",
+  ],
   [CapabilityLevel.L3_EXECUTE]: [
-    'read', 'monitor', 'report', 'analyze', 'recommend', 'draft', 'stage',
-    'execute_with_approval', 'modify_with_approval',
+    "read",
+    "monitor",
+    "report",
+    "analyze",
+    "recommend",
+    "draft",
+    "stage",
+    "execute_with_approval",
+    "modify_with_approval",
   ],
   [CapabilityLevel.L4_AUTONOMOUS]: [
-    'read', 'monitor', 'report', 'analyze', 'recommend', 'draft', 'stage',
-    'execute_with_approval', 'modify_with_approval',
-    'execute_within_bounds', 'modify_within_bounds', 'delegate',
+    "read",
+    "monitor",
+    "report",
+    "analyze",
+    "recommend",
+    "draft",
+    "stage",
+    "execute_with_approval",
+    "modify_with_approval",
+    "execute_within_bounds",
+    "modify_within_bounds",
+    "delegate",
   ],
   [CapabilityLevel.L5_TRUSTED]: [
-    'read', 'monitor', 'report', 'analyze', 'recommend', 'draft', 'stage',
-    'execute_with_approval', 'modify_with_approval',
-    'execute_within_bounds', 'modify_within_bounds', 'delegate',
-    'execute_expanded', 'modify_expanded',
+    "read",
+    "monitor",
+    "report",
+    "analyze",
+    "recommend",
+    "draft",
+    "stage",
+    "execute_with_approval",
+    "modify_with_approval",
+    "execute_within_bounds",
+    "modify_within_bounds",
+    "delegate",
+    "execute_expanded",
+    "modify_expanded",
   ],
   [CapabilityLevel.L6_CERTIFIED]: [
-    'read', 'monitor', 'report', 'analyze', 'recommend', 'draft', 'stage',
-    'execute_with_approval', 'modify_with_approval',
-    'execute_within_bounds', 'modify_within_bounds', 'delegate',
-    'execute_expanded', 'modify_expanded',
-    'execute_independent', 'spawn_agents',
+    "read",
+    "monitor",
+    "report",
+    "analyze",
+    "recommend",
+    "draft",
+    "stage",
+    "execute_with_approval",
+    "modify_with_approval",
+    "execute_within_bounds",
+    "modify_within_bounds",
+    "delegate",
+    "execute_expanded",
+    "modify_expanded",
+    "execute_independent",
+    "spawn_agents",
   ],
   [CapabilityLevel.L7_AUTONOMOUS]: [
-    'read', 'monitor', 'report', 'analyze', 'recommend', 'draft', 'stage',
-    'execute_with_approval', 'modify_with_approval',
-    'execute_within_bounds', 'modify_within_bounds', 'delegate',
-    'execute_expanded', 'modify_expanded',
-    'execute_independent', 'spawn_agents',
-    'execute_any', 'modify_any', 'override_constraints',
+    "read",
+    "monitor",
+    "report",
+    "analyze",
+    "recommend",
+    "draft",
+    "stage",
+    "execute_with_approval",
+    "modify_with_approval",
+    "execute_within_bounds",
+    "modify_within_bounds",
+    "delegate",
+    "execute_expanded",
+    "modify_expanded",
+    "execute_independent",
+    "spawn_agents",
+    "execute_any",
+    "modify_any",
+    "override_constraints",
   ],
 } as const;
 
@@ -201,11 +273,13 @@ export interface CapabilityLevelConfig {
 /**
  * Complete configuration for all capability levels.
  */
-export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, CapabilityLevelConfig>> = {
+export const CAPABILITY_LEVEL_CONFIGS: Readonly<
+  Record<CapabilityLevel, CapabilityLevelConfig>
+> = {
   [CapabilityLevel.L0_OBSERVE]: {
     level: CapabilityLevel.L0_OBSERVE,
-    code: 'L0',
-    name: 'Observe',
+    code: "L0",
+    name: "Observe",
     description: CAPABILITY_LEVEL_DESCRIPTIONS[CapabilityLevel.L0_OBSERVE],
     abilities: CAPABILITY_LEVEL_ABILITIES[CapabilityLevel.L0_OBSERVE],
     requiresApproval: false,
@@ -214,8 +288,8 @@ export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, Capabili
   },
   [CapabilityLevel.L1_ADVISE]: {
     level: CapabilityLevel.L1_ADVISE,
-    code: 'L1',
-    name: 'Advise',
+    code: "L1",
+    name: "Advise",
     description: CAPABILITY_LEVEL_DESCRIPTIONS[CapabilityLevel.L1_ADVISE],
     abilities: CAPABILITY_LEVEL_ABILITIES[CapabilityLevel.L1_ADVISE],
     requiresApproval: false,
@@ -224,8 +298,8 @@ export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, Capabili
   },
   [CapabilityLevel.L2_DRAFT]: {
     level: CapabilityLevel.L2_DRAFT,
-    code: 'L2',
-    name: 'Draft',
+    code: "L2",
+    name: "Draft",
     description: CAPABILITY_LEVEL_DESCRIPTIONS[CapabilityLevel.L2_DRAFT],
     abilities: CAPABILITY_LEVEL_ABILITIES[CapabilityLevel.L2_DRAFT],
     requiresApproval: true,
@@ -234,8 +308,8 @@ export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, Capabili
   },
   [CapabilityLevel.L3_EXECUTE]: {
     level: CapabilityLevel.L3_EXECUTE,
-    code: 'L3',
-    name: 'Execute',
+    code: "L3",
+    name: "Execute",
     description: CAPABILITY_LEVEL_DESCRIPTIONS[CapabilityLevel.L3_EXECUTE],
     abilities: CAPABILITY_LEVEL_ABILITIES[CapabilityLevel.L3_EXECUTE],
     requiresApproval: true,
@@ -244,8 +318,8 @@ export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, Capabili
   },
   [CapabilityLevel.L4_AUTONOMOUS]: {
     level: CapabilityLevel.L4_AUTONOMOUS,
-    code: 'L4',
-    name: 'Autonomous',
+    code: "L4",
+    name: "Autonomous",
     description: CAPABILITY_LEVEL_DESCRIPTIONS[CapabilityLevel.L4_AUTONOMOUS],
     abilities: CAPABILITY_LEVEL_ABILITIES[CapabilityLevel.L4_AUTONOMOUS],
     requiresApproval: false,
@@ -254,8 +328,8 @@ export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, Capabili
   },
   [CapabilityLevel.L5_TRUSTED]: {
     level: CapabilityLevel.L5_TRUSTED,
-    code: 'L5',
-    name: 'Trusted',
+    code: "L5",
+    name: "Trusted",
     description: CAPABILITY_LEVEL_DESCRIPTIONS[CapabilityLevel.L5_TRUSTED],
     abilities: CAPABILITY_LEVEL_ABILITIES[CapabilityLevel.L5_TRUSTED],
     requiresApproval: false,
@@ -264,8 +338,8 @@ export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, Capabili
   },
   [CapabilityLevel.L6_CERTIFIED]: {
     level: CapabilityLevel.L6_CERTIFIED,
-    code: 'L6',
-    name: 'Certified',
+    code: "L6",
+    name: "Certified",
     description: CAPABILITY_LEVEL_DESCRIPTIONS[CapabilityLevel.L6_CERTIFIED],
     abilities: CAPABILITY_LEVEL_ABILITIES[CapabilityLevel.L6_CERTIFIED],
     requiresApproval: false,
@@ -274,8 +348,8 @@ export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, Capabili
   },
   [CapabilityLevel.L7_AUTONOMOUS]: {
     level: CapabilityLevel.L7_AUTONOMOUS,
-    code: 'L7',
-    name: 'Sovereign',
+    code: "L7",
+    name: "Sovereign",
     description: CAPABILITY_LEVEL_DESCRIPTIONS[CapabilityLevel.L7_AUTONOMOUS],
     abilities: CAPABILITY_LEVEL_ABILITIES[CapabilityLevel.L7_AUTONOMOUS],
     requiresApproval: false,
@@ -301,7 +375,10 @@ export const CAPABILITY_LEVEL_CONFIGS: Readonly<Record<CapabilityLevel, Capabili
  * isLevelHigher(CapabilityLevel.L1_ADVISE, CapabilityLevel.L3_EXECUTE); // false
  * ```
  */
-export function isLevelHigher(level: CapabilityLevel, other: CapabilityLevel): boolean {
+export function isLevelHigher(
+  level: CapabilityLevel,
+  other: CapabilityLevel,
+): boolean {
   return level > other;
 }
 
@@ -319,7 +396,10 @@ export function isLevelHigher(level: CapabilityLevel, other: CapabilityLevel): b
  * meetsLevel(CapabilityLevel.L1_ADVISE, CapabilityLevel.L3_EXECUTE);    // false
  * ```
  */
-export function meetsLevel(level: CapabilityLevel, minLevel: CapabilityLevel): boolean {
+export function meetsLevel(
+  level: CapabilityLevel,
+  minLevel: CapabilityLevel,
+): boolean {
   return level >= minLevel;
 }
 
@@ -330,7 +410,10 @@ export function meetsLevel(level: CapabilityLevel, minLevel: CapabilityLevel): b
  * @param b - Second level
  * @returns -1 if a < b, 0 if equal, 1 if a > b
  */
-export function compareLevels(a: CapabilityLevel, b: CapabilityLevel): -1 | 0 | 1 {
+export function compareLevels(
+  a: CapabilityLevel,
+  b: CapabilityLevel,
+): -1 | 0 | 1 {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;
@@ -343,7 +426,10 @@ export function compareLevels(a: CapabilityLevel, b: CapabilityLevel): -1 | 0 | 
  * @param b - Second level
  * @returns The lower level
  */
-export function minLevel(a: CapabilityLevel, b: CapabilityLevel): CapabilityLevel {
+export function minLevel(
+  a: CapabilityLevel,
+  b: CapabilityLevel,
+): CapabilityLevel {
   return Math.min(a, b) as CapabilityLevel;
 }
 
@@ -354,7 +440,10 @@ export function minLevel(a: CapabilityLevel, b: CapabilityLevel): CapabilityLeve
  * @param b - Second level
  * @returns The higher level
  */
-export function maxLevel(a: CapabilityLevel, b: CapabilityLevel): CapabilityLevel {
+export function maxLevel(
+  a: CapabilityLevel,
+  b: CapabilityLevel,
+): CapabilityLevel {
   return Math.max(a, b) as CapabilityLevel;
 }
 
@@ -369,7 +458,7 @@ export function maxLevel(a: CapabilityLevel, b: CapabilityLevel): CapabilityLeve
 export function clampLevel(
   level: CapabilityLevel,
   min: CapabilityLevel = CapabilityLevel.L0_OBSERVE,
-  max: CapabilityLevel = CapabilityLevel.L7_AUTONOMOUS
+  max: CapabilityLevel = CapabilityLevel.L7_AUTONOMOUS,
 ): CapabilityLevel {
   return Math.max(min, Math.min(max, level)) as CapabilityLevel;
 }
@@ -468,11 +557,13 @@ export function canOperateAutonomously(level: CapabilityLevel): boolean {
  * ```
  */
 export function parseLevel(levelStr: string): CapabilityLevel {
-  const normalized = levelStr.toUpperCase().replace(/^L/, '');
+  const normalized = levelStr.toUpperCase().replace(/^L/, "");
   const level = parseInt(normalized, 10);
 
   if (isNaN(level) || level < 0 || level > 7) {
-    throw new Error(`Invalid capability level: ${levelStr}. Must be L0-L7 or 0-7.`);
+    throw new Error(
+      `Invalid capability level: ${levelStr}. Must be L0-L7 or 0-7.`,
+    );
   }
 
   return level as CapabilityLevel;
@@ -504,7 +595,7 @@ export function tryParseLevel(levelStr: string): CapabilityLevel | null {
  */
 export function isCapabilityLevel(value: unknown): value is CapabilityLevel {
   return (
-    typeof value === 'number' &&
+    typeof value === "number" &&
     Number.isInteger(value) &&
     value >= 0 &&
     value <= 7
@@ -534,5 +625,5 @@ export const capabilityLevelConfigSchema = z.object({
  */
 export const levelStringSchema = z
   .string()
-  .regex(/^[Ll]?[0-7]$/, 'Level must be L0-L7 or 0-7')
+  .regex(/^[Ll]?[0-7]$/, "Level must be L0-L7 or 0-7")
   .transform((str) => parseLevel(str));

@@ -6,12 +6,12 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { TrustLevel } from '../common/types.js';
-import { TrustInsufficientError } from '../common/types.js';
-import type { TrustEngine, TrustRecord } from '../trust-engine/index.js';
-import { TRUST_LEVEL_NAMES } from '../trust-engine/index.js';
-import { TrustCallbackHandler, createTrustCallback } from './callback.js';
+import { createLogger } from "../common/logger.js";
+import type { TrustLevel } from "../common/types.js";
+import { TrustInsufficientError } from "../common/types.js";
+import type { TrustEngine, TrustRecord } from "../trust-engine/index.js";
+import { TRUST_LEVEL_NAMES } from "../trust-engine/index.js";
+import { TrustCallbackHandler, createTrustCallback } from "./callback.js";
 import type {
   TrustAwareAgentConfig,
   TrustCheckResult,
@@ -20,25 +20,25 @@ import type {
   LLMErrorType,
   LLMRetryConfig,
   TrustAwareAgentConfigWithRetry,
-} from './types.js';
+} from "./types.js";
 
-const logger = createLogger({ component: 'langchain-executor' });
+const logger = createLogger({ component: "langchain-executor" });
 
 /**
  * Default retryable error types
  */
 const DEFAULT_RETRYABLE_ERRORS: LLMErrorType[] = [
-  'rate_limit',
-  'timeout',
-  'network',
-  'server_error',
-  'model_unavailable',
+  "rate_limit",
+  "timeout",
+  "network",
+  "server_error",
+  "model_unavailable",
 ];
 
 /**
  * Default retry configuration
  */
-const DEFAULT_RETRY_CONFIG: Required<Omit<LLMRetryConfig, 'onRetry'>> = {
+const DEFAULT_RETRY_CONFIG: Required<Omit<LLMRetryConfig, "onRetry">> = {
   maxRetries: 3,
   baseDelayMs: 1000,
   maxDelayMs: 30000,
@@ -55,18 +55,20 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Rate limit errors
   if (
-    message.includes('rate limit') ||
-    message.includes('rate_limit') ||
-    message.includes('too many requests') ||
-    message.includes('429')
+    message.includes("rate limit") ||
+    message.includes("rate_limit") ||
+    message.includes("too many requests") ||
+    message.includes("429")
   ) {
     // Try to extract retry-after header
     const retryMatch = message.match(/retry after (\d+)/i);
-    const retryAfterMs = retryMatch ? parseInt(retryMatch[1], 10) * 1000 : undefined;
+    const retryAfterMs = retryMatch
+      ? parseInt(retryMatch[1], 10) * 1000
+      : undefined;
 
     return {
-      type: 'rate_limit',
-      message: 'API rate limit exceeded',
+      type: "rate_limit",
+      message: "API rate limit exceeded",
       originalError: error,
       retryable: true,
       retryAfterMs,
@@ -76,15 +78,15 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Context length errors
   if (
-    message.includes('context length') ||
-    message.includes('maximum context') ||
-    message.includes('too long') ||
-    message.includes('token limit') ||
-    message.includes('max_tokens')
+    message.includes("context length") ||
+    message.includes("maximum context") ||
+    message.includes("too long") ||
+    message.includes("token limit") ||
+    message.includes("max_tokens")
   ) {
     return {
-      type: 'context_length',
-      message: 'Input or output exceeds maximum context length',
+      type: "context_length",
+      message: "Input or output exceeds maximum context length",
       originalError: error,
       retryable: false,
       metadata: { originalMessage: error.message },
@@ -93,15 +95,15 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Authentication errors
   if (
-    message.includes('unauthorized') ||
-    message.includes('invalid api key') ||
-    message.includes('authentication') ||
-    message.includes('401') ||
-    message.includes('403')
+    message.includes("unauthorized") ||
+    message.includes("invalid api key") ||
+    message.includes("authentication") ||
+    message.includes("401") ||
+    message.includes("403")
   ) {
     return {
-      type: 'authentication',
-      message: 'API authentication failed',
+      type: "authentication",
+      message: "API authentication failed",
       originalError: error,
       retryable: false,
       metadata: { originalMessage: error.message },
@@ -110,14 +112,14 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Model unavailable
   if (
-    message.includes('model not found') ||
-    message.includes('model_not_available') ||
-    message.includes('overloaded') ||
-    message.includes('capacity')
+    message.includes("model not found") ||
+    message.includes("model_not_available") ||
+    message.includes("overloaded") ||
+    message.includes("capacity")
   ) {
     return {
-      type: 'model_unavailable',
-      message: 'Model is unavailable or overloaded',
+      type: "model_unavailable",
+      message: "Model is unavailable or overloaded",
       originalError: error,
       retryable: true,
       metadata: { originalMessage: error.message },
@@ -126,14 +128,14 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Content filter errors
   if (
-    message.includes('content filter') ||
-    message.includes('content_policy') ||
-    message.includes('safety') ||
-    message.includes('blocked')
+    message.includes("content filter") ||
+    message.includes("content_policy") ||
+    message.includes("safety") ||
+    message.includes("blocked")
   ) {
     return {
-      type: 'content_filter',
-      message: 'Content blocked by safety filters',
+      type: "content_filter",
+      message: "Content blocked by safety filters",
       originalError: error,
       retryable: false,
       metadata: { originalMessage: error.message },
@@ -142,14 +144,14 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Timeout errors
   if (
-    message.includes('timeout') ||
-    message.includes('timed out') ||
-    name.includes('timeout') ||
-    message.includes('econnreset')
+    message.includes("timeout") ||
+    message.includes("timed out") ||
+    name.includes("timeout") ||
+    message.includes("econnreset")
   ) {
     return {
-      type: 'timeout',
-      message: 'Request timed out',
+      type: "timeout",
+      message: "Request timed out",
       originalError: error,
       retryable: true,
       metadata: { originalMessage: error.message },
@@ -158,15 +160,15 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Network errors
   if (
-    message.includes('network') ||
-    message.includes('enotfound') ||
-    message.includes('econnrefused') ||
-    message.includes('socket') ||
-    name.includes('fetch')
+    message.includes("network") ||
+    message.includes("enotfound") ||
+    message.includes("econnrefused") ||
+    message.includes("socket") ||
+    name.includes("fetch")
   ) {
     return {
-      type: 'network',
-      message: 'Network connectivity error',
+      type: "network",
+      message: "Network connectivity error",
       originalError: error,
       retryable: true,
       metadata: { originalMessage: error.message },
@@ -175,13 +177,13 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Invalid request errors
   if (
-    message.includes('invalid') ||
-    message.includes('bad request') ||
-    message.includes('400')
+    message.includes("invalid") ||
+    message.includes("bad request") ||
+    message.includes("400")
   ) {
     return {
-      type: 'invalid_request',
-      message: 'Invalid request format',
+      type: "invalid_request",
+      message: "Invalid request format",
       originalError: error,
       retryable: false,
       metadata: { originalMessage: error.message },
@@ -190,16 +192,16 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Server errors
   if (
-    message.includes('500') ||
-    message.includes('502') ||
-    message.includes('503') ||
-    message.includes('504') ||
-    message.includes('internal server error') ||
-    message.includes('service unavailable')
+    message.includes("500") ||
+    message.includes("502") ||
+    message.includes("503") ||
+    message.includes("504") ||
+    message.includes("internal server error") ||
+    message.includes("service unavailable")
   ) {
     return {
-      type: 'server_error',
-      message: 'Provider server error',
+      type: "server_error",
+      message: "Provider server error",
       originalError: error,
       retryable: true,
       metadata: { originalMessage: error.message },
@@ -208,7 +210,7 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
 
   // Unknown error
   return {
-    type: 'unknown',
+    type: "unknown",
     message: error.message,
     originalError: error,
     retryable: false,
@@ -221,8 +223,8 @@ export function classifyLLMError(error: Error): ClassifiedLLMError {
  */
 function calculateRetryDelay(
   attempt: number,
-  config: Required<Omit<LLMRetryConfig, 'onRetry'>>,
-  classifiedError?: ClassifiedLLMError
+  config: Required<Omit<LLMRetryConfig, "onRetry">>,
+  classifiedError?: ClassifiedLLMError,
 ): number {
   // Use retry-after if provided by the error
   if (classifiedError?.retryAfterMs) {
@@ -230,7 +232,8 @@ function calculateRetryDelay(
   }
 
   // Exponential backoff with jitter
-  const exponentialDelay = config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt - 1);
+  const exponentialDelay =
+    config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt - 1);
   const jitter = Math.random() * 0.1 * exponentialDelay; // 10% jitter
   return Math.min(exponentialDelay + jitter, config.maxDelayMs);
 }
@@ -251,10 +254,15 @@ export class TrustAwareExecutor {
   private trustEngine: TrustEngine;
   private callback: TrustCallbackHandler;
   private config: TrustAwareAgentConfigWithRetry;
-  private retryConfig: Required<Omit<LLMRetryConfig, 'onRetry'>> & { onRetry?: LLMRetryConfig['onRetry'] };
+  private retryConfig: Required<Omit<LLMRetryConfig, "onRetry">> & {
+    onRetry?: LLMRetryConfig["onRetry"];
+  };
   private errorClassifier: (error: Error) => ClassifiedLLMError;
 
-  constructor(trustEngine: TrustEngine, config: TrustAwareAgentConfigWithRetry) {
+  constructor(
+    trustEngine: TrustEngine,
+    config: TrustAwareAgentConfigWithRetry,
+  ) {
     this.trustEngine = trustEngine;
     this.config = config;
     this.callback = createTrustCallback(trustEngine, config);
@@ -304,7 +312,7 @@ export class TrustAwareExecutor {
         currentLevel: 0,
         currentScore: 0,
         requiredLevel: minLevel,
-        reason: 'Agent not initialized in trust engine',
+        reason: "Agent not initialized in trust engine",
       };
     }
 
@@ -331,7 +339,7 @@ export class TrustAwareExecutor {
    */
   async execute<T>(
     fn: () => Promise<T>,
-    requiredLevel?: TrustLevel
+    requiredLevel?: TrustLevel,
   ): Promise<TrustedExecutionResult<T>> {
     // Check trust before execution
     const trustCheck = await this.checkTrust(requiredLevel);
@@ -343,12 +351,12 @@ export class TrustAwareExecutor {
           currentLevel: trustCheck.currentLevel,
           requiredLevel: trustCheck.requiredLevel,
         },
-        'Execution blocked due to insufficient trust'
+        "Execution blocked due to insufficient trust",
       );
 
       throw new TrustInsufficientError(
         trustCheck.requiredLevel,
-        trustCheck.currentLevel
+        trustCheck.currentLevel,
       );
     }
 
@@ -366,7 +374,7 @@ export class TrustAwareExecutor {
         signalsRecorded: this.callback.signalsRecorded - initialSignals,
         finalScore: finalRecord?.score,
       },
-      'Trusted execution completed'
+      "Trusted execution completed",
     );
 
     return {
@@ -384,12 +392,16 @@ export class TrustAwareExecutor {
   private async executeWithRetry<T>(fn: () => Promise<T>): Promise<T> {
     let lastError: ClassifiedLLMError | undefined;
 
-    for (let attempt = 1; attempt <= this.retryConfig.maxRetries + 1; attempt++) {
+    for (
+      let attempt = 1;
+      attempt <= this.retryConfig.maxRetries + 1;
+      attempt++
+    ) {
       try {
         return await fn();
       } catch (error) {
         const classifiedError = this.errorClassifier(
-          error instanceof Error ? error : new Error(String(error))
+          error instanceof Error ? error : new Error(String(error)),
         );
         lastError = classifiedError;
 
@@ -403,13 +415,16 @@ export class TrustAwareExecutor {
             retryable: classifiedError.retryable,
             message: classifiedError.message,
           },
-          'Execution attempt failed'
+          "Execution attempt failed",
         );
 
         // Check if we should retry
-        const isRetryableType = this.retryConfig.retryableErrors.includes(classifiedError.type);
+        const isRetryableType = this.retryConfig.retryableErrors.includes(
+          classifiedError.type,
+        );
         const hasRetriesLeft = attempt <= this.retryConfig.maxRetries;
-        const shouldRetry = classifiedError.retryable && isRetryableType && hasRetriesLeft;
+        const shouldRetry =
+          classifiedError.retryable && isRetryableType && hasRetriesLeft;
 
         if (!shouldRetry) {
           // Record failure signal with classification
@@ -418,7 +433,11 @@ export class TrustAwareExecutor {
         }
 
         // Calculate delay and wait
-        const delayMs = calculateRetryDelay(attempt, this.retryConfig, classifiedError);
+        const delayMs = calculateRetryDelay(
+          attempt,
+          this.retryConfig,
+          classifiedError,
+        );
 
         logger.info(
           {
@@ -427,7 +446,7 @@ export class TrustAwareExecutor {
             delayMs,
             errorType: classifiedError.type,
           },
-          'Retrying after delay'
+          "Retrying after delay",
         );
 
         // Call retry callback if configured
@@ -435,7 +454,7 @@ export class TrustAwareExecutor {
           try {
             this.retryConfig.onRetry(classifiedError, attempt, delayMs);
           } catch (callbackError) {
-            logger.warn({ callbackError }, 'Error in onRetry callback');
+            logger.warn({ callbackError }, "Error in onRetry callback");
           }
         }
 
@@ -449,13 +468,15 @@ export class TrustAwareExecutor {
       throw lastError.originalError;
     }
 
-    throw new Error('Execution failed with no error captured');
+    throw new Error("Execution failed with no error captured");
   }
 
   /**
    * Record a classified failure signal
    */
-  private async recordClassifiedFailure(classifiedError: ClassifiedLLMError): Promise<void> {
+  private async recordClassifiedFailure(
+    classifiedError: ClassifiedLLMError,
+  ): Promise<void> {
     if (this.config.recordErrors === false) {
       return;
     }
@@ -469,7 +490,7 @@ export class TrustAwareExecutor {
       entityId: this.config.agentId,
       type: `behavioral.execution_failure.${classifiedError.type}`,
       value: signalValue,
-      source: 'langchain-executor',
+      source: "langchain-executor",
       timestamp: new Date().toISOString(),
       metadata: {
         errorType: classifiedError.type,
@@ -496,7 +517,7 @@ export class TrustAwareExecutor {
       entityId: this.config.agentId,
       type: `behavioral.${type}`,
       value,
-      source: 'manual',
+      source: "manual",
       timestamp: new Date().toISOString(),
       metadata: {},
     });
@@ -511,7 +532,7 @@ export class TrustAwareExecutor {
       entityId: this.config.agentId,
       type: `behavioral.${type}`,
       value,
-      source: 'manual',
+      source: "manual",
       timestamp: new Date().toISOString(),
       metadata: {},
     });
@@ -523,7 +544,7 @@ export class TrustAwareExecutor {
  */
 export function createTrustAwareExecutor(
   trustEngine: TrustEngine,
-  config: TrustAwareAgentConfig
+  config: TrustAwareAgentConfig,
 ): TrustAwareExecutor {
   return new TrustAwareExecutor(trustEngine, config);
 }

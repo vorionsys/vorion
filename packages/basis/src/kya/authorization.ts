@@ -10,7 +10,7 @@ import {
   PolicyBundle,
   PolicyEngineConfig,
   KYACapability,
-} from './types.js';
+} from "./types.js";
 
 export class AuthorizationManager {
   private policyBundles: Map<string, PolicyBundle>;
@@ -27,21 +27,23 @@ export class AuthorizationManager {
   /**
    * Authorize agent action
    */
-  async authorize(request: AuthorizationRequest): Promise<AuthorizationDecision> {
+  async authorize(
+    request: AuthorizationRequest,
+  ): Promise<AuthorizationDecision> {
     // 1. Get agent capabilities
     const agentCapabilities = this.capabilities.get(request.agentDID) || [];
 
     // 2. Find matching capability
-    const matchingCap = agentCapabilities.find(token =>
+    const matchingCap = agentCapabilities.find((token) =>
       token.capabilities.some((cap: KYACapability) =>
-        this.matchesCapability(cap, request.action, request.resource)
-      )
+        this.matchesCapability(cap, request.action, request.resource),
+      ),
     );
 
     if (!matchingCap) {
       return {
         allowed: false,
-        reason: 'No matching capability',
+        reason: "No matching capability",
         trustImpact: -10,
       };
     }
@@ -54,26 +56,26 @@ export class AuthorizationManager {
     if (now < notBefore || now > notAfter) {
       return {
         allowed: false,
-        reason: 'Capability expired or not yet valid',
+        reason: "Capability expired or not yet valid",
         trustImpact: -5,
       };
     }
 
     // 4. Evaluate conditions
     const capability = matchingCap.capabilities.find((cap: KYACapability) =>
-      this.matchesCapability(cap, request.action, request.resource)
+      this.matchesCapability(cap, request.action, request.resource),
     )!;
 
     if (capability.conditions) {
       const conditionsValid = await this.evaluateConditions(
         capability.conditions,
-        request
+        request,
       );
 
       if (!conditionsValid) {
         return {
           allowed: false,
-          reason: 'Capability conditions not met',
+          reason: "Capability conditions not met",
           trustImpact: -5,
         };
       }
@@ -85,7 +87,7 @@ export class AuthorizationManager {
     if (policyViolations.length > 0) {
       return {
         allowed: false,
-        reason: `Policy violations: ${policyViolations.join(', ')}`,
+        reason: `Policy violations: ${policyViolations.join(", ")}`,
         trustImpact: -20,
       };
     }
@@ -93,7 +95,7 @@ export class AuthorizationManager {
     // 6. ALLOW
     return {
       allowed: true,
-      reason: 'Authorized',
+      reason: "Authorized",
       conditions: capability.conditions,
       trustImpact: 1,
     };
@@ -104,7 +106,7 @@ export class AuthorizationManager {
    */
   async grantCapability(
     agentDID: string,
-    capabilityToken: CapabilityToken
+    capabilityToken: CapabilityToken,
   ): Promise<void> {
     const existing = this.capabilities.get(agentDID) || [];
     existing.push(capabilityToken);
@@ -114,9 +116,12 @@ export class AuthorizationManager {
   /**
    * Revoke capability from agent
    */
-  async revokeCapability(agentDID: string, capabilityId: string): Promise<void> {
+  async revokeCapability(
+    agentDID: string,
+    capabilityId: string,
+  ): Promise<void> {
     const existing = this.capabilities.get(agentDID) || [];
-    const filtered = existing.filter(cap => cap.id !== capabilityId);
+    const filtered = existing.filter((cap) => cap.id !== capabilityId);
     this.capabilities.set(agentDID, filtered);
   }
 
@@ -130,7 +135,7 @@ export class AuthorizationManager {
   private matchesCapability(
     capability: { action: string; resource: string },
     action: string,
-    resource: string
+    resource: string,
   ): boolean {
     // Exact match
     if (capability.action === action && capability.resource === resource) {
@@ -148,13 +153,11 @@ export class AuthorizationManager {
    * Pattern matching with wildcards
    */
   private matchesPattern(pattern: string, value: string): boolean {
-    if (pattern === '*') return true;
+    if (pattern === "*") return true;
     if (pattern === value) return true;
 
     // Convert glob pattern to regex
-    const regexPattern = pattern
-      .replace(/\./g, '\\.')
-      .replace(/\*/g, '.*');
+    const regexPattern = pattern.replace(/\./g, "\\.").replace(/\*/g, ".*");
 
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(value);
@@ -165,10 +168,10 @@ export class AuthorizationManager {
    */
   private async evaluateConditions(
     conditions: Record<string, unknown>,
-    request: AuthorizationRequest
+    request: AuthorizationRequest,
   ): Promise<boolean> {
     // Example condition checks
-    if (conditions.maxFileSize && request.resource.startsWith('/')) {
+    if (conditions.maxFileSize && request.resource.startsWith("/")) {
       // Would check actual file size
       return true;
     }
@@ -190,12 +193,14 @@ export class AuthorizationManager {
    * Check policy constraints (MUST NOT do)
    */
   private async checkPolicyConstraints(
-    request: AuthorizationRequest
+    request: AuthorizationRequest,
   ): Promise<string[]> {
     const violations: string[] = [];
 
     // Get applicable policy bundle
-    const policyBundle = this.policyBundles.get(this.config.defaultJurisdiction);
+    const policyBundle = this.policyBundles.get(
+      this.config.defaultJurisdiction,
+    );
 
     if (!policyBundle) {
       return violations;
@@ -209,11 +214,11 @@ export class AuthorizationManager {
         violations.push(constraint.description);
 
         // Apply enforcement action
-        if (constraint.enforcement === 'block') {
+        if (constraint.enforcement === "block") {
           // Already blocked by adding to violations
-        } else if (constraint.enforcement === 'warn') {
+        } else if (constraint.enforcement === "warn") {
           console.warn(`Policy warning: ${constraint.description}`);
-        } else if (constraint.enforcement === 'log') {
+        } else if (constraint.enforcement === "log") {
           console.log(`Policy logged: ${constraint.description}`);
         }
       }
@@ -227,15 +232,21 @@ export class AuthorizationManager {
    */
   private async evaluateConstraint(
     rule: string,
-    request: AuthorizationRequest
+    request: AuthorizationRequest,
   ): Promise<boolean> {
     // Would use CEL (Common Expression Language) or JSON Logic
     // For now, simple keyword matching
-    if (rule.includes('no_credential_access') && request.resource.includes('credential')) {
+    if (
+      rule.includes("no_credential_access") &&
+      request.resource.includes("credential")
+    ) {
       return true;
     }
 
-    if (rule.includes('no_external_code') && request.action.includes('code.execute')) {
+    if (
+      rule.includes("no_external_code") &&
+      request.action.includes("code.execute")
+    ) {
       return true;
     }
 
@@ -249,30 +260,30 @@ export class AuthorizationManager {
     // Would load from files/database
     // For now, create a default policy bundle
     const defaultBundle: PolicyBundle = {
-      id: 'vorion-default-v1',
-      version: '1.0.0',
-      jurisdiction: 'Global',
+      id: "vorion-default-v1",
+      version: "1.0.0",
+      jurisdiction: "Global",
       constraints: [
         {
-          id: 'no-credential-access',
-          description: 'Agents cannot access credential files',
-          rule: 'no_credential_access',
-          severity: 'critical',
-          enforcement: 'block',
+          id: "no-credential-access",
+          description: "Agents cannot access credential files",
+          rule: "no_credential_access",
+          severity: "critical",
+          enforcement: "block",
         },
         {
-          id: 'no-external-code',
-          description: 'Agents cannot execute external code',
-          rule: 'no_external_code',
-          severity: 'high',
-          enforcement: 'block',
+          id: "no-external-code",
+          description: "Agents cannot execute external code",
+          rule: "no_external_code",
+          severity: "high",
+          enforcement: "block",
         },
       ],
       obligations: [],
       permissions: [],
     };
 
-    this.policyBundles.set('Global', defaultBundle);
+    this.policyBundles.set("Global", defaultBundle);
   }
 }
 

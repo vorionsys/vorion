@@ -36,7 +36,7 @@ function StatCard({ value, label, color }: StatCardProps) {
 
 export function HeroSection() {
   const localNodeCount = staticLexicon.length;
-  const activeProviders = Object.values(providerStatus).filter(s => s.available).length;
+  const _activeProviders = Object.values(providerStatus).filter(s => s.available).length;
 
   return (
     <div className="text-center py-12 mb-8 fade-in">

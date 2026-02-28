@@ -2,169 +2,220 @@
 
 **Behavioral Agent Standard for Integrity & Safety**
 
-Version: 0.1 (First Wave Open Source — Feb 2026)
+Version: 0.1 (First Wave Open Source)
 License: Apache 2.0
 Live Implementation: [cognigate.dev](https://cognigate.dev)
-Reference Package: [`@vorionsys/basis`](https://npmjs.com/package/@vorionsys/basis)
+Reference Package: [`@vorionsys/basis`](../packages/basis)
 
-> **This is v0.1 — an early experiment, not a formal standard.**
-> We are sharing it for community feedback. Help us refine it.
+---
 
 ## Overview
 
-BASIS is an open, experimental specification for governing autonomous AI agents. It provides a structured framework to ensure every agent action is assessed, gated, and auditable — before any reasoning or execution occurs.
+BASIS is the open, formal standard for governing autonomous AI agents. It provides a deterministic framework to ensure every agent action is safe, compliant, and auditable — before any reasoning or execution occurs.
 
-In an era where agents interact with the real world via APIs, tools, and human interfaces, ad-hoc system prompts are insufficient for production trust. BASIS replaces vague guidelines with a structured, enforceable protocol.
+In an era where agents interact with the real world via APIs, tools, and human interfaces, ad-hoc system prompts are insufficient for production trust. BASIS replaces vague guidelines with a structured, enforceable protocol that scales to fleets of agents.
 
-**Key characteristics (and honest limitations):**
+Key differentiators from existing approaches:
 
-- **Pre-reasoning governance**: Policies apply to the raw intent, not post-hoc outputs. *Limitation: still relies on heuristics — jailbreakable by adversaries.*
-- **Identity-bound**: Every agent carries a CAR (Categorical Agentic Registry) ID that ties behavior to verifiable credentials. *Limitation: centralized demo registry, not yet decentralized.*
-- **Proof-oriented**: Every decision generates a cryptographic audit trail. *Limitation: SHA-256 chain only, no ZK or public ledger yet.*
-- **Open & extensible**: Apache 2.0 spec + runtime for any agent framework.
+- **Pre-reasoning governance**: Policies apply to the raw intent, not post-hoc outputs.
+- **Identity-bound**: Every agent carries a CAR (Categorical Agentic Registry) ID that ties behavior to verifiable credentials.
+- **Proof-oriented**: Every decision generates a cryptographic audit trail.
+- **Open and extensible**: Apache 2.0 spec + runtime (Cognigate) for any agent framework.
+
+BASIS is designed for:
+
+- Enterprise compliance (SOC2, ISO 42001, EU AI Act).
+- AI safety researchers (formal verification of agent boundaries).
+- Agent builders (drop-in trust layer without reinventing wheels).
+
+---
 
 ## Core Principles
 
-1. **Determinism Over Probability**: Unlike LLM-based safety (refusal prompts), BASIS uses rule-based + heuristic engines for predictable verdicts. Not perfect — but inspectable.
-2. **Tiered Trust**: Agents earn capabilities via ATSF scoring (T0–T7), decaying over time or upon violations. *Tier boundaries are arbitrary starting points — we need community help to refine them.*
-3. **Minimal Intervention**: Governance is lightweight (sub-100ms target latency) but absolute — deny/escalate unsafe intents.
-4. **Auditability First**: PROOF stage creates immutable records, queryable for forensics or regulatory reporting.
-5. **Framework Agnostic**: Wraps any agent runtime; input is simple JSON, output is a governed plan.
+1. **Determinism Over Probability** — Unlike LLM-based safety (refusal prompts), BASIS uses rule-based and heuristic engines for predictable verdicts.
+2. **Tiered Trust** — Agents earn capabilities via ATSF scoring (T0-T7), decaying over time or on violations.
+3. **Minimal Intervention** — Governance is lightweight (sub-100ms latency) but absolute: deny or escalate unsafe intents.
+4. **Auditability First** — The PROOF stage creates immutable records, queryable for forensics or regulatory reporting.
+5. **Framework Agnostic** — Wraps any agent runtime. Input is a simple JSON intent, output is a governed plan.
+
+---
 
 ## The BASIS Pipeline
 
-Every agent action flows through this three-stage engine (implemented in [Cognigate](https://cognigate.dev)):
+Every agent action must pass this three-stage flow, implemented in the Cognigate runtime:
 
-### Stage 1: INTENT — Normalization & Risk Assessment
+### Stage 1: INTENT — Normalization and Risk Assessment
 
 Transforms raw user goals into a structured, analyzable plan.
 
 **Inputs:**
-- `raw_goal`: String (e.g., "Send email to team about Q1 results")
-- `agent_car_id`: CAR identifier (e.g., `car:agent:email-assistant:v1`)
-- `context`: Optional JSON (history, env vars)
+
+- `raw_goal` — String (e.g., "Send email to team about Q1 results")
+- `agent_car_id` — CAR identifier (e.g., `car:agent:email-assistant:v1`)
+- `context` — Optional JSON (history, environment variables)
 
 **Processing:**
-- Parse into `StructuredPlan` with `objectives`, `tools_required`, `endpoints_required`, `data_classifications`
-- Run TRIPWIRE checks: deterministic patterns for immediate denial
-- Compute `risk_score` (0.0–1.0) via heuristics
-- Fetch ATSF trust: `trust_level` (0–7), `trust_score` (0–1000)
+
+- Parse into `StructuredPlan`: objectives, tools_required, endpoints_required, data_classifications
+- Run TRIPWIRE checks: deterministic patterns for immediate denial (e.g., regex for dangerous operations)
+- Compute initial `risk_score` (0.0-1.0) via heuristics (keyword density, tool risk weights)
+- Fetch ATSF trust: `trust_level` (0-7), `trust_score` (0-1000)
 - Generate `reasoning_trace`: explainable log of assessments
 
-**Outputs:** `structured_plan`, `risk_indicators`, `initial_verdict`
+**Outputs:**
 
-Live endpoint: `POST /v1/intent`
+- `structured_plan` with parsed sub-goals and tool requirements
+- `risk_indicators` — array of flags (e.g., "high_velocity", "sensitive_data")
+- `initial_verdict` — "proceed" or "block" (early exit for obvious risks)
 
-### Stage 2: ENFORCE — Policy Validation & Gating
+### Stage 2: ENFORCE — Policy Validation and Gating
 
 Applies the full BASIS policy set to the structured plan.
 
 **Processing:**
+
 - Load agent-specific policies from CAR registry
-- Evaluate against 24+ capability gates
+- Evaluate against capability gates
 - Apply `rigor_mode`: `lite` | `standard` | `strict`
-- Trust gating: map ATSF level to allowed paths
-- Dynamic modifiers: velocity caps, decay, circuit breakers
-- Human escalation: queue for approval if verdict is `escalate`
+- Trust gating: map ATSF level to allowed execution paths
+- Dynamic modifiers: velocity caps, trust decay, circuit breakers
+- Human escalation: if `escalate`, queue for approval via webhook or UI
 
-**Returns:** `verdict` (`allow` | `deny` | `escalate` | `modify`), `modified_plan`, `enforcement_trace`
+**Outputs:**
 
-Live endpoint: `POST /v1/enforce`
+- `verdict` — "allow" | "deny" | "escalate" | "modify"
+- `modified_plan` — if "modify", a sanitized version (e.g., redacted PII)
+- `enforcement_trace` — detailed policy hits and misses
 
-### Stage 3: PROOF — Cryptographic Audit & Logging
+### Stage 3: PROOF — Cryptographic Audit and Logging
 
 Creates an immutable record of the entire flow.
 
 **Processing:**
+
 - Hash chain: `proof_hash = SHA256(inputs_hash + outputs_hash + previous_hash)`
-- Append to proof plane (in-memory or DB-backed ledger)
-- Optional: anchor to blockchain (via CHAIN extension)
+- Append to proof plane (in-memory or database-backed ledger)
+- Optional: anchor to blockchain via the CHAIN extension (`@vorionsys/proof-plane`)
 - Sign with agent's CAR key
 
-**Returns:** `proof_record`, `proof_id`, `verification_endpoint`
+**Outputs:**
 
-Live endpoint: `POST /v1/proof`
-Query: `GET /v1/proof/{id}`
-
-## Trust Tiers (T0–T7)
-
-BASIS enforces boundaries based on ATSF (Agent Trust Scoring Framework) tiers. Scores are computed by `@vorionsys/atsf-core` and gated by Cognigate.
-
-| Tier | Name | Score | Path | Capabilities | Restrictions |
-|------|------|-------|------|-------------|-------------|
-| T0 | Untrusted | 0–199 | Full sandbox | Read-only internals | All external blocked |
-| T1 | Provisional | 200–399 | Restricted | Basic compute | No PII, no writes |
-| T2 | Trusted | 400–599 | Standard | Rate-limited externals | Audit every action |
-| T3 | Verified | 600–799 | Elevated | PII read, limited writes | Human approval for highs |
-| T4 | Privileged | 800–899 | High-trust | Full tools, multi-step | Decay after 1h idle |
-| T5 | Autonomous | 900–949 | Express | Near-full with auto-escalate | Velocity caps |
-| T6 | Council | 950–989 | Oversight | Requires peer review | For critical infra |
-| T7 | Sovereign | 990–1000 | Minimal | Full autonomy | Regulatory reporting mandatory |
-
-*These boundaries are our arbitrary starting point. They need real benchmarks and community validation.*
-
-Reference: `GET /v1/reference/tiers`
-
-## Capabilities Catalog
-
-BASIS defines 24 core capabilities, each with risk weights and trust prerequisites. Examples:
-
-- `api_call`: Weight 0.4, Min T2
-- `file_write`: Weight 0.7, Min T4 + approval
-- `human_interact`: Weight 0.9, Min T5 + strict mode
-- `self_modify`: Weight 1.0, Min T7 + council
-
-Full list: `GET /v1/reference/capabilities`
-
-## Example Flow
-
-```python
-import httpx
-
-async with httpx.AsyncClient() as client:
-    # INTENT: normalize the goal
-    intent = await client.post("https://cognigate.dev/v1/intent", json={
-        "entity_id": "car:agent:email-assistant:v1",
-        "goal": "Send Q1 results to team"
-    })
-
-    # ENFORCE: validate against policies
-    verdict = await client.post("https://cognigate.dev/v1/enforce", json={
-        "plan": intent.json()["plan"],
-        "entity_id": "car:agent:email-assistant:v1",
-        "trust_level": intent.json()["trust_level"],
-        "trust_score": intent.json()["trust_score"]
-    })
-
-    # PROOF: record the decision
-    proof = await client.post("https://cognigate.dev/v1/proof", json=verdict.json())
-```
-
-## What this does NOT do (yet)
-
-- **Formal verification** — we use heuristics, not mathematical proofs
-- **Decentralized identity** — CAR is currently centralized
-- **ZK-proofs** — proof chain is SHA-256 only
-- **Production-scale benchmarks** — no published load tests yet
-- **Integration plugins** — wrapper examples are toy-level
-
-These are future goals, not promises. See [ROADMAP.md](ROADMAP.md).
-
-## Compliance Mapping (aspirational)
-
-- **EU AI Act**: High-risk agents map to T3–T5 with strict + proofs
-- **ISO 42001**: Audit trails via PROOF
-- **SOC2**: Capability gating + decay for access controls
-- **NIST AI RMF**: Submitted as community input (Feb 2026)
-
-*We have not been audited or certified. These are intended design goals.*
-
-## References
-
-- [Cognigate runtime](https://cognigate.dev) — live implementation
-- [ROADMAP.md](ROADMAP.md) — what we plan to work on next
-- [Contributing](../.github/CONTRIBUTING.md) — how to help
+- `proof_record` — JSON with hashes, timestamps, signatures
+- `proof_id` — unique identifier for querying
+- Verification available via the proof query API
 
 ---
 
-*This spec is open for contributions — especially critiques. Tell us what's wrong with it.*
+## Trust Tiers (ATSF Integration)
+
+BASIS enforces boundaries based on ATSF (Agentic Trust Scoring Framework) tiers. Scores are computed by `@vorionsys/atsf-core` and gated at enforcement time.
+
+These are the canonical tier definitions from [`@vorionsys/shared-constants`](../packages/shared-constants/src/tiers.ts):
+
+| Tier | Name | Score Range | Description |
+|------|------|-------------|-------------|
+| T0 | Sandbox | 0-199 | Isolated, no external access, observation only |
+| T1 | Observed | 200-349 | Read-only, sandboxed execution, monitored |
+| T2 | Provisional | 350-499 | Basic operations, heavy supervision |
+| T3 | Monitored | 500-649 | Standard operations with continuous monitoring |
+| T4 | Standard | 650-799 | External API access, policy-governed |
+| T5 | Trusted | 800-875 | Cross-agent communication, delegated tasks |
+| T6 | Certified | 876-950 | Admin tasks, agent spawning, minimal oversight |
+| T7 | Autonomous | 951-1000 | Full autonomy, self-governance, strategic only |
+
+Scores decay over time and on violations. Agents must earn higher tiers through consistent, compliant behavior.
+
+---
+
+## Key Properties
+
+### Capability-Gated
+
+Every action requires explicit CAR-issued capability credentials. An agent cannot access tools, APIs, or data without the matching capability at their current trust tier.
+
+### Trust-Decayed
+
+Scores decay over time or after violations. An idle agent's trust naturally decreases, requiring re-verification through successful task completion.
+
+### Rigor-Adaptive
+
+Higher-risk actions automatically trigger `strict` mode with additional validation, simulation, and potentially council review.
+
+### Human-Escalation Ready
+
+Built-in approval workflows for actions that exceed an agent's autonomous authority. Escalation is a first-class governance outcome, not an error.
+
+### Compliance-First
+
+Designed for regulatory frameworks including SOC2, ISO 42001, and EU AI Act. The PROOF stage provides the audit trail these frameworks require.
+
+---
+
+## Integration
+
+BASIS is framework-agnostic. It wraps any agent system:
+
+```typescript
+import { createTrustEngine } from "@vorionsys/atsf-core";
+import { Cognigate } from "@vorionsys/cognigate";
+
+// Initialize trust scoring
+const engine = createTrustEngine();
+await engine.initializeEntity("agent-001", 2); // Start at T2
+
+// Record behavioral signals
+await engine.recordSignal({
+  id: crypto.randomUUID(),
+  entityId: "agent-001",
+  type: "behavioral.task_completed",
+  value: 0.92,
+  source: "production",
+  timestamp: new Date().toISOString(),
+});
+
+// Query trust score
+const trust = await engine.getScore("agent-001");
+// trust.score: 425, trust.level: 2 (Provisional)
+```
+
+### Supported Frameworks
+
+- **LangChain / LangGraph** — Wrap as middleware or pre-filter
+- **CrewAI** — Policy injection at crew or agent level
+- **AutoGen** — Pre-filter before agent execution
+- **Custom agents** — Direct API or SDK integration
+
+---
+
+## Extensibility
+
+- **Custom Policies** — Add via CAR configuration (JSON rulesets)
+- **Proof Extensions** — Add Merkle trees or zero-knowledge proofs (`@vorionsys/proof-plane`)
+- **Weight Presets** — Configure trust dimension weights per deployment context
+- **Persistence** — Memory, file, SQLite, or Supabase backends
+
+---
+
+## Packages
+
+| Package | Role |
+|---------|------|
+| [`@vorionsys/basis`](../packages/basis) | BASIS standard, trust factors, KYA (Know Your Agent) |
+| [`@vorionsys/atsf-core`](../packages/atsf-core) | Trust scoring engine with full pipeline |
+| [`@vorionsys/cognigate`](../packages/cognigate) | Policy enforcement client SDK |
+| [`@vorionsys/proof-plane`](../packages/proof-plane) | Immutable audit trail with hash chains |
+| [`@vorionsys/contracts`](../packages/contracts) | Zod schemas, API contracts, validators |
+| [`@vorionsys/shared-constants`](../packages/shared-constants) | Canonical trust tier definitions |
+
+---
+
+## References
+
+- [CAR Specification](../packages/car-spec)
+- [ATSF Core](../packages/atsf-core)
+- [Cognigate Runtime](https://cognigate.dev)
+- [Kaizen Learning Platform](https://learn.vorion.org)
+
+---
+
+This specification is open for contributions. See [CONTRIBUTING.md](../.github/CONTRIBUTING.md).

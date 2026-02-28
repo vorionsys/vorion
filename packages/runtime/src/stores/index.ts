@@ -6,5 +6,5 @@
  * @packageDocumentation
  */
 
-export * from './sqlite-proof-store.js';
-export * from './sqlite-trust-store.js';
+export * from "./sqlite-proof-store.js";
+export * from "./sqlite-trust-store.js";

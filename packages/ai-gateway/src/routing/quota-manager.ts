@@ -8,7 +8,7 @@
  * @packageDocumentation
  */
 
-import type { ProviderId } from './health-checker.js';
+import type { ProviderId } from "./health-checker.js";
 
 // =============================================================================
 // TYPES
@@ -17,12 +17,17 @@ import type { ProviderId } from './health-checker.js';
 /**
  * Quota period types
  */
-export type QuotaPeriod = 'minute' | 'hour' | 'day' | 'month';
+export type QuotaPeriod = "minute" | "hour" | "day" | "month";
 
 /**
  * Quota types
  */
-export type QuotaType = 'requests' | 'tokens' | 'input_tokens' | 'output_tokens' | 'cost';
+export type QuotaType =
+  | "requests"
+  | "tokens"
+  | "input_tokens"
+  | "output_tokens"
+  | "cost";
 
 /**
  * Quota limit definition
@@ -40,7 +45,7 @@ export interface QuotaLimit {
  */
 export interface TenantQuotaConfig {
   tenantId: string;
-  tier: 'free' | 'starter' | 'professional' | 'enterprise' | 'unlimited';
+  tier: "free" | "starter" | "professional" | "enterprise" | "unlimited";
   limits: QuotaLimit[];
   /** Provider-specific overrides */
   providerLimits?: Partial<Record<ProviderId, QuotaLimit[]>>;
@@ -125,18 +130,22 @@ export interface QuotaManagerConfig {
 export interface QuotaStorage {
   getTenantConfig(tenantId: string): Promise<TenantQuotaConfig | null>;
   setTenantConfig(config: TenantQuotaConfig): Promise<void>;
-  getUsage(tenantId: string, type: QuotaType, period: QuotaPeriod): Promise<number>;
+  getUsage(
+    tenantId: string,
+    type: QuotaType,
+    period: QuotaPeriod,
+  ): Promise<number>;
   incrementUsage(
     tenantId: string,
     type: QuotaType,
     period: QuotaPeriod,
-    amount: number
+    amount: number,
   ): Promise<number>;
   recordUsage(record: UsageRecord): Promise<void>;
   getUsageHistory(
     tenantId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<UsageRecord[]>;
 }
 
@@ -146,11 +155,11 @@ export interface QuotaStorage {
 
 const DEFAULT_CONFIG: QuotaManagerConfig = {
   defaultLimits: [
-    { type: 'requests', period: 'minute', limit: 60, softLimit: 50 },
-    { type: 'requests', period: 'hour', limit: 1000, softLimit: 800 },
-    { type: 'requests', period: 'day', limit: 10000, softLimit: 8000 },
-    { type: 'tokens', period: 'minute', limit: 100000, softLimit: 80000 },
-    { type: 'tokens', period: 'day', limit: 1000000, softLimit: 800000 },
+    { type: "requests", period: "minute", limit: 60, softLimit: 50 },
+    { type: "requests", period: "hour", limit: 1000, softLimit: 800 },
+    { type: "requests", period: "day", limit: 10000, softLimit: 8000 },
+    { type: "tokens", period: "minute", limit: 100000, softLimit: 80000 },
+    { type: "tokens", period: "day", limit: 1000000, softLimit: 800000 },
   ],
   enableCache: true,
   cacheTtlMs: 5000,
@@ -161,30 +170,30 @@ const DEFAULT_CONFIG: QuotaManagerConfig = {
 /**
  * Tier-based default limits
  */
-const TIER_LIMITS: Record<TenantQuotaConfig['tier'], QuotaLimit[]> = {
+const TIER_LIMITS: Record<TenantQuotaConfig["tier"], QuotaLimit[]> = {
   free: [
-    { type: 'requests', period: 'minute', limit: 10, softLimit: 8 },
-    { type: 'requests', period: 'day', limit: 100, softLimit: 80 },
-    { type: 'tokens', period: 'day', limit: 50000, softLimit: 40000 },
-    { type: 'cost', period: 'month', limit: 5, softLimit: 4 },
+    { type: "requests", period: "minute", limit: 10, softLimit: 8 },
+    { type: "requests", period: "day", limit: 100, softLimit: 80 },
+    { type: "tokens", period: "day", limit: 50000, softLimit: 40000 },
+    { type: "cost", period: "month", limit: 5, softLimit: 4 },
   ],
   starter: [
-    { type: 'requests', period: 'minute', limit: 30, softLimit: 25 },
-    { type: 'requests', period: 'day', limit: 1000, softLimit: 800 },
-    { type: 'tokens', period: 'day', limit: 500000, softLimit: 400000 },
-    { type: 'cost', period: 'month', limit: 50, softLimit: 40 },
+    { type: "requests", period: "minute", limit: 30, softLimit: 25 },
+    { type: "requests", period: "day", limit: 1000, softLimit: 800 },
+    { type: "tokens", period: "day", limit: 500000, softLimit: 400000 },
+    { type: "cost", period: "month", limit: 50, softLimit: 40 },
   ],
   professional: [
-    { type: 'requests', period: 'minute', limit: 100, softLimit: 80 },
-    { type: 'requests', period: 'day', limit: 10000, softLimit: 8000 },
-    { type: 'tokens', period: 'day', limit: 5000000, softLimit: 4000000 },
-    { type: 'cost', period: 'month', limit: 500, softLimit: 400 },
+    { type: "requests", period: "minute", limit: 100, softLimit: 80 },
+    { type: "requests", period: "day", limit: 10000, softLimit: 8000 },
+    { type: "tokens", period: "day", limit: 5000000, softLimit: 4000000 },
+    { type: "cost", period: "month", limit: 500, softLimit: 400 },
   ],
   enterprise: [
-    { type: 'requests', period: 'minute', limit: 500, softLimit: 400 },
-    { type: 'requests', period: 'day', limit: 100000, softLimit: 80000 },
-    { type: 'tokens', period: 'day', limit: 50000000, softLimit: 40000000 },
-    { type: 'cost', period: 'month', limit: 5000, softLimit: 4000 },
+    { type: "requests", period: "minute", limit: 500, softLimit: 400 },
+    { type: "requests", period: "day", limit: 100000, softLimit: 80000 },
+    { type: "tokens", period: "day", limit: 50000000, softLimit: 40000000 },
+    { type: "cost", period: "month", limit: 5000, softLimit: 4000 },
   ],
   unlimited: [],
 };
@@ -194,20 +203,20 @@ const TIER_LIMITS: Record<TenantQuotaConfig['tier'], QuotaLimit[]> = {
  */
 const MODEL_COST_MULTIPLIERS: Record<string, number> = {
   // Anthropic
-  'claude-3-opus': 15,
-  'claude-3-sonnet': 3,
-  'claude-3-haiku': 0.25,
-  'claude-3-5-sonnet': 3,
+  "claude-3-opus": 15,
+  "claude-3-sonnet": 3,
+  "claude-3-haiku": 0.25,
+  "claude-3-5-sonnet": 3,
   // OpenAI
-  'gpt-4-turbo': 10,
-  'gpt-4': 30,
-  'gpt-3.5-turbo': 0.5,
-  'gpt-4o': 5,
-  'gpt-4o-mini': 0.15,
+  "gpt-4-turbo": 10,
+  "gpt-4": 30,
+  "gpt-3.5-turbo": 0.5,
+  "gpt-4o": 5,
+  "gpt-4o-mini": 0.15,
   // Google
-  'gemini-1.5-pro': 3.5,
-  'gemini-1.5-flash': 0.075,
-  'gemini-1.0-pro': 0.5,
+  "gemini-1.5-pro": 3.5,
+  "gemini-1.5-flash": 0.075,
+  "gemini-1.0-pro": 0.5,
   // Default
   default: 1,
 };
@@ -224,7 +233,11 @@ export class InMemoryQuotaStorage implements QuotaStorage {
   private usage = new Map<string, number>();
   private history: UsageRecord[] = [];
 
-  private getUsageKey(tenantId: string, type: QuotaType, period: QuotaPeriod): string {
+  private getUsageKey(
+    tenantId: string,
+    type: QuotaType,
+    period: QuotaPeriod,
+  ): string {
     const periodStart = this.getPeriodStart(period);
     return `${tenantId}:${type}:${period}:${periodStart.toISOString()}`;
   }
@@ -232,13 +245,24 @@ export class InMemoryQuotaStorage implements QuotaStorage {
   private getPeriodStart(period: QuotaPeriod): Date {
     const now = new Date();
     switch (period) {
-      case 'minute':
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
-      case 'hour':
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
-      case 'day':
+      case "minute":
+        return new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          now.getHours(),
+          now.getMinutes(),
+        );
+      case "hour":
+        return new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          now.getHours(),
+        );
+      case "day":
         return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      case 'month':
+      case "month":
         return new Date(now.getFullYear(), now.getMonth(), 1);
     }
   }
@@ -251,7 +275,11 @@ export class InMemoryQuotaStorage implements QuotaStorage {
     this.configs.set(config.tenantId, config);
   }
 
-  async getUsage(tenantId: string, type: QuotaType, period: QuotaPeriod): Promise<number> {
+  async getUsage(
+    tenantId: string,
+    type: QuotaType,
+    period: QuotaPeriod,
+  ): Promise<number> {
     const key = this.getUsageKey(tenantId, type, period);
     return this.usage.get(key) ?? 0;
   }
@@ -260,7 +288,7 @@ export class InMemoryQuotaStorage implements QuotaStorage {
     tenantId: string,
     type: QuotaType,
     period: QuotaPeriod,
-    amount: number
+    amount: number,
   ): Promise<number> {
     const key = this.getUsageKey(tenantId, type, period);
     const current = this.usage.get(key) ?? 0;
@@ -280,13 +308,13 @@ export class InMemoryQuotaStorage implements QuotaStorage {
   async getUsageHistory(
     tenantId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<UsageRecord[]> {
     return this.history.filter(
       (r) =>
         r.tenantId === tenantId &&
         r.timestamp >= startDate &&
-        r.timestamp <= endDate
+        r.timestamp <= endDate,
     );
   }
 
@@ -296,7 +324,7 @@ export class InMemoryQuotaStorage implements QuotaStorage {
     const cutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000 * 32); // 32 days ago
 
     for (const key of this.usage.keys()) {
-      const parts = key.split(':');
+      const parts = key.split(":");
       const dateStr = parts[3];
       if (dateStr && new Date(dateStr) < cutoff) {
         this.usage.delete(key);
@@ -325,7 +353,10 @@ export class InMemoryQuotaStorage implements QuotaStorage {
 export class QuotaManager {
   private config: QuotaManagerConfig;
   private storage: QuotaStorage;
-  private configCache = new Map<string, { config: TenantQuotaConfig; expiry: number }>();
+  private configCache = new Map<
+    string,
+    { config: TenantQuotaConfig; expiry: number }
+  >();
   private usageCache = new Map<string, { value: number; expiry: number }>();
 
   constructor(storage?: QuotaStorage, config?: Partial<QuotaManagerConfig>) {
@@ -343,13 +374,17 @@ export class QuotaManager {
       model?: string;
       estimatedTokens?: number;
       estimatedCost?: number;
-    }
+    },
   ): Promise<QuotaCheckResult> {
     const tenantConfig = await this.getTenantConfig(tenantId);
-    const limits = this.getEffectiveLimits(tenantConfig, options?.provider, options?.model);
+    const limits = this.getEffectiveLimits(
+      tenantConfig,
+      options?.provider,
+      options?.model,
+    );
 
     // Unlimited tier bypasses all checks
-    if (tenantConfig.tier === 'unlimited') {
+    if (tenantConfig.tier === "unlimited") {
       return {
         allowed: true,
         tenantId,
@@ -372,7 +407,7 @@ export class QuotaManager {
       if (usage.isSoftLimitExceeded && !usage.isExceeded) {
         warnings.push(
           `Approaching ${limit.type} limit for ${limit.period}: ` +
-            `${usage.current}/${usage.limit} (${usage.percentUsed.toFixed(1)}%)`
+            `${usage.current}/${usage.limit} (${usage.percentUsed.toFixed(1)}%)`,
         );
       }
 
@@ -385,7 +420,7 @@ export class QuotaManager {
             burstUsed = true;
             warnings.push(
               `Using burst allowance for ${limit.type}: ` +
-                `${usage.current}/${burstLimit} (burst)`
+                `${usage.current}/${burstLimit} (burst)`,
             );
             continue;
           }
@@ -424,39 +459,44 @@ export class QuotaManager {
     const tenantConfig = await this.getTenantConfig(record.tenantId);
 
     // Skip recording for unlimited tier
-    if (tenantConfig.tier === 'unlimited') {
+    if (tenantConfig.tier === "unlimited") {
       return;
     }
 
     // Increment all relevant quota types
-    const periods: QuotaPeriod[] = ['minute', 'hour', 'day', 'month'];
+    const periods: QuotaPeriod[] = ["minute", "hour", "day", "month"];
 
     for (const period of periods) {
       // Request count
-      await this.storage.incrementUsage(record.tenantId, 'requests', period, 1);
+      await this.storage.incrementUsage(record.tenantId, "requests", period, 1);
 
       // Token counts
       await this.storage.incrementUsage(
         record.tenantId,
-        'tokens',
+        "tokens",
         period,
-        record.totalTokens
+        record.totalTokens,
       );
       await this.storage.incrementUsage(
         record.tenantId,
-        'input_tokens',
+        "input_tokens",
         period,
-        record.inputTokens
+        record.inputTokens,
       );
       await this.storage.incrementUsage(
         record.tenantId,
-        'output_tokens',
+        "output_tokens",
         period,
-        record.outputTokens
+        record.outputTokens,
       );
 
       // Cost
-      await this.storage.incrementUsage(record.tenantId, 'cost', period, record.cost);
+      await this.storage.incrementUsage(
+        record.tenantId,
+        "cost",
+        period,
+        record.cost,
+      );
 
       // Invalidate cache
       this.invalidateUsageCache(record.tenantId, period);
@@ -469,7 +509,10 @@ export class QuotaManager {
   /**
    * Get usage for a specific quota
    */
-  async getQuotaUsage(tenantId: string, limit: QuotaLimit): Promise<QuotaUsage> {
+  async getQuotaUsage(
+    tenantId: string,
+    limit: QuotaLimit,
+  ): Promise<QuotaUsage> {
     const cacheKey = `${tenantId}:${limit.type}:${limit.period}`;
 
     // Check cache
@@ -480,7 +523,11 @@ export class QuotaManager {
       }
     }
 
-    const current = await this.storage.getUsage(tenantId, limit.type, limit.period);
+    const current = await this.storage.getUsage(
+      tenantId,
+      limit.type,
+      limit.period,
+    );
 
     // Update cache
     if (this.config.enableCache) {
@@ -514,7 +561,7 @@ export class QuotaManager {
   async getUsageHistory(
     tenantId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<UsageRecord[]> {
     return this.storage.getUsageHistory(tenantId, startDate, endDate);
   }
@@ -545,7 +592,7 @@ export class QuotaManager {
       // Create default config
       config = {
         tenantId,
-        tier: 'free',
+        tier: "free",
         limits: TIER_LIMITS.free,
       };
     }
@@ -567,9 +614,10 @@ export class QuotaManager {
   estimateCost(
     model: string,
     inputTokens: number,
-    outputTokens: number
+    outputTokens: number,
   ): number {
-    const multiplier = MODEL_COST_MULTIPLIERS[model] ?? MODEL_COST_MULTIPLIERS.default!;
+    const multiplier =
+      MODEL_COST_MULTIPLIERS[model] ?? MODEL_COST_MULTIPLIERS.default!;
     // Base cost: $0.001 per 1K tokens, adjusted by model multiplier
     const baseCostPer1K = 0.001;
     const inputCost = (inputTokens / 1000) * baseCostPer1K * multiplier;
@@ -580,7 +628,7 @@ export class QuotaManager {
   /**
    * Get limits for a tier
    */
-  getTierLimits(tier: TenantQuotaConfig['tier']): QuotaLimit[] {
+  getTierLimits(tier: TenantQuotaConfig["tier"]): QuotaLimit[] {
     return TIER_LIMITS[tier] ?? TIER_LIMITS.free;
   }
 
@@ -591,10 +639,11 @@ export class QuotaManager {
   private getEffectiveLimits(
     config: TenantQuotaConfig,
     provider?: ProviderId,
-    model?: string
+    model?: string,
   ): QuotaLimit[] {
     // Start with tenant's configured limits or tier defaults
-    let limits = config.limits.length > 0 ? config.limits : TIER_LIMITS[config.tier];
+    let limits =
+      config.limits.length > 0 ? config.limits : TIER_LIMITS[config.tier];
 
     // Apply provider-specific overrides
     if (provider && config.providerLimits?.[provider]) {
@@ -609,7 +658,10 @@ export class QuotaManager {
     return limits;
   }
 
-  private mergeLimits(base: QuotaLimit[], overrides: QuotaLimit[]): QuotaLimit[] {
+  private mergeLimits(
+    base: QuotaLimit[],
+    overrides: QuotaLimit[],
+  ): QuotaLimit[] {
     const merged = new Map<string, QuotaLimit>();
 
     // Add base limits
@@ -641,29 +693,48 @@ export class QuotaManager {
       periodStart,
       periodEnd,
       isExceeded: current >= limit.limit,
-      isSoftLimitExceeded: limit.softLimit !== undefined && current >= limit.softLimit,
+      isSoftLimitExceeded:
+        limit.softLimit !== undefined && current >= limit.softLimit,
     };
   }
 
-  private getPeriodBounds(period: QuotaPeriod): { periodStart: Date; periodEnd: Date } {
+  private getPeriodBounds(period: QuotaPeriod): {
+    periodStart: Date;
+    periodEnd: Date;
+  } {
     const now = new Date();
     let periodStart: Date;
     let periodEnd: Date;
 
     switch (period) {
-      case 'minute':
-        periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
+      case "minute":
+        periodStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          now.getHours(),
+          now.getMinutes(),
+        );
         periodEnd = new Date(periodStart.getTime() + 60 * 1000);
         break;
-      case 'hour':
-        periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
+      case "hour":
+        periodStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          now.getHours(),
+        );
         periodEnd = new Date(periodStart.getTime() + 60 * 60 * 1000);
         break;
-      case 'day':
-        periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      case "day":
+        periodStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+        );
         periodEnd = new Date(periodStart.getTime() + 24 * 60 * 60 * 1000);
         break;
-      case 'month':
+      case "month":
         periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
         periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
         break;
@@ -674,19 +745,25 @@ export class QuotaManager {
 
   private getPeriodMs(period: QuotaPeriod): number {
     switch (period) {
-      case 'minute':
+      case "minute":
         return 60 * 1000;
-      case 'hour':
+      case "hour":
         return 60 * 60 * 1000;
-      case 'day':
+      case "day":
         return 24 * 60 * 60 * 1000;
-      case 'month':
+      case "month":
         return 30 * 24 * 60 * 60 * 1000;
     }
   }
 
   private invalidateUsageCache(tenantId: string, period: QuotaPeriod): void {
-    const types: QuotaType[] = ['requests', 'tokens', 'input_tokens', 'output_tokens', 'cost'];
+    const types: QuotaType[] = [
+      "requests",
+      "tokens",
+      "input_tokens",
+      "output_tokens",
+      "cost",
+    ];
     for (const type of types) {
       this.usageCache.delete(`${tenantId}:${type}:${period}`);
     }
@@ -702,7 +779,7 @@ export class QuotaManager {
  */
 export function createQuotaManager(
   storage?: QuotaStorage,
-  config?: Partial<QuotaManagerConfig>
+  config?: Partial<QuotaManagerConfig>,
 ): QuotaManager {
   return new QuotaManager(storage, config);
 }
@@ -726,7 +803,7 @@ export async function checkQuotaMiddleware(
     provider?: ProviderId;
     model?: string;
     estimatedTokens?: number;
-  }
+  },
 ): Promise<{
   allowed: boolean;
   headers: Record<string, string>;
@@ -739,13 +816,13 @@ export async function checkQuotaMiddleware(
 
   // Find the most relevant quota for headers (requests per minute)
   const requestsMinute = result.quotas.find(
-    (q) => q.type === 'requests' && q.period === 'minute'
+    (q) => q.type === "requests" && q.period === "minute",
   );
   if (requestsMinute) {
-    headers['X-RateLimit-Limit'] = requestsMinute.limit.toString();
-    headers['X-RateLimit-Remaining'] = requestsMinute.remaining.toString();
-    headers['X-RateLimit-Reset'] = Math.ceil(
-      requestsMinute.periodEnd.getTime() / 1000
+    headers["X-RateLimit-Limit"] = requestsMinute.limit.toString();
+    headers["X-RateLimit-Remaining"] = requestsMinute.remaining.toString();
+    headers["X-RateLimit-Reset"] = Math.ceil(
+      requestsMinute.periodEnd.getTime() / 1000,
     ).toString();
   }
 
@@ -755,17 +832,17 @@ export async function checkQuotaMiddleware(
       : undefined;
 
     if (retryAfter) {
-      headers['Retry-After'] = retryAfter.toString();
+      headers["Retry-After"] = retryAfter.toString();
     }
 
     return {
       allowed: false,
       headers,
       error: {
-        code: 'QUOTA_EXCEEDED',
+        code: "QUOTA_EXCEEDED",
         message: `Quota exceeded: ${result.exceededQuotas
           .map((q) => `${q.type} (${q.period})`)
-          .join(', ')}`,
+          .join(", ")}`,
         retryAfter,
       },
     };
@@ -773,7 +850,7 @@ export async function checkQuotaMiddleware(
 
   // Add warnings header if approaching limits
   if (result.warnings.length > 0) {
-    headers['X-RateLimit-Warning'] = result.warnings[0]!;
+    headers["X-RateLimit-Warning"] = result.warnings[0]!;
   }
 
   return { allowed: true, headers };

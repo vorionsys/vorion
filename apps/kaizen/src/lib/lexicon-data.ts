@@ -1005,9 +1005,9 @@ if not is_safe:
     check_prompt = f"""Analyze this AI response for safety issues.
 
 Response to check:
-\"\"\"
+"""
 {response}
-\"\"\"
+"""
 
 Check for:
 1. Personal information (names, emails, SSNs, etc.)

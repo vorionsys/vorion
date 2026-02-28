@@ -8,4 +8,4 @@
  * @module @vorionsys/contracts/aci
  */
 
-export * from '../car/index.js';
+export * from "../car/index.js";

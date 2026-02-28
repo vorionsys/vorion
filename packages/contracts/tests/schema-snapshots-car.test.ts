@@ -5,34 +5,34 @@
  * attestation, identity, JWT claims, effective permissions, and mapping schemas.
  */
 
-import { describe, it, expect } from 'vitest';
-import { describeSchema } from './helpers/schema-descriptor';
+import { describe, it, expect } from "vitest";
+import { describeSchema } from "./helpers/schema-descriptor";
 
 import {
   domainCodeSchema,
   domainDefinitionSchema,
   domainCodeArraySchema,
   domainBitmaskSchema,
-} from '../src/car/domains';
+} from "../src/car/domains";
 
 import {
   skillCodeSchema,
   skillDefinitionSchema,
   skillCodeArraySchema,
   skillBitmaskSchema,
-} from '../src/car/skills';
+} from "../src/car/skills";
 
 import {
   capabilityLevelSchema,
   capabilityLevelConfigSchema,
-} from '../src/car/levels';
+} from "../src/car/levels";
 
 import {
   certificationTierSchema,
   runtimeTierSchema,
   certificationTierConfigSchema,
   runtimeTierConfigSchema,
-} from '../src/car/tiers';
+} from "../src/car/tiers";
 
 import {
   parsedCARSchema,
@@ -41,7 +41,7 @@ import {
   carValidationErrorSchema,
   carValidationWarningSchema,
   carValidationResultSchema,
-} from '../src/car/car-string';
+} from "../src/car/car-string";
 
 import {
   attestationScopeSchema,
@@ -52,7 +52,7 @@ import {
   attestationVerificationErrorSchema,
   attestationVerificationWarningSchema,
   attestationVerificationResultSchema,
-} from '../src/car/attestation';
+} from "../src/car/attestation";
 
 import {
   capabilityVectorSchema,
@@ -63,7 +63,7 @@ import {
   agentIdentitySummarySchema,
   agentRegistrationOptionsSchema,
   agentMatchCriteriaSchema,
-} from '../src/car/identity';
+} from "../src/car/identity";
 
 import {
   standardJWTClaimsSchema,
@@ -72,7 +72,7 @@ import {
   jwtClaimsValidationOptionsSchema,
   jwtClaimsValidationErrorSchema,
   jwtClaimsValidationResultSchema,
-} from '../src/car/jwt-claims';
+} from "../src/car/jwt-claims";
 
 import {
   effectivePermissionContextSchema,
@@ -80,15 +80,15 @@ import {
   permissionCeilingsSchema,
   effectivePermissionSchema,
   permissionCheckResultSchema,
-} from '../src/car/effective-permission';
+} from "../src/car/effective-permission";
 
 import {
   vorionNamespaceSchema,
   tierMappingResultSchema,
   domainMappingResultSchema,
-} from '../src/car/mapping';
+} from "../src/car/mapping";
 
-describe('CAR Domain Schemas', () => {
+describe("CAR Domain Schemas", () => {
   const schemas = {
     domainCodeSchema,
     domainDefinitionSchema,
@@ -102,16 +102,16 @@ describe('CAR Domain Schemas', () => {
     });
   }
 
-  it('domainCodeSchema accepts valid code', () => {
-    expect(domainCodeSchema.safeParse('A').success).toBe(true);
+  it("domainCodeSchema accepts valid code", () => {
+    expect(domainCodeSchema.safeParse("A").success).toBe(true);
   });
 
-  it('domainBitmaskSchema accepts number', () => {
+  it("domainBitmaskSchema accepts number", () => {
     expect(domainBitmaskSchema.safeParse(255).success).toBe(true);
   });
 });
 
-describe('CAR Skill Schemas', () => {
+describe("CAR Skill Schemas", () => {
   const schemas = {
     skillCodeSchema,
     skillDefinitionSchema,
@@ -126,7 +126,7 @@ describe('CAR Skill Schemas', () => {
   }
 });
 
-describe('CAR Level Schemas', () => {
+describe("CAR Level Schemas", () => {
   const schemas = {
     capabilityLevelSchema,
     capabilityLevelConfigSchema,
@@ -139,7 +139,7 @@ describe('CAR Level Schemas', () => {
   }
 });
 
-describe('CAR Tier Schemas', () => {
+describe("CAR Tier Schemas", () => {
   const schemas = {
     certificationTierSchema,
     runtimeTierSchema,
@@ -154,7 +154,7 @@ describe('CAR Tier Schemas', () => {
   }
 });
 
-describe('CAR String Schemas', () => {
+describe("CAR String Schemas", () => {
   const schemas = {
     parsedCARSchema,
     carStringSchema,
@@ -170,14 +170,15 @@ describe('CAR String Schemas', () => {
     });
   }
 
-  it('carStringSchema accepts valid CAR string', () => {
+  it("carStringSchema accepts valid CAR string", () => {
     expect(
-      carStringSchema.safeParse('a3i.acme-corp.invoice-bot:ABF-L3@1.0.0').success,
+      carStringSchema.safeParse("a3i.acme-corp.invoice-bot:ABF-L3@1.0.0")
+        .success,
     ).toBe(true);
   });
 });
 
-describe('CAR Attestation Schemas', () => {
+describe("CAR Attestation Schemas", () => {
   const schemas = {
     attestationScopeSchema,
     attestationStatusSchema,
@@ -196,7 +197,7 @@ describe('CAR Attestation Schemas', () => {
   }
 });
 
-describe('CAR Identity Schemas', () => {
+describe("CAR Identity Schemas", () => {
   const schemas = {
     capabilityVectorSchema,
     agentMetadataSchema,
@@ -215,7 +216,7 @@ describe('CAR Identity Schemas', () => {
   }
 });
 
-describe('CAR JWT Claims Schemas', () => {
+describe("CAR JWT Claims Schemas", () => {
   const schemas = {
     standardJWTClaimsSchema,
     carAttestationClaimSchema,
@@ -232,7 +233,7 @@ describe('CAR JWT Claims Schemas', () => {
   }
 });
 
-describe('CAR Effective Permission Schemas', () => {
+describe("CAR Effective Permission Schemas", () => {
   const schemas = {
     effectivePermissionContextSchema,
     constrainingFactorSchema,
@@ -248,7 +249,7 @@ describe('CAR Effective Permission Schemas', () => {
   }
 });
 
-describe('CAR Mapping Schemas', () => {
+describe("CAR Mapping Schemas", () => {
   const schemas = {
     vorionNamespaceSchema,
     tierMappingResultSchema,

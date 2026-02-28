@@ -7,11 +7,11 @@
  * @packageDocumentation
  */
 
-import * as nodeCrypto from 'node:crypto';
-import { createLogger } from '../common/logger.js';
-import type { Proof, Decision, Intent, ID } from '../common/types.js';
+import * as nodeCrypto from "node:crypto";
+import { createLogger } from "../common/logger.js";
+import type { Proof, Decision, Intent, ID } from "../common/types.js";
 
-const logger = createLogger({ component: 'proof' });
+const logger = createLogger({ component: "proof" });
 
 /**
  * Ed25519 key pair for signing proofs
@@ -37,10 +37,14 @@ export interface SigningConfig {
  * Generate a new Ed25519 key pair for signing
  */
 export function generateKeyPair(): SigningKeyPair {
-  const { publicKey, privateKey } = nodeCrypto.generateKeyPairSync('ed25519');
+  const { publicKey, privateKey } = nodeCrypto.generateKeyPairSync("ed25519");
   return {
-    publicKey: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
-    privateKey: privateKey.export({ type: 'pkcs8', format: 'der' }).toString('base64'),
+    publicKey: publicKey
+      .export({ type: "spki", format: "der" })
+      .toString("base64"),
+    privateKey: privateKey
+      .export({ type: "pkcs8", format: "der" })
+      .toString("base64"),
   };
 }
 
@@ -83,32 +87,32 @@ export interface ProofQuery {
 export class ProofService {
   private proofs: Map<ID, Proof> = new Map();
   private chain: Proof[] = [];
-  private lastHash: string = '0'.repeat(64);
+  private lastHash: string = "0".repeat(64);
   private privateKey: nodeCrypto.KeyObject | null = null;
   private publicKey: nodeCrypto.KeyObject | null = null;
   private keyId: string;
 
   constructor(config?: SigningConfig) {
-    this.keyId = config?.keyId ?? 'default';
+    this.keyId = config?.keyId ?? "default";
 
     if (config?.privateKey) {
       this.privateKey = nodeCrypto.createPrivateKey({
-        key: Buffer.from(config.privateKey, 'base64'),
-        format: 'der',
-        type: 'pkcs8',
+        key: Buffer.from(config.privateKey, "base64"),
+        format: "der",
+        type: "pkcs8",
       });
       // Derive public key from private key
       this.publicKey = nodeCrypto.createPublicKey(this.privateKey);
-      logger.info({ keyId: this.keyId }, 'Signing key loaded');
+      logger.info({ keyId: this.keyId }, "Signing key loaded");
     } else if (config?.publicKey) {
       this.publicKey = nodeCrypto.createPublicKey({
-        key: Buffer.from(config.publicKey, 'base64'),
-        format: 'der',
-        type: 'spki',
+        key: Buffer.from(config.publicKey, "base64"),
+        format: "der",
+        type: "spki",
       });
-      logger.info({ keyId: this.keyId }, 'Verification-only key loaded');
+      logger.info({ keyId: this.keyId }, "Verification-only key loaded");
     } else {
-      logger.warn('No signing key configured - proofs will not be signed');
+      logger.warn("No signing key configured - proofs will not be signed");
     }
   }
 
@@ -124,10 +128,10 @@ export class ProofService {
       decision: request.decision,
       inputs: request.inputs,
       outputs: request.outputs,
-      hash: '', // Will be calculated
-      hash3: '', // SHA3-256 integrity anchor
+      hash: "", // Will be calculated
+      hash3: "", // SHA3-256 integrity anchor
       previousHash: this.lastHash,
-      signature: '', // Will be signed after hash calculation
+      signature: "", // Will be signed after hash calculation
       createdAt: new Date().toISOString(),
     };
 
@@ -149,7 +153,7 @@ export class ProofService {
         intentId: proof.intentId,
         chainPosition: proof.chainPosition,
       },
-      'Proof created'
+      "Proof created",
     );
 
     return proof;
@@ -205,42 +209,46 @@ export class ProofService {
         valid: false,
         proofId: id,
         chainPosition: -1,
-        issues: ['Proof not found'],
+        issues: ["Proof not found"],
         verifiedAt: new Date().toISOString(),
       };
     }
 
     // Verify SHA-256 hash
-    const { hash: _existingHash, hash3: _existingHash3, ...proofWithoutHashes } = proof;
+    const {
+      hash: _existingHash,
+      hash3: _existingHash3,
+      ...proofWithoutHashes
+    } = proof;
     const expectedHash = await this.calculateHash(proofWithoutHashes);
 
     if (proof.hash !== expectedHash) {
-      issues.push('SHA-256 hash mismatch');
+      issues.push("SHA-256 hash mismatch");
     }
 
     // Verify SHA3-256 hash (if present — absent on pre-upgrade records)
     if (proof.hash3) {
       const expectedHash3 = this.calculateHash3(proofWithoutHashes);
       if (proof.hash3 !== expectedHash3) {
-        issues.push('SHA3-256 hash mismatch');
+        issues.push("SHA3-256 hash mismatch");
       }
     }
 
     // Verify signature
     if (proof.signature) {
       if (!this.verifySignature(proof.hash, proof.signature)) {
-        issues.push('Invalid signature');
+        issues.push("Invalid signature");
       }
     } else if (this.publicKey) {
       // Signature missing but we have a key configured
-      issues.push('Signature missing');
+      issues.push("Signature missing");
     }
 
     // Verify chain linkage
     if (proof.chainPosition > 0) {
       const previous = this.chain[proof.chainPosition - 1];
       if (previous && proof.previousHash !== previous.hash) {
-        issues.push('Chain linkage broken');
+        issues.push("Chain linkage broken");
       }
     }
 
@@ -250,7 +258,7 @@ export class ProofService {
         valid: issues.length === 0,
         issues,
       },
-      'Proof verified'
+      "Proof verified",
     );
 
     return {
@@ -278,7 +286,7 @@ export class ProofService {
       const verification = await this.verify(proof.id);
 
       if (!verification.valid) {
-        issues.push(`Position ${i}: ${verification.issues.join(', ')}`);
+        issues.push(`Position ${i}: ${verification.issues.join(", ")}`);
         break;
       }
 
@@ -295,7 +303,7 @@ export class ProofService {
   /**
    * Calculate hash for a proof record
    */
-  private async calculateHash(proof: Omit<Proof, 'hash'>): Promise<string> {
+  private async calculateHash(proof: Omit<Proof, "hash">): Promise<string> {
     const data = JSON.stringify({
       id: proof.id,
       chainPosition: proof.chainPosition,
@@ -311,15 +319,15 @@ export class ProofService {
     // Use Web Crypto API for SHA-256
     const encoder = new TextEncoder();
     const dataBuffer = encoder.encode(data);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 
   /**
    * Calculate SHA3-256 hash for a proof record (integrity anchor)
    */
-  private calculateHash3(proof: Omit<Proof, 'hash' | 'hash3'>): string {
+  private calculateHash3(proof: Omit<Proof, "hash" | "hash3">): string {
     const data = JSON.stringify({
       id: proof.id,
       chainPosition: proof.chainPosition,
@@ -332,7 +340,7 @@ export class ProofService {
       createdAt: proof.createdAt,
     });
 
-    return nodeCrypto.createHash('sha3-256').update(data).digest('hex');
+    return nodeCrypto.createHash("sha3-256").update(data).digest("hex");
   }
 
   /**
@@ -341,11 +349,11 @@ export class ProofService {
    */
   private sign(data: string): string {
     if (!this.privateKey) {
-      return '';
+      return "";
     }
 
     const signature = nodeCrypto.sign(null, Buffer.from(data), this.privateKey);
-    return signature.toString('base64');
+    return signature.toString("base64");
   }
 
   /**
@@ -363,7 +371,7 @@ export class ProofService {
         null,
         Buffer.from(data),
         this.publicKey,
-        Buffer.from(signature, 'base64')
+        Buffer.from(signature, "base64"),
       );
     } catch {
       return false;
@@ -378,7 +386,9 @@ export class ProofService {
     if (!this.publicKey) {
       return null;
     }
-    return this.publicKey.export({ type: 'spki', format: 'der' }).toString('base64');
+    return this.publicKey
+      .export({ type: "spki", format: "der" })
+      .toString("base64");
   }
 
   /**
@@ -435,7 +445,7 @@ export {
   // Service
   MerkleAggregationService,
   createMerkleAggregationService,
-} from './merkle.js';
+} from "./merkle.js";
 
 // =============================================================================
 // ZERO-KNOWLEDGE PROOFS
@@ -475,4 +485,4 @@ export {
   // Service
   ZKProofService,
   createZKProofService,
-} from './zk-proofs.js';
+} from "./zk-proofs.js";

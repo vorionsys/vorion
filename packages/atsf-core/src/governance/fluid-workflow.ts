@@ -7,11 +7,15 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { ID, TrustLevel } from '../common/types.js';
-import type { GovernanceEngine, GovernanceRequest, GovernanceResult } from './index.js';
+import { createLogger } from "../common/logger.js";
+import type { ID, TrustLevel } from "../common/types.js";
+import type {
+  IGovernanceEngine,
+  GovernanceRequest,
+  GovernanceResult,
+} from "./types.js";
 
-const logger = createLogger({ component: 'fluid-workflow' });
+const logger = createLogger({ component: "fluid-workflow" });
 
 // ============================================================================
 // TYPES
@@ -20,34 +24,34 @@ const logger = createLogger({ component: 'fluid-workflow' });
 /**
  * Decision tier for fluid governance
  */
-export type DecisionTier = 'GREEN' | 'YELLOW' | 'RED';
+export type DecisionTier = "GREEN" | "YELLOW" | "RED";
 
 /**
  * Refinement action types
  */
 export type RefinementAction =
-  | 'REDUCE_SCOPE'
-  | 'ADD_CONSTRAINTS'
-  | 'REQUEST_APPROVAL'
-  | 'PROVIDE_CONTEXT'
-  | 'DECOMPOSE'
-  | 'WAIT_FOR_TRUST';
+  | "REDUCE_SCOPE"
+  | "ADD_CONSTRAINTS"
+  | "REQUEST_APPROVAL"
+  | "PROVIDE_CONTEXT"
+  | "DECOMPOSE"
+  | "WAIT_FOR_TRUST";
 
 /**
  * Workflow state
  */
 export type WorkflowState =
-  | 'SUBMITTED'
-  | 'EVALUATING'
-  | 'APPROVED'
-  | 'PENDING_REFINEMENT'
-  | 'PENDING_REVIEW'
-  | 'DENIED'
-  | 'EXECUTING'
-  | 'COMPLETED'
-  | 'FAILED'
-  | 'CANCELLED'
-  | 'EXPIRED';
+  | "SUBMITTED"
+  | "EVALUATING"
+  | "APPROVED"
+  | "PENDING_REFINEMENT"
+  | "PENDING_REVIEW"
+  | "DENIED"
+  | "EXECUTING"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED"
+  | "EXPIRED";
 
 /**
  * Refinement option presented to agent
@@ -57,7 +61,7 @@ export interface RefinementOption {
   action: RefinementAction;
   description: string;
   successProbability: number;
-  effort: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
   parameters?: Record<string, unknown>;
 }
 
@@ -84,7 +88,11 @@ export interface FluidDecision {
   /** For RED: is this a hard denial? */
   hardDenial?: boolean;
   /** Violated policies */
-  violatedPolicies?: Array<{ policyId: string; name: string; severity: string }>;
+  violatedPolicies?: Array<{
+    policyId: string;
+    name: string;
+    severity: string;
+  }>;
   /** Created timestamp */
   createdAt: Date;
 }
@@ -159,13 +167,19 @@ const DEFAULT_CONFIG: FluidWorkflowConfig = {
  * Valid state transitions
  */
 const VALID_TRANSITIONS: Record<WorkflowState, WorkflowState[]> = {
-  SUBMITTED: ['EVALUATING', 'CANCELLED', 'EXPIRED'],
-  EVALUATING: ['APPROVED', 'PENDING_REFINEMENT', 'PENDING_REVIEW', 'DENIED', 'CANCELLED'],
-  APPROVED: ['EXECUTING', 'CANCELLED', 'EXPIRED'],
-  PENDING_REFINEMENT: ['EVALUATING', 'DENIED', 'CANCELLED', 'EXPIRED'],
-  PENDING_REVIEW: ['APPROVED', 'DENIED', 'CANCELLED', 'EXPIRED'],
+  SUBMITTED: ["EVALUATING", "CANCELLED", "EXPIRED"],
+  EVALUATING: [
+    "APPROVED",
+    "PENDING_REFINEMENT",
+    "PENDING_REVIEW",
+    "DENIED",
+    "CANCELLED",
+  ],
+  APPROVED: ["EXECUTING", "CANCELLED", "EXPIRED"],
+  PENDING_REFINEMENT: ["EVALUATING", "DENIED", "CANCELLED", "EXPIRED"],
+  PENDING_REVIEW: ["APPROVED", "DENIED", "CANCELLED", "EXPIRED"],
   DENIED: [], // Terminal
-  EXECUTING: ['COMPLETED', 'FAILED', 'CANCELLED'],
+  EXECUTING: ["COMPLETED", "FAILED", "CANCELLED"],
   COMPLETED: [], // Terminal
   FAILED: [], // Terminal
   CANCELLED: [], // Terminal
@@ -190,10 +204,13 @@ function isValidTransition(from: WorkflowState, to: WorkflowState): boolean {
  */
 export class FluidWorkflowEngine {
   private config: FluidWorkflowConfig;
-  private governanceEngine: GovernanceEngine;
+  private governanceEngine: IGovernanceEngine;
   private workflows: Map<string, WorkflowInstance> = new Map();
 
-  constructor(governanceEngine: GovernanceEngine, config: Partial<FluidWorkflowConfig> = {}) {
+  constructor(
+    governanceEngine: IGovernanceEngine,
+    config: Partial<FluidWorkflowConfig> = {},
+  ) {
     this.governanceEngine = governanceEngine;
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
@@ -201,7 +218,9 @@ export class FluidWorkflowEngine {
   /**
    * Submit a new intent for governance evaluation
    */
-  async submit(request: GovernanceRequest): Promise<{ workflow: WorkflowInstance; decision: FluidDecision }> {
+  async submit(
+    request: GovernanceRequest,
+  ): Promise<{ workflow: WorkflowInstance; decision: FluidDecision }> {
     const workflowId = crypto.randomUUID();
     const now = new Date();
 
@@ -211,7 +230,7 @@ export class FluidWorkflowEngine {
       intentId: request.requestId,
       agentId: request.entityId,
       correlationId: crypto.randomUUID(),
-      state: 'SUBMITTED',
+      state: "SUBMITTED",
       decisions: [],
       stateHistory: [],
       createdAt: now,
@@ -227,11 +246,11 @@ export class FluidWorkflowEngine {
         agentId: request.entityId,
         action: request.action,
       },
-      'Workflow submitted'
+      "Workflow submitted",
     );
 
     // Transition to EVALUATING
-    this.transition(workflow, 'EVALUATING', 'Initial evaluation');
+    this.transition(workflow, "EVALUATING", "Initial evaluation");
 
     // Evaluate the request
     const decision = await this.evaluate(workflow, request);
@@ -242,7 +261,10 @@ export class FluidWorkflowEngine {
   /**
    * Evaluate a governance request and produce a fluid decision
    */
-  private async evaluate(workflow: WorkflowInstance, request: GovernanceRequest): Promise<FluidDecision> {
+  private async evaluate(
+    workflow: WorkflowInstance,
+    request: GovernanceRequest,
+  ): Promise<FluidDecision> {
     const governanceResult = await this.governanceEngine.evaluate(request);
     const decisionId = crypto.randomUUID();
 
@@ -250,7 +272,10 @@ export class FluidWorkflowEngine {
     const tier = this.determineTier(governanceResult, request.trustLevel);
 
     // Generate refinement options for YELLOW
-    const refinementOptions = tier === 'YELLOW' ? this.generateRefinementOptions(governanceResult, request) : undefined;
+    const refinementOptions =
+      tier === "YELLOW"
+        ? this.generateRefinementOptions(governanceResult, request)
+        : undefined;
 
     // Create fluid decision
     const decision: FluidDecision = {
@@ -258,12 +283,18 @@ export class FluidWorkflowEngine {
       tier,
       governanceResult,
       refinementOptions,
-      refinementDeadline: tier === 'YELLOW' ? new Date(Date.now() + this.config.refinementDeadlineMs) : undefined,
+      refinementDeadline:
+        tier === "YELLOW"
+          ? new Date(Date.now() + this.config.refinementDeadlineMs)
+          : undefined,
       maxRefinementAttempts: this.config.maxRefinementAttempts,
       refinementAttempt: workflow.decisions.length,
       originalDecisionId: workflow.decisions[0]?.decisionId,
-      hardDenial: tier === 'RED' && this.isHardDenial(governanceResult),
-      violatedPolicies: tier === 'RED' ? this.extractViolatedPolicies(governanceResult) : undefined,
+      hardDenial: tier === "RED" && this.isHardDenial(governanceResult),
+      violatedPolicies:
+        tier === "RED"
+          ? this.extractViolatedPolicies(governanceResult)
+          : undefined,
       createdAt: new Date(),
     };
 
@@ -274,14 +305,24 @@ export class FluidWorkflowEngine {
 
     // Transition based on tier
     switch (tier) {
-      case 'GREEN':
-        this.transition(workflow, 'APPROVED', 'Request approved');
+      case "GREEN":
+        this.transition(workflow, "APPROVED", "Request approved");
         break;
-      case 'YELLOW':
-        this.transition(workflow, 'PENDING_REFINEMENT', 'Refinement required', decisionId);
+      case "YELLOW":
+        this.transition(
+          workflow,
+          "PENDING_REFINEMENT",
+          "Refinement required",
+          decisionId,
+        );
         break;
-      case 'RED':
-        this.transition(workflow, 'DENIED', governanceResult.explanation, decisionId);
+      case "RED":
+        this.transition(
+          workflow,
+          "DENIED",
+          governanceResult.explanation,
+          decisionId,
+        );
         break;
     }
 
@@ -292,7 +333,7 @@ export class FluidWorkflowEngine {
         tier,
         confidence: governanceResult.confidence,
       },
-      'Decision made'
+      "Decision made",
     );
 
     return decision;
@@ -301,52 +342,67 @@ export class FluidWorkflowEngine {
   /**
    * Determine decision tier based on governance result
    */
-  private determineTier(result: GovernanceResult, _trustLevel: TrustLevel): DecisionTier {
+  private determineTier(
+    result: GovernanceResult,
+    _trustLevel: TrustLevel,
+  ): DecisionTier {
     // Hard disqualifiers and regulatory mandates = RED
     if (
-      result.decidingRule.category === 'hard_disqualifier' ||
-      result.decidingRule.category === 'regulatory_mandate'
+      result.decidingRule.category === "hard_disqualifier" ||
+      result.decidingRule.category === "regulatory_mandate"
     ) {
-      if (result.decision === 'deny') {
-        return 'RED';
+      if (result.decision === "deny") {
+        return "RED";
       }
     }
 
     // High confidence allow = GREEN
-    if (result.decision === 'allow' && result.confidence >= this.config.greenThreshold) {
-      return 'GREEN';
+    if (
+      result.decision === "allow" &&
+      result.confidence >= this.config.greenThreshold
+    ) {
+      return "GREEN";
     }
 
     // Clear deny with low confidence or clarification needed = YELLOW
-    if (result.clarificationNeeded || result.confidence < this.config.greenThreshold) {
+    if (
+      result.clarificationNeeded ||
+      result.confidence < this.config.greenThreshold
+    ) {
       if (result.confidence >= this.config.yellowThreshold) {
-        return 'YELLOW';
+        return "YELLOW";
       }
     }
 
     // Low trust or low confidence deny = RED
-    if (result.decision === 'deny' || result.confidence < this.config.yellowThreshold) {
-      return 'RED';
+    if (
+      result.decision === "deny" ||
+      result.confidence < this.config.yellowThreshold
+    ) {
+      return "RED";
     }
 
     // Default to YELLOW for uncertain cases
-    return 'YELLOW';
+    return "YELLOW";
   }
 
   /**
    * Generate refinement options for YELLOW decisions
    */
-  private generateRefinementOptions(result: GovernanceResult, request: GovernanceRequest): RefinementOption[] {
+  private generateRefinementOptions(
+    result: GovernanceResult,
+    request: GovernanceRequest,
+  ): RefinementOption[] {
     const options: RefinementOption[] = [];
 
     // If clarification is needed, add that option
     if (result.clarificationNeeded) {
       options.push({
         id: crypto.randomUUID(),
-        action: 'PROVIDE_CONTEXT',
+        action: "PROVIDE_CONTEXT",
         description: result.clarificationNeeded.question,
         successProbability: 0.7,
-        effort: 'low',
+        effort: "low",
         parameters: {
           options: result.clarificationNeeded.options,
         },
@@ -357,10 +413,10 @@ export class FluidWorkflowEngine {
     if (request.resources.length > 1) {
       options.push({
         id: crypto.randomUUID(),
-        action: 'REDUCE_SCOPE',
-        description: 'Reduce the number of resources in the request',
+        action: "REDUCE_SCOPE",
+        description: "Reduce the number of resources in the request",
         successProbability: 0.6,
-        effort: 'low',
+        effort: "low",
         parameters: {
           currentResources: request.resources,
         },
@@ -371,30 +427,30 @@ export class FluidWorkflowEngine {
     if (result.constraints.length === 0) {
       options.push({
         id: crypto.randomUUID(),
-        action: 'ADD_CONSTRAINTS',
-        description: 'Add monitoring or rate limiting constraints',
+        action: "ADD_CONSTRAINTS",
+        description: "Add monitoring or rate limiting constraints",
         successProbability: 0.5,
-        effort: 'low',
+        effort: "low",
       });
     }
 
     // Request approval
     options.push({
       id: crypto.randomUUID(),
-      action: 'REQUEST_APPROVAL',
-      description: 'Request human approval for this action',
+      action: "REQUEST_APPROVAL",
+      description: "Request human approval for this action",
       successProbability: 0.8,
-      effort: 'medium',
+      effort: "medium",
     });
 
     // Decompose into smaller requests
     if (request.capabilities.length > 2) {
       options.push({
         id: crypto.randomUUID(),
-        action: 'DECOMPOSE',
-        description: 'Break down into smaller, more specific requests',
+        action: "DECOMPOSE",
+        description: "Break down into smaller, more specific requests",
         successProbability: 0.65,
-        effort: 'medium',
+        effort: "medium",
       });
     }
 
@@ -406,45 +462,53 @@ export class FluidWorkflowEngine {
    */
   private isHardDenial(result: GovernanceResult): boolean {
     return (
-      result.decidingRule.category === 'hard_disqualifier' ||
-      result.decidingRule.category === 'regulatory_mandate'
+      result.decidingRule.category === "hard_disqualifier" ||
+      result.decidingRule.category === "regulatory_mandate"
     );
   }
 
   /**
    * Extract violated policies from result
    */
-  private extractViolatedPolicies(result: GovernanceResult): Array<{ policyId: string; name: string; severity: string }> {
+  private extractViolatedPolicies(
+    result: GovernanceResult,
+  ): Array<{ policyId: string; name: string; severity: string }> {
     return result.rulesMatched
-      .filter((r) => r.effect?.action === 'deny')
+      .filter((r) => r.effect?.action === "deny")
       .map((r) => ({
         policyId: r.ruleId,
         name: r.ruleName,
-        severity: r.category === 'hard_disqualifier' ? 'critical' : 'error',
+        severity: r.category === "hard_disqualifier" ? "critical" : "error",
       }));
   }
 
   /**
    * Submit a refinement for a YELLOW decision
    */
-  async refine(refinementRequest: RefinementRequest): Promise<{ success: boolean; decision: FluidDecision; remainingAttempts: number }> {
+  async refine(refinementRequest: RefinementRequest): Promise<{
+    success: boolean;
+    decision: FluidDecision;
+    remainingAttempts: number;
+  }> {
     const workflow = this.workflows.get(refinementRequest.workflowId);
 
     if (!workflow) {
       throw new Error(`Workflow not found: ${refinementRequest.workflowId}`);
     }
 
-    if (workflow.state !== 'PENDING_REFINEMENT') {
+    if (workflow.state !== "PENDING_REFINEMENT") {
       throw new Error(`Cannot refine workflow in state: ${workflow.state}`);
     }
 
     const currentDecision = workflow.decisions[workflow.decisions.length - 1];
-    if (!currentDecision || currentDecision.tier !== 'YELLOW') {
-      throw new Error('No YELLOW decision to refine');
+    if (!currentDecision || currentDecision.tier !== "YELLOW") {
+      throw new Error("No YELLOW decision to refine");
     }
 
-    if (currentDecision.refinementAttempt >= this.config.maxRefinementAttempts) {
-      throw new Error('Maximum refinement attempts exceeded');
+    if (
+      currentDecision.refinementAttempt >= this.config.maxRefinementAttempts
+    ) {
+      throw new Error("Maximum refinement attempts exceeded");
     }
 
     // Build modified request
@@ -452,7 +516,7 @@ export class FluidWorkflowEngine {
       requestId: workflow.intentId,
       entityId: workflow.agentId,
       trustLevel: 0 as TrustLevel,
-      action: '',
+      action: "",
       capabilities: [],
       resources: [],
       context: {},
@@ -464,7 +528,7 @@ export class FluidWorkflowEngine {
       requestId: originalRequest.requestId ?? workflow.intentId,
       entityId: originalRequest.entityId ?? workflow.agentId,
       trustLevel: originalRequest.trustLevel ?? (0 as TrustLevel),
-      action: originalRequest.action ?? '',
+      action: originalRequest.action ?? "",
       capabilities: originalRequest.capabilities ?? [],
       resources: originalRequest.resources ?? [],
       context: {
@@ -481,17 +545,18 @@ export class FluidWorkflowEngine {
         refinements: refinementRequest.selectedRefinements,
         attempt: currentDecision.refinementAttempt + 1,
       },
-      'Processing refinement'
+      "Processing refinement",
     );
 
     // Transition back to EVALUATING
-    this.transition(workflow, 'EVALUATING', 'Re-evaluating after refinement');
+    this.transition(workflow, "EVALUATING", "Re-evaluating after refinement");
 
     // Re-evaluate
     const newDecision = await this.evaluate(workflow, modifiedRequest);
 
-    const success = newDecision.tier === 'GREEN';
-    const remainingAttempts = this.config.maxRefinementAttempts - newDecision.refinementAttempt;
+    const success = newDecision.tier === "GREEN";
+    const remainingAttempts =
+      this.config.maxRefinementAttempts - newDecision.refinementAttempt;
 
     return { success, decision: newDecision, remainingAttempts };
   }
@@ -506,51 +571,59 @@ export class FluidWorkflowEngine {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
-    if (workflow.state !== 'PENDING_REFINEMENT') {
+    if (workflow.state !== "PENDING_REFINEMENT") {
       throw new Error(`Cannot request review in state: ${workflow.state}`);
     }
 
-    this.transition(workflow, 'PENDING_REVIEW', reason);
+    this.transition(workflow, "PENDING_REVIEW", reason);
 
-    logger.info({ workflowId, reason }, 'Review requested');
+    logger.info({ workflowId, reason }, "Review requested");
   }
 
   /**
    * Approve a workflow (for human review)
    */
-  async approve(workflowId: string, approver: string, reason: string): Promise<void> {
+  async approve(
+    workflowId: string,
+    approver: string,
+    reason: string,
+  ): Promise<void> {
     const workflow = this.workflows.get(workflowId);
 
     if (!workflow) {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
-    if (workflow.state !== 'PENDING_REVIEW') {
+    if (workflow.state !== "PENDING_REVIEW") {
       throw new Error(`Cannot approve workflow in state: ${workflow.state}`);
     }
 
-    this.transition(workflow, 'APPROVED', `Approved by ${approver}: ${reason}`);
+    this.transition(workflow, "APPROVED", `Approved by ${approver}: ${reason}`);
 
-    logger.info({ workflowId, approver, reason }, 'Workflow approved');
+    logger.info({ workflowId, approver, reason }, "Workflow approved");
   }
 
   /**
    * Deny a workflow (for human review)
    */
-  async deny(workflowId: string, approver: string, reason: string): Promise<void> {
+  async deny(
+    workflowId: string,
+    approver: string,
+    reason: string,
+  ): Promise<void> {
     const workflow = this.workflows.get(workflowId);
 
     if (!workflow) {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
-    if (workflow.state !== 'PENDING_REVIEW') {
+    if (workflow.state !== "PENDING_REVIEW") {
       throw new Error(`Cannot deny workflow in state: ${workflow.state}`);
     }
 
-    this.transition(workflow, 'DENIED', `Denied by ${approver}: ${reason}`);
+    this.transition(workflow, "DENIED", `Denied by ${approver}: ${reason}`);
 
-    logger.info({ workflowId, approver, reason }, 'Workflow denied');
+    logger.info({ workflowId, approver, reason }, "Workflow denied");
   }
 
   /**
@@ -563,13 +636,13 @@ export class FluidWorkflowEngine {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
-    if (workflow.state !== 'APPROVED') {
+    if (workflow.state !== "APPROVED") {
       throw new Error(`Cannot start execution in state: ${workflow.state}`);
     }
 
-    this.transition(workflow, 'EXECUTING', 'Execution started');
+    this.transition(workflow, "EXECUTING", "Execution started");
 
-    logger.info({ workflowId }, 'Execution started');
+    logger.info({ workflowId }, "Execution started");
   }
 
   /**
@@ -582,13 +655,13 @@ export class FluidWorkflowEngine {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
-    if (workflow.state !== 'EXECUTING') {
+    if (workflow.state !== "EXECUTING") {
       throw new Error(`Cannot complete workflow in state: ${workflow.state}`);
     }
 
-    this.transition(workflow, 'COMPLETED', 'Execution completed successfully');
+    this.transition(workflow, "COMPLETED", "Execution completed successfully");
 
-    logger.info({ workflowId }, 'Workflow completed');
+    logger.info({ workflowId }, "Workflow completed");
   }
 
   /**
@@ -601,13 +674,13 @@ export class FluidWorkflowEngine {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
-    if (workflow.state !== 'EXECUTING') {
+    if (workflow.state !== "EXECUTING") {
       throw new Error(`Cannot fail workflow in state: ${workflow.state}`);
     }
 
-    this.transition(workflow, 'FAILED', `Execution failed: ${error}`);
+    this.transition(workflow, "FAILED", `Execution failed: ${error}`);
 
-    logger.error({ workflowId, error }, 'Workflow failed');
+    logger.error({ workflowId, error }, "Workflow failed");
   }
 
   /**
@@ -620,14 +693,22 @@ export class FluidWorkflowEngine {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
-    const terminalStates: WorkflowState[] = ['DENIED', 'COMPLETED', 'FAILED', 'CANCELLED', 'EXPIRED'];
+    const terminalStates: WorkflowState[] = [
+      "DENIED",
+      "COMPLETED",
+      "FAILED",
+      "CANCELLED",
+      "EXPIRED",
+    ];
     if (terminalStates.includes(workflow.state)) {
-      throw new Error(`Cannot cancel workflow in terminal state: ${workflow.state}`);
+      throw new Error(
+        `Cannot cancel workflow in terminal state: ${workflow.state}`,
+      );
     }
 
-    this.transition(workflow, 'CANCELLED', reason);
+    this.transition(workflow, "CANCELLED", reason);
 
-    logger.info({ workflowId, reason }, 'Workflow cancelled');
+    logger.info({ workflowId, reason }, "Workflow cancelled");
   }
 
   /**
@@ -641,13 +722,20 @@ export class FluidWorkflowEngine {
    * Get all workflows for an agent
    */
   getByAgent(agentId: ID): WorkflowInstance[] {
-    return Array.from(this.workflows.values()).filter((w) => w.agentId === agentId);
+    return Array.from(this.workflows.values()).filter(
+      (w) => w.agentId === agentId,
+    );
   }
 
   /**
    * Transition a workflow to a new state
    */
-  private transition(workflow: WorkflowInstance, to: WorkflowState, reason: string, decisionId?: string): void {
+  private transition(
+    workflow: WorkflowInstance,
+    to: WorkflowState,
+    reason: string,
+    decisionId?: string,
+  ): void {
     const from = workflow.state;
 
     if (!isValidTransition(from, to)) {
@@ -671,7 +759,7 @@ export class FluidWorkflowEngine {
         to,
         reason,
       },
-      'State transition'
+      "State transition",
     );
   }
 
@@ -683,15 +771,24 @@ export class FluidWorkflowEngine {
     let expired = 0;
 
     for (const workflow of this.workflows.values()) {
-      const terminalStates: WorkflowState[] = ['DENIED', 'COMPLETED', 'FAILED', 'CANCELLED', 'EXPIRED'];
-      if (!terminalStates.includes(workflow.state) && workflow.expiresAt < now) {
-        this.transition(workflow, 'EXPIRED', 'Workflow expired');
+      const terminalStates: WorkflowState[] = [
+        "DENIED",
+        "COMPLETED",
+        "FAILED",
+        "CANCELLED",
+        "EXPIRED",
+      ];
+      if (
+        !terminalStates.includes(workflow.state) &&
+        workflow.expiresAt < now
+      ) {
+        this.transition(workflow, "EXPIRED", "Workflow expired");
         expired++;
       }
     }
 
     if (expired > 0) {
-      logger.info({ expired }, 'Expired stale workflows');
+      logger.info({ expired }, "Expired stale workflows");
     }
 
     return expired;
@@ -729,7 +826,8 @@ export class FluidWorkflowEngine {
     return {
       total: this.workflows.size,
       byState,
-      avgDecisionsPerWorkflow: this.workflows.size > 0 ? totalDecisions / this.workflows.size : 0,
+      avgDecisionsPerWorkflow:
+        this.workflows.size > 0 ? totalDecisions / this.workflows.size : 0,
     };
   }
 }
@@ -738,8 +836,8 @@ export class FluidWorkflowEngine {
  * Create a new fluid workflow engine
  */
 export function createFluidWorkflowEngine(
-  governanceEngine: GovernanceEngine,
-  config?: Partial<FluidWorkflowConfig>
+  governanceEngine: IGovernanceEngine,
+  config?: Partial<FluidWorkflowConfig>,
 ): FluidWorkflowEngine {
   return new FluidWorkflowEngine(governanceEngine, config);
 }

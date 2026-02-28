@@ -16,7 +16,7 @@
 /**
  * Profile type names
  */
-export type EnvironmentProfileType = 'volatile' | 'standard' | 'stable';
+export type EnvironmentProfileType = "volatile" | "standard" | "stable";
 
 /**
  * Environment profile configuration
@@ -95,17 +95,17 @@ export interface DecayConfigOptions {
 export const DEFAULT_DECAY_PROFILES = {
   profiles: {
     volatile: {
-      type: 'volatile' as const,
+      type: "volatile" as const,
       baseHalfLifeDays: 30,
       failureMultiplier: 4.0,
     },
     standard: {
-      type: 'standard' as const,
+      type: "standard" as const,
       baseHalfLifeDays: 182,
       failureMultiplier: 3.0,
     },
     stable: {
-      type: 'stable' as const,
+      type: "stable" as const,
       baseHalfLifeDays: 365,
       failureMultiplier: 2.0,
     },
@@ -132,16 +132,22 @@ export function calculateContextAwareDecay(
   initialScore: number,
   daysSinceLastAction: number,
   profile: EnvironmentProfile,
-  failureCount: number
+  failureCount: number,
 ): number {
   // Calculate base decay factor using half-life formula
   // At half-life days, this equals 0.5 (50% remaining)
-  const baseDecayFactor = Math.pow(0.5, daysSinceLastAction / profile.baseHalfLifeDays);
+  const baseDecayFactor = Math.pow(
+    0.5,
+    daysSinceLastAction / profile.baseHalfLifeDays,
+  );
 
   // Calculate failure acceleration (exponential penalty)
   // Treat negative failure counts as 0
   const effectiveFailures = Math.max(0, failureCount);
-  const failureAcceleration = Math.pow(profile.failureMultiplier, effectiveFailures);
+  const failureAcceleration = Math.pow(
+    profile.failureMultiplier,
+    effectiveFailures,
+  );
 
   // Apply decay: score * baseFactor / failureAcceleration
   const decayedScore = (initialScore * baseDecayFactor) / failureAcceleration;
@@ -165,14 +171,20 @@ export function calculateContextAwareDecayWithDetails(
   initialScore: number,
   daysSinceLastAction: number,
   profile: EnvironmentProfile,
-  failureCount: number
+  failureCount: number,
 ): DecayCalculationResult {
   // Calculate base decay factor
-  const baseDecayFactor = Math.pow(0.5, daysSinceLastAction / profile.baseHalfLifeDays);
+  const baseDecayFactor = Math.pow(
+    0.5,
+    daysSinceLastAction / profile.baseHalfLifeDays,
+  );
 
   // Calculate failure acceleration
   const effectiveFailures = Math.max(0, failureCount);
-  const failureAcceleration = Math.pow(profile.failureMultiplier, effectiveFailures);
+  const failureAcceleration = Math.pow(
+    profile.failureMultiplier,
+    effectiveFailures,
+  );
 
   // Calculate effective decay factor (after failure penalty)
   const effectiveDecayFactor = baseDecayFactor / failureAcceleration;
@@ -204,7 +216,7 @@ export function calculateDaysUntilDecay(
   currentScore: number,
   targetScore: number,
   profile: EnvironmentProfile,
-  failureCount: number
+  failureCount: number,
 ): number {
   // If already at or below target, return Infinity (already there)
   if (currentScore <= targetScore) {
@@ -218,7 +230,10 @@ export function calculateDaysUntilDecay(
 
   // Calculate failure acceleration
   const effectiveFailures = Math.max(0, failureCount);
-  const failureAcceleration = Math.pow(profile.failureMultiplier, effectiveFailures);
+  const failureAcceleration = Math.pow(
+    profile.failureMultiplier,
+    effectiveFailures,
+  );
 
   // Adjust current score for failure acceleration
   const effectiveCurrentScore = currentScore / failureAcceleration;
@@ -233,7 +248,7 @@ export function calculateDaysUntilDecay(
   // log(target / current) = (days / halfLife) * log(0.5)
   // days = halfLife * log(target / current) / log(0.5)
   const ratio = targetScore / effectiveCurrentScore;
-  const days = profile.baseHalfLifeDays * Math.log(ratio) / Math.log(0.5);
+  const days = (profile.baseHalfLifeDays * Math.log(ratio)) / Math.log(0.5);
 
   return Math.max(0, days);
 }
@@ -247,7 +262,7 @@ export function calculateDaysUntilDecay(
  */
 const ACTIVITY_THRESHOLDS = {
   volatile: 100, // >= 100 actions/day = volatile
-  standard: 10,  // >= 10 actions/day = standard
+  standard: 10, // >= 10 actions/day = standard
   // < 10 actions/day = stable
 };
 
@@ -260,7 +275,9 @@ const ACTIVITY_THRESHOLDS = {
  * @param actionsPerDay - Average number of actions per day
  * @returns Appropriate environment profile
  */
-export function classifyEnvironmentProfile(actionsPerDay: number): EnvironmentProfile {
+export function classifyEnvironmentProfile(
+  actionsPerDay: number,
+): EnvironmentProfile {
   if (actionsPerDay >= ACTIVITY_THRESHOLDS.volatile) {
     return DEFAULT_DECAY_PROFILES.profiles.volatile;
   }
@@ -286,7 +303,7 @@ export function classifyEnvironmentProfile(actionsPerDay: number): EnvironmentPr
 export function getProfileForEntity(
   entityId: string,
   actionsPerDay: number,
-  config: DecayConfig
+  config: DecayConfig,
 ): EnvironmentProfile {
   // Check for manual override first
   const override = config.overrideByAgentId.get(entityId);
@@ -313,7 +330,9 @@ export function getProfileForEntity(
  * @param options - Configuration options
  * @returns Complete decay configuration
  */
-export function createDecayConfig(options: DecayConfigOptions = {}): DecayConfig {
+export function createDecayConfig(
+  options: DecayConfigOptions = {},
+): DecayConfig {
   return {
     autoClassification: options.autoClassification ?? true,
     overrideByAgentId: options.overrideByAgentId ?? new Map(),

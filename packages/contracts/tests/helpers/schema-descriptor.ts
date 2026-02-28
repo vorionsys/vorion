@@ -6,7 +6,7 @@
  * structure will cause snapshot tests to fail, forcing explicit review.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 export interface SchemaDescription {
   type: string;
@@ -21,147 +21,147 @@ export interface SchemaDescription {
  */
 export function describeSchema(schema: z.ZodTypeAny): SchemaDescription {
   const def = schema._def;
-  const typeName: string = def.typeName ?? 'Unknown';
+  const typeName: string = def.typeName ?? "Unknown";
 
   switch (typeName) {
-    case 'ZodString': {
+    case "ZodString": {
       const checks = (def.checks ?? []).map((c: { kind: string }) => c.kind);
-      return { type: 'string', ...(checks.length > 0 ? { checks } : {}) };
+      return { type: "string", ...(checks.length > 0 ? { checks } : {}) };
     }
-    case 'ZodNumber': {
+    case "ZodNumber": {
       const checks = (def.checks ?? []).map((c: { kind: string }) => c.kind);
-      return { type: 'number', ...(checks.length > 0 ? { checks } : {}) };
+      return { type: "number", ...(checks.length > 0 ? { checks } : {}) };
     }
-    case 'ZodBoolean':
-      return { type: 'boolean' };
-    case 'ZodBigInt':
-      return { type: 'bigint' };
-    case 'ZodDate':
-      return { type: 'date' };
-    case 'ZodUndefined':
-      return { type: 'undefined' };
-    case 'ZodNull':
-      return { type: 'null' };
-    case 'ZodAny':
-      return { type: 'any' };
-    case 'ZodUnknown':
-      return { type: 'unknown' };
-    case 'ZodNever':
-      return { type: 'never' };
-    case 'ZodVoid':
-      return { type: 'void' };
-    case 'ZodLiteral':
-      return { type: 'literal', value: def.value };
+    case "ZodBoolean":
+      return { type: "boolean" };
+    case "ZodBigInt":
+      return { type: "bigint" };
+    case "ZodDate":
+      return { type: "date" };
+    case "ZodUndefined":
+      return { type: "undefined" };
+    case "ZodNull":
+      return { type: "null" };
+    case "ZodAny":
+      return { type: "any" };
+    case "ZodUnknown":
+      return { type: "unknown" };
+    case "ZodNever":
+      return { type: "never" };
+    case "ZodVoid":
+      return { type: "void" };
+    case "ZodLiteral":
+      return { type: "literal", value: def.value };
 
-    case 'ZodEnum':
-      return { type: 'enum', values: [...def.values].sort() };
+    case "ZodEnum":
+      return { type: "enum", values: [...def.values].sort() };
 
-    case 'ZodNativeEnum':
+    case "ZodNativeEnum":
       return {
-        type: 'nativeEnum',
+        type: "nativeEnum",
         values: Object.values(def.values as Record<string, string | number>)
-          .filter((v): v is string => typeof v === 'string')
+          .filter((v): v is string => typeof v === "string")
           .sort(),
       };
 
-    case 'ZodObject': {
+    case "ZodObject": {
       const shape: Record<string, SchemaDescription> = {};
       const rawShape = def.shape();
       for (const key of Object.keys(rawShape).sort()) {
         shape[key] = describeSchema(rawShape[key]);
       }
-      return { type: 'object', shape };
+      return { type: "object", shape };
     }
 
-    case 'ZodArray':
-      return { type: 'array', element: describeSchema(def.type) };
+    case "ZodArray":
+      return { type: "array", element: describeSchema(def.type) };
 
-    case 'ZodTuple': {
+    case "ZodTuple": {
       const items = (def.items ?? []).map((item: z.ZodTypeAny) =>
         describeSchema(item),
       );
-      return { type: 'tuple', items };
+      return { type: "tuple", items };
     }
 
-    case 'ZodUnion': {
+    case "ZodUnion": {
       const options = (def.options ?? []).map((opt: z.ZodTypeAny) =>
         describeSchema(opt),
       );
-      return { type: 'union', options };
+      return { type: "union", options };
     }
 
-    case 'ZodDiscriminatedUnion': {
+    case "ZodDiscriminatedUnion": {
       const options = [...(def.options?.values?.() ?? def.options ?? [])].map(
         (opt: z.ZodTypeAny) => describeSchema(opt),
       );
       return {
-        type: 'discriminatedUnion',
+        type: "discriminatedUnion",
         discriminator: def.discriminator,
         options,
       };
     }
 
-    case 'ZodIntersection':
+    case "ZodIntersection":
       return {
-        type: 'intersection',
+        type: "intersection",
         left: describeSchema(def.left),
         right: describeSchema(def.right),
       };
 
-    case 'ZodRecord':
+    case "ZodRecord":
       return {
-        type: 'record',
+        type: "record",
         keyType: describeSchema(def.keyType),
         valueType: describeSchema(def.valueType),
       };
 
-    case 'ZodMap':
+    case "ZodMap":
       return {
-        type: 'map',
+        type: "map",
         keyType: describeSchema(def.keyType),
         valueType: describeSchema(def.valueType),
       };
 
-    case 'ZodSet':
-      return { type: 'set', valueType: describeSchema(def.valueType) };
+    case "ZodSet":
+      return { type: "set", valueType: describeSchema(def.valueType) };
 
-    case 'ZodOptional':
-      return { type: 'optional', inner: describeSchema(def.innerType) };
+    case "ZodOptional":
+      return { type: "optional", inner: describeSchema(def.innerType) };
 
-    case 'ZodNullable':
-      return { type: 'nullable', inner: describeSchema(def.innerType) };
+    case "ZodNullable":
+      return { type: "nullable", inner: describeSchema(def.innerType) };
 
-    case 'ZodDefault':
-      return { type: 'default', inner: describeSchema(def.innerType) };
+    case "ZodDefault":
+      return { type: "default", inner: describeSchema(def.innerType) };
 
-    case 'ZodCatch':
-      return { type: 'catch', inner: describeSchema(def.innerType) };
+    case "ZodCatch":
+      return { type: "catch", inner: describeSchema(def.innerType) };
 
-    case 'ZodBranded':
-      return { type: 'branded', inner: describeSchema(def.type) };
+    case "ZodBranded":
+      return { type: "branded", inner: describeSchema(def.type) };
 
-    case 'ZodPipeline':
+    case "ZodPipeline":
       return {
-        type: 'pipeline',
+        type: "pipeline",
         in: describeSchema(def.in),
         out: describeSchema(def.out),
       };
 
-    case 'ZodLazy':
-      return { type: 'lazy' };
+    case "ZodLazy":
+      return { type: "lazy" };
 
-    case 'ZodEffects':
+    case "ZodEffects":
       return {
-        type: 'effects',
-        effect: def.effect?.type ?? 'unknown',
+        type: "effects",
+        effect: def.effect?.type ?? "unknown",
         inner: describeSchema(def.schema),
       };
 
-    case 'ZodPromise':
-      return { type: 'promise', inner: describeSchema(def.type) };
+    case "ZodPromise":
+      return { type: "promise", inner: describeSchema(def.type) };
 
-    case 'ZodFunction':
-      return { type: 'function' };
+    case "ZodFunction":
+      return { type: "function" };
 
     default:
       return { type: typeName };

@@ -12,12 +12,19 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { Intent, ID, IntentStatus } from '../common/types.js';
+import { createLogger } from "../common/logger.js";
+import type { Intent, ID, IntentStatus } from "../common/types.js";
+import type {
+  IIntentService,
+  IntentSubmission,
+  SubmitOptions,
+} from "./types.js";
+
+export * from "./types.js";
 
 /* eslint-disable no-redeclare */
 
-const logger = createLogger({ component: 'intent' });
+const logger = createLogger({ component: "intent" });
 
 // =============================================================================
 // CANONICAL FIELD ENUMS (aligned with @vorion/contracts)
@@ -27,12 +34,12 @@ const logger = createLogger({ component: 'intent' });
  * Action types for categorizing intents
  */
 export const ActionType = {
-  READ: 'read',
-  WRITE: 'write',
-  DELETE: 'delete',
-  EXECUTE: 'execute',
-  COMMUNICATE: 'communicate',
-  TRANSFER: 'transfer',
+  READ: "read",
+  WRITE: "write",
+  DELETE: "delete",
+  EXECUTE: "execute",
+  COMMUNICATE: "communicate",
+  TRANSFER: "transfer",
 } as const;
 
 export type ActionType = (typeof ActionType)[keyof typeof ActionType];
@@ -41,91 +48,27 @@ export type ActionType = (typeof ActionType)[keyof typeof ActionType];
  * Data sensitivity levels
  */
 export const DataSensitivity = {
-  PUBLIC: 'PUBLIC',
-  INTERNAL: 'INTERNAL',
-  CONFIDENTIAL: 'CONFIDENTIAL',
-  RESTRICTED: 'RESTRICTED',
+  PUBLIC: "PUBLIC",
+  INTERNAL: "INTERNAL",
+  CONFIDENTIAL: "CONFIDENTIAL",
+  RESTRICTED: "RESTRICTED",
 } as const;
 
-export type DataSensitivity = (typeof DataSensitivity)[keyof typeof DataSensitivity];
+export type DataSensitivity =
+  (typeof DataSensitivity)[keyof typeof DataSensitivity];
 
 /**
  * Action reversibility classification
  */
 export const Reversibility = {
-  REVERSIBLE: 'REVERSIBLE',
-  PARTIALLY_REVERSIBLE: 'PARTIALLY_REVERSIBLE',
-  IRREVERSIBLE: 'IRREVERSIBLE',
+  REVERSIBLE: "REVERSIBLE",
+  PARTIALLY_REVERSIBLE: "PARTIALLY_REVERSIBLE",
+  IRREVERSIBLE: "IRREVERSIBLE",
 } as const;
 
 export type Reversibility = (typeof Reversibility)[keyof typeof Reversibility];
 
 /* eslint-enable no-redeclare */
-
-// =============================================================================
-// INTENT SUBMISSION TYPES
-// =============================================================================
-
-/**
- * Intent submission request with canonical fields
- */
-export interface IntentSubmission {
-  /** Agent/entity making the request */
-  entityId: ID;
-  /** Human-readable goal/action description */
-  goal: string;
-  /** Additional context for evaluation */
-  context: Record<string, unknown>;
-  /** Optional metadata */
-  metadata?: Record<string, unknown>;
-
-  // Canonical fields (optional for backwards compatibility)
-  /** Correlation ID for distributed tracing */
-  correlationId?: string;
-  /** Action type category */
-  actionType?: ActionType;
-  /** Resources this intent accesses/modifies */
-  resourceScope?: string[];
-  /** Data sensitivity level */
-  dataSensitivity?: DataSensitivity;
-  /** Whether action can be undone */
-  reversibility?: Reversibility;
-  /** Intent expiration in milliseconds from now */
-  expiresIn?: number;
-  /** Source system identifier */
-  source?: string;
-}
-
-/**
- * Options for submitting an intent
- */
-export interface SubmitOptions {
-  /** Tenant identifier */
-  tenantId: ID;
-  /** Trust snapshot at submission time */
-  trustSnapshot?: Record<string, unknown> | null;
-  /** Current trust level of the entity */
-  trustLevel?: number;
-}
-
-// =============================================================================
-// INTENT SERVICE INTERFACE
-// =============================================================================
-
-/**
- * Interface for intent service implementations
- *
- * Implement this interface to create custom intent handling:
- * - API client for remote Vorion service
- * - Custom persistence layer
- * - Testing mocks with specific behaviors
- */
-export interface IIntentService {
-  submit(submission: IntentSubmission, options: SubmitOptions): Promise<Intent>;
-  get(id: ID, tenantId: ID): Promise<Intent | undefined>;
-  updateStatus(id: ID, tenantId: ID, status: IntentStatus): Promise<Intent | undefined>;
-  listByEntity(entityId: ID, tenantId: ID): Promise<Intent[]>;
-}
 
 // =============================================================================
 // IN-MEMORY MOCK IMPLEMENTATION
@@ -158,7 +101,10 @@ export class MockIntentService implements IIntentService {
   /**
    * Submit a new intent (in-memory)
    */
-  async submit(submission: IntentSubmission, options: SubmitOptions): Promise<Intent> {
+  async submit(
+    submission: IntentSubmission,
+    options: SubmitOptions,
+  ): Promise<Intent> {
     const now = new Date().toISOString();
     const correlationId = submission.correlationId ?? crypto.randomUUID();
 
@@ -169,7 +115,7 @@ export class MockIntentService implements IIntentService {
       goal: submission.goal,
       context: submission.context,
       metadata: submission.metadata ?? {},
-      status: 'pending',
+      status: "pending",
       createdAt: now,
       updatedAt: now,
       trustSnapshot: options.trustSnapshot ?? null,
@@ -190,7 +136,7 @@ export class MockIntentService implements IIntentService {
     this.intents.set(intent.id, intent);
     logger.info(
       { intentId: intent.id, goal: intent.goal, correlationId },
-      'Intent submitted (mock)'
+      "Intent submitted (mock)",
     );
 
     return intent;
@@ -210,13 +156,17 @@ export class MockIntentService implements IIntentService {
   /**
    * Update intent status
    */
-  async updateStatus(id: ID, tenantId: ID, status: IntentStatus): Promise<Intent | undefined> {
+  async updateStatus(
+    id: ID,
+    tenantId: ID,
+    status: IntentStatus,
+  ): Promise<Intent | undefined> {
     const intent = this.intents.get(id);
     if (!intent || intent.tenantId !== tenantId) return undefined;
 
     intent.status = status;
     intent.updatedAt = new Date().toISOString();
-    logger.info({ intentId: id, status }, 'Intent status updated (mock)');
+    logger.info({ intentId: id, status }, "Intent status updated (mock)");
 
     return intent;
   }
@@ -226,7 +176,7 @@ export class MockIntentService implements IIntentService {
    */
   async listByEntity(entityId: ID, tenantId: ID): Promise<Intent[]> {
     return Array.from(this.intents.values()).filter(
-      (i) => i.entityId === entityId && i.tenantId === tenantId
+      (i) => i.entityId === entityId && i.tenantId === tenantId,
     );
   }
 
@@ -278,7 +228,7 @@ export function setIntentService(service: IIntentService): void {
 export function getIntentService(): IIntentService {
   if (!intentService) {
     throw new Error(
-      'No intent service backend configured. Pass a real IntentService implementation or see docs for setup.'
+      "No intent service backend configured. Pass a real IntentService implementation or see docs for setup.",
     );
   }
   return intentService;
@@ -292,7 +242,7 @@ export function getIntentService(): IIntentService {
 export function createIntentService(service?: IIntentService): IIntentService {
   if (!service) {
     throw new Error(
-      'No intent service backend configured. Pass a real IntentService implementation or see docs for setup.'
+      "No intent service backend configured. Pass a real IntentService implementation or see docs for setup.",
     );
   }
   return service;
@@ -309,5 +259,5 @@ export function createMockIntentService(): MockIntentService {
 // PRODUCTION IMPLEMENTATION
 // =============================================================================
 
-export { PersistentIntentService } from './persistent-intent-service.js';
-export type { PersistentIntentServiceConfig } from './persistent-intent-service.js';
+export { PersistentIntentService } from "./persistent-intent-service.js";
+export type { PersistentIntentServiceConfig } from "./persistent-intent-service.js";

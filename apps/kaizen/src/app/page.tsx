@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Navbar, HeroSection, NexusChat } from '@/components/nexus';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Layers, FileCode, Cpu, Shield, Zap, GraduationCap, Award, Map, ArrowRight, Sparkles, Target, Users } from 'lucide-react';
+import { BookOpen, FileCode, Cpu, Shield, Zap, GraduationCap, Award, Map, ArrowRight, Sparkles, Target, Users } from 'lucide-react';
 import Link from 'next/link';
 
 // Learning journey steps for beginners

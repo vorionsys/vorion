@@ -13,7 +13,7 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
+import { createLogger } from "../common/logger.js";
 import type {
   AuditKeyPair,
   PublicKeyInfo,
@@ -21,9 +21,9 @@ import type {
   HSMProvider,
   KeyRotationRequest,
   KeyRotationResult,
-} from './audit-types.js';
+} from "./audit-types.js";
 
-const logger = createLogger({ component: 'key-manager' });
+const logger = createLogger({ component: "key-manager" });
 
 /**
  * Generate a new Ed25519 key pair using jose library
@@ -31,10 +31,10 @@ const logger = createLogger({ component: 'key-manager' });
  */
 export async function generateKeyPair(keyId?: string): Promise<AuditKeyPair> {
   // Dynamic import of jose to allow this module to work standalone
-  const jose = await import('jose');
+  const jose = await import("jose");
 
-  const { publicKey, privateKey } = await jose.generateKeyPair('EdDSA', {
-    crv: 'Ed25519',
+  const { publicKey, privateKey } = await jose.generateKeyPair("EdDSA", {
+    crv: "Ed25519",
     extractable: true, // Required to export keys as JWK
   });
 
@@ -47,9 +47,9 @@ export async function generateKeyPair(keyId?: string): Promise<AuditKeyPair> {
 
   return {
     keyId: generatedKeyId,
-    publicKey: Buffer.from(JSON.stringify(publicJwk)).toString('base64'),
-    privateKey: Buffer.from(JSON.stringify(privateJwk)).toString('base64'),
-    algorithm: 'Ed25519',
+    publicKey: Buffer.from(JSON.stringify(publicJwk)).toString("base64"),
+    privateKey: Buffer.from(JSON.stringify(privateJwk)).toString("base64"),
+    algorithm: "Ed25519",
     createdAt: now,
     rotationSequence: 0,
     active: true,
@@ -79,7 +79,7 @@ export class KeyManager {
   private config: KeyStorageConfig;
   private hsmProvider: HSMProvider | null = null;
 
-  constructor(config: KeyStorageConfig = { type: 'memory' }) {
+  constructor(config: KeyStorageConfig = { type: "memory" }) {
     this.config = config;
     if (config.hsmProvider) {
       this.hsmProvider = config.hsmProvider;
@@ -91,20 +91,20 @@ export class KeyManager {
    */
   async initialize(): Promise<void> {
     switch (this.config.type) {
-      case 'memory':
+      case "memory":
         // Nothing to load for memory storage
-        logger.info('Key manager initialized with memory storage');
+        logger.info("Key manager initialized with memory storage");
         break;
 
-      case 'file':
+      case "file":
         await this.loadFromFile();
         break;
 
-      case 'env':
+      case "env":
         await this.loadFromEnv();
         break;
 
-      case 'hsm':
+      case "hsm":
         await this.initializeHSM();
         break;
 
@@ -117,7 +117,7 @@ export class KeyManager {
    * Generate and store a new key pair
    */
   async generateKey(keyId?: string): Promise<AuditKeyPair> {
-    if (this.config.type === 'hsm' && this.hsmProvider) {
+    if (this.config.type === "hsm" && this.hsmProvider) {
       return this.generateKeyInHSM(keyId);
     }
 
@@ -128,7 +128,7 @@ export class KeyManager {
       this.activeKeyId = keyPair.keyId;
     }
 
-    logger.info({ keyId: keyPair.keyId }, 'Generated new key pair');
+    logger.info({ keyId: keyPair.keyId }, "Generated new key pair");
     return keyPair;
   }
 
@@ -139,21 +139,21 @@ export class KeyManager {
     this.keys.set(keyPair.keyId, keyPair);
 
     switch (this.config.type) {
-      case 'file':
+      case "file":
         await this.saveToFile();
         break;
       // env storage is read-only
       // hsm storage is handled separately
     }
 
-    logger.debug({ keyId: keyPair.keyId }, 'Key stored');
+    logger.debug({ keyId: keyPair.keyId }, "Key stored");
   }
 
   /**
    * Get a key pair by ID
    */
   async getKey(keyId: string): Promise<AuditKeyPair | null> {
-    if (this.config.type === 'hsm' && this.hsmProvider) {
+    if (this.config.type === "hsm" && this.hsmProvider) {
       // HSM keys don't expose private keys, so we return null
       // Use sign/verify methods directly with HSM
       return null;
@@ -166,7 +166,7 @@ export class KeyManager {
    * Get public key info by ID
    */
   async getPublicKey(keyId: string): Promise<PublicKeyInfo | null> {
-    if (this.config.type === 'hsm' && this.hsmProvider) {
+    if (this.config.type === "hsm" && this.hsmProvider) {
       return this.hsmProvider.getPublicKey(keyId);
     }
 
@@ -199,7 +199,7 @@ export class KeyManager {
       throw new Error(`Key not found: ${keyId}`);
     }
     this.activeKeyId = keyId;
-    logger.info({ keyId }, 'Active key changed');
+    logger.info({ keyId }, "Active key changed");
   }
 
   /**
@@ -211,11 +211,11 @@ export class KeyManager {
       return {
         success: false,
         chainId: request.chainId,
-        previousKeyId: '',
-        newKeyId: '',
+        previousKeyId: "",
+        newKeyId: "",
         rotationSequence: 0,
         rotatedAt: new Date().toISOString(),
-        issues: ['No active key to rotate'],
+        issues: ["No active key to rotate"],
       };
     }
 
@@ -252,7 +252,7 @@ export class KeyManager {
         rotationSequence: newKeyPair.rotationSequence,
         reason: request.reason,
       },
-      'Key rotated'
+      "Key rotated",
     );
 
     return {
@@ -269,7 +269,7 @@ export class KeyManager {
    * List all key IDs
    */
   async listKeys(): Promise<string[]> {
-    if (this.config.type === 'hsm' && this.hsmProvider) {
+    if (this.config.type === "hsm" && this.hsmProvider) {
       return this.hsmProvider.listKeys();
     }
     return Array.from(this.keys.keys());
@@ -296,7 +296,7 @@ export class KeyManager {
    * Delete a key
    */
   async deleteKey(keyId: string): Promise<boolean> {
-    if (this.config.type === 'hsm' && this.hsmProvider) {
+    if (this.config.type === "hsm" && this.hsmProvider) {
       return this.hsmProvider.deleteKey(keyId);
     }
 
@@ -305,11 +305,11 @@ export class KeyManager {
       this.activeKeyId = null;
     }
 
-    if (this.config.type === 'file') {
+    if (this.config.type === "file") {
       await this.saveToFile();
     }
 
-    logger.info({ keyId, deleted }, 'Key deletion attempted');
+    logger.info({ keyId, deleted }, "Key deletion attempted");
     return deleted;
   }
 
@@ -317,7 +317,7 @@ export class KeyManager {
    * Check if a key exists
    */
   async hasKey(keyId: string): Promise<boolean> {
-    if (this.config.type === 'hsm' && this.hsmProvider) {
+    if (this.config.type === "hsm" && this.hsmProvider) {
       const keys = await this.hsmProvider.listKeys();
       return keys.includes(keyId);
     }
@@ -330,10 +330,10 @@ export class KeyManager {
   async sign(data: Uint8Array, keyId?: string): Promise<Uint8Array> {
     const targetKeyId = keyId ?? this.activeKeyId;
     if (!targetKeyId) {
-      throw new Error('No key available for signing');
+      throw new Error("No key available for signing");
     }
 
-    if (this.config.type === 'hsm' && this.hsmProvider) {
+    if (this.config.type === "hsm" && this.hsmProvider) {
       return this.hsmProvider.sign(targetKeyId, data);
     }
 
@@ -342,27 +342,33 @@ export class KeyManager {
       throw new Error(`Key not found: ${targetKeyId}`);
     }
 
-    const jose = await import('jose');
-    const privateJwk = JSON.parse(Buffer.from(keyPair.privateKey, 'base64').toString());
-    const privateKey = await jose.importJWK(privateJwk, 'EdDSA');
+    const jose = await import("jose");
+    const privateJwk = JSON.parse(
+      Buffer.from(keyPair.privateKey, "base64").toString(),
+    );
+    const privateKey = await jose.importJWK(privateJwk, "EdDSA");
 
     // Create a compact JWS
     const jws = await new jose.CompactSign(data)
-      .setProtectedHeader({ alg: 'EdDSA' })
+      .setProtectedHeader({ alg: "EdDSA" })
       .sign(privateKey);
 
     // Extract just the signature part
-    const parts = jws.split('.');
+    const parts = jws.split(".");
     const signature = parts[2];
 
-    return Buffer.from(signature!, 'base64url');
+    return Buffer.from(signature!, "base64url");
   }
 
   /**
    * Verify a signature
    */
-  async verify(data: Uint8Array, signature: Uint8Array, keyId: string): Promise<boolean> {
-    if (this.config.type === 'hsm' && this.hsmProvider) {
+  async verify(
+    data: Uint8Array,
+    signature: Uint8Array,
+    keyId: string,
+  ): Promise<boolean> {
+    if (this.config.type === "hsm" && this.hsmProvider) {
       return this.hsmProvider.verify(keyId, data, signature);
     }
 
@@ -372,14 +378,18 @@ export class KeyManager {
     }
 
     try {
-      const jose = await import('jose');
-      const publicJwk = JSON.parse(Buffer.from(keyPair.publicKey, 'base64').toString());
-      const publicKey = await jose.importJWK(publicJwk, 'EdDSA');
+      const jose = await import("jose");
+      const publicJwk = JSON.parse(
+        Buffer.from(keyPair.publicKey, "base64").toString(),
+      );
+      const publicKey = await jose.importJWK(publicJwk, "EdDSA");
 
       // Reconstruct the JWS for verification
-      const header = Buffer.from(JSON.stringify({ alg: 'EdDSA' })).toString('base64url');
-      const payload = Buffer.from(data).toString('base64url');
-      const sig = Buffer.from(signature).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: "EdDSA" })).toString(
+        "base64url",
+      );
+      const payload = Buffer.from(data).toString("base64url");
+      const sig = Buffer.from(signature).toString("base64url");
       const jws = `${header}.${payload}.${sig}`;
 
       await jose.compactVerify(jws, publicKey);
@@ -400,26 +410,32 @@ export class KeyManager {
    * Check if using HSM
    */
   isUsingHSM(): boolean {
-    return this.config.type === 'hsm' && this.hsmProvider !== null;
+    return this.config.type === "hsm" && this.hsmProvider !== null;
   }
 
   // Private methods for file storage
 
   private async loadFromFile(): Promise<void> {
     if (!this.config.filePath) {
-      throw new Error('File path not configured');
+      throw new Error("File path not configured");
     }
 
     try {
-      const fs = await import('node:fs/promises');
-      const exists = await fs.access(this.config.filePath).then(() => true).catch(() => false);
+      const fs = await import("node:fs/promises");
+      const exists = await fs
+        .access(this.config.filePath)
+        .then(() => true)
+        .catch(() => false);
 
       if (!exists) {
-        logger.info({ filePath: this.config.filePath }, 'Key file does not exist, starting fresh');
+        logger.info(
+          { filePath: this.config.filePath },
+          "Key file does not exist, starting fresh",
+        );
         return;
       }
 
-      let content = await fs.readFile(this.config.filePath, 'utf-8');
+      let content = await fs.readFile(this.config.filePath, "utf-8");
 
       // Decrypt if encryption is enabled
       if (this.config.encryptAtRest && this.config.encryptionKey) {
@@ -438,22 +454,25 @@ export class KeyManager {
 
       logger.info(
         { filePath: this.config.filePath, keyCount: this.keys.size },
-        'Keys loaded from file'
+        "Keys loaded from file",
       );
     } catch (error) {
-      logger.error({ error, filePath: this.config.filePath }, 'Failed to load keys from file');
+      logger.error(
+        { error, filePath: this.config.filePath },
+        "Failed to load keys from file",
+      );
       throw error;
     }
   }
 
   private async saveToFile(): Promise<void> {
     if (!this.config.filePath) {
-      throw new Error('File path not configured');
+      throw new Error("File path not configured");
     }
 
     try {
-      const fs = await import('node:fs/promises');
-      const path = await import('node:path');
+      const fs = await import("node:fs/promises");
+      const path = await import("node:path");
 
       const data = {
         activeKeyId: this.activeKeyId,
@@ -471,29 +490,32 @@ export class KeyManager {
       const dir = path.dirname(this.config.filePath);
       await fs.mkdir(dir, { recursive: true });
 
-      await fs.writeFile(this.config.filePath, content, 'utf-8');
+      await fs.writeFile(this.config.filePath, content, "utf-8");
 
-      logger.debug({ filePath: this.config.filePath }, 'Keys saved to file');
+      logger.debug({ filePath: this.config.filePath }, "Keys saved to file");
     } catch (error) {
-      logger.error({ error, filePath: this.config.filePath }, 'Failed to save keys to file');
+      logger.error(
+        { error, filePath: this.config.filePath },
+        "Failed to save keys to file",
+      );
       throw error;
     }
   }
 
   private async loadFromEnv(): Promise<void> {
-    const prefix = this.config.envPrefix ?? 'AUDIT_KEY';
+    const prefix = this.config.envPrefix ?? "AUDIT_KEY";
 
     // Look for AUDIT_KEY_PRIVATE and AUDIT_KEY_PUBLIC
     const privateKeyEnv = process.env[`${prefix}_PRIVATE`];
     const publicKeyEnv = process.env[`${prefix}_PUBLIC`];
-    const keyIdEnv = process.env[`${prefix}_ID`] ?? 'env-key';
+    const keyIdEnv = process.env[`${prefix}_ID`] ?? "env-key";
 
     if (privateKeyEnv && publicKeyEnv) {
       const keyPair: AuditKeyPair = {
         keyId: keyIdEnv,
         publicKey: publicKeyEnv,
         privateKey: privateKeyEnv,
-        algorithm: 'Ed25519',
+        algorithm: "Ed25519",
         createdAt: new Date().toISOString(),
         rotationSequence: 0,
         active: true,
@@ -502,20 +524,20 @@ export class KeyManager {
       this.keys.set(keyPair.keyId, keyPair);
       this.activeKeyId = keyPair.keyId;
 
-      logger.info({ keyId: keyPair.keyId }, 'Key loaded from environment');
+      logger.info({ keyId: keyPair.keyId }, "Key loaded from environment");
     } else {
-      logger.warn({ prefix }, 'No keys found in environment variables');
+      logger.warn({ prefix }, "No keys found in environment variables");
     }
   }
 
   private async initializeHSM(): Promise<void> {
     if (!this.hsmProvider) {
-      throw new Error('HSM provider not configured');
+      throw new Error("HSM provider not configured");
     }
 
     const connected = await this.hsmProvider.isConnected();
     if (!connected) {
-      throw new Error('HSM is not connected');
+      throw new Error("HSM is not connected");
     }
 
     const keys = await this.hsmProvider.listKeys();
@@ -525,24 +547,25 @@ export class KeyManager {
 
     logger.info(
       { provider: this.hsmProvider.name, keyCount: keys.length },
-      'HSM initialized'
+      "HSM initialized",
     );
   }
 
   private async generateKeyInHSM(keyId?: string): Promise<AuditKeyPair> {
     if (!this.hsmProvider) {
-      throw new Error('HSM provider not configured');
+      throw new Error("HSM provider not configured");
     }
 
     const generatedKeyId = keyId ?? `hsm-key-${crypto.randomUUID()}`;
-    const publicKeyInfo = await this.hsmProvider.generateKeyPair(generatedKeyId);
+    const publicKeyInfo =
+      await this.hsmProvider.generateKeyPair(generatedKeyId);
 
     // For HSM, we don't have direct access to private key
     const keyPair: AuditKeyPair = {
       keyId: publicKeyInfo.keyId,
       publicKey: publicKeyInfo.publicKey,
-      privateKey: '', // HSM-managed, not exposed
-      algorithm: 'Ed25519',
+      privateKey: "", // HSM-managed, not exposed
+      algorithm: "Ed25519",
       createdAt: publicKeyInfo.createdAt,
       expiresAt: publicKeyInfo.expiresAt,
       rotationSequence: publicKeyInfo.rotationSequence,
@@ -553,32 +576,32 @@ export class KeyManager {
       this.activeKeyId = keyPair.keyId;
     }
 
-    logger.info({ keyId: keyPair.keyId }, 'Generated key in HSM');
+    logger.info({ keyId: keyPair.keyId }, "Generated key in HSM");
     return keyPair;
   }
 
   // Simple encryption/decryption for file storage (uses AES-256-GCM)
   private async encrypt(data: string): Promise<string> {
     if (!this.config.encryptionKey) {
-      throw new Error('Encryption key not configured');
+      throw new Error("Encryption key not configured");
     }
 
     // Derive a key from the encryption key
     const keyMaterial = new TextEncoder().encode(this.config.encryptionKey);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', keyMaterial);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", keyMaterial);
     const key = await crypto.subtle.importKey(
-      'raw',
+      "raw",
       hashBuffer,
-      { name: 'AES-GCM' },
+      { name: "AES-GCM" },
       false,
-      ['encrypt']
+      ["encrypt"],
     );
 
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const encrypted = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv },
+      { name: "AES-GCM", iv },
       key,
-      new TextEncoder().encode(data)
+      new TextEncoder().encode(data),
     );
 
     // Combine IV and ciphertext
@@ -586,33 +609,33 @@ export class KeyManager {
     combined.set(iv);
     combined.set(new Uint8Array(encrypted), iv.length);
 
-    return Buffer.from(combined).toString('base64');
+    return Buffer.from(combined).toString("base64");
   }
 
   private async decrypt(data: string): Promise<string> {
     if (!this.config.encryptionKey) {
-      throw new Error('Encryption key not configured');
+      throw new Error("Encryption key not configured");
     }
 
     // Derive a key from the encryption key
     const keyMaterial = new TextEncoder().encode(this.config.encryptionKey);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', keyMaterial);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", keyMaterial);
     const key = await crypto.subtle.importKey(
-      'raw',
+      "raw",
       hashBuffer,
-      { name: 'AES-GCM' },
+      { name: "AES-GCM" },
       false,
-      ['decrypt']
+      ["decrypt"],
     );
 
-    const combined = Buffer.from(data, 'base64');
+    const combined = Buffer.from(data, "base64");
     const iv = combined.slice(0, 12);
     const ciphertext = combined.slice(12);
 
     const decrypted = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv },
+      { name: "AES-GCM", iv },
       key,
-      ciphertext
+      ciphertext,
     );
 
     return new TextDecoder().decode(decrypted);
@@ -633,7 +656,7 @@ export function createMockHSMProvider(): HSMProvider {
   const keys = new Map<string, { public: string; private: string }>();
 
   return {
-    name: 'MockHSM',
+    name: "MockHSM",
 
     async isConnected(): Promise<boolean> {
       return true;
@@ -654,32 +677,42 @@ export function createMockHSMProvider(): HSMProvider {
         throw new Error(`Key not found in HSM: ${keyId}`);
       }
 
-      const jose = await import('jose');
-      const privateJwk = JSON.parse(Buffer.from(keyData.private, 'base64').toString());
-      const privateKey = await jose.importJWK(privateJwk, 'EdDSA');
+      const jose = await import("jose");
+      const privateJwk = JSON.parse(
+        Buffer.from(keyData.private, "base64").toString(),
+      );
+      const privateKey = await jose.importJWK(privateJwk, "EdDSA");
 
       const jws = await new jose.CompactSign(data)
-        .setProtectedHeader({ alg: 'EdDSA' })
+        .setProtectedHeader({ alg: "EdDSA" })
         .sign(privateKey);
 
-      const parts = jws.split('.');
-      return Buffer.from(parts[2]!, 'base64url');
+      const parts = jws.split(".");
+      return Buffer.from(parts[2]!, "base64url");
     },
 
-    async verify(keyId: string, data: Uint8Array, signature: Uint8Array): Promise<boolean> {
+    async verify(
+      keyId: string,
+      data: Uint8Array,
+      signature: Uint8Array,
+    ): Promise<boolean> {
       const keyData = keys.get(keyId);
       if (!keyData) {
         throw new Error(`Key not found in HSM: ${keyId}`);
       }
 
       try {
-        const jose = await import('jose');
-        const publicJwk = JSON.parse(Buffer.from(keyData.public, 'base64').toString());
-        const publicKey = await jose.importJWK(publicJwk, 'EdDSA');
+        const jose = await import("jose");
+        const publicJwk = JSON.parse(
+          Buffer.from(keyData.public, "base64").toString(),
+        );
+        const publicKey = await jose.importJWK(publicJwk, "EdDSA");
 
-        const header = Buffer.from(JSON.stringify({ alg: 'EdDSA' })).toString('base64url');
-        const payload = Buffer.from(data).toString('base64url');
-        const sig = Buffer.from(signature).toString('base64url');
+        const header = Buffer.from(JSON.stringify({ alg: "EdDSA" })).toString(
+          "base64url",
+        );
+        const payload = Buffer.from(data).toString("base64url");
+        const sig = Buffer.from(signature).toString("base64url");
         const jws = `${header}.${payload}.${sig}`;
 
         await jose.compactVerify(jws, publicKey);
@@ -696,7 +729,7 @@ export function createMockHSMProvider(): HSMProvider {
       return {
         keyId,
         publicKey: keyData.public,
-        algorithm: 'Ed25519',
+        algorithm: "Ed25519",
         createdAt: new Date().toISOString(),
         rotationSequence: 0,
       };

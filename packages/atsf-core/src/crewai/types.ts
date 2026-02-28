@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import type { TrustLevel } from '../common/types.js';
+import type { TrustLevel } from "../common/types.js";
 
 // =============================================================================
 // CREW CONFIGURATION
@@ -69,7 +69,7 @@ export interface CrewConfig {
 /**
  * Crew execution process type
  */
-export type CrewProcess = 'sequential' | 'hierarchical';
+export type CrewProcess = "sequential" | "hierarchical";
 
 // =============================================================================
 // TASK TYPES
@@ -99,15 +99,15 @@ export interface CrewTaskConfig {
  * CrewAI callback event types
  */
 export type CrewCallbackEvent =
-  | 'task_start'
-  | 'task_end'
-  | 'task_error'
-  | 'delegation_start'
-  | 'delegation_end'
-  | 'delegation_error'
-  | 'crew_start'
-  | 'crew_end'
-  | 'crew_error';
+  | "task_start"
+  | "task_end"
+  | "task_error"
+  | "delegation_start"
+  | "delegation_end"
+  | "delegation_error"
+  | "crew_start"
+  | "crew_end"
+  | "crew_error";
 
 /**
  * Trust signal source for crew events

@@ -9,35 +9,35 @@
  * - Load balancing
  */
 
-import { createGateway } from '@vorionsys/ai-gateway'
-import type { CouncilState, SelectedAgent } from '../types/index.js'
+import { createGateway } from "@vorionsys/ai-gateway";
+import type { CouncilState, SelectedAgent } from "../types/index.js";
 
 export class RoutingAgent {
-  private gateway = createGateway()
+  private gateway = createGateway();
 
   async route(state: CouncilState): Promise<CouncilState> {
-    console.log('[ROUTING] Selecting agents for execution...')
+    console.log("[ROUTING] Selecting agents for execution...");
 
-    const selectedAgents: SelectedAgent[] = []
+    const selectedAgents: SelectedAgent[] = [];
 
     // Simple routing based on plan
     for (const step of state.plan?.steps || []) {
-      if (step.assignTo === 'advisor') {
+      if (step.assignTo === "advisor") {
         selectedAgents.push({
-          agentId: 'advisor_general',
-          agentType: 'advisor',
-          agentName: 'Advisory Council',
-          role: 'Strategic Advisor',
-          reason: `Step requires strategic advice: ${step.description}`
-        })
-      } else if (step.assignTo === 'workforce') {
+          agentId: "advisor_general",
+          agentType: "advisor",
+          agentName: "Advisory Council",
+          role: "Strategic Advisor",
+          reason: `Step requires strategic advice: ${step.description}`,
+        });
+      } else if (step.assignTo === "workforce") {
         selectedAgents.push({
-          agentId: 'workforce_general',
-          agentType: 'team',
-          agentName: 'General Workforce',
-          role: 'Task Executor',
-          reason: `Step requires execution: ${step.description}`
-        })
+          agentId: "workforce_general",
+          agentType: "team",
+          agentName: "General Workforce",
+          role: "Task Executor",
+          reason: `Step requires execution: ${step.description}`,
+        });
       }
     }
 
@@ -45,28 +45,28 @@ export class RoutingAgent {
       ...state,
       routing: {
         selectedAgents,
-        rationale: 'Agents selected based on task requirements',
-        routedBy: 'routing_1'
+        rationale: "Agents selected based on task requirements",
+        routedBy: "routing_1",
       },
-      currentStep: 'execution',
-      updatedAt: new Date()
-    }
+      currentStep: "execution",
+      updatedAt: new Date(),
+    };
   }
 
   static getConfig() {
     return {
-      id: 'routing_1',
-      name: 'Routing Agent',
-      role: 'routing_dispatch' as const,
-      description: 'Selects appropriate agents for task execution',
+      id: "routing_1",
+      name: "Routing Agent",
+      role: "routing_dispatch" as const,
+      description: "Selects appropriate agents for task execution",
       capabilities: [
-        'Agent selection',
-        'Load balancing',
-        'Cost optimization',
-        'Availability checking'
+        "Agent selection",
+        "Load balancing",
+        "Cost optimization",
+        "Availability checking",
       ],
-      model: 'general/fast',
-      systemPrompt: 'Select the best available agents for task execution.'
-    }
+      model: "general/fast",
+      systemPrompt: "Select the best available agents for task execution.",
+    };
   }
 }

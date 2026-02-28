@@ -22,15 +22,15 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
+import { createLogger } from "../common/logger.js";
 
-import type { TrustLevel, Intent } from '../common/types.js';
+import type { TrustLevel, Intent } from "../common/types.js";
 
 // ---------------------------------------------------------------------------
 // Logger
 // ---------------------------------------------------------------------------
 
-const logger = createLogger({ component: 'intent-gateway' });
+const logger = createLogger({ component: "intent-gateway" });
 
 // ---------------------------------------------------------------------------
 // Constants & Union Types
@@ -38,81 +38,117 @@ const logger = createLogger({ component: 'intent-gateway' });
 
 /** Supported jurisdictional scopes. */
 export const JURISDICTIONS = [
-  'GLOBAL', 'EU', 'US', 'APAC', 'UK', 'CA', 'AU', 'JP', 'SG', 'CH',
+  "GLOBAL",
+  "EU",
+  "US",
+  "APAC",
+  "UK",
+  "CA",
+  "AU",
+  "JP",
+  "SG",
+  "CH",
 ] as const;
 export type Jurisdiction = (typeof JURISDICTIONS)[number];
 
 /** Industry verticals that affect policy selection. */
 export const INDUSTRIES = [
-  'general', 'healthcare', 'finance', 'defense', 'government',
-  'education', 'energy',
+  "general",
+  "healthcare",
+  "finance",
+  "defense",
+  "government",
+  "education",
+  "energy",
 ] as const;
 export type Industry = (typeof INDUSTRIES)[number];
 
 /** Cryptographic suite requirements, ordered by strictness. */
 export const CRYPTO_SUITES = [
-  'standard', 'fips-140-2', 'post-quantum',
+  "standard",
+  "fips-140-2",
+  "post-quantum",
 ] as const;
 export type CryptoSuite = (typeof CRYPTO_SUITES)[number];
 
 /** Proof anchoring methods, ordered by assurance level. */
 export const PROOF_ANCHORING_METHODS = [
-  'database', 'merkle-tree', 'blockchain-l2', 'tsa-rfc3161',
+  "database",
+  "merkle-tree",
+  "blockchain-l2",
+  "tsa-rfc3161",
 ] as const;
 export type ProofAnchoringMethod = (typeof PROOF_ANCHORING_METHODS)[number];
 
 /** Consent models, ordered by strictness. */
 export const CONSENT_MODELS = [
-  'implicit', 'opt-out', 'opt-in', 'explicit-granular',
+  "implicit",
+  "opt-out",
+  "opt-in",
+  "explicit-granular",
 ] as const;
 export type ConsentModel = (typeof CONSENT_MODELS)[number];
 
 /** Escalation modes, ordered by severity. */
 export const ESCALATION_MODES = [
-  'log-only', 'flag-review', 'block-escalate', 'hard-block',
+  "log-only",
+  "flag-review",
+  "block-escalate",
+  "hard-block",
 ] as const;
 export type EscalationMode = (typeof ESCALATION_MODES)[number];
 
 /** EU AI Act risk classification tiers. */
 export const AI_ACT_CLASSIFICATIONS = [
-  'unacceptable', 'high-risk', 'limited-risk', 'minimal-risk',
+  "unacceptable",
+  "high-risk",
+  "limited-risk",
+  "minimal-risk",
 ] as const;
 export type AiActClassification = (typeof AI_ACT_CLASSIFICATIONS)[number];
 
 /** High-risk categories under Annex III of the EU AI Act. */
 export const AI_ACT_HIGH_RISK_CATEGORIES = [
-  'biometric-identification',
-  'critical-infrastructure',
-  'education-vocational',
-  'employment-worker-management',
-  'essential-services',
-  'law-enforcement',
-  'migration-asylum-border',
-  'justice-democratic',
+  "biometric-identification",
+  "critical-infrastructure",
+  "education-vocational",
+  "employment-worker-management",
+  "essential-services",
+  "law-enforcement",
+  "migration-asylum-border",
+  "justice-democratic",
 ] as const;
-export type AiActHighRiskCategory = (typeof AI_ACT_HIGH_RISK_CATEGORIES)[number];
+export type AiActHighRiskCategory =
+  (typeof AI_ACT_HIGH_RISK_CATEGORIES)[number];
 
 /** How the jurisdiction was determined. */
-export type JurisdictionSource = 'tenant-config' | 'metadata-inference' | 'default';
+export type JurisdictionSource =
+  | "tenant-config"
+  | "metadata-inference"
+  | "default";
 
 /** Enforcement strength of a policy constraint. */
-export type EnforcementLevel = 'advisory' | 'required' | 'mandatory' | 'blocking';
+export type EnforcementLevel =
+  | "advisory"
+  | "required"
+  | "mandatory"
+  | "blocking";
 
 /** Policy constraint categories. */
 export type PolicyConstraintType =
-  | 'retention'
-  | 'crypto'
-  | 'consent'
-  | 'escalation'
-  | 'data-residency'
-  | 'trust-level'
-  | 'external-services'
-  | 'proof-anchoring'
-  | 'audit-requirement'
-  | 'processing-restriction';
+  | "retention"
+  | "crypto"
+  | "consent"
+  | "escalation"
+  | "data-residency"
+  | "trust-level"
+  | "external-services"
+  | "proof-anchoring"
+  | "audit-requirement"
+  | "processing-restriction";
 
 /** Severity of a policy conflict. */
-export type ConflictSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type ConflictSeverity = "low" | "medium" | "high" | "critical";
 
 // ---------------------------------------------------------------------------
 // Core Interfaces
@@ -355,8 +391,8 @@ export interface TenantContext {
 
 export const DEFAULT_GATEWAY_CONFIG: IntentGatewayConfig = {
   enabled: true,
-  defaultJurisdiction: 'GLOBAL',
-  defaultIndustry: 'general',
+  defaultJurisdiction: "GLOBAL",
+  defaultIndustry: "general",
   regimeCacheTtlMs: 5 * 60 * 1000, // 5 minutes
   blockOnConflicts: true,
   logRegimeDecisions: true,
@@ -370,39 +406,78 @@ export const DEFAULT_GATEWAY_CONFIG: IntentGatewayConfig = {
  * Data residency zones mapped to each jurisdiction.
  */
 export const JURISDICTION_RESIDENCY_ZONES: Record<Jurisdiction, string> = {
-  GLOBAL: 'global',
-  EU: 'eu-west',
-  US: 'us-east',
-  APAC: 'ap-southeast-1',
-  UK: 'uk-south',
-  CA: 'ca-central',
-  AU: 'au-southeast',
-  JP: 'ap-northeast-1',
-  SG: 'ap-southeast-1',
-  CH: 'eu-central',
+  GLOBAL: "global",
+  EU: "eu-west",
+  US: "us-east",
+  APAC: "ap-southeast-1",
+  UK: "uk-south",
+  CA: "ca-central",
+  AU: "au-southeast",
+  JP: "ap-northeast-1",
+  SG: "ap-southeast-1",
+  CH: "eu-central",
 };
 
 /** EU/EEA member state ISO 3166-1 alpha-2 codes. */
 const EU_MEMBER_STATE_CODES = new Set([
-  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
-  'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
-  'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO',
+  "AT",
+  "BE",
+  "BG",
+  "HR",
+  "CY",
+  "CZ",
+  "DK",
+  "EE",
+  "FI",
+  "FR",
+  "DE",
+  "GR",
+  "HU",
+  "IE",
+  "IT",
+  "LV",
+  "LT",
+  "LU",
+  "MT",
+  "NL",
+  "PL",
+  "PT",
+  "RO",
+  "SK",
+  "SI",
+  "ES",
+  "SE",
+  "IS",
+  "LI",
+  "NO",
 ]);
 
 /** APAC country codes for regional mapping. */
 const APAC_COUNTRY_CODES = new Set([
-  'JP', 'KR', 'SG', 'AU', 'NZ', 'IN', 'TH', 'MY', 'ID', 'PH', 'VN', 'TW', 'HK',
+  "JP",
+  "KR",
+  "SG",
+  "AU",
+  "NZ",
+  "IN",
+  "TH",
+  "MY",
+  "ID",
+  "PH",
+  "VN",
+  "TW",
+  "HK",
 ]);
 
 /** Direct country-to-jurisdiction mapping for countries with specific regimes. */
 const COUNTRY_JURISDICTION_MAP: Record<string, Jurisdiction> = {
-  US: 'US',
-  GB: 'UK',
-  CA: 'CA',
-  AU: 'AU',
-  JP: 'JP',
-  SG: 'SG',
-  CH: 'CH',
+  US: "US",
+  GB: "UK",
+  CA: "CA",
+  AU: "AU",
+  JP: "JP",
+  SG: "SG",
+  CH: "CH",
 };
 
 /**
@@ -433,28 +508,40 @@ export class JurisdictionResolver {
     // Tier 1: Explicit tenant configuration
     const tenantResult = this.resolveFromTenantConfig(tenantId);
     if (tenantResult) {
-      logger.debug({ tenantId, source: 'tenant-config' }, 'Jurisdiction from tenant config');
+      logger.debug(
+        { tenantId, source: "tenant-config" },
+        "Jurisdiction from tenant config",
+      );
       return tenantResult;
     }
 
     // Tier 2: Infer from intent metadata
     const metadataResult = this.resolveFromMetadata(intentMetadata);
     if (metadataResult) {
-      logger.debug({ tenantId, source: 'metadata' }, 'Jurisdiction from metadata');
+      logger.debug(
+        { tenantId, source: "metadata" },
+        "Jurisdiction from metadata",
+      );
       return metadataResult;
     }
 
     // Tier 3: Gateway defaults
-    logger.debug({ tenantId, source: 'default' }, 'Jurisdiction from defaults');
+    logger.debug({ tenantId, source: "default" }, "Jurisdiction from defaults");
     return this.resolveDefault();
   }
 
   /**
    * Register a tenant's jurisdiction configuration.
    */
-  registerTenantConfig(tenantId: string, config: TenantJurisdictionConfig): void {
+  registerTenantConfig(
+    tenantId: string,
+    config: TenantJurisdictionConfig,
+  ): void {
     this.tenantConfigs.set(tenantId, config);
-    logger.info({ tenantId, jurisdictions: config.jurisdictions }, 'Tenant config registered');
+    logger.info(
+      { tenantId, jurisdictions: config.jurisdictions },
+      "Tenant config registered",
+    );
   }
 
   /**
@@ -470,11 +557,15 @@ export class JurisdictionResolver {
    */
   detectCrossBorderTransfer(jurisdictions: Jurisdiction[]): boolean {
     if (jurisdictions.length <= 1) return false;
-    const zones = new Set(jurisdictions.map(j => JURISDICTION_RESIDENCY_ZONES[j]));
+    const zones = new Set(
+      jurisdictions.map((j) => JURISDICTION_RESIDENCY_ZONES[j]),
+    );
     return zones.size > 1;
   }
 
-  private resolveFromTenantConfig(tenantId: string): JurisdictionContext | null {
+  private resolveFromTenantConfig(
+    tenantId: string,
+  ): JurisdictionContext | null {
     const config = this.tenantConfigs.get(tenantId);
     if (!config) return null;
     return {
@@ -483,9 +574,9 @@ export class JurisdictionResolver {
       dataResidency:
         config.dataResidency ??
         JURISDICTION_RESIDENCY_ZONES[config.jurisdictions[0]] ??
-        'global',
+        "global",
       crossBorderTransfer: this.detectCrossBorderTransfer(config.jurisdictions),
-      source: 'tenant-config',
+      source: "tenant-config",
     };
   }
 
@@ -498,21 +589,24 @@ export class JurisdictionResolver {
     if (jurisdictions.length === 0) return null;
 
     const industry =
-      typeof metadata.industry === 'string' && this.isValidIndustry(metadata.industry)
+      typeof metadata.industry === "string" &&
+      this.isValidIndustry(metadata.industry)
         ? (metadata.industry as Industry)
         : this.config.defaultIndustry;
 
     const dataResidency =
-      (typeof metadata.dataResidency === 'string' ? metadata.dataResidency : undefined) ??
+      (typeof metadata.dataResidency === "string"
+        ? metadata.dataResidency
+        : undefined) ??
       JURISDICTION_RESIDENCY_ZONES[jurisdictions[0]] ??
-      'global';
+      "global";
 
     return {
       primaryJurisdictions: jurisdictions,
       industry,
       dataResidency,
       crossBorderTransfer: this.detectCrossBorderTransfer(jurisdictions),
-      source: 'metadata-inference',
+      source: "metadata-inference",
     };
   }
 
@@ -520,9 +614,11 @@ export class JurisdictionResolver {
     return {
       primaryJurisdictions: [this.config.defaultJurisdiction],
       industry: this.config.defaultIndustry,
-      dataResidency: JURISDICTION_RESIDENCY_ZONES[this.config.defaultJurisdiction] ?? 'global',
+      dataResidency:
+        JURISDICTION_RESIDENCY_ZONES[this.config.defaultJurisdiction] ??
+        "global",
       crossBorderTransfer: false,
-      source: 'default',
+      source: "default",
     };
   }
 
@@ -537,7 +633,7 @@ export class JurisdictionResolver {
     const jurisdictions: Jurisdiction[] = [];
 
     // Direct jurisdiction field
-    if (typeof metadata.jurisdiction === 'string') {
+    if (typeof metadata.jurisdiction === "string") {
       const j = metadata.jurisdiction.toUpperCase() as Jurisdiction;
       if (this.isValidJurisdiction(j)) jurisdictions.push(j);
     }
@@ -545,7 +641,7 @@ export class JurisdictionResolver {
     // Jurisdictions array
     if (Array.isArray(metadata.jurisdictions)) {
       for (const item of metadata.jurisdictions) {
-        if (typeof item === 'string') {
+        if (typeof item === "string") {
           const j = item.toUpperCase() as Jurisdiction;
           if (this.isValidJurisdiction(j) && !jurisdictions.includes(j)) {
             jurisdictions.push(j);
@@ -555,27 +651,27 @@ export class JurisdictionResolver {
     }
 
     // Country code inference
-    if (typeof metadata.countryCode === 'string') {
+    if (typeof metadata.countryCode === "string") {
       const code = metadata.countryCode.toUpperCase();
       if (EU_MEMBER_STATE_CODES.has(code)) {
-        if (!jurisdictions.includes('EU')) jurisdictions.push('EU');
+        if (!jurisdictions.includes("EU")) jurisdictions.push("EU");
       } else if (COUNTRY_JURISDICTION_MAP[code]) {
         const j = COUNTRY_JURISDICTION_MAP[code];
         if (!jurisdictions.includes(j)) jurisdictions.push(j);
       } else if (APAC_COUNTRY_CODES.has(code)) {
-        if (!jurisdictions.includes('APAC')) jurisdictions.push('APAC');
+        if (!jurisdictions.includes("APAC")) jurisdictions.push("APAC");
       }
     }
 
     // Region string inference
-    if (typeof metadata.region === 'string') {
+    if (typeof metadata.region === "string") {
       const region = metadata.region.toUpperCase();
-      if (['EU', 'EUROPE', 'EEA'].includes(region)) {
-        if (!jurisdictions.includes('EU')) jurisdictions.push('EU');
-      } else if (['US', 'UNITED STATES', 'NORTH AMERICA'].includes(region)) {
-        if (!jurisdictions.includes('US')) jurisdictions.push('US');
-      } else if (['APAC', 'ASIA', 'ASIA-PACIFIC'].includes(region)) {
-        if (!jurisdictions.includes('APAC')) jurisdictions.push('APAC');
+      if (["EU", "EUROPE", "EEA"].includes(region)) {
+        if (!jurisdictions.includes("EU")) jurisdictions.push("EU");
+      } else if (["US", "UNITED STATES", "NORTH AMERICA"].includes(region)) {
+        if (!jurisdictions.includes("US")) jurisdictions.push("US");
+      } else if (["APAC", "ASIA", "ASIA-PACIFIC"].includes(region)) {
+        if (!jurisdictions.includes("APAC")) jurisdictions.push("APAC");
       }
     }
 
@@ -601,37 +697,37 @@ export class JurisdictionResolver {
  * the strictest value wins.
  */
 const CRYPTO_SUITE_STRICTNESS: Record<CryptoSuite, number> = {
-  'standard': 0,
-  'fips-140-2': 1,
-  'post-quantum': 2,
+  standard: 0,
+  "fips-140-2": 1,
+  "post-quantum": 2,
 };
 
 const CONSENT_STRICTNESS: Record<ConsentModel, number> = {
-  'implicit': 0,
-  'opt-out': 1,
-  'opt-in': 2,
-  'explicit-granular': 3,
+  implicit: 0,
+  "opt-out": 1,
+  "opt-in": 2,
+  "explicit-granular": 3,
 };
 
 const ESCALATION_STRICTNESS: Record<EscalationMode, number> = {
-  'log-only': 0,
-  'flag-review': 1,
-  'block-escalate': 2,
-  'hard-block': 3,
+  "log-only": 0,
+  "flag-review": 1,
+  "block-escalate": 2,
+  "hard-block": 3,
 };
 
 const PROOF_ANCHORING_STRICTNESS: Record<ProofAnchoringMethod, number> = {
-  'database': 0,
-  'merkle-tree': 1,
-  'blockchain-l2': 2,
-  'tsa-rfc3161': 3,
+  database: 0,
+  "merkle-tree": 1,
+  "blockchain-l2": 2,
+  "tsa-rfc3161": 3,
 };
 
 const ENFORCEMENT_ORDER: Record<EnforcementLevel, number> = {
-  'advisory': 0,
-  'required': 1,
-  'mandatory': 2,
-  'blocking': 3,
+  advisory: 0,
+  required: 1,
+  mandatory: 2,
+  blocking: 3,
 };
 
 /**
@@ -646,7 +742,15 @@ function constraint(
   jurisdiction: Jurisdiction,
   value: unknown,
 ): PolicyConstraint {
-  return { id, type, rule, enforcement, sourceBundleId: bundleId, sourceJurisdiction: jurisdiction, value };
+  return {
+    id,
+    type,
+    rule,
+    enforcement,
+    sourceBundleId: bundleId,
+    sourceJurisdiction: jurisdiction,
+    value,
+  };
 }
 
 /**
@@ -657,103 +761,375 @@ function createBuiltinBundles(): PolicyBundle[] {
   return [
     // -- GLOBAL DEFAULT --
     {
-      id: 'global-default',
-      name: 'Global Default',
-      jurisdictions: ['GLOBAL'],
+      id: "global-default",
+      name: "Global Default",
+      jurisdictions: ["GLOBAL"],
       priority: 0,
       constraints: [
-        constraint('global-retention', 'retention', 'Min 365-day audit retention', 'required', 'global-default', 'GLOBAL', 365),
-        constraint('global-crypto', 'crypto', 'Standard cryptographic suite', 'required', 'global-default', 'GLOBAL', 'standard'),
-        constraint('global-consent', 'consent', 'Implicit consent model', 'required', 'global-default', 'GLOBAL', 'implicit'),
-        constraint('global-escalation', 'escalation', 'Flag for human review', 'required', 'global-default', 'GLOBAL', 'flag-review'),
-        constraint('global-trust', 'trust-level', 'Minimum trust T2 (Provisional)', 'required', 'global-default', 'GLOBAL', 2),
-        constraint('global-proof', 'proof-anchoring', 'Database proof anchoring', 'required', 'global-default', 'GLOBAL', 'database'),
-        constraint('global-external', 'external-services', 'External services allowed', 'advisory', 'global-default', 'GLOBAL', true),
+        constraint(
+          "global-retention",
+          "retention",
+          "Min 365-day audit retention",
+          "required",
+          "global-default",
+          "GLOBAL",
+          365,
+        ),
+        constraint(
+          "global-crypto",
+          "crypto",
+          "Standard cryptographic suite",
+          "required",
+          "global-default",
+          "GLOBAL",
+          "standard",
+        ),
+        constraint(
+          "global-consent",
+          "consent",
+          "Implicit consent model",
+          "required",
+          "global-default",
+          "GLOBAL",
+          "implicit",
+        ),
+        constraint(
+          "global-escalation",
+          "escalation",
+          "Flag for human review",
+          "required",
+          "global-default",
+          "GLOBAL",
+          "flag-review",
+        ),
+        constraint(
+          "global-trust",
+          "trust-level",
+          "Minimum trust T2 (Provisional)",
+          "required",
+          "global-default",
+          "GLOBAL",
+          2,
+        ),
+        constraint(
+          "global-proof",
+          "proof-anchoring",
+          "Database proof anchoring",
+          "required",
+          "global-default",
+          "GLOBAL",
+          "database",
+        ),
+        constraint(
+          "global-external",
+          "external-services",
+          "External services allowed",
+          "advisory",
+          "global-default",
+          "GLOBAL",
+          true,
+        ),
       ],
     },
 
     // -- EU (GDPR + AI Act) --
     {
-      id: 'eu-gdpr',
-      name: 'EU GDPR',
-      jurisdictions: ['EU'],
+      id: "eu-gdpr",
+      name: "EU GDPR",
+      jurisdictions: ["EU"],
       priority: 10,
       constraints: [
-        constraint('eu-retention', 'retention', 'GDPR: 5-year audit retention', 'mandatory', 'eu-gdpr', 'EU', 1825),
-        constraint('eu-consent', 'consent', 'GDPR: Explicit granular consent', 'mandatory', 'eu-gdpr', 'EU', 'explicit-granular'),
-        constraint('eu-residency', 'data-residency', 'GDPR: EU data residency', 'mandatory', 'eu-gdpr', 'EU', 'eu-west'),
-        constraint('eu-proof', 'proof-anchoring', 'GDPR: Merkle tree proof anchoring', 'required', 'eu-gdpr', 'EU', 'merkle-tree'),
-        constraint('eu-trust', 'trust-level', 'GDPR: Minimum trust T3 (Monitored)', 'required', 'eu-gdpr', 'EU', 3),
-        constraint('eu-processing', 'processing-restriction', 'GDPR: Purpose limitation', 'mandatory', 'eu-gdpr', 'EU', 'purpose-limitation'),
-        constraint('eu-audit', 'audit-requirement', 'GDPR: Full audit trail', 'mandatory', 'eu-gdpr', 'EU', 'full-audit-trail'),
+        constraint(
+          "eu-retention",
+          "retention",
+          "GDPR: 5-year audit retention",
+          "mandatory",
+          "eu-gdpr",
+          "EU",
+          1825,
+        ),
+        constraint(
+          "eu-consent",
+          "consent",
+          "GDPR: Explicit granular consent",
+          "mandatory",
+          "eu-gdpr",
+          "EU",
+          "explicit-granular",
+        ),
+        constraint(
+          "eu-residency",
+          "data-residency",
+          "GDPR: EU data residency",
+          "mandatory",
+          "eu-gdpr",
+          "EU",
+          "eu-west",
+        ),
+        constraint(
+          "eu-proof",
+          "proof-anchoring",
+          "GDPR: Merkle tree proof anchoring",
+          "required",
+          "eu-gdpr",
+          "EU",
+          "merkle-tree",
+        ),
+        constraint(
+          "eu-trust",
+          "trust-level",
+          "GDPR: Minimum trust T3 (Monitored)",
+          "required",
+          "eu-gdpr",
+          "EU",
+          3,
+        ),
+        constraint(
+          "eu-processing",
+          "processing-restriction",
+          "GDPR: Purpose limitation",
+          "mandatory",
+          "eu-gdpr",
+          "EU",
+          "purpose-limitation",
+        ),
+        constraint(
+          "eu-audit",
+          "audit-requirement",
+          "GDPR: Full audit trail",
+          "mandatory",
+          "eu-gdpr",
+          "EU",
+          "full-audit-trail",
+        ),
       ],
     },
     {
-      id: 'eu-ai-act',
-      name: 'EU AI Act',
-      jurisdictions: ['EU'],
+      id: "eu-ai-act",
+      name: "EU AI Act",
+      jurisdictions: ["EU"],
       priority: 15,
       constraints: [
-        constraint('euai-escalation', 'escalation', 'AI Act: Block and escalate on violations', 'mandatory', 'eu-ai-act', 'EU', 'block-escalate'),
-        constraint('euai-audit', 'audit-requirement', 'AI Act: AI system audit trail', 'mandatory', 'eu-ai-act', 'EU', 'ai-system-audit'),
-        constraint('euai-processing', 'processing-restriction', 'AI Act: Risk assessment required', 'mandatory', 'eu-ai-act', 'EU', 'risk-assessment-required'),
+        constraint(
+          "euai-escalation",
+          "escalation",
+          "AI Act: Block and escalate on violations",
+          "mandatory",
+          "eu-ai-act",
+          "EU",
+          "block-escalate",
+        ),
+        constraint(
+          "euai-audit",
+          "audit-requirement",
+          "AI Act: AI system audit trail",
+          "mandatory",
+          "eu-ai-act",
+          "EU",
+          "ai-system-audit",
+        ),
+        constraint(
+          "euai-processing",
+          "processing-restriction",
+          "AI Act: Risk assessment required",
+          "mandatory",
+          "eu-ai-act",
+          "EU",
+          "risk-assessment-required",
+        ),
       ],
     },
 
     // -- US --
     {
-      id: 'us-standard',
-      name: 'US Standard',
-      jurisdictions: ['US'],
+      id: "us-standard",
+      name: "US Standard",
+      jurisdictions: ["US"],
       priority: 10,
       constraints: [
-        constraint('us-retention', 'retention', 'US: 7-year audit retention', 'mandatory', 'us-standard', 'US', 2555),
-        constraint('us-crypto', 'crypto', 'US: FIPS 140-2 cryptographic suite', 'mandatory', 'us-standard', 'US', 'fips-140-2'),
-        constraint('us-proof', 'proof-anchoring', 'US: TSA RFC 3161 proof anchoring', 'required', 'us-standard', 'US', 'tsa-rfc3161'),
-        constraint('us-trust', 'trust-level', 'US: Minimum trust T3 (Monitored)', 'required', 'us-standard', 'US', 3),
-        constraint('us-escalation', 'escalation', 'US: Block and escalate', 'mandatory', 'us-standard', 'US', 'block-escalate'),
-        constraint('us-consent', 'consent', 'US: Opt-out consent model', 'required', 'us-standard', 'US', 'opt-out'),
+        constraint(
+          "us-retention",
+          "retention",
+          "US: 7-year audit retention",
+          "mandatory",
+          "us-standard",
+          "US",
+          2555,
+        ),
+        constraint(
+          "us-crypto",
+          "crypto",
+          "US: FIPS 140-2 cryptographic suite",
+          "mandatory",
+          "us-standard",
+          "US",
+          "fips-140-2",
+        ),
+        constraint(
+          "us-proof",
+          "proof-anchoring",
+          "US: TSA RFC 3161 proof anchoring",
+          "required",
+          "us-standard",
+          "US",
+          "tsa-rfc3161",
+        ),
+        constraint(
+          "us-trust",
+          "trust-level",
+          "US: Minimum trust T3 (Monitored)",
+          "required",
+          "us-standard",
+          "US",
+          3,
+        ),
+        constraint(
+          "us-escalation",
+          "escalation",
+          "US: Block and escalate",
+          "mandatory",
+          "us-standard",
+          "US",
+          "block-escalate",
+        ),
+        constraint(
+          "us-consent",
+          "consent",
+          "US: Opt-out consent model",
+          "required",
+          "us-standard",
+          "US",
+          "opt-out",
+        ),
       ],
     },
 
     // -- APAC --
     {
-      id: 'apac-standard',
-      name: 'APAC Standard',
-      jurisdictions: ['APAC'],
+      id: "apac-standard",
+      name: "APAC Standard",
+      jurisdictions: ["APAC"],
       priority: 8,
       constraints: [
-        constraint('apac-retention', 'retention', 'APAC: 3-year audit retention', 'required', 'apac-standard', 'APAC', 1095),
-        constraint('apac-consent', 'consent', 'APAC: Opt-in consent model', 'required', 'apac-standard', 'APAC', 'opt-in'),
-        constraint('apac-trust', 'trust-level', 'APAC: Minimum trust T2 (Provisional)', 'required', 'apac-standard', 'APAC', 2),
-        constraint('apac-proof', 'proof-anchoring', 'APAC: Merkle tree proof anchoring', 'required', 'apac-standard', 'APAC', 'merkle-tree'),
+        constraint(
+          "apac-retention",
+          "retention",
+          "APAC: 3-year audit retention",
+          "required",
+          "apac-standard",
+          "APAC",
+          1095,
+        ),
+        constraint(
+          "apac-consent",
+          "consent",
+          "APAC: Opt-in consent model",
+          "required",
+          "apac-standard",
+          "APAC",
+          "opt-in",
+        ),
+        constraint(
+          "apac-trust",
+          "trust-level",
+          "APAC: Minimum trust T2 (Provisional)",
+          "required",
+          "apac-standard",
+          "APAC",
+          2,
+        ),
+        constraint(
+          "apac-proof",
+          "proof-anchoring",
+          "APAC: Merkle tree proof anchoring",
+          "required",
+          "apac-standard",
+          "APAC",
+          "merkle-tree",
+        ),
       ],
     },
 
     // -- UK (post-Brexit, GDPR-adjacent) --
     {
-      id: 'uk-dpa',
-      name: 'UK Data Protection Act',
-      jurisdictions: ['UK'],
+      id: "uk-dpa",
+      name: "UK Data Protection Act",
+      jurisdictions: ["UK"],
       priority: 10,
       constraints: [
-        constraint('uk-retention', 'retention', 'UK DPA: 5-year retention', 'mandatory', 'uk-dpa', 'UK', 1825),
-        constraint('uk-consent', 'consent', 'UK DPA: Explicit granular consent', 'mandatory', 'uk-dpa', 'UK', 'explicit-granular'),
-        constraint('uk-trust', 'trust-level', 'UK DPA: Minimum trust T3 (Monitored)', 'required', 'uk-dpa', 'UK', 3),
-        constraint('uk-residency', 'data-residency', 'UK DPA: UK data residency', 'mandatory', 'uk-dpa', 'UK', 'uk-south'),
+        constraint(
+          "uk-retention",
+          "retention",
+          "UK DPA: 5-year retention",
+          "mandatory",
+          "uk-dpa",
+          "UK",
+          1825,
+        ),
+        constraint(
+          "uk-consent",
+          "consent",
+          "UK DPA: Explicit granular consent",
+          "mandatory",
+          "uk-dpa",
+          "UK",
+          "explicit-granular",
+        ),
+        constraint(
+          "uk-trust",
+          "trust-level",
+          "UK DPA: Minimum trust T3 (Monitored)",
+          "required",
+          "uk-dpa",
+          "UK",
+          3,
+        ),
+        constraint(
+          "uk-residency",
+          "data-residency",
+          "UK DPA: UK data residency",
+          "mandatory",
+          "uk-dpa",
+          "UK",
+          "uk-south",
+        ),
       ],
     },
 
     // -- Canada --
     {
-      id: 'ca-pipeda',
-      name: 'Canada PIPEDA',
-      jurisdictions: ['CA'],
+      id: "ca-pipeda",
+      name: "Canada PIPEDA",
+      jurisdictions: ["CA"],
       priority: 10,
       constraints: [
-        constraint('ca-consent', 'consent', 'PIPEDA: Opt-in consent', 'mandatory', 'ca-pipeda', 'CA', 'opt-in'),
-        constraint('ca-trust', 'trust-level', 'PIPEDA: Minimum trust T3', 'required', 'ca-pipeda', 'CA', 3),
-        constraint('ca-retention', 'retention', 'PIPEDA: 3-year retention', 'required', 'ca-pipeda', 'CA', 1095),
+        constraint(
+          "ca-consent",
+          "consent",
+          "PIPEDA: Opt-in consent",
+          "mandatory",
+          "ca-pipeda",
+          "CA",
+          "opt-in",
+        ),
+        constraint(
+          "ca-trust",
+          "trust-level",
+          "PIPEDA: Minimum trust T3",
+          "required",
+          "ca-pipeda",
+          "CA",
+          3,
+        ),
+        constraint(
+          "ca-retention",
+          "retention",
+          "PIPEDA: 3-year retention",
+          "required",
+          "ca-pipeda",
+          "CA",
+          1095,
+        ),
       ],
     },
   ];
@@ -793,10 +1169,16 @@ export class PolicyComposer {
    */
   registerBundle(bundle: PolicyBundle): void {
     if (this.bundles.has(bundle.id)) {
-      logger.warn({ bundleId: bundle.id }, 'Overwriting existing policy bundle');
+      logger.warn(
+        { bundleId: bundle.id },
+        "Overwriting existing policy bundle",
+      );
     }
     this.bundles.set(bundle.id, bundle);
-    logger.info({ bundleId: bundle.id, priority: bundle.priority }, 'Policy bundle registered');
+    logger.info(
+      { bundleId: bundle.id, priority: bundle.priority },
+      "Policy bundle registered",
+    );
   }
 
   /**
@@ -811,7 +1193,7 @@ export class PolicyComposer {
 
     // Always include global default as a fallback
     if (applicable.length === 0) {
-      const global = this.bundles.get('global-default');
+      const global = this.bundles.get("global-default");
       if (global) applicable.push(global);
     }
 
@@ -844,11 +1226,11 @@ export class PolicyComposer {
       unresolvedConflicts.push(...result.unresolvedConflicts);
     }
 
-    const isValid = unresolvedConflicts.every(c => c.severity !== 'critical');
+    const isValid = unresolvedConflicts.every((c) => c.severity !== "critical");
 
     return {
       constraints: resolved,
-      sourceBundles: applicable.map(b => b.id),
+      sourceBundles: applicable.map((b) => b.id),
       resolvedConflicts,
       unresolvedConflicts,
       isValid,
@@ -870,7 +1252,7 @@ export class PolicyComposer {
 
     for (const [id, bundle] of this.bundles) {
       const applies = bundle.jurisdictions.some(
-        j => j === 'GLOBAL' || ctx.primaryJurisdictions.includes(j),
+        (j) => j === "GLOBAL" || ctx.primaryJurisdictions.includes(j),
       );
       if (applies && !used.has(id)) {
         selected.push(bundle);
@@ -908,34 +1290,50 @@ export class PolicyComposer {
   } {
     // No conflict possible with a single constraint
     if (constraints.length <= 1) {
-      return { resolved: constraints, resolvedConflicts: [], unresolvedConflicts: [] };
+      return {
+        resolved: constraints,
+        resolvedConflicts: [],
+        unresolvedConflicts: [],
+      };
     }
 
     switch (type) {
       // Numeric max-wins
-      case 'retention':
-      case 'trust-level':
+      case "retention":
+      case "trust-level":
         return this.resolveByMax(type, constraints);
 
       // Ordered-enum strictest-wins
-      case 'crypto':
-        return this.resolveByStrictness(type, constraints, CRYPTO_SUITE_STRICTNESS);
-      case 'consent':
+      case "crypto":
+        return this.resolveByStrictness(
+          type,
+          constraints,
+          CRYPTO_SUITE_STRICTNESS,
+        );
+      case "consent":
         return this.resolveByStrictness(type, constraints, CONSENT_STRICTNESS);
-      case 'escalation':
-        return this.resolveByStrictness(type, constraints, ESCALATION_STRICTNESS);
-      case 'proof-anchoring':
-        return this.resolveByStrictness(type, constraints, PROOF_ANCHORING_STRICTNESS);
+      case "escalation":
+        return this.resolveByStrictness(
+          type,
+          constraints,
+          ESCALATION_STRICTNESS,
+        );
+      case "proof-anchoring":
+        return this.resolveByStrictness(
+          type,
+          constraints,
+          PROOF_ANCHORING_STRICTNESS,
+        );
 
       // Special resolution
-      case 'data-residency':
+      case "data-residency":
         return this.resolveDataResidency(constraints);
-      case 'external-services':
+      case "external-services":
         return this.resolveExternalServices(constraints);
 
       // Additive (keep all unique values)
-      case 'audit-requirement':
-      case 'processing-restriction':
+      case "audit-requirement":
+      case "processing-restriction":
         return this.resolveAdditive(constraints);
 
       // Fallback: by bundle priority
@@ -949,22 +1347,26 @@ export class PolicyComposer {
     type: PolicyConstraintType,
     constraints: PolicyConstraint[],
   ) {
-    const valued = constraints.map(c => ({
+    const valued = constraints.map((c) => ({
       constraint: c,
-      numericValue: typeof c.value === 'number' ? c.value : 0,
+      numericValue: typeof c.value === "number" ? c.value : 0,
     }));
-    const winner = valued.reduce((max, v) => v.numericValue > max.numericValue ? v : max);
-    const hasConflict = new Set(valued.map(v => v.numericValue)).size > 1;
+    const winner = valued.reduce((max, v) =>
+      v.numericValue > max.numericValue ? v : max,
+    );
+    const hasConflict = new Set(valued.map((v) => v.numericValue)).size > 1;
 
     return {
       resolved: [winner.constraint],
       resolvedConflicts: hasConflict
-        ? [{
-            constraintType: type,
-            constraints,
-            description: `${type}: resolved to max value ${winner.numericValue}`,
-            severity: 'low' as ConflictSeverity,
-          }]
+        ? [
+            {
+              constraintType: type,
+              constraints,
+              description: `${type}: resolved to max value ${winner.numericValue}`,
+              severity: "low" as ConflictSeverity,
+            },
+          ]
         : [],
       unresolvedConflicts: [] as PolicyConflict[],
     };
@@ -976,22 +1378,26 @@ export class PolicyComposer {
     constraints: PolicyConstraint[],
     strictnessMap: Record<string, number>,
   ) {
-    const valued = constraints.map(c => ({
+    const valued = constraints.map((c) => ({
       constraint: c,
       strictness: strictnessMap[String(c.value)] ?? 0,
     }));
-    const winner = valued.reduce((max, v) => v.strictness > max.strictness ? v : max);
-    const hasConflict = new Set(valued.map(v => v.strictness)).size > 1;
+    const winner = valued.reduce((max, v) =>
+      v.strictness > max.strictness ? v : max,
+    );
+    const hasConflict = new Set(valued.map((v) => v.strictness)).size > 1;
 
     return {
       resolved: [winner.constraint],
       resolvedConflicts: hasConflict
-        ? [{
-            constraintType: type,
-            constraints,
-            description: `${type}: resolved to strictest value "${winner.constraint.value}"`,
-            severity: 'low' as ConflictSeverity,
-          }]
+        ? [
+            {
+              constraintType: type,
+              constraints,
+              description: `${type}: resolved to strictest value "${winner.constraint.value}"`,
+              severity: "low" as ConflictSeverity,
+            },
+          ]
         : [],
       unresolvedConflicts: [] as PolicyConflict[],
     };
@@ -1003,61 +1409,75 @@ export class PolicyComposer {
    * both places. This is surfaced as an unresolved critical conflict.
    */
   private resolveDataResidency(constraints: PolicyConstraint[]) {
-    const zones = new Set(constraints.map(c => String(c.value)));
+    const zones = new Set(constraints.map((c) => String(c.value)));
 
     if (zones.size <= 1) {
-      return { resolved: [constraints[0]], resolvedConflicts: [] as PolicyConflict[], unresolvedConflicts: [] as PolicyConflict[] };
+      return {
+        resolved: [constraints[0]],
+        resolvedConflicts: [] as PolicyConflict[],
+        unresolvedConflicts: [] as PolicyConflict[],
+      };
     }
 
     // Sort by enforcement level (strictest first)
     const sorted = [...constraints].sort(
-      (a, b) => (ENFORCEMENT_ORDER[b.enforcement] ?? 0) - (ENFORCEMENT_ORDER[a.enforcement] ?? 0),
+      (a, b) =>
+        (ENFORCEMENT_ORDER[b.enforcement] ?? 0) -
+        (ENFORCEMENT_ORDER[a.enforcement] ?? 0),
     );
 
     const hasMandatory = sorted.some(
-      c => c.enforcement === 'blocking' || c.enforcement === 'mandatory',
+      (c) => c.enforcement === "blocking" || c.enforcement === "mandatory",
     );
 
     if (hasMandatory) {
       return {
         resolved: [sorted[0]],
         resolvedConflicts: [] as PolicyConflict[],
-        unresolvedConflicts: [{
-          constraintType: 'data-residency' as PolicyConstraintType,
-          constraints,
-          description: `Incompatible data residency requirements: ${[...zones].join(' vs ')}`,
-          severity: 'critical' as ConflictSeverity,
-        }],
+        unresolvedConflicts: [
+          {
+            constraintType: "data-residency" as PolicyConstraintType,
+            constraints,
+            description: `Incompatible data residency requirements: ${[...zones].join(" vs ")}`,
+            severity: "critical" as ConflictSeverity,
+          },
+        ],
       };
     }
 
     return {
       resolved: [sorted[0]],
-      resolvedConflicts: [{
-        constraintType: 'data-residency' as PolicyConstraintType,
-        constraints,
-        description: `Data residency resolved to ${sorted[0].value}`,
-        severity: 'medium' as ConflictSeverity,
-      }],
+      resolvedConflicts: [
+        {
+          constraintType: "data-residency" as PolicyConstraintType,
+          constraints,
+          description: `Data residency resolved to ${sorted[0].value}`,
+          severity: "medium" as ConflictSeverity,
+        },
+      ],
       unresolvedConflicts: [] as PolicyConflict[],
     };
   }
 
   /** External services: false (restrictive) wins over true (permissive). */
   private resolveExternalServices(constraints: PolicyConstraint[]) {
-    const blocked = constraints.some(c => c.value === false);
-    const winner = blocked ? constraints.find(c => c.value === false)! : constraints[0];
-    const hasConflict = new Set(constraints.map(c => c.value)).size > 1;
+    const blocked = constraints.some((c) => c.value === false);
+    const winner = blocked
+      ? constraints.find((c) => c.value === false)!
+      : constraints[0];
+    const hasConflict = new Set(constraints.map((c) => c.value)).size > 1;
 
     return {
       resolved: [winner],
       resolvedConflicts: hasConflict
-        ? [{
-            constraintType: 'external-services' as PolicyConstraintType,
-            constraints,
-            description: `External services: resolved to ${winner.value}`,
-            severity: 'low' as ConflictSeverity,
-          }]
+        ? [
+            {
+              constraintType: "external-services" as PolicyConstraintType,
+              constraints,
+              description: `External services: resolved to ${winner.value}`,
+              severity: "low" as ConflictSeverity,
+            },
+          ]
         : [],
       unresolvedConflicts: [] as PolicyConflict[],
     };
@@ -1074,7 +1494,11 @@ export class PolicyComposer {
         unique.push(c);
       }
     }
-    return { resolved: unique, resolvedConflicts: [] as PolicyConflict[], unresolvedConflicts: [] as PolicyConflict[] };
+    return {
+      resolved: unique,
+      resolvedConflicts: [] as PolicyConflict[],
+      unresolvedConflicts: [] as PolicyConflict[],
+    };
   }
 
   /** Fallback: resolve by bundle priority (highest priority wins). */
@@ -1083,20 +1507,25 @@ export class PolicyComposer {
     constraints: PolicyConstraint[],
     bundles: PolicyBundle[],
   ) {
-    const priorityMap = new Map(bundles.map(b => [b.id, b.priority]));
+    const priorityMap = new Map(bundles.map((b) => [b.id, b.priority]));
     const sorted = [...constraints].sort(
-      (a, b) => (priorityMap.get(b.sourceBundleId) ?? 0) - (priorityMap.get(a.sourceBundleId) ?? 0),
+      (a, b) =>
+        (priorityMap.get(b.sourceBundleId) ?? 0) -
+        (priorityMap.get(a.sourceBundleId) ?? 0),
     );
     return {
       resolved: [sorted[0]],
-      resolvedConflicts: constraints.length > 1
-        ? [{
-            constraintType: type,
-            constraints,
-            description: `${type}: resolved by priority to bundle "${sorted[0].sourceBundleId}"`,
-            severity: 'low' as ConflictSeverity,
-          }]
-        : [],
+      resolvedConflicts:
+        constraints.length > 1
+          ? [
+              {
+                constraintType: type,
+                constraints,
+                description: `${type}: resolved by priority to bundle "${sorted[0].sourceBundleId}"`,
+                severity: "low" as ConflictSeverity,
+              },
+            ]
+          : [],
       unresolvedConflicts: [] as PolicyConflict[],
     };
   }
@@ -1108,89 +1537,143 @@ export class PolicyComposer {
 
 /** Keywords that trigger "unacceptable" (prohibited) classification under Art. 5. */
 const PROHIBITED_KEYWORDS = [
-  'social scoring', 'social credit', 'subliminal manipulation',
-  'subliminal technique', 'exploit vulnerability', 'exploit vulnerabilities',
-  'real-time biometric identification', 'real-time facial recognition',
-  'mass surveillance', 'emotion recognition workplace',
-  'emotion recognition education', 'predictive policing individual',
-  'cognitive behavioral manipulation', 'biometric categorisation sensitive',
-  'untargeted scraping facial',
+  "social scoring",
+  "social credit",
+  "subliminal manipulation",
+  "subliminal technique",
+  "exploit vulnerability",
+  "exploit vulnerabilities",
+  "real-time biometric identification",
+  "real-time facial recognition",
+  "mass surveillance",
+  "emotion recognition workplace",
+  "emotion recognition education",
+  "predictive policing individual",
+  "cognitive behavioral manipulation",
+  "biometric categorisation sensitive",
+  "untargeted scraping facial",
 ];
 
 /** Keywords mapped to Annex III high-risk categories. */
 const HIGH_RISK_KEYWORDS: Record<AiActHighRiskCategory, string[]> = {
-  'biometric-identification': [
-    'biometric identification', 'biometric verification', 'facial recognition',
-    'fingerprint matching', 'voice identification', 'iris recognition',
+  "biometric-identification": [
+    "biometric identification",
+    "biometric verification",
+    "facial recognition",
+    "fingerprint matching",
+    "voice identification",
+    "iris recognition",
   ],
-  'critical-infrastructure': [
-    'critical infrastructure', 'power grid', 'water supply',
-    'traffic management', 'electricity distribution', 'energy management',
+  "critical-infrastructure": [
+    "critical infrastructure",
+    "power grid",
+    "water supply",
+    "traffic management",
+    "electricity distribution",
+    "energy management",
   ],
-  'education-vocational': [
-    'student assessment', 'educational admission', 'learning evaluation',
-    'exam scoring', 'academic grading', 'educational placement',
+  "education-vocational": [
+    "student assessment",
+    "educational admission",
+    "learning evaluation",
+    "exam scoring",
+    "academic grading",
+    "educational placement",
   ],
-  'employment-worker-management': [
-    'recruitment', 'hiring decision', 'cv screening', 'resume screening',
-    'employee evaluation', 'performance monitoring', 'promotion decision',
-    'termination decision', 'worker management',
+  "employment-worker-management": [
+    "recruitment",
+    "hiring decision",
+    "cv screening",
+    "resume screening",
+    "employee evaluation",
+    "performance monitoring",
+    "promotion decision",
+    "termination decision",
+    "worker management",
   ],
-  'essential-services': [
-    'credit scoring', 'creditworthiness', 'insurance pricing',
-    'insurance risk', 'social benefit', 'public assistance',
-    'emergency services dispatch', 'loan application', 'mortgage decision',
+  "essential-services": [
+    "credit scoring",
+    "creditworthiness",
+    "insurance pricing",
+    "insurance risk",
+    "social benefit",
+    "public assistance",
+    "emergency services dispatch",
+    "loan application",
+    "mortgage decision",
   ],
-  'law-enforcement': [
-    'law enforcement', 'criminal risk assessment', 'recidivism prediction',
-    'crime prediction', 'evidence analysis', 'suspect profiling',
+  "law-enforcement": [
+    "law enforcement",
+    "criminal risk assessment",
+    "recidivism prediction",
+    "crime prediction",
+    "evidence analysis",
+    "suspect profiling",
   ],
-  'migration-asylum-border': [
-    'border control', 'immigration', 'asylum application',
-    'visa application', 'migration management', 'refugee assessment',
+  "migration-asylum-border": [
+    "border control",
+    "immigration",
+    "asylum application",
+    "visa application",
+    "migration management",
+    "refugee assessment",
   ],
-  'justice-democratic': [
-    'judicial decision', 'court ruling', 'sentencing',
-    'legal outcome prediction', 'electoral', 'voting',
-    'election', 'democratic process',
+  "justice-democratic": [
+    "judicial decision",
+    "court ruling",
+    "sentencing",
+    "legal outcome prediction",
+    "electoral",
+    "voting",
+    "election",
+    "democratic process",
   ],
 };
 
 /** Keywords that trigger "limited-risk" classification (transparency obligations). */
 const LIMITED_RISK_KEYWORDS = [
-  'chatbot', 'conversational ai', 'virtual assistant', 'deepfake',
-  'synthetic media', 'generated content', 'ai-generated text',
-  'ai-generated image', 'ai-generated video', 'emotion detection',
-  'content generation', 'text generation', 'image generation',
+  "chatbot",
+  "conversational ai",
+  "virtual assistant",
+  "deepfake",
+  "synthetic media",
+  "generated content",
+  "ai-generated text",
+  "ai-generated image",
+  "ai-generated video",
+  "emotion detection",
+  "content generation",
+  "text generation",
+  "image generation",
 ];
 
 /** Regulatory obligations per classification tier. */
 const OBLIGATIONS_MAP: Record<AiActClassification, string[]> = {
-  'unacceptable': [
-    'PROHIBITED - System must not be deployed in EU/EEA',
-    'Immediate cessation required for EU market',
-    'Notify national supervisory authority',
+  unacceptable: [
+    "PROHIBITED - System must not be deployed in EU/EEA",
+    "Immediate cessation required for EU market",
+    "Notify national supervisory authority",
   ],
-  'high-risk': [
-    'Risk management system (Art. 9)',
-    'Data governance and management (Art. 10)',
-    'Technical documentation (Art. 11)',
-    'Record-keeping and logging (Art. 12)',
-    'Transparency and user information (Art. 13)',
-    'Human oversight measures (Art. 14)',
-    'Accuracy, robustness, cybersecurity (Art. 15)',
-    'Conformity assessment (Art. 43)',
-    'Post-market monitoring (Art. 61)',
-    'Serious incident reporting (Art. 62)',
+  "high-risk": [
+    "Risk management system (Art. 9)",
+    "Data governance and management (Art. 10)",
+    "Technical documentation (Art. 11)",
+    "Record-keeping and logging (Art. 12)",
+    "Transparency and user information (Art. 13)",
+    "Human oversight measures (Art. 14)",
+    "Accuracy, robustness, cybersecurity (Art. 15)",
+    "Conformity assessment (Art. 43)",
+    "Post-market monitoring (Art. 61)",
+    "Serious incident reporting (Art. 62)",
   ],
-  'limited-risk': [
-    'Inform users of AI interaction (Art. 50)',
-    'Label AI-generated content (Art. 50)',
-    'Disclose deepfake/synthetic content (Art. 50)',
+  "limited-risk": [
+    "Inform users of AI interaction (Art. 50)",
+    "Label AI-generated content (Art. 50)",
+    "Disclose deepfake/synthetic content (Art. 50)",
   ],
-  'minimal-risk': [
-    'Voluntary codes of conduct (Art. 95)',
-    'No mandatory obligations',
+  "minimal-risk": [
+    "Voluntary codes of conduct (Art. 95)",
+    "No mandatory obligations",
   ],
 };
 
@@ -1232,10 +1715,10 @@ export class AiActClassifier {
     if (limited) return limited;
 
     return {
-      classification: 'minimal-risk',
+      classification: "minimal-risk",
       confidence: 0.6,
-      reasoning: 'No risk indicators detected; classified as minimal-risk',
-      obligations: OBLIGATIONS_MAP['minimal-risk'],
+      reasoning: "No risk indicators detected; classified as minimal-risk",
+      obligations: OBLIGATIONS_MAP["minimal-risk"],
     };
   }
 
@@ -1248,28 +1731,28 @@ export class AiActClassifier {
     if (intentType) parts.push(intentType.toLowerCase());
     if (context) {
       for (const [key, value] of Object.entries(context)) {
-        if (typeof value === 'string') {
+        if (typeof value === "string") {
           parts.push(`${key}: ${value}`.toLowerCase());
         } else if (Array.isArray(value)) {
           for (const item of value) {
-            if (typeof item === 'string') parts.push(item.toLowerCase());
+            if (typeof item === "string") parts.push(item.toLowerCase());
           }
         }
       }
     }
-    return parts.join(' ');
+    return parts.join(" ");
   }
 
   private checkProhibited(text: string): AiActClassificationResult | null {
     for (const keyword of PROHIBITED_KEYWORDS) {
       if (text.includes(keyword)) {
-        logger.warn({ keyword }, 'EU AI Act: PROHIBITED system detected');
+        logger.warn({ keyword }, "EU AI Act: PROHIBITED system detected");
         return {
-          classification: 'unacceptable',
+          classification: "unacceptable",
           confidence: 0.9,
           reasoning: `Prohibited practice detected: "${keyword}" (Art. 5)`,
-          annexReference: 'Article 5',
-          obligations: OBLIGATIONS_MAP['unacceptable'],
+          annexReference: "Article 5",
+          obligations: OBLIGATIONS_MAP["unacceptable"],
         };
       }
     }
@@ -1277,11 +1760,18 @@ export class AiActClassifier {
   }
 
   private checkHighRisk(text: string): AiActClassificationResult | null {
-    let bestMatch: { category: AiActHighRiskCategory; keyword: string; count: number } | null = null;
+    let bestMatch: {
+      category: AiActHighRiskCategory;
+      keyword: string;
+      count: number;
+    } | null = null;
 
-    for (const [category, keywords] of Object.entries(HIGH_RISK_KEYWORDS) as [AiActHighRiskCategory, string[]][]) {
+    for (const [category, keywords] of Object.entries(HIGH_RISK_KEYWORDS) as [
+      AiActHighRiskCategory,
+      string[],
+    ][]) {
       let count = 0;
-      let firstKeyword = '';
+      let firstKeyword = "";
       for (const keyword of keywords) {
         if (text.includes(keyword)) {
           count++;
@@ -1297,15 +1787,15 @@ export class AiActClassifier {
       const confidence = Math.min(0.5 + bestMatch.count * 0.15, 0.95);
       logger.info(
         { category: bestMatch.category, confidence },
-        'EU AI Act: High-risk classification',
+        "EU AI Act: High-risk classification",
       );
       return {
-        classification: 'high-risk',
+        classification: "high-risk",
         highRiskCategory: bestMatch.category,
         confidence,
         reasoning: `High-risk system (Annex III: ${bestMatch.category}). Matched: "${bestMatch.keyword}"`,
-        annexReference: 'Article 6, Annex III',
-        obligations: OBLIGATIONS_MAP['high-risk'],
+        annexReference: "Article 6, Annex III",
+        obligations: OBLIGATIONS_MAP["high-risk"],
       };
     }
 
@@ -1316,11 +1806,11 @@ export class AiActClassifier {
     for (const keyword of LIMITED_RISK_KEYWORDS) {
       if (text.includes(keyword)) {
         return {
-          classification: 'limited-risk',
+          classification: "limited-risk",
           confidence: 0.7,
           reasoning: `Limited-risk transparency obligation: "${keyword}"`,
-          annexReference: 'Article 50',
-          obligations: OBLIGATIONS_MAP['limited-risk'],
+          annexReference: "Article 50",
+          obligations: OBLIGATIONS_MAP["limited-risk"],
         };
       }
     }
@@ -1343,13 +1833,18 @@ function pickStrictest<T extends string>(
 ): T {
   const all = policyValue ? [...defaults, policyValue] : defaults;
   return all.reduce((strictest, current) =>
-    (strictnessMap[current] ?? 0) > (strictnessMap[strictest] ?? 0) ? current : strictest,
+    (strictnessMap[current] ?? 0) > (strictnessMap[strictest] ?? 0)
+      ? current
+      : strictest,
   );
 }
 
 /** Check if a jurisdiction context includes any of the given jurisdictions. */
-function hasJurisdiction(ctx: JurisdictionContext, ...jurisdictions: Jurisdiction[]): boolean {
-  return jurisdictions.some(j => ctx.primaryJurisdictions.includes(j));
+function hasJurisdiction(
+  ctx: JurisdictionContext,
+  ...jurisdictions: Jurisdiction[]
+): boolean {
+  return jurisdictions.some((j) => ctx.primaryJurisdictions.includes(j));
 }
 
 /** Extract a typed constraint value from a composed policy set. */
@@ -1357,7 +1852,9 @@ function extractPolicyValue<T = unknown>(
   policySet: ComposedPolicySet,
   type: string,
 ): T | undefined {
-  return policySet.constraints.find(c => c.type === type)?.value as T | undefined;
+  return policySet.constraints.find((c) => c.type === type)?.value as
+    | T
+    | undefined;
 }
 
 /**
@@ -1370,13 +1867,19 @@ export class RegimeSelector {
   /**
    * Select the governance regime for the given context and policy set.
    */
-  select(ctx: JurisdictionContext, policySet: ComposedPolicySet): GovernanceRegime {
+  select(
+    ctx: JurisdictionContext,
+    policySet: ComposedPolicySet,
+  ): GovernanceRegime {
     const cryptoSuite = this.resolveCryptoSuite(ctx, policySet);
     const proofAnchoring = this.resolveProofAnchoring(ctx, policySet);
     const consentModel = this.resolveConsentModel(ctx, policySet);
     const escalationMode = this.resolveEscalationMode(ctx, policySet);
     const auditRetentionDays = this.resolveAuditRetentionDays(ctx, policySet);
-    const externalServicesAllowed = this.resolveExternalServicesAllowed(ctx, policySet);
+    const externalServicesAllowed = this.resolveExternalServicesAllowed(
+      ctx,
+      policySet,
+    );
     const minimumTrustLevel = this.resolveMinimumTrustLevel(ctx, policySet);
 
     // Build a deterministic regime ID from the resolved parameters
@@ -1396,14 +1899,15 @@ export class RegimeSelector {
     const jurisdictionPart =
       ctx.primaryJurisdictions.length === 1
         ? ctx.primaryJurisdictions[0]
-        : `Multi(${ctx.primaryJurisdictions.join('+')})`;
-    const name = ctx.industry !== 'general'
-      ? `${jurisdictionPart}-${ctx.industry}`
-      : jurisdictionPart;
+        : `Multi(${ctx.primaryJurisdictions.join("+")})`;
+    const name =
+      ctx.industry !== "general"
+        ? `${jurisdictionPart}-${ctx.industry}`
+        : jurisdictionPart;
 
     const regime: GovernanceRegime = {
       regimeId,
-      name: name || 'default',
+      name: name || "default",
       jurisdictions: ctx.primaryJurisdictions,
       policyNamespaces: policySet.sourceBundles,
       cryptoSuite,
@@ -1414,68 +1918,91 @@ export class RegimeSelector {
       dataResidency: ctx.dataResidency,
       externalServicesAllowed,
       minimumTrustLevel,
-      conformityAssessmentRequired: hasJurisdiction(ctx, 'EU'),
-      transparencyRequired: hasJurisdiction(ctx, 'EU', 'CA', 'UK'),
+      conformityAssessmentRequired: hasJurisdiction(ctx, "EU"),
+      transparencyRequired: hasJurisdiction(ctx, "EU", "CA", "UK"),
       metadata: {},
     };
 
     logger.info(
       { regimeId, name, cryptoSuite, minimumTrustLevel },
-      'Governance regime assembled',
+      "Governance regime assembled",
     );
 
     return regime;
   }
 
-  private resolveCryptoSuite(ctx: JurisdictionContext, ps: ComposedPolicySet): CryptoSuite {
-    const pv = extractPolicyValue<CryptoSuite>(ps, 'crypto');
-    const defaults: CryptoSuite[] = ['standard'];
-    if (hasJurisdiction(ctx, 'US')) defaults.push('fips-140-2');
+  private resolveCryptoSuite(
+    ctx: JurisdictionContext,
+    ps: ComposedPolicySet,
+  ): CryptoSuite {
+    const pv = extractPolicyValue<CryptoSuite>(ps, "crypto");
+    const defaults: CryptoSuite[] = ["standard"];
+    if (hasJurisdiction(ctx, "US")) defaults.push("fips-140-2");
     return pickStrictest(defaults, pv, CRYPTO_SUITE_STRICTNESS);
   }
 
-  private resolveProofAnchoring(ctx: JurisdictionContext, ps: ComposedPolicySet): ProofAnchoringMethod {
-    const pv = extractPolicyValue<ProofAnchoringMethod>(ps, 'proof-anchoring');
-    const defaults: ProofAnchoringMethod[] = ['database'];
-    if (hasJurisdiction(ctx, 'US')) defaults.push('tsa-rfc3161');
-    else if (hasJurisdiction(ctx, 'EU')) defaults.push('merkle-tree');
+  private resolveProofAnchoring(
+    ctx: JurisdictionContext,
+    ps: ComposedPolicySet,
+  ): ProofAnchoringMethod {
+    const pv = extractPolicyValue<ProofAnchoringMethod>(ps, "proof-anchoring");
+    const defaults: ProofAnchoringMethod[] = ["database"];
+    if (hasJurisdiction(ctx, "US")) defaults.push("tsa-rfc3161");
+    else if (hasJurisdiction(ctx, "EU")) defaults.push("merkle-tree");
     return pickStrictest(defaults, pv, PROOF_ANCHORING_STRICTNESS);
   }
 
-  private resolveConsentModel(ctx: JurisdictionContext, ps: ComposedPolicySet): ConsentModel {
-    const pv = extractPolicyValue<ConsentModel>(ps, 'consent');
-    const defaults: ConsentModel[] = ['implicit'];
-    if (hasJurisdiction(ctx, 'EU', 'UK')) defaults.push('explicit-granular');
-    else if (hasJurisdiction(ctx, 'CA')) defaults.push('opt-in');
-    else if (hasJurisdiction(ctx, 'US')) defaults.push('opt-out');
+  private resolveConsentModel(
+    ctx: JurisdictionContext,
+    ps: ComposedPolicySet,
+  ): ConsentModel {
+    const pv = extractPolicyValue<ConsentModel>(ps, "consent");
+    const defaults: ConsentModel[] = ["implicit"];
+    if (hasJurisdiction(ctx, "EU", "UK")) defaults.push("explicit-granular");
+    else if (hasJurisdiction(ctx, "CA")) defaults.push("opt-in");
+    else if (hasJurisdiction(ctx, "US")) defaults.push("opt-out");
     return pickStrictest(defaults, pv, CONSENT_STRICTNESS);
   }
 
-  private resolveEscalationMode(ctx: JurisdictionContext, ps: ComposedPolicySet): EscalationMode {
-    const pv = extractPolicyValue<EscalationMode>(ps, 'escalation');
-    const defaults: EscalationMode[] = ['flag-review'];
-    if (hasJurisdiction(ctx, 'US', 'EU')) defaults.push('block-escalate');
+  private resolveEscalationMode(
+    ctx: JurisdictionContext,
+    ps: ComposedPolicySet,
+  ): EscalationMode {
+    const pv = extractPolicyValue<EscalationMode>(ps, "escalation");
+    const defaults: EscalationMode[] = ["flag-review"];
+    if (hasJurisdiction(ctx, "US", "EU")) defaults.push("block-escalate");
     return pickStrictest(defaults, pv, ESCALATION_STRICTNESS);
   }
 
-  private resolveAuditRetentionDays(ctx: JurisdictionContext, ps: ComposedPolicySet): number {
-    const pv = extractPolicyValue<number>(ps, 'retention');
+  private resolveAuditRetentionDays(
+    ctx: JurisdictionContext,
+    ps: ComposedPolicySet,
+  ): number {
+    const pv = extractPolicyValue<number>(ps, "retention");
     const defaults = [365];
-    if (hasJurisdiction(ctx, 'EU', 'UK')) defaults.push(1825);
-    if (hasJurisdiction(ctx, 'US')) defaults.push(2555);
+    if (hasJurisdiction(ctx, "EU", "UK")) defaults.push(1825);
+    if (hasJurisdiction(ctx, "US")) defaults.push(2555);
     return Math.max(...(pv !== undefined ? [...defaults, pv] : defaults));
   }
 
-  private resolveExternalServicesAllowed(ctx: JurisdictionContext, ps: ComposedPolicySet): boolean {
-    const pv = extractPolicyValue<boolean>(ps, 'external-services');
+  private resolveExternalServicesAllowed(
+    ctx: JurisdictionContext,
+    ps: ComposedPolicySet,
+  ): boolean {
+    const pv = extractPolicyValue<boolean>(ps, "external-services");
     return pv !== undefined ? pv : true;
   }
 
-  private resolveMinimumTrustLevel(ctx: JurisdictionContext, ps: ComposedPolicySet): TrustLevel {
-    const pv = extractPolicyValue<TrustLevel>(ps, 'trust-level');
+  private resolveMinimumTrustLevel(
+    ctx: JurisdictionContext,
+    ps: ComposedPolicySet,
+  ): TrustLevel {
+    const pv = extractPolicyValue<TrustLevel>(ps, "trust-level");
     const defaults: TrustLevel[] = [2];
-    if (hasJurisdiction(ctx, 'EU', 'US', 'UK', 'CA')) defaults.push(3);
-    return Math.max(...(pv !== undefined ? [...defaults, pv] : defaults)) as TrustLevel;
+    if (hasJurisdiction(ctx, "EU", "US", "UK", "CA")) defaults.push(3);
+    return Math.max(
+      ...(pv !== undefined ? [...defaults, pv] : defaults),
+    ) as TrustLevel;
   }
 
   /**
@@ -1509,10 +2036,10 @@ export class RegimeSelector {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
-    return `regime-${Math.abs(hash).toString(16).padStart(8, '0')}`;
+    return `regime-${Math.abs(hash).toString(16).padStart(8, "0")}`;
   }
 }
 
@@ -1529,10 +2056,10 @@ export class GatewayConflictError extends Error {
 
   constructor(conflicts: PolicyConflict[]) {
     super(
-      'Intent blocked by unresolved policy conflicts: ' +
-      conflicts.map(c => c.description).join('; '),
+      "Intent blocked by unresolved policy conflicts: " +
+        conflicts.map((c) => c.description).join("; "),
     );
-    this.name = 'GatewayConflictError';
+    this.name = "GatewayConflictError";
     this.conflicts = conflicts;
   }
 }
@@ -1542,7 +2069,7 @@ export class GatewayConflictError extends Error {
 // ---------------------------------------------------------------------------
 
 /** EU/EEA jurisdiction codes that trigger AI Act classification. */
-const EU_JURISDICTION_CODES = new Set<Jurisdiction>(['EU']);
+const EU_JURISDICTION_CODES = new Set<Jurisdiction>(["EU"]);
 
 /**
  * The Intent Gateway is the policy-aware orchestrator for all agent intents.
@@ -1598,8 +2125,11 @@ export class IntentGateway {
     this.aiActClassifier = new AiActClassifier();
 
     logger.info(
-      { enabled: this.config.enabled, defaultJurisdiction: this.config.defaultJurisdiction },
-      'IntentGateway initialized',
+      {
+        enabled: this.config.enabled,
+        defaultJurisdiction: this.config.defaultJurisdiction,
+      },
+      "IntentGateway initialized",
     );
   }
 
@@ -1626,8 +2156,13 @@ export class IntentGateway {
 
     try {
       // Step 1: Resolve jurisdiction
-      const intentMetadata = submission.context as Record<string, unknown> | undefined;
-      const jurisdictionContext = this.jurisdictionResolver.resolve(options.ctx, intentMetadata);
+      const intentMetadata = submission.context as
+        | Record<string, unknown>
+        | undefined;
+      const jurisdictionContext = this.jurisdictionResolver.resolve(
+        options.ctx,
+        intentMetadata,
+      );
       const tenantId = options.ctx.tenantId;
 
       // Step 2: Compose policies
@@ -1650,12 +2185,23 @@ export class IntentGateway {
 
       // Step 3: EU AI Act classification (when EU jurisdiction applies)
       let aiActResult: AiActClassificationResult | undefined;
-      if (jurisdictionContext.primaryJurisdictions.some(j => EU_JURISDICTION_CODES.has(j))) {
-        const goal = typeof submission.goal === 'string' ? submission.goal : '';
-        const intentType = typeof submission.intentType === 'string' ? submission.intentType : undefined;
-        aiActResult = this.aiActClassifier.classify(goal, intentMetadata, intentType);
+      if (
+        jurisdictionContext.primaryJurisdictions.some((j) =>
+          EU_JURISDICTION_CODES.has(j),
+        )
+      ) {
+        const goal = typeof submission.goal === "string" ? submission.goal : "";
+        const intentType =
+          typeof submission.intentType === "string"
+            ? submission.intentType
+            : undefined;
+        aiActResult = this.aiActClassifier.classify(
+          goal,
+          intentMetadata,
+          intentType,
+        );
 
-        if (aiActResult.classification === 'unacceptable') {
+        if (aiActResult.classification === "unacceptable") {
           warnings.push(`EU AI Act: PROHIBITED - ${aiActResult.reasoning}`);
         }
       }
@@ -1687,7 +2233,10 @@ export class IntentGateway {
       };
 
       // Enforce minimum trust level
-      if (!enrichedOptions.trustLevel || enrichedOptions.trustLevel < regime.minimumTrustLevel) {
+      if (
+        !enrichedOptions.trustLevel ||
+        enrichedOptions.trustLevel < regime.minimumTrustLevel
+      ) {
         enrichedOptions.trustLevel = regime.minimumTrustLevel;
       }
 
@@ -1703,12 +2252,15 @@ export class IntentGateway {
             aiActClassification: regime.aiActClassification,
             bundles: policySet.sourceBundles,
           },
-          'Gateway regime decision',
+          "Gateway regime decision",
         );
       }
 
       // Submit the intent
-      const intent = await this.intentService.submit(submission, enrichedOptions);
+      const intent = await this.intentService.submit(
+        submission,
+        enrichedOptions,
+      );
 
       return { intent, regime, jurisdictionContext, policySet, warnings };
     } catch (error) {
@@ -1717,14 +2269,14 @@ export class IntentGateway {
 
       // Degrade gracefully: submit without governance enrichment
       logger.error(
-        { error: error instanceof Error ? error.message : 'Unknown error' },
-        'Gateway error - falling through to passthrough',
+        { error: error instanceof Error ? error.message : "Unknown error" },
+        "Gateway error - falling through to passthrough",
       );
 
       const intent = await this.intentService.submit(submission, options);
       const result = this.createPassthroughResult(intent);
       result.warnings.push(
-        `Gateway degraded: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Gateway degraded: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       return result;
     }
@@ -1742,8 +2294,13 @@ export class IntentGateway {
     jurisdictionContext: JurisdictionContext;
     policySet: ComposedPolicySet;
   } {
-    const jurisdictionContext = this.jurisdictionResolver.resolve(ctx, metadata);
-    const tenantConfig = this.jurisdictionResolver.getTenantConfig(ctx.tenantId);
+    const jurisdictionContext = this.jurisdictionResolver.resolve(
+      ctx,
+      metadata,
+    );
+    const tenantConfig = this.jurisdictionResolver.getTenantConfig(
+      ctx.tenantId,
+    );
     const policySet = this.policyComposer.compose(
       jurisdictionContext,
       tenantConfig?.customPolicyBundles,
@@ -1756,7 +2313,10 @@ export class IntentGateway {
    * Register a tenant's jurisdiction configuration.
    * This is the primary way to tell the gateway where a tenant operates.
    */
-  registerTenantConfig(tenantId: string, config: TenantJurisdictionConfig): void {
+  registerTenantConfig(
+    tenantId: string,
+    config: TenantJurisdictionConfig,
+  ): void {
     this.jurisdictionResolver.registerTenantConfig(tenantId, config);
   }
 
@@ -1781,16 +2341,16 @@ export class IntentGateway {
     return {
       intent,
       regime: {
-        regimeId: 'regime-passthrough',
-        name: 'passthrough',
+        regimeId: "regime-passthrough",
+        name: "passthrough",
         jurisdictions: [this.config.defaultJurisdiction],
         policyNamespaces: [],
-        cryptoSuite: 'standard',
-        proofAnchoring: 'database',
+        cryptoSuite: "standard",
+        proofAnchoring: "database",
         auditRetentionDays: 365,
-        consentModel: 'implicit',
-        escalationMode: 'flag-review',
-        dataResidency: 'global',
+        consentModel: "implicit",
+        escalationMode: "flag-review",
+        dataResidency: "global",
         externalServicesAllowed: true,
         minimumTrustLevel: 2,
         conformityAssessmentRequired: false,
@@ -1800,9 +2360,9 @@ export class IntentGateway {
       jurisdictionContext: {
         primaryJurisdictions: [this.config.defaultJurisdiction],
         industry: this.config.defaultIndustry,
-        dataResidency: 'global',
+        dataResidency: "global",
         crossBorderTransfer: false,
-        source: 'default',
+        source: "default",
       },
       policySet: {
         constraints: [],

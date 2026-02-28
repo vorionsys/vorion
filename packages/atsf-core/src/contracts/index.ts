@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { ID } from '../common/types.js';
+import { createLogger } from "../common/logger.js";
+import type { ID } from "../common/types.js";
 import type {
   VorionResponse,
   VorionErrorResponse,
@@ -29,11 +29,11 @@ import type {
   AssumptionCategory,
   InvalidityCategory,
   ErrorCategory,
-} from './types.js';
+} from "./types.js";
 
-export * from './types.js';
+export * from "./types.js";
 
-const logger = createLogger({ component: 'contracts' });
+const logger = createLogger({ component: "contracts" });
 
 /**
  * Builder for creating VorionResponse objects
@@ -46,11 +46,29 @@ export class ResponseBuilder<T = unknown> {
   private modelsUsed: ModelReference[] = [];
   private assumptions: Assumption[] = [];
   private invalidityConditions: InvalidityCondition[] = [];
-  private confidenceComponents: Array<{ component: string; confidence: number; weight: number; explanation: string }> = [];
-  private confidenceReducers: Array<{ factor: string; impact: number; explanation: string }> = [];
-  private confidenceBoosters: Array<{ factor: string; impact: number; explanation: string }> = [];
+  private confidenceComponents: Array<{
+    component: string;
+    confidence: number;
+    weight: number;
+    explanation: string;
+  }> = [];
+  private confidenceReducers: Array<{
+    factor: string;
+    impact: number;
+    explanation: string;
+  }> = [];
+  private confidenceBoosters: Array<{
+    factor: string;
+    impact: number;
+    explanation: string;
+  }> = [];
   private stateSnapshot: Record<string, unknown> = {};
-  private externalDeps: Array<{ name: string; type: 'api' | 'database' | 'service' | 'model'; version: string; stateAtRequest: Record<string, unknown> }> = [];
+  private externalDeps: Array<{
+    name: string;
+    type: "api" | "database" | "service" | "model";
+    version: string;
+    stateAtRequest: Record<string, unknown>;
+  }> = [];
   private metadata: Partial<ResponseMetadata> = {};
   private governance?: GovernanceDecision;
 
@@ -67,7 +85,7 @@ export class ResponseBuilder<T = unknown> {
     action: string,
     input: string,
     output: string,
-    durationMs: number
+    durationMs: number,
   ): this {
     this.processingSteps.push({
       stepNumber: this.processingSteps.length + 1,
@@ -99,7 +117,7 @@ export class ResponseBuilder<T = unknown> {
   /**
    * Add an assumption
    */
-  addAssumption(assumption: Omit<Assumption, 'id'>): this {
+  addAssumption(assumption: Omit<Assumption, "id">): this {
     this.assumptions.push({
       id: `assumption-${this.assumptions.length + 1}`,
       ...assumption,
@@ -110,7 +128,7 @@ export class ResponseBuilder<T = unknown> {
   /**
    * Add an invalidity condition
    */
-  addInvalidityCondition(condition: Omit<InvalidityCondition, 'id'>): this {
+  addInvalidityCondition(condition: Omit<InvalidityCondition, "id">): this {
     this.invalidityConditions.push({
       id: `invalidity-${this.invalidityConditions.length + 1}`,
       ...condition,
@@ -125,16 +143,25 @@ export class ResponseBuilder<T = unknown> {
     component: string,
     confidence: number,
     weight: number,
-    explanation: string
+    explanation: string,
   ): this {
-    this.confidenceComponents.push({ component, confidence, weight, explanation });
+    this.confidenceComponents.push({
+      component,
+      confidence,
+      weight,
+      explanation,
+    });
     return this;
   }
 
   /**
    * Add a confidence-reducing factor
    */
-  addConfidenceReducer(factor: string, impact: number, explanation: string): this {
+  addConfidenceReducer(
+    factor: string,
+    impact: number,
+    explanation: string,
+  ): this {
     this.confidenceReducers.push({ factor, impact, explanation });
     return this;
   }
@@ -142,7 +169,11 @@ export class ResponseBuilder<T = unknown> {
   /**
    * Add a confidence-boosting factor
    */
-  addConfidenceBooster(factor: string, impact: number, explanation: string): this {
+  addConfidenceBooster(
+    factor: string,
+    impact: number,
+    explanation: string,
+  ): this {
     this.confidenceBoosters.push({ factor, impact, explanation });
     return this;
   }
@@ -168,9 +199,9 @@ export class ResponseBuilder<T = unknown> {
    */
   addExternalDependency(
     name: string,
-    type: 'api' | 'database' | 'service' | 'model',
+    type: "api" | "database" | "service" | "model",
     version: string,
-    stateAtRequest: Record<string, unknown> = {}
+    stateAtRequest: Record<string, unknown> = {},
   ): this {
     this.externalDeps.push({ name, type, version, stateAtRequest });
     return this;
@@ -195,7 +226,9 @@ export class ResponseBuilder<T = unknown> {
     const confidence = this.calculateConfidence();
 
     // Calculate hashes
-    const inputHash = await this.calculateHash(JSON.stringify({ requestId: this.requestId }));
+    const inputHash = await this.calculateHash(
+      JSON.stringify({ requestId: this.requestId }),
+    );
     const outputHash = await this.calculateHash(JSON.stringify(payload));
 
     // Build provenance
@@ -227,8 +260,8 @@ export class ResponseBuilder<T = unknown> {
 
     // Build metadata
     const metadata: ResponseMetadata = {
-      apiVersion: '1.0.0',
-      engineVersion: '1.0.0',
+      apiVersion: "1.0.0",
+      engineVersion: "1.0.0",
       correlationId: this.requestId,
       tags: [],
       custom: {},
@@ -259,7 +292,7 @@ export class ResponseBuilder<T = unknown> {
         assumptionCount: this.assumptions.length,
         invalidityCount: this.invalidityConditions.length,
       },
-      'Response built'
+      "Response built",
     );
 
     return response;
@@ -298,14 +331,14 @@ export class ResponseBuilder<T = unknown> {
       breakdown: this.confidenceComponents,
       reducingFactors: this.confidenceReducers,
       boostingFactors: this.confidenceBoosters,
-      calibration: 'heuristic',
+      calibration: "heuristic",
     };
   }
 
   /**
    * Calculate phase timings (simplified distribution)
    */
-  private calculatePhases(totalMs: number): ResponseTiming['phases'] {
+  private calculatePhases(totalMs: number): ResponseTiming["phases"] {
     // Approximate distribution
     return {
       parsing: Math.round(totalMs * 0.05),
@@ -322,7 +355,7 @@ export class ResponseBuilder<T = unknown> {
   private isReplayable(): boolean {
     // Non-deterministic operations make replay harder
     const hasNonDeterministic = this.modelsUsed.some(
-      (m) => m.purpose.includes('random') || m.purpose.includes('sample')
+      (m) => m.purpose.includes("random") || m.purpose.includes("sample"),
     );
     return !hasNonDeterministic;
   }
@@ -332,17 +365,19 @@ export class ResponseBuilder<T = unknown> {
    */
   private generateReplayInstructions(): string {
     const steps: string[] = [
-      '1. Restore state snapshot to matching values',
-      '2. Ensure external dependencies are at specified versions',
+      "1. Restore state snapshot to matching values",
+      "2. Ensure external dependencies are at specified versions",
     ];
 
     if (this.externalDeps.length > 0) {
-      steps.push('3. Mock external services to return captured states');
+      steps.push("3. Mock external services to return captured states");
     }
 
-    steps.push(`${this.externalDeps.length > 0 ? '4' : '3'}. Replay request with original requestId`);
+    steps.push(
+      `${this.externalDeps.length > 0 ? "4" : "3"}. Replay request with original requestId`,
+    );
 
-    return steps.join('\n');
+    return steps.join("\n");
   }
 
   /**
@@ -351,7 +386,7 @@ export class ResponseBuilder<T = unknown> {
   private createDefaultGovernance(): GovernanceDecision {
     return {
       decisionId: crypto.randomUUID(),
-      action: 'allow',
+      action: "allow",
       trustLevel: 2,
       rulesApplied: [],
       modifications: [],
@@ -366,9 +401,9 @@ export class ResponseBuilder<T = unknown> {
   private async calculateHash(data: string): Promise<string> {
     const encoder = new TextEncoder();
     const dataBuffer = encoder.encode(data);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 }
 
@@ -391,7 +426,11 @@ export class ErrorResponseBuilder {
   /**
    * Add an attempted action
    */
-  addAttempted(action: string, result: 'success' | 'partial' | 'failed', details: string): this {
+  addAttempted(
+    action: string,
+    result: "success" | "partial" | "failed",
+    details: string,
+  ): this {
     this.attempted.push({ action, result, details });
     return this;
   }
@@ -399,7 +438,11 @@ export class ErrorResponseBuilder {
   /**
    * Add a remediation step
    */
-  addRemediation(action: string, description: string, automated: boolean = false): this {
+  addRemediation(
+    action: string,
+    description: string,
+    automated: boolean = false,
+  ): this {
     this.remediation.push({
       step: this.remediation.length + 1,
       action,
@@ -447,10 +490,10 @@ export class ErrorResponseBuilder {
     };
 
     const metadata: ResponseMetadata = {
-      apiVersion: '1.0.0',
-      engineVersion: '1.0.0',
+      apiVersion: "1.0.0",
+      engineVersion: "1.0.0",
       correlationId: this.requestId,
-      tags: ['error'],
+      tags: ["error"],
       custom: {},
       ...this.metadata,
     };
@@ -475,7 +518,7 @@ export class ErrorResponseBuilder {
         errorCategory: error.category,
         retryable: error.retryable,
       },
-      'Error response built'
+      "Error response built",
     );
 
     return response;
@@ -513,24 +556,24 @@ export class ContractService {
     const issues: string[] = [];
 
     // Check required fields
-    if (!response.responseId) issues.push('Missing responseId');
-    if (!response.requestId) issues.push('Missing requestId');
-    if (response.success === undefined) issues.push('Missing success flag');
-    if (!response.confidence) issues.push('Missing confidence');
-    if (!response.governance) issues.push('Missing governance');
-    if (!response.timing) issues.push('Missing timing');
+    if (!response.responseId) issues.push("Missing responseId");
+    if (!response.requestId) issues.push("Missing requestId");
+    if (response.success === undefined) issues.push("Missing success flag");
+    if (!response.confidence) issues.push("Missing confidence");
+    if (!response.governance) issues.push("Missing governance");
+    if (!response.timing) issues.push("Missing timing");
 
     // Validate confidence
     if (response.confidence) {
       if (response.confidence.overall < 0 || response.confidence.overall > 1) {
-        issues.push('Confidence overall must be between 0 and 1');
+        issues.push("Confidence overall must be between 0 and 1");
       }
     }
 
     // Validate timing
     if (response.timing) {
       if (response.timing.totalDurationMs < 0) {
-        issues.push('Total duration cannot be negative');
+        issues.push("Total duration cannot be negative");
       }
     }
 
@@ -559,7 +602,7 @@ export class ContractService {
 
     for (const condition of response.invalidityConditions) {
       // Check time-based conditions
-      if (condition.category === 'temporal' && condition.timeLimit) {
+      if (condition.category === "temporal" && condition.timeLimit) {
         const responseTime = new Date(response.timing.respondedAt).getTime();
         if (now - responseTime > condition.timeLimit) {
           invalidatedBy.push(condition);
@@ -579,7 +622,7 @@ export class ContractService {
    */
   storeResponse<T>(response: VorionResponse<T>): void {
     this.responseCache.set(response.responseId, response as VorionResponse);
-    logger.debug({ responseId: response.responseId }, 'Response stored');
+    logger.debug({ responseId: response.responseId }, "Response stored");
   }
 
   /**
@@ -587,7 +630,7 @@ export class ContractService {
    */
   storeErrorResponse(response: VorionErrorResponse): void {
     this.errorCache.set(response.responseId, response);
-    logger.debug({ responseId: response.responseId }, 'Error response stored');
+    logger.debug({ responseId: response.responseId }, "Error response stored");
   }
 
   /**
@@ -633,7 +676,8 @@ export class ContractService {
     return {
       totalResponses: responses.length,
       totalErrors: errors.length,
-      averageConfidence: responses.length > 0 ? totalConfidence / responses.length : 0,
+      averageConfidence:
+        responses.length > 0 ? totalConfidence / responses.length : 0,
       averageDurationMs: totalCount > 0 ? totalDuration / totalCount : 0,
     };
   }
@@ -652,11 +696,11 @@ export function createContractService(): ContractService {
 export function createAssumption(
   assumption: string,
   category: AssumptionCategory,
-  criticality: Assumption['criticality'],
+  criticality: Assumption["criticality"],
   confidence: number,
   fallbackBehavior: string,
-  supportingEvidence: string[] = []
-): Omit<Assumption, 'id'> {
+  supportingEvidence: string[] = [],
+): Omit<Assumption, "id"> {
   return {
     assumption,
     category,
@@ -673,11 +717,11 @@ export function createAssumption(
 export function createInvalidityCondition(
   condition: string,
   category: InvalidityCategory,
-  severity: InvalidityCondition['severity'],
+  severity: InvalidityCondition["severity"],
   detection: string,
   recommendedAction: string,
-  timeLimit?: number
-): Omit<InvalidityCondition, 'id'> {
+  timeLimit?: number,
+): Omit<InvalidityCondition, "id"> {
   return {
     condition,
     category,
@@ -697,7 +741,7 @@ export function createContractError(
   category: ErrorCategory,
   retryable: boolean,
   context: Record<string, unknown> = {},
-  retryAfterMs?: number
+  retryAfterMs?: number,
 ): ContractError {
   return {
     code,
@@ -714,40 +758,40 @@ export function createContractError(
  */
 export const ErrorCodes = {
   // Validation errors (V1xxx)
-  INVALID_INPUT: 'V1001',
-  MISSING_REQUIRED_FIELD: 'V1002',
-  INVALID_FORMAT: 'V1003',
+  INVALID_INPUT: "V1001",
+  MISSING_REQUIRED_FIELD: "V1002",
+  INVALID_FORMAT: "V1003",
 
   // Authorization errors (A2xxx)
-  UNAUTHORIZED: 'A2001',
-  FORBIDDEN: 'A2002',
-  TRUST_INSUFFICIENT: 'A2003',
+  UNAUTHORIZED: "A2001",
+  FORBIDDEN: "A2002",
+  TRUST_INSUFFICIENT: "A2003",
 
   // Governance errors (G3xxx)
-  GOVERNANCE_DENIED: 'G3001',
-  GOVERNANCE_ESCALATED: 'G3002',
-  CONTAINMENT_BLOCKED: 'G3003',
+  GOVERNANCE_DENIED: "G3001",
+  GOVERNANCE_ESCALATED: "G3002",
+  CONTAINMENT_BLOCKED: "G3003",
 
   // Resource errors (R4xxx)
-  NOT_FOUND: 'R4001',
-  CONFLICT: 'R4002',
-  RESOURCE_EXHAUSTED: 'R4003',
+  NOT_FOUND: "R4001",
+  CONFLICT: "R4002",
+  RESOURCE_EXHAUSTED: "R4003",
 
   // External errors (E5xxx)
-  EXTERNAL_SERVICE_ERROR: 'E5001',
-  EXTERNAL_TIMEOUT: 'E5002',
-  EXTERNAL_UNAVAILABLE: 'E5003',
+  EXTERNAL_SERVICE_ERROR: "E5001",
+  EXTERNAL_TIMEOUT: "E5002",
+  EXTERNAL_UNAVAILABLE: "E5003",
 
   // Internal errors (I6xxx)
-  INTERNAL_ERROR: 'I6001',
-  NOT_IMPLEMENTED: 'I6002',
-  CIRCUIT_BREAKER_OPEN: 'I6003',
+  INTERNAL_ERROR: "I6001",
+  NOT_IMPLEMENTED: "I6002",
+  CIRCUIT_BREAKER_OPEN: "I6003",
 
   // Timeout errors (T7xxx)
-  REQUEST_TIMEOUT: 'T7001',
-  PROCESSING_TIMEOUT: 'T7002',
+  REQUEST_TIMEOUT: "T7001",
+  PROCESSING_TIMEOUT: "T7002",
 
   // Rate limit errors (L8xxx)
-  RATE_LIMITED: 'L8001',
-  QUOTA_EXCEEDED: 'L8002',
+  RATE_LIMITED: "L8001",
+  QUOTA_EXCEEDED: "L8002",
 } as const;

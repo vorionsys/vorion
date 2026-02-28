@@ -6,11 +6,11 @@
  * @packageDocumentation
  */
 
-import Database from 'better-sqlite3';
-import { createLogger } from '../common/logger.js';
-import type { TrustTier, ObservationTier } from '../trust-facade/types.js';
+import Database from "better-sqlite3";
+import { createLogger } from "../common/logger.js";
+import type { TrustTier, ObservationTier } from "../trust-facade/types.js";
 
-const logger = createLogger({ component: 'sqlite-trust-store' });
+const logger = createLogger({ component: "sqlite-trust-store" });
 
 export interface SQLiteTrustStoreConfig {
   /** Database file path (use ':memory:' for in-memory) */
@@ -43,7 +43,7 @@ export interface AgentTrustRecord {
 export interface TrustSignalRecord {
   id: string;
   agentId: string;
-  type: 'success' | 'failure' | 'violation' | 'neutral';
+  type: "success" | "failure" | "violation" | "neutral";
   source: string;
   weight: number;
   scoreBefore: number;
@@ -61,7 +61,11 @@ export interface TrustStore {
   /** Get an agent's trust record */
   getAgent(agentId: string): Promise<AgentTrustRecord | null>;
   /** Update an agent's score */
-  updateScore(agentId: string, newScore: number, newTier: TrustTier): Promise<void>;
+  updateScore(
+    agentId: string,
+    newScore: number,
+    newTier: TrustTier,
+  ): Promise<void>;
   /** Revoke an agent */
   revokeAgent(agentId: string, reason: string): Promise<void>;
   /** Record a trust signal */
@@ -99,13 +103,16 @@ export class SQLiteTrustStore implements TrustStore {
     this.db = new Database(this.config.dbPath);
 
     if (this.config.walMode) {
-      this.db.pragma('journal_mode = WAL');
+      this.db.pragma("journal_mode = WAL");
     }
 
     this.initializeSchema();
     this.prepareStatements();
 
-    logger.info({ dbPath: this.config.dbPath }, 'SQLite trust store initialized');
+    logger.info(
+      { dbPath: this.config.dbPath },
+      "SQLite trust store initialized",
+    );
   }
 
   private initializeSchema(): void {
@@ -146,7 +153,7 @@ export class SQLiteTrustStore implements TrustStore {
       CREATE INDEX IF NOT EXISTS idx_agents_is_revoked ON agents(is_revoked);
     `);
 
-    logger.debug('Trust store schema initialized');
+    logger.debug("Trust store schema initialized");
   }
 
   private prepareStatements(): void {
@@ -218,7 +225,7 @@ export class SQLiteTrustStore implements TrustStore {
    * Save or update an agent's trust record
    */
   async saveAgent(record: AgentTrustRecord): Promise<void> {
-    if (!this.stmts) throw new Error('Store not initialized');
+    if (!this.stmts) throw new Error("Store not initialized");
 
     this.stmts.upsertAgent.run({
       agentId: record.agentId,
@@ -235,29 +242,31 @@ export class SQLiteTrustStore implements TrustStore {
       revokedReason: record.revokedReason ?? null,
     });
 
-    logger.debug({ agentId: record.agentId }, 'Agent record saved');
+    logger.debug({ agentId: record.agentId }, "Agent record saved");
   }
 
   /**
    * Get an agent's trust record
    */
   async getAgent(agentId: string): Promise<AgentTrustRecord | null> {
-    if (!this.stmts) throw new Error('Store not initialized');
+    if (!this.stmts) throw new Error("Store not initialized");
 
-    const row = this.stmts.getAgent.get(agentId) as {
-      agent_id: string;
-      name: string;
-      score: number;
-      tier: number;
-      observation_tier: string;
-      observation_ceiling: number;
-      capabilities: string;
-      admitted_at: string;
-      expires_at: string;
-      last_activity_at: string;
-      is_revoked: number;
-      revoked_reason: string | null;
-    } | undefined;
+    const row = this.stmts.getAgent.get(agentId) as
+      | {
+          agent_id: string;
+          name: string;
+          score: number;
+          tier: number;
+          observation_tier: string;
+          observation_ceiling: number;
+          capabilities: string;
+          admitted_at: string;
+          expires_at: string;
+          last_activity_at: string;
+          is_revoked: number;
+          revoked_reason: string | null;
+        }
+      | undefined;
 
     if (!row) return null;
 
@@ -280,8 +289,12 @@ export class SQLiteTrustStore implements TrustStore {
   /**
    * Update an agent's score
    */
-  async updateScore(agentId: string, newScore: number, newTier: TrustTier): Promise<void> {
-    if (!this.stmts) throw new Error('Store not initialized');
+  async updateScore(
+    agentId: string,
+    newScore: number,
+    newTier: TrustTier,
+  ): Promise<void> {
+    if (!this.stmts) throw new Error("Store not initialized");
 
     this.stmts.updateScore.run({
       agentId,
@@ -290,14 +303,14 @@ export class SQLiteTrustStore implements TrustStore {
       lastActivityAt: new Date().toISOString(),
     });
 
-    logger.debug({ agentId, newScore, newTier }, 'Agent score updated');
+    logger.debug({ agentId, newScore, newTier }, "Agent score updated");
   }
 
   /**
    * Revoke an agent
    */
   async revokeAgent(agentId: string, reason: string): Promise<void> {
-    if (!this.stmts) throw new Error('Store not initialized');
+    if (!this.stmts) throw new Error("Store not initialized");
 
     this.stmts.revokeAgent.run({
       agentId,
@@ -305,14 +318,14 @@ export class SQLiteTrustStore implements TrustStore {
       lastActivityAt: new Date().toISOString(),
     });
 
-    logger.warn({ agentId, reason }, 'Agent revoked');
+    logger.warn({ agentId, reason }, "Agent revoked");
   }
 
   /**
    * Record a trust signal
    */
   async recordSignal(signal: TrustSignalRecord): Promise<void> {
-    if (!this.stmts) throw new Error('Store not initialized');
+    if (!this.stmts) throw new Error("Store not initialized");
 
     this.stmts.insertSignal.run({
       id: signal.id,
@@ -326,14 +339,20 @@ export class SQLiteTrustStore implements TrustStore {
       timestamp: signal.timestamp.toISOString(),
     });
 
-    logger.debug({ signalId: signal.id, agentId: signal.agentId, type: signal.type }, 'Signal recorded');
+    logger.debug(
+      { signalId: signal.id, agentId: signal.agentId, type: signal.type },
+      "Signal recorded",
+    );
   }
 
   /**
    * Get signals for an agent
    */
-  async getSignals(agentId: string, limit: number = 100): Promise<TrustSignalRecord[]> {
-    if (!this.stmts) throw new Error('Store not initialized');
+  async getSignals(
+    agentId: string,
+    limit: number = 100,
+  ): Promise<TrustSignalRecord[]> {
+    if (!this.stmts) throw new Error("Store not initialized");
 
     const rows = this.stmts.getSignals.all(agentId, limit) as Array<{
       id: string;
@@ -350,7 +369,7 @@ export class SQLiteTrustStore implements TrustStore {
     return rows.map((row) => ({
       id: row.id,
       agentId: row.agent_id,
-      type: row.type as TrustSignalRecord['type'],
+      type: row.type as TrustSignalRecord["type"],
       source: row.source,
       weight: row.weight,
       scoreBefore: row.score_before,
@@ -364,7 +383,7 @@ export class SQLiteTrustStore implements TrustStore {
    * List all active agents
    */
   async listActiveAgents(): Promise<AgentTrustRecord[]> {
-    if (!this.stmts) throw new Error('Store not initialized');
+    if (!this.stmts) throw new Error("Store not initialized");
 
     const rows = this.stmts.listActiveAgents.all() as Array<{
       agent_id: string;
@@ -401,9 +420,15 @@ export class SQLiteTrustStore implements TrustStore {
    * Get statistics
    */
   getStats(): { agents: number; activeAgents: number; signals: number } {
-    const agentCount = this.db.prepare('SELECT COUNT(*) as count FROM agents').get() as { count: number };
-    const activeCount = this.db.prepare('SELECT COUNT(*) as count FROM agents WHERE is_revoked = 0').get() as { count: number };
-    const signalCount = this.db.prepare('SELECT COUNT(*) as count FROM trust_signals').get() as { count: number };
+    const agentCount = this.db
+      .prepare("SELECT COUNT(*) as count FROM agents")
+      .get() as { count: number };
+    const activeCount = this.db
+      .prepare("SELECT COUNT(*) as count FROM agents WHERE is_revoked = 0")
+      .get() as { count: number };
+    const signalCount = this.db
+      .prepare("SELECT COUNT(*) as count FROM trust_signals")
+      .get() as { count: number };
 
     return {
       agents: agentCount.count,
@@ -416,9 +441,9 @@ export class SQLiteTrustStore implements TrustStore {
    * Clear all data (useful for testing)
    */
   clear(): void {
-    this.db.exec('DELETE FROM trust_signals');
-    this.db.exec('DELETE FROM agents');
-    logger.debug('All trust data cleared');
+    this.db.exec("DELETE FROM trust_signals");
+    this.db.exec("DELETE FROM agents");
+    logger.debug("All trust data cleared");
   }
 
   /**
@@ -426,13 +451,15 @@ export class SQLiteTrustStore implements TrustStore {
    */
   close(): void {
     this.db.close();
-    logger.info('SQLite trust store closed');
+    logger.info("SQLite trust store closed");
   }
 }
 
 /**
  * Create a new SQLite trust store
  */
-export function createSQLiteTrustStore(config: SQLiteTrustStoreConfig): SQLiteTrustStore {
+export function createSQLiteTrustStore(
+  config: SQLiteTrustStoreConfig,
+): SQLiteTrustStore {
   return new SQLiteTrustStore(config);
 }

@@ -10,18 +10,21 @@
  * @packageDocumentation
  */
 
-import type { TrustSignal, TrustLevel } from '../common/types.js';
-import type { TrustEngine, TrustTierChangedEvent } from '../trust-engine/index.js';
-import { BootCampRunner } from './runner.js';
-import { evaluateGraduation } from './graduation.js';
-import { challengeToTrustSignal, challengeToAttestation } from './scorer.js';
+import type { TrustSignal, TrustLevel } from "../common/types.js";
+import type {
+  TrustEngine,
+  TrustTierChangedEvent,
+} from "../trust-engine/index.js";
+import { BootCampRunner } from "./runner.js";
+import { evaluateGraduation } from "./graduation.js";
+import { challengeToTrustSignal, challengeToAttestation } from "./scorer.js";
 import type {
   BootCampAgent,
   BootCampSession,
   BootCampConfig,
   GraduationResult,
-} from './types.js';
-import type { BootCampAttestation } from './scorer.js';
+} from "./types.js";
+import type { BootCampAttestation } from "./scorer.js";
 
 // =============================================================================
 // TYPES
@@ -131,9 +134,9 @@ export class PromotionService {
       const milestoneSignal: TrustSignal = {
         id: `bootcamp-graduation-${session.sessionId}-${Date.now()}`,
         entityId: agent.agentId,
-        type: 'behavioral.graduation',
+        type: "behavioral.graduation",
         value: 1.0,
-        source: 'sandbox-training',
+        source: "sandbox-training",
         timestamp: new Date().toISOString(),
         metadata: {
           sessionId: session.sessionId,

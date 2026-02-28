@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { EventEmitter } from 'events';
-import { createLogger } from '../common/logger.js';
+import { EventEmitter } from "events";
+import { createLogger } from "../common/logger.js";
 import type {
   CloudRegion,
   AIProvider,
@@ -18,10 +18,10 @@ import type {
   SavingsCalculatedEvent,
   IntensityFetchedEvent,
   FallbackUsedEvent,
-} from './types.js';
-import { ENERGY_PER_1000_TOKENS_KWH } from './types.js';
+} from "./types.js";
+import { ENERGY_PER_1000_TOKENS_KWH } from "./types.js";
 
-const logger = createLogger({ component: 'carbon-metrics' });
+const logger = createLogger({ component: "carbon-metrics" });
 
 /**
  * Default history retention (24 hours worth at 5-minute intervals)
@@ -62,7 +62,8 @@ export class CarbonMetrics extends EventEmitter {
   constructor(config: CarbonMetricsConfig = {}) {
     super();
     this._historySize = config.historySize ?? DEFAULT_HISTORY_SIZE;
-    this._baselineIntensity = config.baselineIntensity ?? DEFAULT_BASELINE_INTENSITY;
+    this._baselineIntensity =
+      config.baselineIntensity ?? DEFAULT_BASELINE_INTENSITY;
     this._periodStart = new Date().toISOString();
   }
 
@@ -91,7 +92,9 @@ export class CarbonMetrics extends EventEmitter {
    * Get average carbon intensity
    */
   get averageIntensity(): number {
-    return this._totalRequests > 0 ? this._totalIntensitySum / this._totalRequests : 0;
+    return this._totalRequests > 0
+      ? this._totalIntensitySum / this._totalRequests
+      : 0;
   }
 
   /**
@@ -123,7 +126,9 @@ export class CarbonMetrics extends EventEmitter {
    * Get fallback rate
    */
   get fallbackRate(): number {
-    return this._totalFetches > 0 ? this._fallbackCount / this._totalFetches : 0;
+    return this._totalFetches > 0
+      ? this._fallbackCount / this._totalFetches
+      : 0;
   }
 
   /**
@@ -133,12 +138,18 @@ export class CarbonMetrics extends EventEmitter {
     this._totalRequests++;
 
     // Calculate CO2
-    const co2Grams = this.calculateCO2(decision.carbonIntensity.intensity, estimatedTokens);
+    const co2Grams = this.calculateCO2(
+      decision.carbonIntensity.intensity,
+      estimatedTokens,
+    );
     this._totalEstimatedCO2Grams += co2Grams;
     this._totalIntensitySum += decision.carbonIntensity.intensity;
 
     // Calculate savings vs baseline
-    const baselineCO2 = this.calculateCO2(this._baselineIntensity, estimatedTokens);
+    const baselineCO2 = this.calculateCO2(
+      this._baselineIntensity,
+      estimatedTokens,
+    );
     const savings = Math.max(0, baselineCO2 - co2Grams);
     this._totalSavingsGrams += savings;
 
@@ -159,7 +170,7 @@ export class CarbonMetrics extends EventEmitter {
       region: decision.region,
       intensity: decision.carbonIntensity.intensity,
       timestamp: decision.decidedAt,
-      source: 'routing_decision',
+      source: "routing_decision",
     });
 
     // Emit savings event
@@ -173,7 +184,7 @@ export class CarbonMetrics extends EventEmitter {
         savingsGrams: savings,
         totalRequests: this._totalRequests,
       },
-      'Routing recorded'
+      "Routing recorded",
     );
   }
 
@@ -209,7 +220,7 @@ export class CarbonMetrics extends EventEmitter {
         fallbackSource: event.fallbackSource,
         reason: event.reason,
       },
-      'Fallback recorded'
+      "Fallback recorded",
     );
   }
 
@@ -238,7 +249,7 @@ export class CarbonMetrics extends EventEmitter {
    */
   getIntensityHistory(region?: CloudRegion): IntensityHistoryEntry[] {
     if (region) {
-      return this._intensityHistory.filter(e => e.region === region);
+      return this._intensityHistory.filter((e) => e.region === region);
     }
     return [...this._intensityHistory];
   }
@@ -257,8 +268,11 @@ export class CarbonMetrics extends EventEmitter {
   /**
    * Get regions sorted by average intensity (greenest first)
    */
-  getRegionsByIntensity(): Array<{ region: CloudRegion; averageIntensity: number }> {
-    const regions = new Set(this._intensityHistory.map(e => e.region));
+  getRegionsByIntensity(): Array<{
+    region: CloudRegion;
+    averageIntensity: number;
+  }> {
+    const regions = new Set(this._intensityHistory.map((e) => e.region));
     const result: Array<{ region: CloudRegion; averageIntensity: number }> = [];
 
     Array.from(regions).forEach((region) => {
@@ -282,8 +296,11 @@ export class CarbonMetrics extends EventEmitter {
       if (requests > 0) {
         // Estimate what the CO2 would have been at baseline
         const avgCO2PerRequest = totalCO2 / requests;
-        const baselineCO2PerRequest = avgCO2PerRequest * (this._baselineIntensity / this.getAverageRegionIntensity(region));
-        const regionSavings = (baselineCO2PerRequest - avgCO2PerRequest) * requests;
+        const baselineCO2PerRequest =
+          avgCO2PerRequest *
+          (this._baselineIntensity / this.getAverageRegionIntensity(region));
+        const regionSavings =
+          (baselineCO2PerRequest - avgCO2PerRequest) * requests;
         savings.set(region, Math.max(0, regionSavings));
       }
     });
@@ -329,7 +346,10 @@ export class CarbonMetrics extends EventEmitter {
       milesDrivenEquivalent,
       greenestRegion,
       dirtiestRegion,
-      recommendations: this.generateRecommendations(snapshot, regionsByIntensity),
+      recommendations: this.generateRecommendations(
+        snapshot,
+        regionsByIntensity,
+      ),
     };
   }
 
@@ -350,7 +370,7 @@ export class CarbonMetrics extends EventEmitter {
     this._co2ByRegion.clear();
     this._intensityHistory = [];
     this._periodStart = new Date().toISOString();
-    logger.info('Carbon metrics reset');
+    logger.info("Carbon metrics reset");
   }
 
   /**
@@ -378,24 +398,29 @@ export class CarbonMetrics extends EventEmitter {
    */
   private generateRecommendations(
     snapshot: CarbonMetricsSnapshot,
-    regionsByIntensity: Array<{ region: CloudRegion; averageIntensity: number }>
+    regionsByIntensity: Array<{
+      region: CloudRegion;
+      averageIntensity: number;
+    }>,
   ): string[] {
     const recommendations: string[] = [];
 
     // Check green routing percentage
     if (snapshot.greenRoutingPercentage < 50) {
       recommendations.push(
-        'Consider relaxing latency constraints to allow more routing to low-carbon regions.'
+        "Consider relaxing latency constraints to allow more routing to low-carbon regions.",
       );
     }
 
     // Check if high-carbon regions are being used frequently
-    const highCarbonRegions = regionsByIntensity.filter(r => r.averageIntensity > 300);
+    const highCarbonRegions = regionsByIntensity.filter(
+      (r) => r.averageIntensity > 300,
+    );
     for (const { region } of highCarbonRegions) {
       const requests = snapshot.requestsByRegion.get(region) ?? 0;
       if (requests > snapshot.totalRequests * 0.1) {
         recommendations.push(
-          `Region ${region} has high carbon intensity. Consider alternative regions if latency permits.`
+          `Region ${region} has high carbon intensity. Consider alternative regions if latency permits.`,
         );
       }
     }
@@ -403,23 +428,23 @@ export class CarbonMetrics extends EventEmitter {
     // Check cache hit rate
     if (snapshot.cacheHitRate < 0.5) {
       recommendations.push(
-        'Low cache hit rate detected. Consider increasing cache TTL for carbon intensity data.'
+        "Low cache hit rate detected. Consider increasing cache TTL for carbon intensity data.",
       );
     }
 
     // Check fallback rate
     if (snapshot.fallbackRate > 0.1) {
       recommendations.push(
-        'High fallback rate detected. Check primary carbon data source connectivity.'
+        "High fallback rate detected. Check primary carbon data source connectivity.",
       );
     }
 
     // Recommend greenest regions
     const greenestRegions = regionsByIntensity.slice(0, 3);
     if (greenestRegions.length > 0) {
-      const regionNames = greenestRegions.map(r => r.region).join(', ');
+      const regionNames = greenestRegions.map((r) => r.region).join(", ");
       recommendations.push(
-        `Greenest available regions: ${regionNames}. Consider prioritizing these when possible.`
+        `Greenest available regions: ${regionNames}. Consider prioritizing these when possible.`,
       );
     }
 
@@ -433,19 +458,20 @@ export class CarbonMetrics extends EventEmitter {
     requestId: string,
     actualCO2Grams: number,
     baselineCO2Grams: number,
-    savingsGrams: number
+    savingsGrams: number,
   ): void {
     const event: SavingsCalculatedEvent = {
-      type: 'carbon:savings_calculated',
+      type: "carbon:savings_calculated",
       timestamp: new Date().toISOString(),
       requestId,
       actualCO2Grams,
       baselineCO2Grams,
       savingsGrams,
-      savingsPercentage: baselineCO2Grams > 0 ? (savingsGrams / baselineCO2Grams) * 100 : 0,
+      savingsPercentage:
+        baselineCO2Grams > 0 ? (savingsGrams / baselineCO2Grams) * 100 : 0,
     };
     this.emit(event.type, event);
-    this.emit('carbon:*', event);
+    this.emit("carbon:*", event);
   }
 }
 
@@ -480,6 +506,8 @@ export interface SustainabilityReport extends CarbonMetricsSnapshot {
 /**
  * Create a carbon metrics collector
  */
-export function createCarbonMetrics(config?: CarbonMetricsConfig): CarbonMetrics {
+export function createCarbonMetrics(
+  config?: CarbonMetricsConfig,
+): CarbonMetrics {
   return new CarbonMetrics(config);
 }

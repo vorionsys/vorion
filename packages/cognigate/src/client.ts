@@ -22,9 +22,9 @@ import {
   GovernanceResultSchema,
   ProofRecordSchema,
   AgentSchema,
-} from './types.js';
+} from "./types.js";
 
-const DEFAULT_BASE_URL = 'https://cognigate.dev/v1';
+const DEFAULT_BASE_URL = "https://cognigate.dev/v1";
 const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_RETRIES = 3;
 
@@ -33,15 +33,17 @@ export class CognigateError extends Error {
     message: string,
     public code: string,
     public status?: number,
-    public details?: Record<string, unknown>
+    public details?: Record<string, unknown>,
   ) {
     super(message);
-    this.name = 'CognigateError';
+    this.name = "CognigateError";
   }
 }
 
 export class Cognigate {
-  private readonly config: Required<Omit<CognigateConfig, 'webhookSecret' | 'region'>> & { webhookSecret?: string; region?: string };
+  private readonly config: Required<
+    Omit<CognigateConfig, "webhookSecret" | "region">
+  > & { webhookSecret?: string; region?: string };
   public readonly agents: AgentsClient;
   public readonly trust: TrustClient;
   public readonly governance: GovernanceClient;
@@ -49,7 +51,7 @@ export class Cognigate {
 
   constructor(config: CognigateConfig) {
     if (!config.apiKey) {
-      throw new CognigateError('API key is required', 'MISSING_API_KEY');
+      throw new CognigateError("API key is required", "MISSING_API_KEY");
     }
 
     this.config = {
@@ -73,18 +75,20 @@ export class Cognigate {
    * Make an authenticated request to the Cognigate API
    */
   async request<T>(
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     path: string,
-    body?: unknown
+    body?: unknown,
   ): Promise<T> {
     const url = `${this.config.baseUrl}${path}`;
 
     const headers: Record<string, string> = {
-      'Authorization': `Bearer ${this.config.apiKey}`,
-      'Content-Type': 'application/json',
-      'X-SDK-Version': '1.0.0',
-      'X-SDK-Language': 'typescript',
-      ...(this.config.region ? { 'X-Cognigate-Region': this.config.region } : {}),
+      Authorization: `Bearer ${this.config.apiKey}`,
+      "Content-Type": "application/json",
+      "X-SDK-Version": "1.0.0",
+      "X-SDK-Language": "typescript",
+      ...(this.config.region
+        ? { "X-Cognigate-Region": this.config.region }
+        : {}),
     };
 
     let lastError: Error | null = null;
@@ -92,7 +96,10 @@ export class Cognigate {
     for (let attempt = 0; attempt < this.config.retries; attempt++) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+        const timeoutId = setTimeout(
+          () => controller.abort(),
+          this.config.timeout,
+        );
 
         const response = await fetch(url, {
           method,
@@ -108,12 +115,16 @@ export class Cognigate {
         }
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({})) as Record<string, unknown>;
+          const errorData = (await response.json().catch(() => ({}))) as Record<
+            string,
+            unknown
+          >;
           throw new CognigateError(
-            (errorData.message as string) || `Request failed with status ${response.status}`,
-            (errorData.code as string) || 'REQUEST_FAILED',
+            (errorData.message as string) ||
+              `Request failed with status ${response.status}`,
+            (errorData.code as string) || "REQUEST_FAILED",
             response.status,
-            errorData.details as Record<string, unknown> | undefined
+            errorData.details as Record<string, unknown> | undefined,
           );
         }
 
@@ -122,25 +133,33 @@ export class Cognigate {
       } catch (error) {
         lastError = error as Error;
 
-        if (error instanceof CognigateError && error.status && error.status < 500) {
+        if (
+          error instanceof CognigateError &&
+          error.status &&
+          error.status < 500
+        ) {
           throw error; // Don't retry client errors
         }
 
         if (attempt < this.config.retries - 1) {
           const delay = Math.pow(2, attempt) * 1000;
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
 
-    throw lastError || new CognigateError('Request failed', 'UNKNOWN_ERROR');
+    throw lastError || new CognigateError("Request failed", "UNKNOWN_ERROR");
   }
 
   /**
    * Check API health
    */
-  async health(): Promise<{ status: string; version: string; timestamp: Date }> {
-    return this.request('GET', '/health');
+  async health(): Promise<{
+    status: string;
+    version: string;
+    timestamp: Date;
+  }> {
+    return this.request("GET", "/health");
   }
 
   /**
@@ -167,7 +186,11 @@ export class Cognigate {
   /**
    * Get tier thresholds
    */
-  static getTierThresholds(tier: TrustTier): { min: number; max: number; name: string } {
+  static getTierThresholds(tier: TrustTier): {
+    min: number;
+    max: number;
+    name: string;
+  } {
     return TIER_THRESHOLDS[tier];
   }
 }
@@ -185,24 +208,27 @@ class AgentsClient {
   async list(params?: {
     page?: number;
     pageSize?: number;
-    status?: 'ACTIVE' | 'PAUSED' | 'SUSPENDED';
+    status?: "ACTIVE" | "PAUSED" | "SUSPENDED";
   }): Promise<PaginatedResponse<Agent>> {
     const query = new URLSearchParams();
-    if (params?.page) query.set('page', params.page.toString());
-    if (params?.pageSize) query.set('pageSize', params.pageSize.toString());
-    if (params?.status) query.set('status', params.status);
+    if (params?.page) query.set("page", params.page.toString());
+    if (params?.pageSize) query.set("pageSize", params.pageSize.toString());
+    if (params?.status) query.set("status", params.status);
 
     const queryString = query.toString();
-    const path = `/agents${queryString ? `?${queryString}` : ''}`;
+    const path = `/agents${queryString ? `?${queryString}` : ""}`;
 
-    return this.client.request('GET', path);
+    return this.client.request("GET", path);
   }
 
   /**
    * Get a specific agent
    */
   async get(agentId: string): Promise<Agent> {
-    const response = await this.client.request<Agent>('GET', `/agents/${agentId}`);
+    const response = await this.client.request<Agent>(
+      "GET",
+      `/agents/${agentId}`,
+    );
     return AgentSchema.parse(response) as Agent;
   }
 
@@ -210,7 +236,7 @@ class AgentsClient {
    * Create a new agent
    */
   async create(data: CreateAgentRequest): Promise<Agent> {
-    const response = await this.client.request<Agent>('POST', '/agents', data);
+    const response = await this.client.request<Agent>("POST", "/agents", data);
     return AgentSchema.parse(response) as Agent;
   }
 
@@ -218,7 +244,11 @@ class AgentsClient {
    * Update an agent
    */
   async update(agentId: string, data: UpdateAgentRequest): Promise<Agent> {
-    const response = await this.client.request<Agent>('PATCH', `/agents/${agentId}`, data);
+    const response = await this.client.request<Agent>(
+      "PATCH",
+      `/agents/${agentId}`,
+      data,
+    );
     return AgentSchema.parse(response) as Agent;
   }
 
@@ -226,21 +256,21 @@ class AgentsClient {
    * Delete an agent
    */
   async delete(agentId: string): Promise<void> {
-    await this.client.request('DELETE', `/agents/${agentId}`);
+    await this.client.request("DELETE", `/agents/${agentId}`);
   }
 
   /**
    * Pause an agent
    */
   async pause(agentId: string): Promise<Agent> {
-    return this.update(agentId, { status: 'PAUSED' });
+    return this.update(agentId, { status: "PAUSED" });
   }
 
   /**
    * Resume an agent
    */
   async resume(agentId: string): Promise<Agent> {
-    return this.update(agentId, { status: 'ACTIVE' });
+    return this.update(agentId, { status: "ACTIVE" });
   }
 }
 
@@ -255,7 +285,10 @@ class TrustClient {
    * Get trust status for an entity
    */
   async getStatus(entityId: string): Promise<TrustStatus> {
-    const response = await this.client.request<TrustStatus>('GET', `/trust/${entityId}`);
+    const response = await this.client.request<TrustStatus>(
+      "GET",
+      `/trust/${entityId}`,
+    );
     return TrustStatusSchema.parse(response) as TrustStatus;
   }
 
@@ -264,17 +297,17 @@ class TrustClient {
    */
   async getHistory(
     entityId: string,
-    params?: { from?: Date; to?: Date; limit?: number }
+    params?: { from?: Date; to?: Date; limit?: number },
   ): Promise<Array<{ score: number; tier: TrustTier; timestamp: Date }>> {
     const query = new URLSearchParams();
-    if (params?.from) query.set('from', params.from.toISOString());
-    if (params?.to) query.set('to', params.to.toISOString());
-    if (params?.limit) query.set('limit', params.limit.toString());
+    if (params?.from) query.set("from", params.from.toISOString());
+    if (params?.to) query.set("to", params.to.toISOString());
+    if (params?.limit) query.set("limit", params.limit.toString());
 
     const queryString = query.toString();
-    const path = `/trust/${entityId}/history${queryString ? `?${queryString}` : ''}`;
+    const path = `/trust/${entityId}/history${queryString ? `?${queryString}` : ""}`;
 
-    return this.client.request('GET', path);
+    return this.client.request("GET", path);
   }
 
   /**
@@ -287,12 +320,12 @@ class TrustClient {
       success: boolean;
       metrics?: Record<string, number>;
       notes?: string;
-    }
+    },
   ): Promise<TrustStatus> {
     const response = await this.client.request<TrustStatus>(
-      'POST',
+      "POST",
       `/trust/${entityId}/outcome`,
-      { proofId, ...outcome }
+      { proofId, ...outcome },
     );
     return TrustStatusSchema.parse(response) as TrustStatus;
   }
@@ -308,8 +341,11 @@ class GovernanceClient {
   /**
    * Parse user intent into structured format
    */
-  async parseIntent(entityId: string, rawInput: string): Promise<IntentParseResult> {
-    return this.client.request('POST', '/governance/parse', {
+  async parseIntent(
+    entityId: string,
+    rawInput: string,
+  ): Promise<IntentParseResult> {
+    return this.client.request("POST", "/governance/parse", {
       entityId,
       rawInput,
     });
@@ -320,9 +356,9 @@ class GovernanceClient {
    */
   async enforce(intent: Intent): Promise<GovernanceResult> {
     const response = await this.client.request<GovernanceResult>(
-      'POST',
-      '/governance/enforce',
-      intent
+      "POST",
+      "/governance/enforce",
+      intent,
     );
     return GovernanceResultSchema.parse(response) as GovernanceResult;
   }
@@ -330,7 +366,10 @@ class GovernanceClient {
   /**
    * Convenience method: parse and enforce in one call
    */
-  async evaluate(entityId: string, rawInput: string): Promise<{
+  async evaluate(
+    entityId: string,
+    rawInput: string,
+  ): Promise<{
     intent: Intent;
     result: GovernanceResult;
   }> {
@@ -348,9 +387,9 @@ class GovernanceClient {
   async canPerform(
     entityId: string,
     action: string,
-    capabilities: string[]
+    capabilities: string[],
   ): Promise<{ allowed: boolean; reason: string }> {
-    return this.client.request('POST', '/governance/check', {
+    return this.client.request("POST", "/governance/check", {
       entityId,
       action,
       capabilities,
@@ -369,7 +408,10 @@ class ProofsClient {
    * Get a specific proof record
    */
   async get(proofId: string): Promise<ProofRecord> {
-    const response = await this.client.request<ProofRecord>('GET', `/proofs/${proofId}`);
+    const response = await this.client.request<ProofRecord>(
+      "GET",
+      `/proofs/${proofId}`,
+    );
     return ProofRecordSchema.parse(response) as ProofRecord;
   }
 
@@ -383,25 +425,25 @@ class ProofsClient {
       pageSize?: number;
       from?: Date;
       to?: Date;
-      outcome?: 'SUCCESS' | 'FAILURE' | 'PARTIAL';
-    }
+      outcome?: "SUCCESS" | "FAILURE" | "PARTIAL";
+    },
   ): Promise<PaginatedResponse<ProofRecord>> {
     const query = new URLSearchParams();
-    query.set('entityId', entityId);
-    if (params?.page) query.set('page', params.page.toString());
-    if (params?.pageSize) query.set('pageSize', params.pageSize.toString());
-    if (params?.from) query.set('from', params.from.toISOString());
-    if (params?.to) query.set('to', params.to.toISOString());
-    if (params?.outcome) query.set('outcome', params.outcome);
+    query.set("entityId", entityId);
+    if (params?.page) query.set("page", params.page.toString());
+    if (params?.pageSize) query.set("pageSize", params.pageSize.toString());
+    if (params?.from) query.set("from", params.from.toISOString());
+    if (params?.to) query.set("to", params.to.toISOString());
+    if (params?.outcome) query.set("outcome", params.outcome);
 
-    return this.client.request('GET', `/proofs?${query.toString()}`);
+    return this.client.request("GET", `/proofs?${query.toString()}`);
   }
 
   /**
    * Get proof chain statistics
    */
   async getStats(entityId: string): Promise<ProofChainStats> {
-    return this.client.request('GET', `/proofs/stats/${entityId}`);
+    return this.client.request("GET", `/proofs/stats/${entityId}`);
   }
 
   /**
@@ -412,7 +454,7 @@ class ProofsClient {
     errors: string[];
     lastVerified: Date;
   }> {
-    return this.client.request('POST', `/proofs/verify/${entityId}`);
+    return this.client.request("POST", `/proofs/verify/${entityId}`);
   }
 }
 

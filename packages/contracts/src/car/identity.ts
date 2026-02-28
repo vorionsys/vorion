@@ -8,13 +8,26 @@
  * @module @vorionsys/contracts/car/identity
  */
 
-import { z } from 'zod';
-import { type DomainCode, domainCodeArraySchema } from './domains.js';
-import { CapabilityLevel, capabilityLevelSchema } from './levels.js';
-import { CertificationTier, certificationTierSchema, RuntimeTier, runtimeTierSchema } from './tiers.js';
-import { type Attestation, attestationSchema } from './attestation.js';
-import { type ParsedCAR, parsedCARSchema, carStringSchema } from './car-string.js';
-import { type SkillCode, skillCodeArraySchema, skillBitmaskSchema } from './skills.js';
+import { z } from "zod";
+import { type DomainCode, domainCodeArraySchema } from "./domains.js";
+import { CapabilityLevel, capabilityLevelSchema } from "./levels.js";
+import {
+  CertificationTier,
+  certificationTierSchema,
+  RuntimeTier,
+  runtimeTierSchema,
+} from "./tiers.js";
+import { type Attestation, attestationSchema } from "./attestation.js";
+import {
+  type ParsedCAR,
+  parsedCARSchema,
+  carStringSchema,
+} from "./car-string.js";
+import {
+  type SkillCode,
+  skillCodeArraySchema,
+  skillBitmaskSchema,
+} from "./skills.js";
 
 // ============================================================================
 // Supervision Constants
@@ -113,17 +126,19 @@ export interface AgentMetadata {
 /**
  * Zod schema for AgentMetadata validation.
  */
-export const agentMetadataSchema = z.object({
-  description: z.string().optional(),
-  version: z.string().optional(),
-  contact: z.string().optional(),
-  documentation: z.string().url().optional(),
-  support: z.string().url().optional(),
-  termsOfService: z.string().url().optional(),
-  privacyPolicy: z.string().url().optional(),
-  organization: z.string().optional(),
-  logo: z.string().url().optional(),
-}).catchall(z.string().optional());
+export const agentMetadataSchema = z
+  .object({
+    description: z.string().optional(),
+    version: z.string().optional(),
+    contact: z.string().optional(),
+    documentation: z.string().url().optional(),
+    support: z.string().url().optional(),
+    termsOfService: z.string().url().optional(),
+    privacyPolicy: z.string().url().optional(),
+    organization: z.string().optional(),
+    logo: z.string().url().optional(),
+  })
+  .catchall(z.string().optional());
 
 // ============================================================================
 // Supervision Context
@@ -189,7 +204,9 @@ export function isSupervisionActive(ctx: SupervisionContext): boolean {
 
   // Check heartbeat if required
   if (ctx.heartbeatIntervalMs > 0 && ctx.lastHeartbeat) {
-    const heartbeatDeadline = new Date(ctx.lastHeartbeat.getTime() + ctx.heartbeatIntervalMs);
+    const heartbeatDeadline = new Date(
+      ctx.lastHeartbeat.getTime() + ctx.heartbeatIntervalMs,
+    );
     if (heartbeatDeadline < now) {
       return false;
     }
@@ -209,18 +226,21 @@ export function isSupervisionActive(ctx: SupervisionContext): boolean {
  */
 export function calculateSupervisedTier(
   baseTier: CertificationTier,
-  supervision: SupervisionContext
+  supervision: SupervisionContext,
 ): CertificationTier {
   if (!isSupervisionActive(supervision)) {
     return baseTier;
   }
 
-  const elevation = Math.min(supervision.elevationTiers, MAX_SUPERVISION_ELEVATION);
+  const elevation = Math.min(
+    supervision.elevationTiers,
+    MAX_SUPERVISION_ELEVATION,
+  );
   const supervisorCap = Math.max(0, supervision.supervisorTier - 1);
   const elevatedTier = Math.min(
     baseTier + elevation,
     supervisorCap,
-    CertificationTier.T7_AUTONOMOUS
+    CertificationTier.T7_AUTONOMOUS,
   );
 
   return Math.max(baseTier, elevatedTier) as CertificationTier;
@@ -237,9 +257,12 @@ export function calculateSupervisedTier(
 export function validateSupervisionElevation(
   supervisorTier: CertificationTier,
   subjectTier: CertificationTier,
-  requestedElevation: number
+  requestedElevation: number,
 ): { valid: boolean; reason?: string; effectiveTier?: CertificationTier } {
-  if (requestedElevation < 0 || requestedElevation > MAX_SUPERVISION_ELEVATION) {
+  if (
+    requestedElevation < 0 ||
+    requestedElevation > MAX_SUPERVISION_ELEVATION
+  ) {
     return {
       valid: false,
       reason: `Elevation must be 0-${MAX_SUPERVISION_ELEVATION}, got ${requestedElevation}`,
@@ -257,7 +280,7 @@ export function validateSupervisionElevation(
   const effectiveTier = Math.min(
     subjectTier + requestedElevation,
     supervisorCap,
-    CertificationTier.T7_AUTONOMOUS
+    CertificationTier.T7_AUTONOMOUS,
   ) as CertificationTier;
 
   return { valid: true, effectiveTier };
@@ -342,11 +365,13 @@ export const verificationMethodSchema = z.object({
 /**
  * Zod schema for ServiceEndpoint.
  */
-export const serviceEndpointSchema = z.object({
-  id: z.string().min(1),
-  type: z.string().min(1),
-  serviceEndpoint: z.string().url(),
-}).catchall(z.unknown());
+export const serviceEndpointSchema = z
+  .object({
+    id: z.string().min(1),
+    type: z.string().min(1),
+    serviceEndpoint: z.string().url(),
+  })
+  .catchall(z.unknown());
 
 // ============================================================================
 // Agent Identity
@@ -570,7 +595,7 @@ export const agentMatchCriteriaSchema = z.object({
  */
 export function createAgentIdentity(
   options: AgentRegistrationOptions,
-  parsedCAR?: ParsedCAR
+  parsedCAR?: ParsedCAR,
 ): AgentIdentity {
   const now = new Date();
 
@@ -618,13 +643,19 @@ export function createAgentIdentity(
  * @param identity - Full agent identity
  * @returns Summarized view
  */
-export function toAgentIdentitySummary(identity: AgentIdentity): AgentIdentitySummary {
+export function toAgentIdentitySummary(
+  identity: AgentIdentity,
+): AgentIdentitySummary {
   // Compute certification tier from valid attestations
   const now = new Date();
-  const validAttestations = identity.attestations.filter((a) => a.expiresAt > now);
+  const validAttestations = identity.attestations.filter(
+    (a) => a.expiresAt > now,
+  );
   const certificationTier =
     validAttestations.length > 0
-      ? (Math.max(...validAttestations.map((a) => a.certificationTier)) as CertificationTier)
+      ? (Math.max(
+          ...validAttestations.map((a) => a.certificationTier),
+        ) as CertificationTier)
       : undefined;
 
   return {
@@ -653,7 +684,7 @@ export function toAgentIdentitySummary(identity: AgentIdentity): AgentIdentitySu
  */
 export function matchesAgentCriteria(
   identity: AgentIdentity,
-  criteria: AgentMatchCriteria
+  criteria: AgentMatchCriteria,
 ): boolean {
   // Check active status
   if (criteria.mustBeActive && !identity.active) {
@@ -663,14 +694,19 @@ export function matchesAgentCriteria(
   // Check required domains
   if (criteria.requiredDomains && criteria.requiredDomains.length > 0) {
     const agentDomains = new Set(identity.capabilities.domains);
-    const hasAllDomains = criteria.requiredDomains.every((d) => agentDomains.has(d));
+    const hasAllDomains = criteria.requiredDomains.every((d) =>
+      agentDomains.has(d),
+    );
     if (!hasAllDomains) {
       return false;
     }
   }
 
   // Check minimum level
-  if (criteria.minLevel !== undefined && identity.capabilities.level < criteria.minLevel) {
+  if (
+    criteria.minLevel !== undefined &&
+    identity.capabilities.level < criteria.minLevel
+  ) {
     return false;
   }
 
@@ -678,7 +714,7 @@ export function matchesAgentCriteria(
   if (criteria.minCertificationTier !== undefined) {
     const now = new Date();
     const validAttestations = identity.attestations.filter(
-      (a) => a.status === 'active' && a.expiresAt > now
+      (a) => a.status === "active" && a.expiresAt > now,
     );
     const highestTier =
       validAttestations.length > 0
@@ -701,7 +737,9 @@ export function matchesAgentCriteria(
   // Check required skills
   if (criteria.requiredSkills && criteria.requiredSkills.length > 0) {
     const agentSkills = new Set(identity.capabilities.skills ?? []);
-    const hasAllSkills = criteria.requiredSkills.every((s) => agentSkills.has(s));
+    const hasAllSkills = criteria.requiredSkills.every((s) =>
+      agentSkills.has(s),
+    );
     if (!hasAllSkills) {
       return false;
     }
@@ -711,7 +749,7 @@ export function matchesAgentCriteria(
   if (criteria.mustHaveValidAttestations) {
     const now = new Date();
     const hasValidAttestation = identity.attestations.some(
-      (a) => a.status === 'active' && a.expiresAt > now
+      (a) => a.status === "active" && a.expiresAt > now,
     );
     if (!hasValidAttestation) {
       return false;
@@ -748,7 +786,7 @@ export function matchesAgentCriteria(
  */
 export function capabilityVectorSatisfies(
   a: CapabilityVector,
-  b: CapabilityVector
+  b: CapabilityVector,
 ): boolean {
   // Check domains
   const aDomains = new Set(a.domains);
@@ -785,10 +823,10 @@ export function capabilityVectorSatisfies(
  */
 export function isCapabilityVector(value: unknown): value is CapabilityVector {
   return (
-    typeof value === 'object' &&
+    typeof value === "object" &&
     value !== null &&
-    'domains' in value &&
-    'level' in value
+    "domains" in value &&
+    "level" in value
   );
 }
 
@@ -797,25 +835,27 @@ export function isCapabilityVector(value: unknown): value is CapabilityVector {
  */
 export function isAgentIdentity(value: unknown): value is AgentIdentity {
   return (
-    typeof value === 'object' &&
+    typeof value === "object" &&
     value !== null &&
-    ('car' in value || 'carId' in value) &&
-    'did' in value &&
-    'capabilities' in value &&
-    'attestations' in value
+    ("car" in value || "carId" in value) &&
+    "did" in value &&
+    "capabilities" in value &&
+    "attestations" in value
   );
 }
 
 /**
  * Type guard to check if a value is a valid AgentIdentitySummary.
  */
-export function isAgentIdentitySummary(value: unknown): value is AgentIdentitySummary {
+export function isAgentIdentitySummary(
+  value: unknown,
+): value is AgentIdentitySummary {
   return (
-    typeof value === 'object' &&
+    typeof value === "object" &&
     value !== null &&
-    ('car' in value || 'carId' in value) &&
-    'did' in value &&
-    'domains' in value &&
-    'level' in value
+    ("car" in value || "carId" in value) &&
+    "did" in value &&
+    "domains" in value &&
+    "level" in value
   );
 }

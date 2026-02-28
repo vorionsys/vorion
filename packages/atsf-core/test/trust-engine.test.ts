@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   TrustEngine,
   createTrustEngine,
@@ -9,27 +9,27 @@ import {
   type TrustFailureDetectedEvent,
   type TrustDecayAppliedEvent,
   type TrustTierChangedEvent,
-} from '../src/trust-engine/index.js';
-import type { TrustSignal } from '../src/common/types.js';
+} from "../src/trust-engine/index.js";
+import type { TrustSignal } from "../src/common/types.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-describe('TrustEngine', () => {
+describe("TrustEngine", () => {
   let engine: TrustEngine;
 
   beforeEach(() => {
     engine = createTrustEngine();
   });
 
-  describe('initialization', () => {
-    it('should create engine with default config', () => {
+  describe("initialization", () => {
+    it("should create engine with default config", () => {
       expect(engine.decayRate).toBe(0.01);
       expect(engine.decayIntervalMs).toBe(60000);
       expect(engine.failureThreshold).toBe(0.3);
       expect(engine.acceleratedDecayMultiplier).toBe(1.0);
     });
 
-    it('should create engine with custom config', () => {
+    it("should create engine with custom config", () => {
       const config: TrustEngineConfig = {
         decayRate: 0.05,
         decayIntervalMs: 30000,
@@ -46,93 +46,93 @@ describe('TrustEngine', () => {
       expect(customEngine.acceleratedDecayMultiplier).toBe(5.0);
     });
 
-    it('should initialize entity at specified level', async () => {
-      const record = await engine.initializeEntity('agent-001', 2);
+    it("should initialize entity at specified level", async () => {
+      const record = await engine.initializeEntity("agent-001", 2);
 
-      expect(record.entityId).toBe('agent-001');
+      expect(record.entityId).toBe("agent-001");
       expect(record.level).toBe(2);
       expect(record.score).toBe(TRUST_THRESHOLDS[2].min);
       expect(record.recentFailures).toEqual([]);
     });
 
-    it('should emit initialized event', async () => {
+    it("should emit initialized event", async () => {
       const events: unknown[] = [];
-      engine.on('trust:initialized', (e) => events.push(e));
+      engine.on("trust:initialized", (e) => events.push(e));
 
-      await engine.initializeEntity('agent-001', 1);
+      await engine.initializeEntity("agent-001", 1);
 
       expect(events).toHaveLength(1);
       expect(events[0]).toMatchObject({
-        type: 'trust:initialized',
-        entityId: 'agent-001',
+        type: "trust:initialized",
+        entityId: "agent-001",
         initialLevel: 1,
       });
     });
   });
 
-  describe('8-tier trust levels', () => {
-    it('should have 8 trust levels (T0-T7)', () => {
+  describe("8-tier trust levels", () => {
+    it("should have 8 trust levels (T0-T7)", () => {
       expect(Object.keys(TRUST_THRESHOLDS)).toHaveLength(8);
       expect(Object.keys(TRUST_LEVEL_NAMES)).toHaveLength(8);
     });
 
-    it('should have correct level names', () => {
+    it("should have correct level names", () => {
       // Canonical 8-tier trust system
-      expect(TRUST_LEVEL_NAMES[0]).toBe('Sandbox');
-      expect(TRUST_LEVEL_NAMES[1]).toBe('Observed');
-      expect(TRUST_LEVEL_NAMES[2]).toBe('Provisional');
-      expect(TRUST_LEVEL_NAMES[3]).toBe('Monitored');
-      expect(TRUST_LEVEL_NAMES[4]).toBe('Standard');
-      expect(TRUST_LEVEL_NAMES[5]).toBe('Trusted');
-      expect(TRUST_LEVEL_NAMES[6]).toBe('Certified');
-      expect(TRUST_LEVEL_NAMES[7]).toBe('Autonomous');
+      expect(TRUST_LEVEL_NAMES[0]).toBe("Sandbox");
+      expect(TRUST_LEVEL_NAMES[1]).toBe("Observed");
+      expect(TRUST_LEVEL_NAMES[2]).toBe("Provisional");
+      expect(TRUST_LEVEL_NAMES[3]).toBe("Monitored");
+      expect(TRUST_LEVEL_NAMES[4]).toBe("Standard");
+      expect(TRUST_LEVEL_NAMES[5]).toBe("Trusted");
+      expect(TRUST_LEVEL_NAMES[6]).toBe("Certified");
+      expect(TRUST_LEVEL_NAMES[7]).toBe("Autonomous");
     });
 
-    it('should have non-overlapping score ranges', () => {
+    it("should have non-overlapping score ranges", () => {
       const ranges = Object.values(TRUST_THRESHOLDS);
       for (let i = 0; i < ranges.length - 1; i++) {
         expect(ranges[i]!.max).toBeLessThan(ranges[i + 1]!.min);
       }
     });
 
-    it('should cover full 0-1000 range', () => {
+    it("should cover full 0-1000 range", () => {
       expect(TRUST_THRESHOLDS[0].min).toBe(0);
       expect(TRUST_THRESHOLDS[7].max).toBe(1000);
     });
   });
 
-  describe('signal recording', () => {
-    it('should record signals and update score', async () => {
-      await engine.initializeEntity('agent-001', 1);
+  describe("signal recording", () => {
+    it("should record signals and update score", async () => {
+      await engine.initializeEntity("agent-001", 1);
 
       const signal: TrustSignal = {
-        id: 'sig-001',
-        entityId: 'agent-001',
-        type: 'behavioral.task_completed',
+        id: "sig-001",
+        entityId: "agent-001",
+        type: "behavioral.task_completed",
         value: 0.9,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       };
 
       await engine.recordSignal(signal);
 
-      const record = await engine.getScore('agent-001');
+      const record = await engine.getScore("agent-001");
       expect(record).toBeDefined();
       expect(record!.signals).toHaveLength(1);
     });
 
-    it('should emit signal_recorded event', async () => {
+    it("should emit signal_recorded event", async () => {
       const events: unknown[] = [];
-      engine.on('trust:signal_recorded', (e) => events.push(e));
+      engine.on("trust:signal_recorded", (e) => events.push(e));
 
-      await engine.initializeEntity('agent-001', 1);
+      await engine.initializeEntity("agent-001", 1);
       await engine.recordSignal({
-        id: 'sig-001',
-        entityId: 'agent-001',
-        type: 'behavioral.task_completed',
+        id: "sig-001",
+        entityId: "agent-001",
+        type: "behavioral.task_completed",
         value: 0.9,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       });
@@ -140,43 +140,45 @@ describe('TrustEngine', () => {
       expect(events).toHaveLength(1);
     });
 
-    it('should reduce manual approval uplift at higher trust tiers', async () => {
+    it("should reduce manual approval uplift at higher trust tiers", async () => {
       const lowTierEngine = createTrustEngine();
       const highTierEngine = createTrustEngine();
 
-      await lowTierEngine.initializeEntity('agent-low', 1);
-      await highTierEngine.initializeEntity('agent-high', 6);
+      await lowTierEngine.initializeEntity("agent-low", 1);
+      await highTierEngine.initializeEntity("agent-high", 6);
 
       const manualApprovalSignal = {
-        id: 'manual-approval-1',
-        type: 'behavioral.manual_review',
+        id: "manual-approval-1",
+        type: "behavioral.manual_review",
         value: 0.95,
-        source: 'manual',
+        source: "manual",
         timestamp: new Date().toISOString(),
         metadata: {},
       };
 
       await lowTierEngine.recordSignal({
         ...manualApprovalSignal,
-        entityId: 'agent-low',
+        entityId: "agent-low",
       });
 
       await highTierEngine.recordSignal({
         ...manualApprovalSignal,
-        id: 'manual-approval-2',
-        entityId: 'agent-high',
+        id: "manual-approval-2",
+        entityId: "agent-high",
       });
 
-      const lowRecord = await lowTierEngine.getScore('agent-low');
-      const highRecord = await highTierEngine.getScore('agent-high');
+      const lowRecord = await lowTierEngine.getScore("agent-low");
+      const highRecord = await highTierEngine.getScore("agent-high");
 
       expect(lowRecord).toBeDefined();
       expect(highRecord).toBeDefined();
-      expect((lowRecord?.score ?? 0) - 500).toBeGreaterThan((highRecord?.score ?? 0) - 500);
+      expect((lowRecord?.score ?? 0) - 500).toBeGreaterThan(
+        (highRecord?.score ?? 0) - 500,
+      );
     });
   });
 
-  describe('accelerated decay on failure', () => {
+  describe("accelerated decay on failure", () => {
     let customEngine: TrustEngine;
 
     beforeEach(() => {
@@ -191,19 +193,19 @@ describe('TrustEngine', () => {
       });
     });
 
-    it('should detect failure when signal value is below threshold', async () => {
+    it("should detect failure when signal value is below threshold", async () => {
       const events: TrustFailureDetectedEvent[] = [];
-      customEngine.on('trust:failure_detected', (e) => events.push(e));
+      customEngine.on("trust:failure_detected", (e) => events.push(e));
 
-      await customEngine.initializeEntity('agent-001', 3);
+      await customEngine.initializeEntity("agent-001", 3);
 
       // Record a failure signal (value < 0.3)
       await customEngine.recordSignal({
-        id: 'sig-001',
-        entityId: 'agent-001',
-        type: 'behavioral.task_failed',
+        id: "sig-001",
+        entityId: "agent-001",
+        type: "behavioral.task_failed",
         value: 0.1,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       });
@@ -213,19 +215,19 @@ describe('TrustEngine', () => {
       expect(events[0]!.acceleratedDecayActive).toBe(false);
     });
 
-    it('should activate accelerated decay after min failures', async () => {
+    it("should activate accelerated decay after min failures", async () => {
       const events: TrustFailureDetectedEvent[] = [];
-      customEngine.on('trust:failure_detected', (e) => events.push(e));
+      customEngine.on("trust:failure_detected", (e) => events.push(e));
 
-      await customEngine.initializeEntity('agent-001', 3);
+      await customEngine.initializeEntity("agent-001", 3);
 
       // First failure
       await customEngine.recordSignal({
-        id: 'sig-001',
-        entityId: 'agent-001',
-        type: 'behavioral.task_failed',
+        id: "sig-001",
+        entityId: "agent-001",
+        type: "behavioral.task_failed",
         value: 0.1,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       });
@@ -234,11 +236,11 @@ describe('TrustEngine', () => {
 
       // Second failure - should activate accelerated decay
       await customEngine.recordSignal({
-        id: 'sig-002',
-        entityId: 'agent-001',
-        type: 'behavioral.task_failed',
+        id: "sig-002",
+        entityId: "agent-001",
+        type: "behavioral.task_failed",
         value: 0.2,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       });
@@ -247,51 +249,51 @@ describe('TrustEngine', () => {
       expect(events[1]!.acceleratedDecayActive).toBe(true);
     });
 
-    it('should track accelerated decay status via helper methods', async () => {
-      await customEngine.initializeEntity('agent-001', 3);
+    it("should track accelerated decay status via helper methods", async () => {
+      await customEngine.initializeEntity("agent-001", 3);
 
-      expect(customEngine.isAcceleratedDecayActive('agent-001')).toBe(false);
-      expect(customEngine.getFailureCount('agent-001')).toBe(0);
+      expect(customEngine.isAcceleratedDecayActive("agent-001")).toBe(false);
+      expect(customEngine.getFailureCount("agent-001")).toBe(0);
 
       // Add two failures
       for (let i = 0; i < 2; i++) {
         await customEngine.recordSignal({
           id: `sig-00${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_failed',
+          entityId: "agent-001",
+          type: "behavioral.task_failed",
           value: 0.1,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
       }
 
-      expect(customEngine.isAcceleratedDecayActive('agent-001')).toBe(true);
-      expect(customEngine.getFailureCount('agent-001')).toBe(2);
+      expect(customEngine.isAcceleratedDecayActive("agent-001")).toBe(true);
+      expect(customEngine.getFailureCount("agent-001")).toBe(2);
     });
 
-    it('should not count signals above threshold as failures', async () => {
+    it("should not count signals above threshold as failures", async () => {
       const events: TrustFailureDetectedEvent[] = [];
-      customEngine.on('trust:failure_detected', (e) => events.push(e));
+      customEngine.on("trust:failure_detected", (e) => events.push(e));
 
-      await customEngine.initializeEntity('agent-001', 3);
+      await customEngine.initializeEntity("agent-001", 3);
 
       // Record a successful signal (value >= 0.3)
       await customEngine.recordSignal({
-        id: 'sig-001',
-        entityId: 'agent-001',
-        type: 'behavioral.task_completed',
+        id: "sig-001",
+        entityId: "agent-001",
+        type: "behavioral.task_completed",
         value: 0.5,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       });
 
       expect(events).toHaveLength(0);
-      expect(customEngine.getFailureCount('agent-001')).toBe(0);
+      expect(customEngine.getFailureCount("agent-001")).toBe(0);
     });
 
-    it('should apply accelerated decay rate when failures present', async () => {
+    it("should apply accelerated decay rate when failures present", async () => {
       // Create engine with very high decay for observable difference
       const testEngine = createTrustEngine({
         decayRate: 0.5, // 50% decay per interval
@@ -302,17 +304,17 @@ describe('TrustEngine', () => {
         minFailuresForAcceleration: 2,
       });
 
-      await testEngine.initializeEntity('agent-001', 3);
-      const initialScore = (await testEngine.getScore('agent-001'))!.score;
+      await testEngine.initializeEntity("agent-001", 3);
+      const initialScore = (await testEngine.getScore("agent-001"))!.score;
 
       // Add two failures to trigger accelerated decay
       for (let i = 0; i < 2; i++) {
         await testEngine.recordSignal({
           id: `fail-${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_failed',
+          entityId: "agent-001",
+          type: "behavioral.task_failed",
           value: 0.1,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
@@ -322,9 +324,9 @@ describe('TrustEngine', () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       const decayEvents: TrustDecayAppliedEvent[] = [];
-      testEngine.on('trust:decay_applied', (e) => decayEvents.push(e));
+      testEngine.on("trust:decay_applied", (e) => decayEvents.push(e));
 
-      const record = await testEngine.getScore('agent-001');
+      const record = await testEngine.getScore("agent-001");
 
       // Score should have decayed significantly with accelerated rate
       expect(record!.score).toBeLessThan(initialScore);
@@ -334,7 +336,7 @@ describe('TrustEngine', () => {
       }
     });
 
-    it('should include accelerated flag in decay events', async () => {
+    it("should include accelerated flag in decay events", async () => {
       const testEngine = createTrustEngine({
         decayRate: 0.5,
         decayIntervalMs: 10,
@@ -345,18 +347,18 @@ describe('TrustEngine', () => {
       });
 
       const decayEvents: TrustDecayAppliedEvent[] = [];
-      testEngine.on('trust:decay_applied', (e) => decayEvents.push(e));
+      testEngine.on("trust:decay_applied", (e) => decayEvents.push(e));
 
-      await testEngine.initializeEntity('agent-001', 3);
+      await testEngine.initializeEntity("agent-001", 3);
 
       // Add failures
       for (let i = 0; i < 2; i++) {
         await testEngine.recordSignal({
           id: `fail-${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_failed',
+          entityId: "agent-001",
+          type: "behavioral.task_failed",
           value: 0.1,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
@@ -364,56 +366,56 @@ describe('TrustEngine', () => {
 
       // Wait and trigger decay
       await new Promise((resolve) => setTimeout(resolve, 50));
-      await testEngine.getScore('agent-001');
+      await testEngine.getScore("agent-001");
 
       // Check that accelerated flag is present
       if (decayEvents.length > 0) {
-        expect(decayEvents[0]).toHaveProperty('accelerated');
+        expect(decayEvents[0]).toHaveProperty("accelerated");
       }
     });
 
-    it('should emit wildcard events', async () => {
+    it("should emit wildcard events", async () => {
       const allEvents: unknown[] = [];
-      customEngine.on('trust:*', (e) => allEvents.push(e));
+      customEngine.on("trust:*", (e) => allEvents.push(e));
 
-      await customEngine.initializeEntity('agent-001', 1);
+      await customEngine.initializeEntity("agent-001", 1);
 
       // Should have received the initialized event via wildcard
       expect(allEvents.length).toBeGreaterThan(0);
-      expect(allEvents[0]).toMatchObject({ type: 'trust:initialized' });
+      expect(allEvents[0]).toMatchObject({ type: "trust:initialized" });
     });
   });
 
-  describe('tier changes', () => {
-    it('should emit tier_changed on promotion', async () => {
+  describe("tier changes", () => {
+    it("should emit tier_changed on promotion", async () => {
       const events: TrustTierChangedEvent[] = [];
-      engine.on('trust:tier_changed', (e) => events.push(e));
+      engine.on("trust:tier_changed", (e) => events.push(e));
 
-      await engine.initializeEntity('agent-001', 1);
+      await engine.initializeEntity("agent-001", 1);
 
       // Record many high-value signals to trigger promotion
       for (let i = 0; i < 50; i++) {
         await engine.recordSignal({
           id: `sig-${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_completed',
+          entityId: "agent-001",
+          type: "behavioral.task_completed",
           value: 1.0,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
       }
 
-      const record = await engine.getScore('agent-001');
+      const record = await engine.getScore("agent-001");
 
       if (record!.level > 1) {
         expect(events.length).toBeGreaterThan(0);
-        const promotionEvent = events.find((e) => e.direction === 'promoted');
+        const promotionEvent = events.find((e) => e.direction === "promoted");
         expect(promotionEvent).toBeDefined();
       }
     });
 
-    it('should emit tier_changed on demotion from decay', async () => {
+    it("should emit tier_changed on demotion from decay", async () => {
       const testEngine = createTrustEngine({
         decayRate: 0.9, // Very aggressive decay
         decayIntervalMs: 10,
@@ -424,24 +426,24 @@ describe('TrustEngine', () => {
       });
 
       const events: TrustTierChangedEvent[] = [];
-      testEngine.on('trust:tier_changed', (e) => events.push(e));
+      testEngine.on("trust:tier_changed", (e) => events.push(e));
 
-      await testEngine.initializeEntity('agent-001', 3);
+      await testEngine.initializeEntity("agent-001", 3);
 
       // Wait for decay
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      await testEngine.getScore('agent-001');
+      await testEngine.getScore("agent-001");
 
       if (events.length > 0) {
-        const demotionEvent = events.find((e) => e.direction === 'demoted');
+        const demotionEvent = events.find((e) => e.direction === "demoted");
         expect(demotionEvent).toBeDefined();
       }
     });
   });
 
-  describe('failure window expiration', () => {
-    it('should expire old failures outside window', async () => {
+  describe("failure window expiration", () => {
+    it("should expire old failures outside window", async () => {
       const testEngine = createTrustEngine({
         decayRate: 0.01,
         decayIntervalMs: 60000,
@@ -451,46 +453,46 @@ describe('TrustEngine', () => {
         minFailuresForAcceleration: 2,
       });
 
-      await testEngine.initializeEntity('agent-001', 3);
+      await testEngine.initializeEntity("agent-001", 3);
 
       // Add two failures
       for (let i = 0; i < 2; i++) {
         await testEngine.recordSignal({
           id: `fail-${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_failed',
+          entityId: "agent-001",
+          type: "behavioral.task_failed",
           value: 0.1,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
       }
 
-      expect(testEngine.isAcceleratedDecayActive('agent-001')).toBe(true);
+      expect(testEngine.isAcceleratedDecayActive("agent-001")).toBe(true);
 
       // Wait for failures to expire
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Failures should have expired
-      expect(testEngine.getFailureCount('agent-001')).toBe(0);
-      expect(testEngine.isAcceleratedDecayActive('agent-001')).toBe(false);
+      expect(testEngine.getFailureCount("agent-001")).toBe(0);
+      expect(testEngine.isAcceleratedDecayActive("agent-001")).toBe(false);
     });
   });
 
-  describe('factory function', () => {
-    it('should create engine with createTrustEngine()', () => {
+  describe("factory function", () => {
+    it("should create engine with createTrustEngine()", () => {
       const engine = createTrustEngine();
       expect(engine).toBeInstanceOf(TrustEngine);
     });
 
-    it('should accept config in factory', () => {
+    it("should accept config in factory", () => {
       const engine = createTrustEngine({ decayRate: 0.05 });
       expect(engine.decayRate).toBe(0.05);
     });
   });
 
-  describe('decay formula correctness', () => {
-    it('should apply exponential decay based on staleness', async () => {
+  describe("decay formula correctness", () => {
+    it("should apply exponential decay based on staleness", async () => {
       const testEngine = createTrustEngine({
         decayRate: 0.1, // 10% per interval
         decayIntervalMs: 10,
@@ -498,14 +500,14 @@ describe('TrustEngine', () => {
         minFailuresForAcceleration: 100, // Disable accelerated decay
       });
 
-      await testEngine.initializeEntity('agent-001', 3);
-      const initialRecord = await testEngine.getScore('agent-001');
+      await testEngine.initializeEntity("agent-001", 3);
+      const initialRecord = await testEngine.getScore("agent-001");
       const initialScore = initialRecord!.score;
 
       // Wait for multiple decay intervals
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      const decayedRecord = await testEngine.getScore('agent-001');
+      const decayedRecord = await testEngine.getScore("agent-001");
       const finalScore = decayedRecord!.score;
 
       // Decay should follow: score * (1 - rate)^periods
@@ -514,7 +516,7 @@ describe('TrustEngine', () => {
       expect(finalScore).toBeGreaterThan(0);
     });
 
-    it('should not decay score below 0', async () => {
+    it("should not decay score below 0", async () => {
       const testEngine = createTrustEngine({
         decayRate: 0.99, // 99% decay per interval
         decayIntervalMs: 5,
@@ -522,16 +524,16 @@ describe('TrustEngine', () => {
         minFailuresForAcceleration: 100,
       });
 
-      await testEngine.initializeEntity('agent-001', 1);
+      await testEngine.initializeEntity("agent-001", 1);
 
       // Wait for extreme decay
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const record = await testEngine.getScore('agent-001');
+      const record = await testEngine.getScore("agent-001");
       expect(record!.score).toBeGreaterThanOrEqual(0);
     });
 
-    it('should apply correct multiplier for accelerated decay', async () => {
+    it("should apply correct multiplier for accelerated decay", async () => {
       const multiplier = 3.0;
       const testEngine = createTrustEngine({
         decayRate: 0.1,
@@ -542,38 +544,38 @@ describe('TrustEngine', () => {
       });
 
       // Initialize two agents at same level
-      await testEngine.initializeEntity('normal-agent', 3);
-      await testEngine.initializeEntity('failing-agent', 3);
+      await testEngine.initializeEntity("normal-agent", 3);
+      await testEngine.initializeEntity("failing-agent", 3);
 
       // Add failures to one agent
       for (let i = 0; i < 2; i++) {
         await testEngine.recordSignal({
           id: `fail-${i}`,
-          entityId: 'failing-agent',
-          type: 'behavioral.task_failed',
+          entityId: "failing-agent",
+          type: "behavioral.task_failed",
           value: 0.1,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
       }
 
-      expect(testEngine.isAcceleratedDecayActive('failing-agent')).toBe(true);
-      expect(testEngine.isAcceleratedDecayActive('normal-agent')).toBe(false);
+      expect(testEngine.isAcceleratedDecayActive("failing-agent")).toBe(true);
+      expect(testEngine.isAcceleratedDecayActive("normal-agent")).toBe(false);
 
       // Wait for decay
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      const normalRecord = await testEngine.getScore('normal-agent');
-      const failingRecord = await testEngine.getScore('failing-agent');
+      const normalRecord = await testEngine.getScore("normal-agent");
+      const failingRecord = await testEngine.getScore("failing-agent");
 
       // Failing agent should have decayed more due to accelerated multiplier
       expect(failingRecord!.score).toBeLessThanOrEqual(normalRecord!.score);
     });
   });
 
-  describe('trust tier boundary conditions', () => {
-    it('should correctly assign tier at exact boundary values', async () => {
+  describe("trust tier boundary conditions", () => {
+    it("should correctly assign tier at exact boundary values", async () => {
       // Test each tier boundary (8-tier model)
       const boundaries = [
         { score: 0, expectedLevel: 0 },
@@ -596,13 +598,14 @@ describe('TrustEngine', () => {
 
       for (const { score, expectedLevel } of boundaries) {
         // Verify threshold configuration matches expected boundaries
-        const threshold = TRUST_THRESHOLDS[expectedLevel as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7];
+        const threshold =
+          TRUST_THRESHOLDS[expectedLevel as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7];
         expect(score).toBeGreaterThanOrEqual(threshold.min);
         expect(score).toBeLessThanOrEqual(threshold.max);
       }
     });
 
-    it('should have contiguous tier ranges with no gaps', () => {
+    it("should have contiguous tier ranges with no gaps", () => {
       const levels = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
       for (let i = 0; i < levels.length - 1; i++) {
@@ -614,12 +617,12 @@ describe('TrustEngine', () => {
       }
     });
 
-    it('should handle score clamping at boundaries', async () => {
+    it("should handle score clamping at boundaries", async () => {
       const testEngine = createTrustEngine();
 
       // Initialize at L7 (Autonomous)
-      await testEngine.initializeEntity('max-agent', 7);
-      const maxRecord = await testEngine.getScore('max-agent');
+      await testEngine.initializeEntity("max-agent", 7);
+      const maxRecord = await testEngine.getScore("max-agent");
 
       // Score should be clamped to 1000 max
       expect(maxRecord!.score).toBeLessThanOrEqual(1000);
@@ -629,113 +632,113 @@ describe('TrustEngine', () => {
     });
   });
 
-  describe('recovery mechanics', () => {
-    it('should track consecutive successes', async () => {
+  describe("recovery mechanics", () => {
+    it("should track consecutive successes", async () => {
       const testEngine = createTrustEngine({
         successThreshold: 0.7,
         minSuccessesForAcceleration: 3,
       });
 
-      await testEngine.initializeEntity('agent-001', 2);
+      await testEngine.initializeEntity("agent-001", 2);
 
-      expect(testEngine.getConsecutiveSuccessCount('agent-001')).toBe(0);
+      expect(testEngine.getConsecutiveSuccessCount("agent-001")).toBe(0);
 
       // Record success signals
       for (let i = 0; i < 3; i++) {
         await testEngine.recordSignal({
           id: `success-${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_completed',
+          entityId: "agent-001",
+          type: "behavioral.task_completed",
           value: 0.9,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
       }
 
-      expect(testEngine.getConsecutiveSuccessCount('agent-001')).toBe(3);
-      expect(testEngine.isAcceleratedRecoveryActive('agent-001')).toBe(true);
+      expect(testEngine.getConsecutiveSuccessCount("agent-001")).toBe(3);
+      expect(testEngine.isAcceleratedRecoveryActive("agent-001")).toBe(true);
     });
 
-    it('should reset consecutive successes on failure', async () => {
+    it("should reset consecutive successes on failure", async () => {
       const testEngine = createTrustEngine({
         successThreshold: 0.7,
         failureThreshold: 0.3,
         minSuccessesForAcceleration: 3,
       });
 
-      await testEngine.initializeEntity('agent-001', 2);
+      await testEngine.initializeEntity("agent-001", 2);
 
       // Build up successes
       for (let i = 0; i < 2; i++) {
         await testEngine.recordSignal({
           id: `success-${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_completed',
+          entityId: "agent-001",
+          type: "behavioral.task_completed",
           value: 0.9,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
       }
 
-      expect(testEngine.getConsecutiveSuccessCount('agent-001')).toBe(2);
+      expect(testEngine.getConsecutiveSuccessCount("agent-001")).toBe(2);
 
       // Record a failure
       await testEngine.recordSignal({
-        id: 'failure-1',
-        entityId: 'agent-001',
-        type: 'behavioral.task_failed',
+        id: "failure-1",
+        entityId: "agent-001",
+        type: "behavioral.task_failed",
         value: 0.1,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       });
 
       // Consecutive successes should be reset
-      expect(testEngine.getConsecutiveSuccessCount('agent-001')).toBe(0);
+      expect(testEngine.getConsecutiveSuccessCount("agent-001")).toBe(0);
     });
 
-    it('should track peak score', async () => {
+    it("should track peak score", async () => {
       const testEngine = createTrustEngine();
 
-      await testEngine.initializeEntity('agent-001', 3);
-      const initialPeak = testEngine.getPeakScore('agent-001');
+      await testEngine.initializeEntity("agent-001", 3);
+      const initialPeak = testEngine.getPeakScore("agent-001");
 
       // Record high-value signals to increase score
       for (let i = 0; i < 10; i++) {
         await testEngine.recordSignal({
           id: `success-${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_completed',
+          entityId: "agent-001",
+          type: "behavioral.task_completed",
           value: 1.0,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
       }
 
-      const newPeak = testEngine.getPeakScore('agent-001');
+      const newPeak = testEngine.getPeakScore("agent-001");
       expect(newPeak).toBeGreaterThanOrEqual(initialPeak);
     });
 
-    it('should emit recovery events on success signals', async () => {
+    it("should emit recovery events on success signals", async () => {
       const testEngine = createTrustEngine({
         successThreshold: 0.7,
         recoveryRate: 0.05,
       });
 
       const recoveryEvents: unknown[] = [];
-      testEngine.on('trust:recovery_applied', (e) => recoveryEvents.push(e));
+      testEngine.on("trust:recovery_applied", (e) => recoveryEvents.push(e));
 
-      await testEngine.initializeEntity('agent-001', 2);
+      await testEngine.initializeEntity("agent-001", 2);
 
       await testEngine.recordSignal({
-        id: 'success-1',
-        entityId: 'agent-001',
-        type: 'behavioral.task_completed',
+        id: "success-1",
+        entityId: "agent-001",
+        type: "behavioral.task_completed",
         value: 0.95,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       });
@@ -744,26 +747,26 @@ describe('TrustEngine', () => {
     });
   });
 
-  describe('signal weight consistency', () => {
-    it('should weight behavioral signals at 40%', async () => {
+  describe("signal weight consistency", () => {
+    it("should weight behavioral signals at 40%", async () => {
       const testEngine = createTrustEngine();
 
-      await testEngine.initializeEntity('agent-001', 1);
+      await testEngine.initializeEntity("agent-001", 1);
 
       // Record only behavioral signals
       for (let i = 0; i < 10; i++) {
         await testEngine.recordSignal({
           id: `behavioral-${i}`,
-          entityId: 'agent-001',
-          type: 'behavioral.task_completed',
+          entityId: "agent-001",
+          type: "behavioral.task_completed",
           value: 1.0,
-          source: 'system',
+          source: "system",
           timestamp: new Date().toISOString(),
           metadata: {},
         });
       }
 
-      const record = await testEngine.getScore('agent-001');
+      const record = await testEngine.getScore("agent-001");
 
       // With only perfect behavioral signals, behavioral component should be 1.0
       // Total weighted contribution: 1.0 * 0.4 * 1000 = 400 from behavioral
@@ -772,45 +775,47 @@ describe('TrustEngine', () => {
       expect(record!.components.behavioral).toBeGreaterThan(0.5);
     });
 
-    it('should apply 7-day half-life to signal weighting', async () => {
+    it("should apply 7-day half-life to signal weighting", async () => {
       const testEngine = createTrustEngine();
 
-      await testEngine.initializeEntity('agent-001', 2);
+      await testEngine.initializeEntity("agent-001", 2);
 
       // Record an old signal (simulated by backdating)
-      const oldTimestamp = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const oldTimestamp = new Date(
+        Date.now() - 7 * 24 * 60 * 60 * 1000,
+      ).toISOString();
       await testEngine.recordSignal({
-        id: 'old-signal',
-        entityId: 'agent-001',
-        type: 'behavioral.task_completed',
+        id: "old-signal",
+        entityId: "agent-001",
+        type: "behavioral.task_completed",
         value: 1.0,
-        source: 'system',
+        source: "system",
         timestamp: oldTimestamp,
         metadata: {},
       });
 
-      const recordWithOld = await testEngine.getScore('agent-001');
+      const recordWithOld = await testEngine.getScore("agent-001");
 
       // Record a recent signal
       await testEngine.recordSignal({
-        id: 'new-signal',
-        entityId: 'agent-001',
-        type: 'behavioral.task_completed',
+        id: "new-signal",
+        entityId: "agent-001",
+        type: "behavioral.task_completed",
         value: 1.0,
-        source: 'system',
+        source: "system",
         timestamp: new Date().toISOString(),
         metadata: {},
       });
 
-      const recordWithNew = await testEngine.getScore('agent-001');
+      const recordWithNew = await testEngine.getScore("agent-001");
 
       // Recent signals should have more weight, increasing the score
       expect(recordWithNew!.score).toBeGreaterThanOrEqual(recordWithOld!.score);
     });
   });
 
-  describe('event subscription limits', () => {
-    it('should track listener statistics', () => {
+  describe("event subscription limits", () => {
+    it("should track listener statistics", () => {
       const testEngine = createTrustEngine({
         maxListenersPerEvent: 10,
         maxTotalListeners: 50,
@@ -823,73 +828,73 @@ describe('TrustEngine', () => {
       expect(stats.maxTotalListeners).toBe(50);
     });
 
-    it('should increment listener count on subscription', () => {
+    it("should increment listener count on subscription", () => {
       const testEngine = createTrustEngine({
         maxListenersPerEvent: 10,
         maxTotalListeners: 50,
       });
 
-      testEngine.on('trust:initialized', () => {});
-      testEngine.on('trust:initialized', () => {});
-      testEngine.on('trust:score_changed', () => {});
+      testEngine.on("trust:initialized", () => {});
+      testEngine.on("trust:initialized", () => {});
+      testEngine.on("trust:score_changed", () => {});
 
       const stats = testEngine.getListenerStats();
 
       expect(stats.totalListeners).toBe(3);
-      expect(stats.listenersByEvent['trust:initialized']).toBe(2);
-      expect(stats.listenersByEvent['trust:score_changed']).toBe(1);
+      expect(stats.listenersByEvent["trust:initialized"]).toBe(2);
+      expect(stats.listenersByEvent["trust:score_changed"]).toBe(1);
     });
 
-    it('should throw when per-event limit exceeded', () => {
+    it("should throw when per-event limit exceeded", () => {
       const testEngine = createTrustEngine({
         maxListenersPerEvent: 2,
         maxTotalListeners: 100,
       });
 
-      testEngine.on('trust:initialized', () => {});
-      testEngine.on('trust:initialized', () => {});
+      testEngine.on("trust:initialized", () => {});
+      testEngine.on("trust:initialized", () => {});
 
       // Third listener should throw
       expect(() => {
-        testEngine.on('trust:initialized', () => {});
+        testEngine.on("trust:initialized", () => {});
       }).toThrow(/Maximum listeners.*exceeded/);
     });
 
-    it('should throw when total limit exceeded', () => {
+    it("should throw when total limit exceeded", () => {
       const testEngine = createTrustEngine({
         maxListenersPerEvent: 100,
         maxTotalListeners: 3,
       });
 
-      testEngine.on('trust:initialized', () => {});
-      testEngine.on('trust:score_changed', () => {});
-      testEngine.on('trust:tier_changed', () => {});
+      testEngine.on("trust:initialized", () => {});
+      testEngine.on("trust:score_changed", () => {});
+      testEngine.on("trust:tier_changed", () => {});
 
       // Fourth listener should throw
       expect(() => {
-        testEngine.on('trust:decay_applied', () => {});
+        testEngine.on("trust:decay_applied", () => {});
       }).toThrow(/Maximum total listeners.*exceeded/);
     });
 
-    it('should decrement count when listener removed', () => {
+    it("should decrement count when listener removed", () => {
       const testEngine = createTrustEngine();
 
       const listener = () => {};
-      testEngine.on('trust:initialized', listener);
+      testEngine.on("trust:initialized", listener);
 
       expect(testEngine.getListenerStats().totalListeners).toBe(1);
 
-      testEngine.off('trust:initialized', listener);
+      testEngine.off("trust:initialized", listener);
 
       expect(testEngine.getListenerStats().totalListeners).toBe(0);
     });
 
-    it('should clear counts when removeAllListeners called', () => {
+    it("should clear counts when removeAllListeners called", () => {
       const testEngine = createTrustEngine();
 
-      testEngine.on('trust:initialized', () => {});
-      testEngine.on('trust:score_changed', () => {});
-      testEngine.on('trust:tier_changed', () => {});
+      testEngine.on("trust:initialized", () => {});
+      testEngine.on("trust:score_changed", () => {});
+      testEngine.on("trust:tier_changed", () => {});
 
       expect(testEngine.getListenerStats().totalListeners).toBe(3);
 
@@ -899,74 +904,88 @@ describe('TrustEngine', () => {
     });
   });
 
-  describe('scheduled readiness adjustment', () => {
-    it('should apply 6% adjustment at day 7 checkpoint', async () => {
-      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
-      const record = await testEngine.initializeEntity('fresh-001', 3);
+  describe("scheduled readiness adjustment", () => {
+    it("should apply 6% adjustment at day 7 checkpoint", async () => {
+      const testEngine = createTrustEngine({
+        readinessMode: "checkpoint_schedule",
+      });
+      const record = await testEngine.initializeEntity("fresh-001", 3);
 
-      record.lastCalculatedAt = new Date(Date.now() - (7 * DAY_MS + 1000)).toISOString();
+      record.lastCalculatedAt = new Date(
+        Date.now() - (7 * DAY_MS + 1000),
+      ).toISOString();
 
-      const updated = await testEngine.getScore('fresh-001');
+      const updated = await testEngine.getScore("fresh-001");
       expect(updated).toBeDefined();
       expect(updated!.score).toBe(470);
     });
 
-    it('should calibrate to half-life (50%) at day 182', async () => {
-      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
-      const record = await testEngine.initializeEntity('fresh-002', 3);
+    it("should calibrate to half-life (50%) at day 182", async () => {
+      const testEngine = createTrustEngine({
+        readinessMode: "checkpoint_schedule",
+      });
+      const record = await testEngine.initializeEntity("fresh-002", 3);
 
-      record.lastCalculatedAt = new Date(Date.now() - (182 * DAY_MS + 60_000)).toISOString();
+      record.lastCalculatedAt = new Date(
+        Date.now() - (182 * DAY_MS + 60_000),
+      ).toISOString();
 
-      const updated = await testEngine.getScore('fresh-002');
+      const updated = await testEngine.getScore("fresh-002");
       expect(updated).toBeDefined();
       expect(updated!.score).toBe(250);
     });
 
-    it('should apply deferred full reduction after exception expiry', async () => {
-      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
-      const record = await testEngine.initializeEntity('fresh-003', 3);
+    it("should apply deferred full reduction after exception expiry", async () => {
+      const testEngine = createTrustEngine({
+        readinessMode: "checkpoint_schedule",
+      });
+      const record = await testEngine.initializeEntity("fresh-003", 3);
 
-      testEngine.setReadinessException('fresh-003', {
-        reason: 'telemetry_outage',
+      testEngine.setReadinessException("fresh-003", {
+        reason: "telemetry_outage",
         expiresAt: new Date(Date.now() + 3 * DAY_MS).toISOString(),
         reductionScale: 0.5,
       });
 
-      record.lastCalculatedAt = new Date(Date.now() - (8 * DAY_MS)).toISOString();
+      record.lastCalculatedAt = new Date(Date.now() - 8 * DAY_MS).toISOString();
 
-      const duringException = await testEngine.getScore('fresh-003');
+      const duringException = await testEngine.getScore("fresh-003");
       expect(duringException).toBeDefined();
       expect(duringException!.score).toBe(485);
 
-      const activeException = testEngine.getReadinessException('fresh-003');
+      const activeException = testEngine.getReadinessException("fresh-003");
       expect(activeException).toBeDefined();
       activeException!.expiresAt = new Date(Date.now() - 1000).toISOString();
 
-      const afterExpiry = await testEngine.getScore('fresh-003');
+      const afterExpiry = await testEngine.getScore("fresh-003");
       expect(afterExpiry).toBeDefined();
       expect(afterExpiry!.score).toBe(470);
-      expect(testEngine.getReadinessException('fresh-003')).toBeUndefined();
+      expect(testEngine.getReadinessException("fresh-003")).toBeUndefined();
     });
 
-    it('should reject unsupported readiness exception reason', async () => {
-      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
-      await testEngine.initializeEntity('fresh-004', 3);
+    it("should reject unsupported readiness exception reason", async () => {
+      const testEngine = createTrustEngine({
+        readinessMode: "checkpoint_schedule",
+      });
+      await testEngine.initializeEntity("fresh-004", 3);
 
       expect(() => {
-        testEngine.setReadinessException('fresh-004', {
-          reason: 'custom_reason' as never,
+        testEngine.setReadinessException("fresh-004", {
+          reason: "custom_reason" as never,
           expiresAt: new Date(Date.now() + DAY_MS).toISOString(),
         });
       }).toThrow(/Unsupported readiness exception reason/);
     });
 
-    it('should reject readiness exception with past expiry', async () => {
-      const testEngine = createTrustEngine({ readinessMode: 'checkpoint_schedule' });
-      await testEngine.initializeEntity('fresh-005', 3);
+    it("should reject readiness exception with past expiry", async () => {
+      const testEngine = createTrustEngine({
+        readinessMode: "checkpoint_schedule",
+      });
+      await testEngine.initializeEntity("fresh-005", 3);
 
       expect(() => {
-        testEngine.setReadinessException('fresh-005', {
-          reason: 'planned_maintenance',
+        testEngine.setReadinessException("fresh-005", {
+          reason: "planned_maintenance",
           expiresAt: new Date(Date.now() - DAY_MS).toISOString(),
         });
       }).toThrow(/must be in the future/);

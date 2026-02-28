@@ -3,22 +3,22 @@
  */
 
 // Enum validators
-export * from './enums.js';
+export * from "./enums.js";
 
 // Trust profile validators
-export * from './trust-profile.js';
+export * from "./trust-profile.js";
 
 // Intent validators
-export * from './intent.js';
+export * from "./intent.js";
 
 // Decision validators
-export * from './decision.js';
+export * from "./decision.js";
 
 // Proof event validators
-export * from './proof-event.js';
+export * from "./proof-event.js";
 
 // Utility functions for validation
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Validate data against a schema
@@ -33,7 +33,7 @@ export function validate<T>(schema: z.ZodSchema<T>, data: unknown): T {
  */
 export function safeValidate<T>(
   schema: z.ZodSchema<T>,
-  data: unknown
+  data: unknown,
 ): { success: true; data: T } | { success: false; errors: z.ZodIssue[] } {
   const result = schema.safeParse(data);
   if (result.success) {
@@ -47,10 +47,10 @@ export function safeValidate<T>(
  */
 export function formatValidationErrors(errors: z.ZodIssue[]): string[] {
   return errors.map((issue) => {
-    const path = issue.path.join('.');
+    const path = issue.path.join(".");
     return path ? `${path}: ${issue.message}` : issue.message;
   });
 }
 
 // Re-export Zod for convenience
-export { z } from 'zod';
+export { z } from "zod";

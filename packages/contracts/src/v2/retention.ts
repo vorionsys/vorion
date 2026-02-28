@@ -5,14 +5,14 @@
  * WORM compliance, legal holds, cryptographic sealing.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import {
   UUIDSchema,
   TimestampSchema,
   SemVerSchema,
   HashSchema,
-} from '../common/primitives.js';
-import { EvidenceClassificationSchema } from './evidence.js';
+} from "../common/primitives.js";
+import { EvidenceClassificationSchema } from "./evidence.js";
 
 // ============================================================================
 // RETENTION POLICY
@@ -21,7 +21,7 @@ import { EvidenceClassificationSchema } from './evidence.js';
 export const RetentionPolicySchema = z.object({
   // Identity
   id: UUIDSchema,
-  schemaVersion: SemVerSchema.default('2.0.0'),
+  schemaVersion: SemVerSchema.default("2.0.0"),
   version: SemVerSchema,
 
   // Metadata
@@ -43,7 +43,7 @@ export const RetentionPolicySchema = z.object({
   immutablePeriodDays: z.number().int().nonnegative().optional(),
 
   // Deletion Rules
-  deletionMethod: z.enum(['SOFT_DELETE', 'HARD_DELETE', 'CRYPTO_SHRED']),
+  deletionMethod: z.enum(["SOFT_DELETE", "HARD_DELETE", "CRYPTO_SHRED"]),
   deletionApprovalRequired: z.boolean().default(true),
   deletionApproverRoles: z.array(z.string()).optional(),
 
@@ -51,7 +51,7 @@ export const RetentionPolicySchema = z.object({
   legalHoldOverridesRetention: z.boolean().default(true),
 
   // Lifecycle
-  status: z.enum(['DRAFT', 'ACTIVE', 'DEPRECATED']),
+  status: z.enum(["DRAFT", "ACTIVE", "DEPRECATED"]),
   effectiveFrom: TimestampSchema,
   effectiveUntil: TimestampSchema.optional(),
   createdAt: TimestampSchema,
@@ -67,7 +67,7 @@ export const RetentionPolicySchema = z.object({
 export const LegalHoldSchema = z.object({
   // Identity
   id: UUIDSchema,
-  schemaVersion: SemVerSchema.default('2.0.0'),
+  schemaVersion: SemVerSchema.default("2.0.0"),
 
   // Metadata
   name: z.string().min(1),
@@ -95,7 +95,7 @@ export const LegalHoldSchema = z.object({
   custodianEmails: z.array(z.string().email()).optional(),
 
   // Lifecycle
-  status: z.enum(['PENDING', 'ACTIVE', 'RELEASED', 'EXPIRED']),
+  status: z.enum(["PENDING", "ACTIVE", "RELEASED", "EXPIRED"]),
   createdAt: TimestampSchema,
   createdBy: z.string().min(1),
   activatedAt: TimestampSchema.optional(),
@@ -115,16 +115,16 @@ export const LegalHoldSchema = z.object({
 export const SealEventSchema = z.object({
   // Identity
   id: UUIDSchema,
-  schemaVersion: SemVerSchema.default('2.0.0'),
+  schemaVersion: SemVerSchema.default("2.0.0"),
 
   // Seal Type
   sealType: z.enum([
-    'EVIDENCE_SEAL',
-    'PACK_SEAL',
-    'PERIOD_SEAL',
-    'COMPLIANCE_SEAL',
-    'AUDIT_SEAL',
-    'INCIDENT_SEAL',
+    "EVIDENCE_SEAL",
+    "PACK_SEAL",
+    "PERIOD_SEAL",
+    "COMPLIANCE_SEAL",
+    "AUDIT_SEAL",
+    "INCIDENT_SEAL",
   ]),
 
   // References
@@ -140,7 +140,7 @@ export const SealEventSchema = z.object({
   periodEnd: TimestampSchema.optional(),
 
   // Cryptographic Proof
-  algorithm: z.enum(['SHA256', 'SHA384', 'SHA512', 'BLAKE3']),
+  algorithm: z.enum(["SHA256", "SHA384", "SHA512", "BLAKE3"]),
   signature: z.string(),
   publicKeyId: z.string(),
   timestampAuthority: z.string().optional(),
@@ -170,7 +170,7 @@ export const SealEventSchema = z.object({
 export const RetentionScheduleSchema = z.object({
   // Identity
   id: UUIDSchema,
-  schemaVersion: SemVerSchema.default('2.0.0'),
+  schemaVersion: SemVerSchema.default("2.0.0"),
 
   // Reference
   evidencePackId: UUIDSchema,
@@ -185,7 +185,13 @@ export const RetentionScheduleSchema = z.object({
   extendedAt: TimestampSchema.optional(),
 
   // Status
-  status: z.enum(['ACTIVE', 'EXTENDED', 'UNDER_HOLD', 'PENDING_DELETION', 'DELETED']),
+  status: z.enum([
+    "ACTIVE",
+    "EXTENDED",
+    "UNDER_HOLD",
+    "PENDING_DELETION",
+    "DELETED",
+  ]),
   underLegalHold: z.boolean().default(false),
 
   // Deletion Tracking

@@ -2,7 +2,7 @@
  * Tests for BASIS Validation Gate
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   validateAgent,
   isValidAgent,
@@ -15,23 +15,23 @@ import {
   type RegisteredProfile,
   type ValidationGateOptions,
   scoreToTier,
-} from './validation-gate';
-import { TrustTier } from './trust-factors';
+} from "./validation-gate";
+import { TrustTier } from "./trust-factors";
 
-describe('ValidationGate', () => {
+describe("ValidationGate", () => {
   // =============================================================================
   // BASIC VALIDATION TESTS
   // =============================================================================
 
-  describe('validateAgent', () => {
-    it('should PASS a valid manifest', () => {
+  describe("validateAgent", () => {
+    it("should PASS a valid manifest", () => {
       const manifest: AgentManifest = {
-        agentId: 'a3i.acme-corp.invoice-bot:ABF-L3@1.0.0',
-        organization: 'acme-corp',
-        agentClass: 'invoice-bot',
-        domains: ['A', 'B', 'F'],
+        agentId: "a3i.acme-corp.invoice-bot:ABF-L3@1.0.0",
+        organization: "acme-corp",
+        agentClass: "invoice-bot",
+        domains: ["A", "B", "F"],
         capabilityLevel: 3,
-        version: '1.0.0',
+        version: "1.0.0",
         trustScore: 450,
       };
 
@@ -42,9 +42,9 @@ describe('ValidationGate', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('should REJECT manifest missing required agentId', () => {
+    it("should REJECT manifest missing required agentId", () => {
       const manifest = {
-        organization: 'acme-corp',
+        organization: "acme-corp",
         trustScore: 450,
       } as AgentManifest;
 
@@ -55,9 +55,9 @@ describe('ValidationGate', () => {
       expect(result.errors.length).toBeGreaterThan(0);
     });
 
-    it('should include timing information', () => {
+    it("should include timing information", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 500,
       };
 
@@ -67,28 +67,32 @@ describe('ValidationGate', () => {
       expect(result.durationMs).toBeGreaterThanOrEqual(0);
     });
 
-    it('should detect invalid CAR format', () => {
+    it("should detect invalid CAR format", () => {
       const manifest: AgentManifest = {
-        agentId: 'invalid-format:missing-parts@1.0.0',
+        agentId: "invalid-format:missing-parts@1.0.0",
         trustScore: 500,
       };
 
       const result = validateAgent(manifest);
 
-      const formatIssue = result.issues.find((i) => i.code === 'INVALID_CAR_FORMAT');
+      const formatIssue = result.issues.find(
+        (i) => i.code === "INVALID_CAR_FORMAT",
+      );
       expect(formatIssue).toBeDefined();
     });
 
-    it('should accept simple ID format with info note', () => {
+    it("should accept simple ID format with info note", () => {
       const manifest: AgentManifest = {
-        agentId: 'simple-agent-id',
+        agentId: "simple-agent-id",
         trustScore: 500,
       };
 
       const result = validateAgent(manifest);
 
       expect(result.valid).toBe(true);
-      const infoIssue = result.issues.find((i) => i.code === 'SIMPLE_ID_FORMAT');
+      const infoIssue = result.issues.find(
+        (i) => i.code === "SIMPLE_ID_FORMAT",
+      );
       expect(infoIssue).toBeDefined();
       expect(infoIssue?.severity).toBe(ValidationSeverity.INFO);
     });
@@ -98,8 +102,8 @@ describe('ValidationGate', () => {
   // TRUST TIER VALIDATION
   // =============================================================================
 
-  describe('trust tier validation', () => {
-    it('should calculate trust tier from score', () => {
+  describe("trust tier validation", () => {
+    it("should calculate trust tier from score", () => {
       // T0: 0-199
       expect(scoreToTier(0)).toBe(TrustTier.T0_SANDBOX);
       expect(scoreToTier(199)).toBe(TrustTier.T0_SANDBOX);
@@ -126,9 +130,9 @@ describe('ValidationGate', () => {
       expect(scoreToTier(1000)).toBe(TrustTier.T7_AUTONOMOUS);
     });
 
-    it('should REJECT when trust tier is below minimum', () => {
+    it("should REJECT when trust tier is below minimum", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 100, // T0
       };
 
@@ -137,12 +141,14 @@ describe('ValidationGate', () => {
       });
 
       expect(result.decision).toBe(GateDecision.REJECT);
-      expect(result.errors.some((e) => e.code === 'INSUFFICIENT_TRUST_TIER')).toBe(true);
+      expect(
+        result.errors.some((e) => e.code === "INSUFFICIENT_TRUST_TIER"),
+      ).toBe(true);
     });
 
-    it('should PASS when trust tier meets minimum', () => {
+    it("should PASS when trust tier meets minimum", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 700, // T4 (650-799)
       };
 
@@ -154,14 +160,16 @@ describe('ValidationGate', () => {
       expect(result.trustTier).toBe(TrustTier.T4_STANDARD);
     });
 
-    it('should warn when trust score is missing', () => {
+    it("should warn when trust score is missing", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
       };
 
       const result = validateAgent(manifest);
 
-      expect(result.warnings.some((w) => w.code === 'MISSING_TRUST_SCORE')).toBe(true);
+      expect(
+        result.warnings.some((w) => w.code === "MISSING_TRUST_SCORE"),
+      ).toBe(true);
     });
   });
 
@@ -169,24 +177,28 @@ describe('ValidationGate', () => {
   // PROFILE VALIDATION
   // =============================================================================
 
-  describe('profile validation', () => {
+  describe("profile validation", () => {
     const validProfile: RegisteredProfile = {
-      agentId: 'a3i.acme-corp.invoice-bot:ABF-L3@1.0.0',
-      organization: 'acme-corp',
-      agentClass: 'invoice-bot',
-      approvedDomains: ['A', 'B', 'F'],
+      agentId: "a3i.acme-corp.invoice-bot:ABF-L3@1.0.0",
+      organization: "acme-corp",
+      agentClass: "invoice-bot",
+      approvedDomains: ["A", "B", "F"],
       maxCapabilityLevel: 4,
-      approvedCapabilities: ['CAP-READ-PUBLIC', 'CAP-DB-READ', 'CAP-WRITE-APPROVED'],
+      approvedCapabilities: [
+        "CAP-READ-PUBLIC",
+        "CAP-DB-READ",
+        "CAP-WRITE-APPROVED",
+      ],
       trustScore: 500,
-      registeredAt: new Date('2024-01-01'),
+      registeredAt: new Date("2024-01-01"),
     };
 
-    it('should PASS when manifest matches profile', () => {
+    it("should PASS when manifest matches profile", () => {
       const manifest: AgentManifest = {
-        agentId: 'a3i.acme-corp.invoice-bot:ABF-L3@1.0.0',
-        organization: 'acme-corp',
-        agentClass: 'invoice-bot',
-        domains: ['A', 'B'],
+        agentId: "a3i.acme-corp.invoice-bot:ABF-L3@1.0.0",
+        organization: "acme-corp",
+        agentClass: "invoice-bot",
+        domains: ["A", "B"],
         capabilityLevel: 3,
         trustScore: 500,
       };
@@ -197,23 +209,23 @@ describe('ValidationGate', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('should REJECT when organization mismatches', () => {
+    it("should REJECT when organization mismatches", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
-        organization: 'evil-corp',
+        agentId: "test-agent",
+        organization: "evil-corp",
         trustScore: 500,
       };
 
       const result = validateAgent(manifest, validProfile);
 
       expect(result.decision).toBe(GateDecision.REJECT);
-      expect(result.errors.some((e) => e.code === 'ORG_MISMATCH')).toBe(true);
+      expect(result.errors.some((e) => e.code === "ORG_MISMATCH")).toBe(true);
     });
 
-    it('should REJECT when capability level exceeds maximum', () => {
+    it("should REJECT when capability level exceeds maximum", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
-        organization: 'acme-corp',
+        agentId: "test-agent",
+        organization: "acme-corp",
         capabilityLevel: 7, // exceeds profile max of 4
         trustScore: 500,
       };
@@ -221,39 +233,45 @@ describe('ValidationGate', () => {
       const result = validateAgent(manifest, validProfile);
 
       expect(result.decision).toBe(GateDecision.REJECT);
-      expect(result.errors.some((e) => e.code === 'CAPABILITY_LEVEL_EXCEEDED')).toBe(true);
+      expect(
+        result.errors.some((e) => e.code === "CAPABILITY_LEVEL_EXCEEDED"),
+      ).toBe(true);
     });
 
-    it('should REJECT unauthorized domains', () => {
+    it("should REJECT unauthorized domains", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
-        organization: 'acme-corp',
-        domains: ['A', 'B', 'S'], // S not approved
+        agentId: "test-agent",
+        organization: "acme-corp",
+        domains: ["A", "B", "S"], // S not approved
         trustScore: 500,
       };
 
       const result = validateAgent(manifest, validProfile);
 
       expect(result.decision).toBe(GateDecision.REJECT);
-      expect(result.errors.some((e) => e.code === 'UNAUTHORIZED_DOMAINS')).toBe(true);
+      expect(result.errors.some((e) => e.code === "UNAUTHORIZED_DOMAINS")).toBe(
+        true,
+      );
     });
 
-    it('should warn on unauthorized capabilities', () => {
+    it("should warn on unauthorized capabilities", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
-        organization: 'acme-corp',
-        requestedCapabilities: ['CAP-READ-PUBLIC', 'CAP-SYSTEM-ADMIN-FULL'], // admin not approved
+        agentId: "test-agent",
+        organization: "acme-corp",
+        requestedCapabilities: ["CAP-READ-PUBLIC", "CAP-SYSTEM-ADMIN-FULL"], // admin not approved
         trustScore: 500,
       };
 
       const result = validateAgent(manifest, validProfile);
 
-      expect(result.warnings.some((w) => w.code === 'UNAUTHORIZED_CAPABILITIES')).toBe(true);
+      expect(
+        result.warnings.some((w) => w.code === "UNAUTHORIZED_CAPABILITIES"),
+      ).toBe(true);
     });
 
-    it('should REJECT when profile required but missing', () => {
+    it("should REJECT when profile required but missing", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 500,
       };
 
@@ -262,7 +280,9 @@ describe('ValidationGate', () => {
       });
 
       expect(result.decision).toBe(GateDecision.REJECT);
-      expect(result.errors.some((e) => e.code === 'PROFILE_NOT_FOUND')).toBe(true);
+      expect(result.errors.some((e) => e.code === "PROFILE_NOT_FOUND")).toBe(
+        true,
+      );
     });
   });
 
@@ -270,45 +290,47 @@ describe('ValidationGate', () => {
   // CAPABILITY VALIDATION
   // =============================================================================
 
-  describe('capability validation', () => {
-    it('should allow capabilities matching trust tier', () => {
+  describe("capability validation", () => {
+    it("should allow capabilities matching trust tier", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 700, // T4_STANDARD (650-799)
-        requestedCapabilities: ['CAP-READ-PUBLIC', 'CAP-AGENT-COMMUNICATE'],
+        requestedCapabilities: ["CAP-READ-PUBLIC", "CAP-AGENT-COMMUNICATE"],
       };
 
       const result = validateAgent(manifest);
 
-      expect(result.allowedCapabilities).toContain('CAP-READ-PUBLIC');
-      expect(result.allowedCapabilities).toContain('CAP-AGENT-COMMUNICATE');
+      expect(result.allowedCapabilities).toContain("CAP-READ-PUBLIC");
+      expect(result.allowedCapabilities).toContain("CAP-AGENT-COMMUNICATE");
       expect(result.deniedCapabilities).toBeUndefined();
     });
 
-    it('should deny capabilities above trust tier', () => {
+    it("should deny capabilities above trust tier", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 100, // T0_SANDBOX
-        requestedCapabilities: ['CAP-READ-PUBLIC', 'CAP-AGENT-SPAWN'], // spawn requires T6
+        requestedCapabilities: ["CAP-READ-PUBLIC", "CAP-AGENT-SPAWN"], // spawn requires T6
       };
 
       const result = validateAgent(manifest);
 
-      expect(result.allowedCapabilities).toContain('CAP-READ-PUBLIC');
-      expect(result.deniedCapabilities).toContain('CAP-AGENT-SPAWN');
+      expect(result.allowedCapabilities).toContain("CAP-READ-PUBLIC");
+      expect(result.deniedCapabilities).toContain("CAP-AGENT-SPAWN");
     });
 
-    it('should provide recommendations for denied capabilities', () => {
+    it("should provide recommendations for denied capabilities", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 100,
-        requestedCapabilities: ['CAP-AGENT-SPAWN'],
+        requestedCapabilities: ["CAP-AGENT-SPAWN"],
       };
 
       const result = validateAgent(manifest);
 
       expect(result.recommendations).toBeDefined();
-      expect(result.recommendations?.some((r) => r.includes('trust score'))).toBe(true);
+      expect(
+        result.recommendations?.some((r) => r.includes("trust score")),
+      ).toBe(true);
     });
   });
 
@@ -316,31 +338,33 @@ describe('ValidationGate', () => {
   // REQUIRED DOMAINS
   // =============================================================================
 
-  describe('required domains', () => {
-    it('should REJECT when required domains are missing', () => {
+  describe("required domains", () => {
+    it("should REJECT when required domains are missing", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
-        domains: ['A', 'B'],
+        agentId: "test-agent",
+        domains: ["A", "B"],
         trustScore: 500,
       };
 
       const result = validateAgent(manifest, undefined, {
-        requiredDomains: ['A', 'F'], // F is missing
+        requiredDomains: ["A", "F"], // F is missing
       });
 
       expect(result.decision).toBe(GateDecision.REJECT);
-      expect(result.errors.some((e) => e.code === 'MISSING_REQUIRED_DOMAINS')).toBe(true);
+      expect(
+        result.errors.some((e) => e.code === "MISSING_REQUIRED_DOMAINS"),
+      ).toBe(true);
     });
 
-    it('should PASS when all required domains present', () => {
+    it("should PASS when all required domains present", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
-        domains: ['A', 'B', 'F'],
+        agentId: "test-agent",
+        domains: ["A", "B", "F"],
         trustScore: 500,
       };
 
       const result = validateAgent(manifest, undefined, {
-        requiredDomains: ['A', 'F'],
+        requiredDomains: ["A", "F"],
       });
 
       expect(result.decision).toBe(GateDecision.PASS);
@@ -351,14 +375,16 @@ describe('ValidationGate', () => {
   // STRICT MODE
   // =============================================================================
 
-  describe('strict mode', () => {
-    it('should REJECT on warnings in strict mode', () => {
+  describe("strict mode", () => {
+    it("should REJECT on warnings in strict mode", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         // No trust score - generates warning
       };
 
-      const normalResult = validateAgent(manifest, undefined, { strict: false });
+      const normalResult = validateAgent(manifest, undefined, {
+        strict: false,
+      });
       const strictResult = validateAgent(manifest, undefined, { strict: true });
 
       expect(normalResult.decision).toBe(GateDecision.PASS);
@@ -370,20 +396,20 @@ describe('ValidationGate', () => {
   // CUSTOM VALIDATORS
   // =============================================================================
 
-  describe('custom validators', () => {
-    it('should run custom validators', () => {
+  describe("custom validators", () => {
+    it("should run custom validators", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 500,
-        metadata: { version: '0.0.1' },
+        metadata: { version: "0.0.1" },
       };
 
       const customValidator = (m: AgentManifest) => {
         const issues = [];
-        if (m.metadata?.version === '0.0.1') {
+        if (m.metadata?.version === "0.0.1") {
           issues.push({
-            code: 'UNSTABLE_VERSION',
-            message: 'Agent is using unstable version',
+            code: "UNSTABLE_VERSION",
+            message: "Agent is using unstable version",
             severity: ValidationSeverity.WARNING,
           });
         }
@@ -394,17 +420,19 @@ describe('ValidationGate', () => {
         customValidators: [customValidator],
       });
 
-      expect(result.warnings.some((w) => w.code === 'UNSTABLE_VERSION')).toBe(true);
+      expect(result.warnings.some((w) => w.code === "UNSTABLE_VERSION")).toBe(
+        true,
+      );
     });
 
-    it('should handle custom validator errors gracefully', () => {
+    it("should handle custom validator errors gracefully", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 500,
       };
 
       const failingValidator = () => {
-        throw new Error('Validator crashed');
+        throw new Error("Validator crashed");
       };
 
       const result = validateAgent(manifest, undefined, {
@@ -412,7 +440,9 @@ describe('ValidationGate', () => {
       });
 
       // Should not crash, just add a warning
-      expect(result.warnings.some((w) => w.code === 'CUSTOM_VALIDATOR_ERROR')).toBe(true);
+      expect(
+        result.warnings.some((w) => w.code === "CUSTOM_VALIDATOR_ERROR"),
+      ).toBe(true);
     });
   });
 
@@ -420,31 +450,31 @@ describe('ValidationGate', () => {
   // HELPER FUNCTIONS
   // =============================================================================
 
-  describe('isValidAgent', () => {
-    it('should return true for valid agent', () => {
+  describe("isValidAgent", () => {
+    it("should return true for valid agent", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 500,
       };
 
       expect(isValidAgent(manifest)).toBe(true);
     });
 
-    it('should return false for invalid agent', () => {
+    it("should return false for invalid agent", () => {
       const manifest = {} as AgentManifest;
 
       expect(isValidAgent(manifest)).toBe(false);
     });
   });
 
-  describe('createValidationGate', () => {
-    it('should create gate with preset options', () => {
+  describe("createValidationGate", () => {
+    it("should create gate with preset options", () => {
       const gate = createValidationGate({
         minimumTrustTier: TrustTier.T3_MONITORED,
       });
 
       const lowTrustManifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 100,
       };
 
@@ -452,13 +482,13 @@ describe('ValidationGate', () => {
       expect(result.decision).toBe(GateDecision.REJECT);
     });
 
-    it('should allow option overrides', () => {
+    it("should allow option overrides", () => {
       const gate = createValidationGate({
         minimumTrustTier: TrustTier.T5_TRUSTED,
       });
 
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 700, // T4 (650-799)
       };
 
@@ -474,24 +504,26 @@ describe('ValidationGate', () => {
     });
   });
 
-  describe('preset gates', () => {
-    it('strictValidationGate should reject on warnings', () => {
+  describe("preset gates", () => {
+    it("strictValidationGate should reject on warnings", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         // Missing trustScore generates warning
       };
 
       expect(strictValidationGate.isValid(manifest)).toBe(false);
     });
 
-    it('productionValidationGate should require profile', () => {
+    it("productionValidationGate should require profile", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 500,
       };
 
       const result = productionValidationGate.validate(manifest);
-      expect(result.errors.some((e) => e.code === 'PROFILE_NOT_FOUND')).toBe(true);
+      expect(result.errors.some((e) => e.code === "PROFILE_NOT_FOUND")).toBe(
+        true,
+      );
     });
   });
 
@@ -499,12 +531,12 @@ describe('ValidationGate', () => {
   // ESCALATION
   // =============================================================================
 
-  describe('escalation', () => {
-    it('should ESCALATE when capability escalation allowed and denied caps exist', () => {
+  describe("escalation", () => {
+    it("should ESCALATE when capability escalation allowed and denied caps exist", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 100, // T0
-        requestedCapabilities: ['CAP-AGENT-SPAWN'], // Requires T6
+        requestedCapabilities: ["CAP-AGENT-SPAWN"], // Requires T6
       };
 
       const result = validateAgent(manifest, undefined, {
@@ -514,11 +546,11 @@ describe('ValidationGate', () => {
       expect(result.decision).toBe(GateDecision.ESCALATE);
     });
 
-    it('should REJECT when capability escalation not allowed', () => {
+    it("should REJECT when capability escalation not allowed", () => {
       const manifest: AgentManifest = {
-        agentId: 'test-agent',
+        agentId: "test-agent",
         trustScore: 100,
-        requestedCapabilities: ['CAP-AGENT-SPAWN'],
+        requestedCapabilities: ["CAP-AGENT-SPAWN"],
       };
 
       const result = validateAgent(manifest, undefined, {

@@ -7,22 +7,27 @@
  * @packageDocumentation
  */
 
-import * as crypto from 'node:crypto';
-import { createLogger } from '../common/logger.js';
-import { TrustFacade, type AgentCredentials, type Action, type TrustSignal } from '../trust-facade/index.js';
-import { ProofCommitter, type ProofEvent } from '../proof-committer/index.js';
+import * as crypto from "node:crypto";
+import { createLogger } from "../common/logger.js";
+import {
+  TrustFacade,
+  type AgentCredentials,
+  type Action,
+  type TrustSignal,
+} from "../trust-facade/index.js";
+import { ProofCommitter, type ProofEvent } from "../proof-committer/index.js";
 import type {
   Intent,
   IntentResult,
   PipelineContext,
   IntentPipelineConfig,
   ExecutionHandler,
-} from './types.js';
-import { DEFAULT_INTENT_PIPELINE_CONFIG } from './types.js';
+} from "./types.js";
+import { DEFAULT_INTENT_PIPELINE_CONFIG } from "./types.js";
 
-export * from './types.js';
+export * from "./types.js";
 
-const logger = createLogger({ component: 'intent-pipeline' });
+const logger = createLogger({ component: "intent-pipeline" });
 
 /**
  * IntentPipeline - Orchestrates the full agent intent lifecycle
@@ -42,13 +47,13 @@ export class IntentPipeline {
   constructor(
     trustFacade: TrustFacade,
     proofCommitter: ProofCommitter,
-    config?: Partial<IntentPipelineConfig>
+    config?: Partial<IntentPipelineConfig>,
   ) {
     this.trustFacade = trustFacade;
     this.proofCommitter = proofCommitter;
     this.config = { ...DEFAULT_INTENT_PIPELINE_CONFIG, ...config };
 
-    logger.info({ config: this.config }, 'IntentPipeline initialized');
+    logger.info({ config: this.config }, "IntentPipeline initialized");
   }
 
   /**
@@ -56,7 +61,7 @@ export class IntentPipeline {
    */
   registerHandler(actionType: string, handler: ExecutionHandler): void {
     this.executionHandlers.set(actionType, handler);
-    logger.debug({ actionType }, 'Handler registered');
+    logger.debug({ actionType }, "Handler registered");
   }
 
   /**
@@ -65,7 +70,7 @@ export class IntentPipeline {
   async submit(
     agentCredentials: AgentCredentials,
     action: Action,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<IntentResult> {
     const startTime = performance.now();
     const correlationId = crypto.randomUUID();
@@ -88,7 +93,7 @@ export class IntentPipeline {
 
     // Record intent submission
     const submitCommitmentId = this.proofCommitter.commit({
-      type: 'intent_submitted',
+      type: "intent_submitted",
       entityId: intent.agentId,
       payload: { intentId: intent.id, action },
       timestamp: Date.now(),
@@ -96,32 +101,35 @@ export class IntentPipeline {
     });
 
     if (this.config.verboseLogging) {
-      logger.debug({ intentId: intent.id, correlationId }, 'Intent submitted');
+      logger.debug({ intentId: intent.id, correlationId }, "Intent submitted");
     }
 
     try {
       // Full trust check (gate + authorization)
-      const checkResult = await this.trustFacade.fullCheck(agentCredentials, action);
+      const checkResult = await this.trustFacade.fullCheck(
+        agentCredentials,
+        action,
+      );
 
       // Determine if allowed (must be admitted and authorized)
       const admitted = checkResult.admission.admitted;
       const authorized = checkResult.authorization?.allowed ?? false;
       const allowed = admitted && authorized;
-      const tier = checkResult.authorization?.tier ?? 'RED';
+      const tier = checkResult.authorization?.tier ?? "RED";
 
       // Record decision
       this.proofCommitter.commit({
-        type: 'decision_made',
+        type: "decision_made",
         entityId: intent.agentId,
         payload: {
           intentId: intent.id,
           allowed,
           tier,
           reason: allowed
-            ? 'Trust check passed'
+            ? "Trust check passed"
             : admitted
-              ? checkResult.authorization?.reason ?? 'Authorization denied'
-              : checkResult.admission.reason ?? 'Admission denied',
+              ? (checkResult.authorization?.reason ?? "Authorization denied")
+              : (checkResult.admission.reason ?? "Admission denied"),
         },
         timestamp: Date.now(),
         correlationId,
@@ -133,8 +141,8 @@ export class IntentPipeline {
         this.totalProcessingTimeMs += processingTimeMs;
 
         const reason = admitted
-          ? checkResult.authorization?.reason ?? 'Authorization denied'
-          : `Gate denied: ${checkResult.admission.reason ?? 'Admission denied'}`;
+          ? (checkResult.authorization?.reason ?? "Authorization denied")
+          : `Gate denied: ${checkResult.admission.reason ?? "Admission denied"}`;
 
         return {
           intentId: intent.id,
@@ -151,7 +159,7 @@ export class IntentPipeline {
       if (handler) {
         // Record execution start
         this.proofCommitter.commit({
-          type: 'execution_started',
+          type: "execution_started",
           entityId: intent.agentId,
           payload: { intentId: intent.id, actionType: action.type },
           timestamp: Date.now(),
@@ -162,7 +170,7 @@ export class IntentPipeline {
 
         // Record execution completion
         this.proofCommitter.commit({
-          type: 'execution_completed',
+          type: "execution_completed",
           entityId: intent.agentId,
           payload: {
             intentId: intent.id,
@@ -177,8 +185,8 @@ export class IntentPipeline {
         if (this.config.autoRecordSignals) {
           const signal: TrustSignal = {
             agentId: intent.agentId,
-            type: execResult.success ? 'success' : 'failure',
-            source: 'execution',
+            type: execResult.success ? "success" : "failure",
+            source: "execution",
             weight: execResult.success ? 0.1 : 0.5, // Asymmetric: failures weighted more (weight is 0-1)
             context: { intentId: intent.id, actionType: action.type },
           };
@@ -216,7 +224,7 @@ export class IntentPipeline {
         intentId: intent.id,
         allowed: true,
         tier,
-        reason: 'Intent processed successfully',
+        reason: "Intent processed successfully",
         commitmentId: submitCommitmentId,
         constraints: constraintStrings,
         processingTimeMs,
@@ -226,13 +234,13 @@ export class IntentPipeline {
       this.totalProcessingTimeMs += processingTimeMs;
       this.deniedIntents++;
 
-      logger.error({ error, intentId: intent.id }, 'Intent processing failed');
+      logger.error({ error, intentId: intent.id }, "Intent processing failed");
 
       return {
         intentId: intent.id,
         allowed: false,
-        tier: 'RED',
-        reason: `Processing error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        tier: "RED",
+        reason: `Processing error: ${error instanceof Error ? error.message : "Unknown error"}`,
         commitmentId: submitCommitmentId,
         processingTimeMs,
       };
@@ -242,7 +250,10 @@ export class IntentPipeline {
   /**
    * Quick authorization check (no execution)
    */
-  async check(agentCredentials: AgentCredentials, action: Action): Promise<{
+  async check(
+    agentCredentials: AgentCredentials,
+    action: Action,
+  ): Promise<{
     allowed: boolean;
     tier: string;
     reason: string;
@@ -255,12 +266,12 @@ export class IntentPipeline {
 
     return {
       allowed,
-      tier: result.authorization?.tier ?? 'RED',
+      tier: result.authorization?.tier ?? "RED",
       reason: allowed
-        ? 'Allowed'
+        ? "Allowed"
         : admitted
-          ? result.authorization?.reason ?? 'Authorization denied'
-          : result.admission.reason ?? 'Admission denied',
+          ? (result.authorization?.reason ?? "Authorization denied")
+          : (result.admission.reason ?? "Admission denied"),
     };
   }
 
@@ -278,8 +289,12 @@ export class IntentPipeline {
       totalIntents: this.totalIntents,
       allowedIntents: this.allowedIntents,
       deniedIntents: this.deniedIntents,
-      avgProcessingTimeMs: this.totalIntents > 0 ? this.totalProcessingTimeMs / this.totalIntents : 0,
-      allowRate: this.totalIntents > 0 ? this.allowedIntents / this.totalIntents : 0,
+      avgProcessingTimeMs:
+        this.totalIntents > 0
+          ? this.totalProcessingTimeMs / this.totalIntents
+          : 0,
+      allowRate:
+        this.totalIntents > 0 ? this.allowedIntents / this.totalIntents : 0,
     };
   }
 
@@ -295,7 +310,7 @@ export class IntentPipeline {
    */
   async stop(): Promise<void> {
     await this.proofCommitter.stop();
-    logger.info(this.getMetrics(), 'IntentPipeline stopped');
+    logger.info(this.getMetrics(), "IntentPipeline stopped");
   }
 }
 
@@ -305,7 +320,7 @@ export class IntentPipeline {
 export function createIntentPipeline(
   trustFacade: TrustFacade,
   proofCommitter: ProofCommitter,
-  config?: Partial<IntentPipelineConfig>
+  config?: Partial<IntentPipelineConfig>,
 ): IntentPipeline {
   return new IntentPipeline(trustFacade, proofCommitter, config);
 }

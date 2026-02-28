@@ -1,5 +1,5 @@
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { DeployFunction } from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DeployFunction } from "hardhat-deploy/types";
 
 /**
  * Deploy AgentCard NFT contract
@@ -16,11 +16,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   log(`Deploying AgentCard to ${network.name}...`);
 
-  const agentCard = await deploy('AgentCard', {
+  const agentCard = await deploy("AgentCard", {
     from: deployer,
     args: [],
     log: true,
-    waitConfirmations: network.name === 'polygon' ? 5 : 1,
+    waitConfirmations: network.name === "polygon" ? 5 : 1,
   });
 
   log(`AgentCard deployed to: ${agentCard.address}`);
@@ -30,8 +30,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log(`Granting CERTIFIER_ROLE to ${certifier}...`);
 
     const agentCardContract = await hre.ethers.getContractAt(
-      'AgentCard',
-      agentCard.address
+      "AgentCard",
+      agentCard.address,
     );
 
     const CERTIFIER_ROLE = await agentCardContract.CERTIFIER_ROLE();
@@ -43,19 +43,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Verify contract on Etherscan/Polygonscan
   if (
-    network.name !== 'hardhat' &&
-    network.name !== 'localhost' &&
+    network.name !== "hardhat" &&
+    network.name !== "localhost" &&
     process.env.ETHERSCAN_API_KEY
   ) {
-    log('Verifying contract on block explorer...');
+    log("Verifying contract on block explorer...");
     try {
-      await hre.run('verify:verify', {
+      await hre.run("verify:verify", {
         address: agentCard.address,
         constructorArguments: [],
       });
-      log('Contract verified successfully');
+      log("Contract verified successfully");
     } catch (error) {
-      log('Contract verification failed:', error);
+      log("Contract verification failed:", error);
     }
   }
 
@@ -63,4 +63,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['AgentCard', 'BASIS'];
+func.tags = ["AgentCard", "BASIS"];

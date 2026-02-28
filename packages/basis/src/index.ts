@@ -5,13 +5,13 @@
  */
 
 // Trust Factors - Scoring criteria
-export * from './trust-factors.js';
+export * from "./trust-factors.js";
 
 // Trust Capabilities - What agents can do at each tier
-export * from './trust-capabilities.js';
+export * from "./trust-capabilities.js";
 
 // Validation Gate - Agent manifest validation
-export * from './validation-gate.js';
+export * from "./validation-gate.js";
 
 // KYA (Know Your Agent) - Identity and authorization
-export * from './kya/index.js';
+export * from "./kya/index.js";

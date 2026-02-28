@@ -11,14 +11,14 @@
  * Event types that can be recorded in the proof plane
  */
 export type ProofEventType =
-  | 'intent_submitted'
-  | 'decision_made'
-  | 'execution_started'
-  | 'execution_completed'
-  | 'trust_signal'
-  | 'agent_admitted'
-  | 'agent_revoked'
-  | 'parity_violation';
+  | "intent_submitted"
+  | "decision_made"
+  | "execution_started"
+  | "execution_completed"
+  | "trust_signal"
+  | "agent_admitted"
+  | "agent_revoked"
+  | "parity_violation";
 
 /**
  * A proof event to be committed
@@ -120,7 +120,8 @@ export class InMemoryProofStore implements ProofStore {
       this.commitments.set(commitment.id, commitment);
 
       // Index by entity
-      const entityCommitments = this.entityIndex.get(commitment.event.entityId) ?? [];
+      const entityCommitments =
+        this.entityIndex.get(commitment.event.entityId) ?? [];
       entityCommitments.push(commitment.id);
       this.entityIndex.set(commitment.event.entityId, entityCommitments);
     }

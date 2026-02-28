@@ -11,7 +11,7 @@
  * @module @vorionsys/contracts/car/skills
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Skill Code Type
@@ -54,51 +54,88 @@ import { z } from 'zod';
  * - GV: Governance - Policy and compliance
  */
 export type SkillCode =
-  | 'TG'  // Text Generation
-  | 'CW'  // Content Writing
-  | 'CR'  // Creative Writing
-  | 'TD'  // Technical Documentation
-  | 'TR'  // Translation
-  | 'SM'  // Summarization
-  | 'DA'  // Data Analysis
-  | 'RS'  // Research
-  | 'QA'  // Question Answering
-  | 'CA'  // Code Assistance
-  | 'DV'  // Development
-  | 'RV'  // Review
-  | 'WS'  // Web Search
-  | 'FO'  // File Operations
-  | 'AI'  // API Integration
-  | 'PL'  // Planning
-  | 'CM'  // Communication
-  | 'CS'  // Customer Support
-  | 'AU'  // Automation
-  | 'SC'  // Security
-  | 'GV'; // Governance
+  | "TG" // Text Generation
+  | "CW" // Content Writing
+  | "CR" // Creative Writing
+  | "TD" // Technical Documentation
+  | "TR" // Translation
+  | "SM" // Summarization
+  | "DA" // Data Analysis
+  | "RS" // Research
+  | "QA" // Question Answering
+  | "CA" // Code Assistance
+  | "DV" // Development
+  | "RV" // Review
+  | "WS" // Web Search
+  | "FO" // File Operations
+  | "AI" // API Integration
+  | "PL" // Planning
+  | "CM" // Communication
+  | "CS" // Customer Support
+  | "AU" // Automation
+  | "SC" // Security
+  | "GV"; // Governance
 
 /**
  * Array of all valid skill codes.
  */
 export const SKILL_CODES: readonly SkillCode[] = [
-  'TG', 'CW', 'CR', 'TD', 'TR', 'SM',  // Content & Generation
-  'DA', 'RS', 'QA',                     // Analysis & Research
-  'CA', 'DV', 'RV', 'WS', 'FO', 'AI',  // Development & Technical
-  'PL', 'CM', 'CS', 'AU',              // Business & Operations
-  'SC', 'GV',                           // Security & Governance
+  "TG",
+  "CW",
+  "CR",
+  "TD",
+  "TR",
+  "SM", // Content & Generation
+  "DA",
+  "RS",
+  "QA", // Analysis & Research
+  "CA",
+  "DV",
+  "RV",
+  "WS",
+  "FO",
+  "AI", // Development & Technical
+  "PL",
+  "CM",
+  "CS",
+  "AU", // Business & Operations
+  "SC",
+  "GV", // Security & Governance
 ] as const;
 
 /**
  * Zod schema for SkillCode validation.
  */
-export const skillCodeSchema = z.enum([
-  'TG', 'CW', 'CR', 'TD', 'TR', 'SM',
-  'DA', 'RS', 'QA',
-  'CA', 'DV', 'RV', 'WS', 'FO', 'AI',
-  'PL', 'CM', 'CS', 'AU',
-  'SC', 'GV',
-], {
-  errorMap: () => ({ message: `Invalid skill code. Must be one of: ${SKILL_CODES.join(', ')}` }),
-});
+export const skillCodeSchema = z.enum(
+  [
+    "TG",
+    "CW",
+    "CR",
+    "TD",
+    "TR",
+    "SM",
+    "DA",
+    "RS",
+    "QA",
+    "CA",
+    "DV",
+    "RV",
+    "WS",
+    "FO",
+    "AI",
+    "PL",
+    "CM",
+    "CS",
+    "AU",
+    "SC",
+    "GV",
+  ],
+  {
+    errorMap: () => ({
+      message: `Invalid skill code. Must be one of: ${SKILL_CODES.join(", ")}`,
+    }),
+  },
+);
 
 // ============================================================================
 // Skill Definition
@@ -108,11 +145,11 @@ export const skillCodeSchema = z.enum([
  * Skill category for grouping related skills.
  */
 export type SkillCategory =
-  | 'content'
-  | 'analysis'
-  | 'development'
-  | 'business'
-  | 'security';
+  | "content"
+  | "analysis"
+  | "development"
+  | "business"
+  | "security";
 
 /**
  * Complete definition for a skill.
@@ -142,61 +179,203 @@ export interface SkillDefinition {
  */
 export const SKILL_DEFINITIONS: Readonly<Record<SkillCode, SkillDefinition>> = {
   // Content & Generation (bits 0-5)
-  TG: { code: 'TG', name: 'Text Generation', bit: 0x00001, description: 'General text creation and composition', category: 'content', legacyId: 'text_generation' },
-  CW: { code: 'CW', name: 'Content Writing', bit: 0x00002, description: 'Blog posts, articles, marketing copy', category: 'content', legacyId: 'content_writing' },
-  CR: { code: 'CR', name: 'Creative Writing', bit: 0x00004, description: 'Fiction, storytelling, creative content', category: 'content', legacyId: 'creative_writing' },
-  TD: { code: 'TD', name: 'Technical Documentation', bit: 0x00008, description: 'Docs, guides, specifications', category: 'content', legacyId: 'technical_documentation' },
-  TR: { code: 'TR', name: 'Translation', bit: 0x00010, description: 'Language translation services', category: 'content', legacyId: 'translation' },
-  SM: { code: 'SM', name: 'Summarization', bit: 0x00020, description: 'Content condensation and extraction', category: 'content', legacyId: 'summarization' },
+  TG: {
+    code: "TG",
+    name: "Text Generation",
+    bit: 0x00001,
+    description: "General text creation and composition",
+    category: "content",
+    legacyId: "text_generation",
+  },
+  CW: {
+    code: "CW",
+    name: "Content Writing",
+    bit: 0x00002,
+    description: "Blog posts, articles, marketing copy",
+    category: "content",
+    legacyId: "content_writing",
+  },
+  CR: {
+    code: "CR",
+    name: "Creative Writing",
+    bit: 0x00004,
+    description: "Fiction, storytelling, creative content",
+    category: "content",
+    legacyId: "creative_writing",
+  },
+  TD: {
+    code: "TD",
+    name: "Technical Documentation",
+    bit: 0x00008,
+    description: "Docs, guides, specifications",
+    category: "content",
+    legacyId: "technical_documentation",
+  },
+  TR: {
+    code: "TR",
+    name: "Translation",
+    bit: 0x00010,
+    description: "Language translation services",
+    category: "content",
+    legacyId: "translation",
+  },
+  SM: {
+    code: "SM",
+    name: "Summarization",
+    bit: 0x00020,
+    description: "Content condensation and extraction",
+    category: "content",
+    legacyId: "summarization",
+  },
 
   // Analysis & Research (bits 6-8)
-  DA: { code: 'DA', name: 'Data Analysis', bit: 0x00040, description: 'Statistical analysis, data processing', category: 'analysis', legacyId: 'data_analysis' },
-  RS: { code: 'RS', name: 'Research', bit: 0x00080, description: 'Information gathering and synthesis', category: 'analysis' },
-  QA: { code: 'QA', name: 'Question Answering', bit: 0x00100, description: 'Q&A, knowledge retrieval', category: 'analysis', legacyId: 'question_answering' },
+  DA: {
+    code: "DA",
+    name: "Data Analysis",
+    bit: 0x00040,
+    description: "Statistical analysis, data processing",
+    category: "analysis",
+    legacyId: "data_analysis",
+  },
+  RS: {
+    code: "RS",
+    name: "Research",
+    bit: 0x00080,
+    description: "Information gathering and synthesis",
+    category: "analysis",
+  },
+  QA: {
+    code: "QA",
+    name: "Question Answering",
+    bit: 0x00100,
+    description: "Q&A, knowledge retrieval",
+    category: "analysis",
+    legacyId: "question_answering",
+  },
 
   // Development & Technical (bits 9-14)
-  CA: { code: 'CA', name: 'Code Assistance', bit: 0x00200, description: 'Programming help, debugging', category: 'development', legacyId: 'code_assistance' },
-  DV: { code: 'DV', name: 'Development', bit: 0x00400, description: 'Software development tasks', category: 'development' },
-  RV: { code: 'RV', name: 'Review', bit: 0x00800, description: 'Code review, content review', category: 'development' },
-  WS: { code: 'WS', name: 'Web Search', bit: 0x01000, description: 'Internet search and retrieval', category: 'development', legacyId: 'web_search' },
-  FO: { code: 'FO', name: 'File Operations', bit: 0x02000, description: 'File manipulation, I/O', category: 'development', legacyId: 'file_operations' },
-  AI: { code: 'AI', name: 'API Integration', bit: 0x04000, description: 'External API interactions', category: 'development', legacyId: 'api_integration' },
+  CA: {
+    code: "CA",
+    name: "Code Assistance",
+    bit: 0x00200,
+    description: "Programming help, debugging",
+    category: "development",
+    legacyId: "code_assistance",
+  },
+  DV: {
+    code: "DV",
+    name: "Development",
+    bit: 0x00400,
+    description: "Software development tasks",
+    category: "development",
+  },
+  RV: {
+    code: "RV",
+    name: "Review",
+    bit: 0x00800,
+    description: "Code review, content review",
+    category: "development",
+  },
+  WS: {
+    code: "WS",
+    name: "Web Search",
+    bit: 0x01000,
+    description: "Internet search and retrieval",
+    category: "development",
+    legacyId: "web_search",
+  },
+  FO: {
+    code: "FO",
+    name: "File Operations",
+    bit: 0x02000,
+    description: "File manipulation, I/O",
+    category: "development",
+    legacyId: "file_operations",
+  },
+  AI: {
+    code: "AI",
+    name: "API Integration",
+    bit: 0x04000,
+    description: "External API interactions",
+    category: "development",
+    legacyId: "api_integration",
+  },
 
   // Business & Operations (bits 15-18)
-  PL: { code: 'PL', name: 'Planning', bit: 0x08000, description: 'Task planning, scheduling', category: 'business' },
-  CM: { code: 'CM', name: 'Communication', bit: 0x10000, description: 'Messaging, notifications', category: 'business' },
-  CS: { code: 'CS', name: 'Customer Support', bit: 0x20000, description: 'Customer service interactions', category: 'business', legacyId: 'customer_support' },
-  AU: { code: 'AU', name: 'Automation', bit: 0x40000, description: 'Workflow automation', category: 'business' },
+  PL: {
+    code: "PL",
+    name: "Planning",
+    bit: 0x08000,
+    description: "Task planning, scheduling",
+    category: "business",
+  },
+  CM: {
+    code: "CM",
+    name: "Communication",
+    bit: 0x10000,
+    description: "Messaging, notifications",
+    category: "business",
+  },
+  CS: {
+    code: "CS",
+    name: "Customer Support",
+    bit: 0x20000,
+    description: "Customer service interactions",
+    category: "business",
+    legacyId: "customer_support",
+  },
+  AU: {
+    code: "AU",
+    name: "Automation",
+    bit: 0x40000,
+    description: "Workflow automation",
+    category: "business",
+  },
 
   // Security & Governance (bits 19-20)
-  SC: { code: 'SC', name: 'Security', bit: 0x80000, description: 'Security-related operations', category: 'security' },
-  GV: { code: 'GV', name: 'Governance', bit: 0x100000, description: 'Policy and compliance', category: 'security' },
+  SC: {
+    code: "SC",
+    name: "Security",
+    bit: 0x80000,
+    description: "Security-related operations",
+    category: "security",
+  },
+  GV: {
+    code: "GV",
+    name: "Governance",
+    bit: 0x100000,
+    description: "Policy and compliance",
+    category: "security",
+  },
 } as const;
 
 /**
  * Human-readable skill names indexed by code.
  */
-export const SKILL_NAMES: Readonly<Record<SkillCode, string>> = Object.fromEntries(
-  Object.entries(SKILL_DEFINITIONS).map(([code, def]) => [code, def.name])
-) as Record<SkillCode, string>;
+export const SKILL_NAMES: Readonly<Record<SkillCode, string>> =
+  Object.fromEntries(
+    Object.entries(SKILL_DEFINITIONS).map(([code, def]) => [code, def.name]),
+  ) as Record<SkillCode, string>;
 
 /**
  * Bitmask value representing all skills combined.
  */
 export const ALL_SKILLS_BITMASK = Object.values(SKILL_DEFINITIONS).reduce(
   (mask, skill) => mask | skill.bit,
-  0
+  0,
 );
 
 /**
  * Skills grouped by category.
  */
-export const SKILLS_BY_CATEGORY: Readonly<Record<SkillCategory, readonly SkillCode[]>> = {
-  content: ['TG', 'CW', 'CR', 'TD', 'TR', 'SM'],
-  analysis: ['DA', 'RS', 'QA'],
-  development: ['CA', 'DV', 'RV', 'WS', 'FO', 'AI'],
-  business: ['PL', 'CM', 'CS', 'AU'],
-  security: ['SC', 'GV'],
+export const SKILLS_BY_CATEGORY: Readonly<
+  Record<SkillCategory, readonly SkillCode[]>
+> = {
+  content: ["TG", "CW", "CR", "TD", "TR", "SM"],
+  analysis: ["DA", "RS", "QA"],
+  development: ["CA", "DV", "RV", "WS", "FO", "AI"],
+  business: ["PL", "CM", "CS", "AU"],
+  security: ["SC", "GV"],
 } as const;
 
 // ============================================================================
@@ -207,19 +386,19 @@ export const SKILLS_BY_CATEGORY: Readonly<Record<SkillCategory, readonly SkillCo
  * Map legacy string identifiers to skill codes.
  */
 export const LEGACY_ID_TO_SKILL: Readonly<Record<string, SkillCode>> = {
-  text_generation: 'TG',
-  content_writing: 'CW',
-  creative_writing: 'CR',
-  technical_documentation: 'TD',
-  translation: 'TR',
-  summarization: 'SM',
-  data_analysis: 'DA',
-  question_answering: 'QA',
-  code_assistance: 'CA',
-  web_search: 'WS',
-  file_operations: 'FO',
-  api_integration: 'AI',
-  customer_support: 'CS',
+  text_generation: "TG",
+  content_writing: "CW",
+  creative_writing: "CR",
+  technical_documentation: "TD",
+  translation: "TR",
+  summarization: "SM",
+  data_analysis: "DA",
+  question_answering: "QA",
+  code_assistance: "CA",
+  web_search: "WS",
+  file_operations: "FO",
+  api_integration: "AI",
+  customer_support: "CS",
 } as const;
 
 /**
@@ -238,7 +417,9 @@ export function legacyIdToSkillCode(legacyId: string): SkillCode | undefined {
  * @param legacyIds - Array of legacy string identifiers
  * @returns Array of skill codes (unrecognized IDs are filtered out)
  */
-export function legacyIdsToSkillCodes(legacyIds: readonly string[]): SkillCode[] {
+export function legacyIdsToSkillCodes(
+  legacyIds: readonly string[],
+): SkillCode[] {
   return legacyIds
     .map((id) => LEGACY_ID_TO_SKILL[id])
     .filter((code): code is SkillCode => code !== undefined);
@@ -282,7 +463,9 @@ export function encodeSkills(skills: readonly SkillCode[]): number {
  * ```
  */
 export function decodeSkills(bitmask: number): SkillCode[] {
-  return SKILL_CODES.filter((code) => (bitmask & SKILL_DEFINITIONS[code].bit) !== 0);
+  return SKILL_CODES.filter(
+    (code) => (bitmask & SKILL_DEFINITIONS[code].bit) !== 0,
+  );
 }
 
 /**
@@ -302,9 +485,9 @@ export function parseSkillString(skillString: string): SkillCode[] {
   if (!skillString) return [];
 
   // Try comma-separated first
-  if (skillString.includes(',')) {
+  if (skillString.includes(",")) {
     return skillString
-      .split(',')
+      .split(",")
       .map((s) => s.trim().toUpperCase())
       .filter((s): s is SkillCode => isSkillCode(s));
   }
@@ -334,7 +517,7 @@ export function parseSkillString(skillString: string): SkillCode[] {
  */
 export function formatSkillString(skills: readonly SkillCode[]): string {
   const unique = [...new Set(skills)];
-  return unique.sort().join(',');
+  return unique.sort().join(",");
 }
 
 // ============================================================================
@@ -355,7 +538,10 @@ export function formatSkillString(skills: readonly SkillCode[]): string {
  * hasSkills(agentMask, required);  // true
  * ```
  */
-export function hasSkills(agentSkills: number, requiredSkills: number): boolean {
+export function hasSkills(
+  agentSkills: number,
+  requiredSkills: number,
+): boolean {
   return (agentSkills & requiredSkills) === requiredSkills;
 }
 
@@ -368,7 +554,7 @@ export function hasSkills(agentSkills: number, requiredSkills: number): boolean 
  */
 export function satisfiesSkillRequirements(
   agentSkills: readonly SkillCode[],
-  requiredSkills: readonly SkillCode[]
+  requiredSkills: readonly SkillCode[],
 ): boolean {
   const agentMask = encodeSkills(agentSkills);
   const requiredMask = encodeSkills(requiredSkills);
@@ -384,7 +570,7 @@ export function satisfiesSkillRequirements(
  */
 export function intersectSkills(
   skills1: readonly SkillCode[],
-  skills2: readonly SkillCode[]
+  skills2: readonly SkillCode[],
 ): SkillCode[] {
   const mask1 = encodeSkills(skills1);
   const mask2 = encodeSkills(skills2);
@@ -400,7 +586,7 @@ export function intersectSkills(
  */
 export function unionSkills(
   skills1: readonly SkillCode[],
-  skills2: readonly SkillCode[]
+  skills2: readonly SkillCode[],
 ): SkillCode[] {
   const mask1 = encodeSkills(skills1);
   const mask2 = encodeSkills(skills2);
@@ -416,7 +602,7 @@ export function unionSkills(
  */
 export function differenceSkills(
   skills1: readonly SkillCode[],
-  skills2: readonly SkillCode[]
+  skills2: readonly SkillCode[],
 ): SkillCode[] {
   const mask1 = encodeSkills(skills1);
   const mask2 = encodeSkills(skills2);
@@ -473,7 +659,9 @@ export function getSkillCategory(code: SkillCode): SkillCategory {
  * @param category - Skill category
  * @returns Array of skill codes in that category
  */
-export function getSkillsInCategory(category: SkillCategory): readonly SkillCode[] {
+export function getSkillsInCategory(
+  category: SkillCategory,
+): readonly SkillCode[] {
   return SKILLS_BY_CATEGORY[category];
 }
 
@@ -504,7 +692,7 @@ export function countSkills(bitmask: number): number {
  * @returns True if value is a valid SkillCode
  */
 export function isSkillCode(value: unknown): value is SkillCode {
-  return typeof value === 'string' && SKILL_CODES.includes(value as SkillCode);
+  return typeof value === "string" && SKILL_CODES.includes(value as SkillCode);
 }
 
 /**
@@ -529,7 +717,13 @@ export const skillDefinitionSchema = z.object({
   name: z.string().min(1),
   bit: z.number().int().positive(),
   description: z.string().min(1),
-  category: z.enum(['content', 'analysis', 'development', 'business', 'security']),
+  category: z.enum([
+    "content",
+    "analysis",
+    "development",
+    "business",
+    "security",
+  ]),
   legacyId: z.string().optional(),
 });
 
@@ -541,7 +735,11 @@ export const skillCodeArraySchema = z.array(skillCodeSchema);
 /**
  * Zod schema for skill bitmask validation (21 bits max).
  */
-export const skillBitmaskSchema = z.number().int().min(0).max(ALL_SKILLS_BITMASK);
+export const skillBitmaskSchema = z
+  .number()
+  .int()
+  .min(0)
+  .max(ALL_SKILLS_BITMASK);
 
 /**
  * Zod schema for skill string validation (comma-separated codes).
@@ -554,6 +752,6 @@ export const skillStringSchema = z
       const codes = parseSkillString(val);
       return codes.length > 0;
     },
-    { message: 'Invalid skill string format' }
+    { message: "Invalid skill string format" },
   )
   .transform((val) => parseSkillString(val));

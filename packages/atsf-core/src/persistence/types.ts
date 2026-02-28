@@ -6,8 +6,8 @@
  * @packageDocumentation
  */
 
-import type { ID } from '../common/types.js';
-import type { TrustRecord } from '../trust-engine/index.js';
+import type { ID } from "../common/types.js";
+import type { TrustRecord } from "../trust-engine/types.js";
 
 /**
  * Query options for listing trust records
@@ -26,9 +26,9 @@ export interface TrustRecordQuery {
   /** Offset for pagination */
   offset?: number;
   /** Sort by field */
-  sortBy?: 'score' | 'level' | 'lastCalculatedAt';
+  sortBy?: "score" | "level" | "lastCalculatedAt";
   /** Sort direction */
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 /**
@@ -94,7 +94,7 @@ export interface PersistenceProvider {
  */
 export interface PersistenceConfig {
   /** Provider type */
-  type: 'memory' | 'file' | 'sqlite' | 'supabase';
+  type: "memory" | "file" | "sqlite" | "supabase";
   /** File path for file/sqlite providers */
   path?: string;
   /** Auto-save interval in ms (0 = disabled) */

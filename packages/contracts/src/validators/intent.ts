@@ -2,14 +2,22 @@
  * Zod schemas for intent types
  */
 
-import { z } from 'zod';
-import { actionTypeSchema, dataSensitivitySchema, reversibilitySchema } from './enums.js';
-import type { Intent, IntentContext, CreateIntentRequest } from '../v2/intent.js';
+import { z } from "zod";
+import {
+  actionTypeSchema,
+  dataSensitivitySchema,
+  reversibilitySchema,
+} from "./enums.js";
+import type {
+  Intent,
+  IntentContext,
+  CreateIntentRequest,
+} from "../v2/intent.js";
 
 /** Intent context validator */
 export const intentContextSchema = z.object({
   domain: z.string().optional(),
-  environment: z.enum(['production', 'staging', 'development']).optional(),
+  environment: z.enum(["production", "staging", "development"]).optional(),
   onBehalfOf: z.string().optional(),
   sessionId: z.string().optional(),
   parentIntentId: z.string().uuid().optional(),
@@ -53,4 +61,6 @@ export const createIntentRequestSchema = z.object({
 // Type inference from schemas
 export type ValidatedIntent = z.infer<typeof intentSchema>;
 export type ValidatedIntentContext = z.infer<typeof intentContextSchema>;
-export type ValidatedCreateIntentRequest = z.infer<typeof createIntentRequestSchema>;
+export type ValidatedCreateIntentRequest = z.infer<
+  typeof createIntentRequestSchema
+>;

@@ -2,7 +2,7 @@
  * Intent types - represents what an agent wants to do
  */
 
-import type { ActionType, DataSensitivity, Reversibility } from './enums.js';
+import type { ActionType, DataSensitivity, Reversibility } from "./enums.js";
 
 /**
  * Intent - a request from an agent to perform an action

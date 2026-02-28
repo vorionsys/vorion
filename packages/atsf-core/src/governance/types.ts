@@ -7,31 +7,36 @@
  * @packageDocumentation
  */
 
-import type { ID, Timestamp, TrustLevel, ControlAction } from '../common/types.js';
+import type {
+  ID,
+  Timestamp,
+  TrustLevel,
+  ControlAction,
+} from "../common/types.js";
 
 /**
  * Rule categories in priority order
  */
 export type RuleCategory =
-  | 'hard_disqualifier'     // Absolute blocks, no override possible
-  | 'regulatory_mandate'    // Legal/compliance requirements
-  | 'security_critical'     // Security-sensitive rules
-  | 'policy_enforcement'    // Organizational policy rules
-  | 'soft_constraint'       // Preferences, can be overridden
-  | 'clarification_trigger' // Requires human clarification
-  | 'logging_only';         // Informational, no enforcement
+  | "hard_disqualifier" // Absolute blocks, no override possible
+  | "regulatory_mandate" // Legal/compliance requirements
+  | "security_critical" // Security-sensitive rules
+  | "policy_enforcement" // Organizational policy rules
+  | "soft_constraint" // Preferences, can be overridden
+  | "clarification_trigger" // Requires human clarification
+  | "logging_only"; // Informational, no enforcement
 
 /**
  * Priority values for rule categories
  */
 export const RuleCategoryPriority: Record<RuleCategory, number> = {
-  hard_disqualifier: 0,     // Highest priority
+  hard_disqualifier: 0, // Highest priority
   regulatory_mandate: 1,
   security_critical: 2,
   policy_enforcement: 3,
   soft_constraint: 4,
   clarification_trigger: 5,
-  logging_only: 6,          // Lowest priority
+  logging_only: 6, // Lowest priority
 };
 
 /**
@@ -98,39 +103,39 @@ export interface RuleCondition {
   children?: RuleCondition[];
 
   /** Logical operator for children */
-  logicalOperator?: 'AND' | 'OR' | 'NOT';
+  logicalOperator?: "AND" | "OR" | "NOT";
 }
 
 /**
  * Types of conditions
  */
 export type ConditionType =
-  | 'field_match'       // Simple field comparison
-  | 'capability_check'  // Capability requirement
-  | 'trust_threshold'   // Trust score check
-  | 'resource_limit'    // Resource usage check
-  | 'time_window'       // Time-based condition
-  | 'pattern_match'     // Regex or pattern matching
-  | 'composite'         // Combination of conditions
-  | 'custom';           // Custom evaluator
+  | "field_match" // Simple field comparison
+  | "capability_check" // Capability requirement
+  | "trust_threshold" // Trust score check
+  | "resource_limit" // Resource usage check
+  | "time_window" // Time-based condition
+  | "pattern_match" // Regex or pattern matching
+  | "composite" // Combination of conditions
+  | "custom"; // Custom evaluator
 
 /**
  * Operators for conditions
  */
 export type ConditionOperator =
-  | 'equals'
-  | 'not_equals'
-  | 'greater_than'
-  | 'less_than'
-  | 'greater_or_equal'
-  | 'less_or_equal'
-  | 'contains'
-  | 'not_contains'
-  | 'matches'
-  | 'in'
-  | 'not_in'
-  | 'exists'
-  | 'not_exists';
+  | "equals"
+  | "not_equals"
+  | "greater_than"
+  | "less_than"
+  | "greater_or_equal"
+  | "less_or_equal"
+  | "contains"
+  | "not_contains"
+  | "matches"
+  | "in"
+  | "not_in"
+  | "exists"
+  | "not_exists";
 
 /**
  * Effect when a rule matches
@@ -160,7 +165,7 @@ export interface RuleEffect {
  */
 export interface EffectModification {
   target: string;
-  operation: 'set' | 'append' | 'remove' | 'redact' | 'transform';
+  operation: "set" | "append" | "remove" | "redact" | "transform";
   value?: unknown;
   reason: string;
 }
@@ -169,7 +174,7 @@ export interface EffectModification {
  * Constraint applied by a rule effect
  */
 export interface EffectConstraint {
-  type: 'scope' | 'rate' | 'capability' | 'data' | 'time';
+  type: "scope" | "rate" | "capability" | "data" | "time";
   constraint: string;
   value: unknown;
   reason: string;
@@ -300,7 +305,7 @@ export interface RuleAudit {
 export interface RuleChange {
   timestamp: Timestamp;
   changedBy: string;
-  changeType: 'create' | 'update' | 'enable' | 'disable' | 'delete';
+  changeType: "create" | "update" | "enable" | "disable" | "delete";
   changes: Record<string, { before: unknown; after: unknown }>;
   reason: string;
 }
@@ -341,11 +346,11 @@ export interface Authority {
  * Types of authority
  */
 export type AuthorityType =
-  | 'system'      // Built-in system authority
-  | 'role'        // Role-based authority
-  | 'delegated'   // Delegated from another authority
-  | 'temporary'   // Time-limited authority
-  | 'emergency';  // Emergency override authority
+  | "system" // Built-in system authority
+  | "role" // Role-based authority
+  | "delegated" // Delegated from another authority
+  | "temporary" // Time-limited authority
+  | "emergency"; // Emergency override authority
 
 /**
  * Scope of authority
@@ -459,6 +464,14 @@ export interface EvaluatedRule {
   effect?: RuleEffect;
   matchReason: string;
   evaluationMs: number;
+}
+
+/**
+ * Interface for governance engine consumers.
+ * Decouples consumers from the concrete GovernanceEngine class to avoid circular imports.
+ */
+export interface IGovernanceEngine {
+  evaluate(request: GovernanceRequest): Promise<GovernanceResult>;
 }
 
 /**

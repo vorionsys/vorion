@@ -13,10 +13,10 @@
  *   car presets                    - Show preset hierarchy
  */
 
-import { Command } from 'commander'
-import chalk from 'chalk'
-import ora from 'ora'
-import Table from 'cli-table3'
+import { Command } from "commander";
+import chalk from "chalk";
+import ora from "ora";
+import Table from "cli-table3";
 import {
   createCARClient,
   CARClient,
@@ -24,23 +24,26 @@ import {
   AgentRole,
   TRUST_TIER_LABELS,
   AGENT_ROLE_LABELS,
-} from '@vorionsys/car-client'
+} from "@vorionsys/car-client";
 
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
 
-const program = new Command()
+const program = new Command();
 
 function getClient(): CARClient {
-  const baseUrl = process.env.CAR_API_URL || process.env.VORION_BASE_URL || 'http://localhost:3000'
-  const apiKey = process.env.CAR_API_KEY || process.env.VORION_API_KEY
+  const baseUrl =
+    process.env.CAR_API_URL ||
+    process.env.VORION_BASE_URL ||
+    "http://localhost:3000";
+  const apiKey = process.env.CAR_API_KEY || process.env.VORION_API_KEY;
 
   return createCARClient({
     baseUrl,
     apiKey,
     timeout: 30000,
-  })
+  });
 }
 
 // =============================================================================
@@ -57,22 +60,22 @@ function tierColor(tier: TrustTier): string {
     T5: chalk.magenta,
     T6: chalk.cyan,
     T7: chalk.whiteBright,
-  }
-  return colors[tier](`${tier} (${TRUST_TIER_LABELS[tier]})`)
+  };
+  return colors[tier](`${tier} (${TRUST_TIER_LABELS[tier]})`);
 }
 
 function decisionColor(decision: string): string {
-  if (decision === 'ALLOW') return chalk.green(decision)
-  if (decision === 'DENY') return chalk.red(decision)
-  if (decision === 'ESCALATE') return chalk.yellow(decision)
-  return decision
+  if (decision === "ALLOW") return chalk.green(decision);
+  if (decision === "DENY") return chalk.red(decision);
+  if (decision === "ESCALATE") return chalk.yellow(decision);
+  return decision;
 }
 
 function complianceColor(status: string): string {
-  if (status === 'COMPLIANT') return chalk.green(status)
-  if (status === 'WARNING') return chalk.yellow(status)
-  if (status === 'VIOLATION') return chalk.red(status)
-  return status
+  if (status === "COMPLIANT") return chalk.green(status);
+  if (status === "WARNING") return chalk.yellow(status);
+  if (status === "VIOLATION") return chalk.red(status);
+  return status;
 }
 
 // =============================================================================
@@ -80,87 +83,108 @@ function complianceColor(status: string): string {
 // =============================================================================
 
 program
-  .name('car')
-  .description('CAR (Categorical Agentic Registry) Phase 6 Trust Engine CLI')
-  .version('1.0.0')
+  .name("car")
+  .description("CAR (Categorical Agentic Registry) Phase 6 Trust Engine CLI")
+  .version("1.0.0");
 
 // Stats command
 program
-  .command('stats')
-  .description('Show dashboard statistics')
+  .command("stats")
+  .description("Show dashboard statistics")
   .action(async () => {
-    const spinner = ora('Fetching statistics...').start()
-    const client = getClient()
+    const spinner = ora("Fetching statistics...").start();
+    const client = getClient();
 
     try {
-      const data = await client.getStats()
-      spinner.stop()
+      const data = await client.getStats();
+      spinner.stop();
 
-      console.log(chalk.bold('\n📊 Phase 6 Trust Engine Statistics\n'))
+      console.log(chalk.bold("\n📊 Phase 6 Trust Engine Statistics\n"));
 
       // Context stats
       const contextTable = new Table({
-        head: [chalk.cyan('Context'), chalk.cyan('Count')],
-      })
+        head: [chalk.cyan("Context"), chalk.cyan("Count")],
+      });
       contextTable.push(
-        ['Deployments', data.stats.contextStats.deployments],
-        ['Organizations', data.stats.contextStats.organizations],
-        ['Agents', data.stats.contextStats.agents],
-        ['Active Operations', data.stats.contextStats.activeOperations],
-      )
-      console.log(contextTable.toString())
+        ["Deployments", data.stats.contextStats.deployments],
+        ["Organizations", data.stats.contextStats.organizations],
+        ["Agents", data.stats.contextStats.agents],
+        ["Active Operations", data.stats.contextStats.activeOperations],
+      );
+      console.log(contextTable.toString());
 
       // Ceiling stats
-      console.log(chalk.bold('\n🎯 Compliance Status'))
+      console.log(chalk.bold("\n🎯 Compliance Status"));
       const ceilingTable = new Table({
-        head: [chalk.cyan('Status'), chalk.cyan('Count')],
-      })
+        head: [chalk.cyan("Status"), chalk.cyan("Count")],
+      });
       ceilingTable.push(
-        [chalk.green('Compliant'), data.stats.ceilingStats.complianceBreakdown.compliant],
-        [chalk.yellow('Warning'), data.stats.ceilingStats.complianceBreakdown.warning],
-        [chalk.red('Violation'), data.stats.ceilingStats.complianceBreakdown.violation],
-      )
-      console.log(ceilingTable.toString())
+        [
+          chalk.green("Compliant"),
+          data.stats.ceilingStats.complianceBreakdown.compliant,
+        ],
+        [
+          chalk.yellow("Warning"),
+          data.stats.ceilingStats.complianceBreakdown.warning,
+        ],
+        [
+          chalk.red("Violation"),
+          data.stats.ceilingStats.complianceBreakdown.violation,
+        ],
+      );
+      console.log(ceilingTable.toString());
 
       // Role gate stats
-      console.log(chalk.bold('\n🔑 Role Gate Evaluations'))
+      console.log(chalk.bold("\n🔑 Role Gate Evaluations"));
       const roleTable = new Table({
-        head: [chalk.cyan('Decision'), chalk.cyan('Count')],
-      })
+        head: [chalk.cyan("Decision"), chalk.cyan("Count")],
+      });
       roleTable.push(
-        [chalk.green('ALLOW'), data.stats.roleGateStats.byDecision.ALLOW],
-        [chalk.red('DENY'), data.stats.roleGateStats.byDecision.DENY],
-        [chalk.yellow('ESCALATE'), data.stats.roleGateStats.byDecision.ESCALATE],
-      )
-      console.log(roleTable.toString())
+        [chalk.green("ALLOW"), data.stats.roleGateStats.byDecision.ALLOW],
+        [chalk.red("DENY"), data.stats.roleGateStats.byDecision.DENY],
+        [
+          chalk.yellow("ESCALATE"),
+          data.stats.roleGateStats.byDecision.ESCALATE,
+        ],
+      );
+      console.log(roleTable.toString());
 
       // Tier distribution
-      console.log(chalk.bold('\n📈 Trust Tier Distribution'))
+      console.log(chalk.bold("\n📈 Trust Tier Distribution"));
       const tierTable = new Table({
-        head: [chalk.cyan('Tier'), chalk.cyan('Label'), chalk.cyan('Range'), chalk.cyan('Count')],
-      })
+        head: [
+          chalk.cyan("Tier"),
+          chalk.cyan("Label"),
+          chalk.cyan("Range"),
+          chalk.cyan("Count"),
+        ],
+      });
       for (const tier of data.tierDistribution) {
-        tierTable.push([tier.tier, tier.label, tier.range, tier.count])
+        tierTable.push([tier.tier, tier.label, tier.range, tier.count]);
       }
-      console.log(tierTable.toString())
+      console.log(tierTable.toString());
 
-      console.log(chalk.dim(`\nVersion: ${data.version.major}.${data.version.minor}.${data.version.patch}`))
+      console.log(
+        chalk.dim(
+          `\nVersion: ${data.version.major}.${data.version.minor}.${data.version.patch}`,
+        ),
+      );
     } catch (error) {
-      spinner.fail('Failed to fetch statistics')
-      console.error(chalk.red((error as Error).message))
-      process.exit(1)
+      spinner.fail("Failed to fetch statistics");
+      console.error(chalk.red((error as Error).message));
+      process.exit(1);
     }
-  })
+  });
 
 // Evaluate command
 program
-  .command('evaluate <agentId> <role>')
-  .description('Evaluate role gate for an agent')
-  .option('-t, --tier <tier>', 'Current trust tier', 'T3')
-  .option('-s, --score <score>', 'Current trust score', '550')
+  .command("evaluate <agentId> <role>")
+  .description("Evaluate role gate for an agent")
+  .option("-t, --tier <tier>", "Current trust tier", "T3")
+  .option("-s, --score <score>", "Current trust score", "550")
   .action(async (agentId: string, role: string, options) => {
-    const spinner = ora('Evaluating role gate...').start()
-    const client = getClient()
+    const spinner = ora("Evaluating role gate...").start();
+    const client = getClient();
 
     try {
       const result = await client.evaluateRoleGate({
@@ -168,191 +192,220 @@ program
         requestedRole: role as AgentRole,
         currentTier: options.tier as TrustTier,
         currentScore: parseInt(options.score, 10),
-      })
-      spinner.stop()
+      });
+      spinner.stop();
 
-      console.log(chalk.bold('\n🔑 Role Gate Evaluation\n'))
+      console.log(chalk.bold("\n🔑 Role Gate Evaluation\n"));
 
-      const table = new Table()
+      const table = new Table();
       table.push(
-        { 'Agent ID': agentId },
-        { 'Requested Role': `${role} (${AGENT_ROLE_LABELS[role as AgentRole] || role})` },
-        { 'Current Tier': tierColor(options.tier as TrustTier) },
-        { 'Current Score': options.score },
-        { 'Final Decision': decisionColor(result.evaluation.finalDecision) },
-      )
-      console.log(table.toString())
+        { "Agent ID": agentId },
+        {
+          "Requested Role": `${role} (${AGENT_ROLE_LABELS[role as AgentRole] || role})`,
+        },
+        { "Current Tier": tierColor(options.tier as TrustTier) },
+        { "Current Score": options.score },
+        { "Final Decision": decisionColor(result.evaluation.finalDecision) },
+      );
+      console.log(table.toString());
 
-      console.log(chalk.bold('\n📋 Layer Results'))
+      console.log(chalk.bold("\n📋 Layer Results"));
       const layerTable = new Table({
-        head: [chalk.cyan('Layer'), chalk.cyan('Result')],
-      })
+        head: [chalk.cyan("Layer"), chalk.cyan("Result")],
+      });
       layerTable.push(
-        ['1. Kernel', result.layers.kernel.allowed ? chalk.green('ALLOWED') : chalk.red('DENIED')],
-        ['2. Policy', result.layers.policy.result ? decisionColor(result.layers.policy.result) : chalk.dim('N/A')],
-        ['3. BASIS', result.layers.basis.overrideUsed ? chalk.yellow('OVERRIDE USED') : chalk.dim('Not used')],
-      )
-      console.log(layerTable.toString())
+        [
+          "1. Kernel",
+          result.layers.kernel.allowed
+            ? chalk.green("ALLOWED")
+            : chalk.red("DENIED"),
+        ],
+        [
+          "2. Policy",
+          result.layers.policy.result
+            ? decisionColor(result.layers.policy.result)
+            : chalk.dim("N/A"),
+        ],
+        [
+          "3. BASIS",
+          result.layers.basis.overrideUsed
+            ? chalk.yellow("OVERRIDE USED")
+            : chalk.dim("Not used"),
+        ],
+      );
+      console.log(layerTable.toString());
 
       if (result.evaluation.decisionReason) {
-        console.log(chalk.dim(`\nReason: ${result.evaluation.decisionReason}`))
+        console.log(chalk.dim(`\nReason: ${result.evaluation.decisionReason}`));
       }
     } catch (error) {
-      spinner.fail('Failed to evaluate role gate')
-      console.error(chalk.red((error as Error).message))
-      process.exit(1)
+      spinner.fail("Failed to evaluate role gate");
+      console.error(chalk.red((error as Error).message));
+      process.exit(1);
     }
-  })
+  });
 
 // Ceiling command
 program
-  .command('ceiling <agentId> <score>')
-  .description('Check ceiling for proposed score')
-  .option('-f, --framework <framework>', 'Compliance framework', 'DEFAULT')
-  .option('-p, --previous <score>', 'Previous score')
+  .command("ceiling <agentId> <score>")
+  .description("Check ceiling for proposed score")
+  .option("-f, --framework <framework>", "Compliance framework", "DEFAULT")
+  .option("-p, --previous <score>", "Previous score")
   .action(async (agentId: string, score: string, options) => {
-    const spinner = ora('Checking ceiling...').start()
-    const client = getClient()
+    const spinner = ora("Checking ceiling...").start();
+    const client = getClient();
 
     try {
       const result = await client.checkCeiling({
         agentId,
         proposedScore: parseInt(score, 10),
-        previousScore: options.previous ? parseInt(options.previous, 10) : undefined,
+        previousScore: options.previous
+          ? parseInt(options.previous, 10)
+          : undefined,
         complianceFramework: options.framework as any,
-      })
-      spinner.stop()
+      });
+      spinner.stop();
 
-      console.log(chalk.bold('\n🎯 Ceiling Check\n'))
+      console.log(chalk.bold("\n🎯 Ceiling Check\n"));
 
-      const table = new Table()
+      const table = new Table();
       table.push(
-        { 'Agent ID': agentId },
-        { 'Proposed Score': score },
-        { 'Final Score': result.result.finalScore.toString() },
-        { 'Effective Ceiling': result.result.effectiveCeiling.toString() },
-        { 'Ceiling Applied': result.result.ceilingApplied ? chalk.yellow('YES') : chalk.green('NO') },
-        { 'Compliance': complianceColor(result.result.complianceStatus) },
-        { 'Framework': options.framework },
-      )
-      console.log(table.toString())
+        { "Agent ID": agentId },
+        { "Proposed Score": score },
+        { "Final Score": result.result.finalScore.toString() },
+        { "Effective Ceiling": result.result.effectiveCeiling.toString() },
+        {
+          "Ceiling Applied": result.result.ceilingApplied
+            ? chalk.yellow("YES")
+            : chalk.green("NO"),
+        },
+        { Compliance: complianceColor(result.result.complianceStatus) },
+        { Framework: options.framework },
+      );
+      console.log(table.toString());
 
-      if (result.result.gamingIndicators && result.result.gamingIndicators.length > 0) {
-        console.log(chalk.yellow('\n⚠️  Gaming Indicators Detected:'))
+      if (
+        result.result.gamingIndicators &&
+        result.result.gamingIndicators.length > 0
+      ) {
+        console.log(chalk.yellow("\n⚠️  Gaming Indicators Detected:"));
         for (const indicator of result.result.gamingIndicators) {
-          console.log(chalk.yellow(`   - ${indicator}`))
+          console.log(chalk.yellow(`   - ${indicator}`));
         }
       }
     } catch (error) {
-      spinner.fail('Failed to check ceiling')
-      console.error(chalk.red((error as Error).message))
-      process.exit(1)
+      spinner.fail("Failed to check ceiling");
+      console.error(chalk.red((error as Error).message));
+      process.exit(1);
     }
-  })
+  });
 
 // Provenance command
 program
-  .command('provenance <agentId>')
-  .description('Show agent provenance')
+  .command("provenance <agentId>")
+  .description("Show agent provenance")
   .action(async (agentId: string) => {
-    const spinner = ora('Fetching provenance...').start()
-    const client = getClient()
+    const spinner = ora("Fetching provenance...").start();
+    const client = getClient();
 
     try {
-      const result = await client.getProvenance(agentId)
-      spinner.stop()
+      const result = await client.getProvenance(agentId);
+      spinner.stop();
 
-      console.log(chalk.bold('\n📜 Agent Provenance\n'))
+      console.log(chalk.bold("\n📜 Agent Provenance\n"));
 
       if (result.records.length === 0) {
-        console.log(chalk.dim('No provenance records found'))
-        return
+        console.log(chalk.dim("No provenance records found"));
+        return;
       }
 
       const table = new Table({
         head: [
-          chalk.cyan('Agent'),
-          chalk.cyan('Type'),
-          chalk.cyan('Modifier'),
-          chalk.cyan('Parent'),
-          chalk.cyan('Created By'),
+          chalk.cyan("Agent"),
+          chalk.cyan("Type"),
+          chalk.cyan("Modifier"),
+          chalk.cyan("Parent"),
+          chalk.cyan("Created By"),
         ],
-      })
+      });
 
       for (const record of result.records) {
-        const modifierStr = record.trustModifier >= 0
-          ? chalk.green(`+${record.trustModifier}`)
-          : chalk.red(record.trustModifier.toString())
+        const modifierStr =
+          record.trustModifier >= 0
+            ? chalk.green(`+${record.trustModifier}`)
+            : chalk.red(record.trustModifier.toString());
 
         table.push([
           record.agentId,
           record.creationType,
           modifierStr,
-          record.parentAgentId || chalk.dim('N/A'),
+          record.parentAgentId || chalk.dim("N/A"),
           record.createdBy,
-        ])
+        ]);
       }
-      console.log(table.toString())
+      console.log(table.toString());
 
       if (result.lineage && result.lineage.length > 1) {
-        console.log(chalk.bold('\n🔗 Lineage'))
-        const lineageStr = result.lineage.map(r => r.agentId).join(' → ')
-        console.log(chalk.cyan(`   ${lineageStr}`))
+        console.log(chalk.bold("\n🔗 Lineage"));
+        const lineageStr = result.lineage.map((r) => r.agentId).join(" → ");
+        console.log(chalk.cyan(`   ${lineageStr}`));
       }
     } catch (error) {
-      spinner.fail('Failed to fetch provenance')
-      console.error(chalk.red((error as Error).message))
-      process.exit(1)
+      spinner.fail("Failed to fetch provenance");
+      console.error(chalk.red((error as Error).message));
+      process.exit(1);
     }
-  })
+  });
 
 // Alerts command
 program
-  .command('alerts [status]')
-  .description('List gaming alerts')
-  .option('-l, --limit <limit>', 'Maximum alerts to show', '20')
+  .command("alerts [status]")
+  .description("List gaming alerts")
+  .option("-l, --limit <limit>", "Maximum alerts to show", "20")
   .action(async (status: string | undefined, options) => {
-    const spinner = ora('Fetching alerts...').start()
-    const client = getClient()
+    const spinner = ora("Fetching alerts...").start();
+    const client = getClient();
 
     try {
       const result = await client.getGamingAlerts(
         status as any,
-        parseInt(options.limit, 10)
-      )
-      spinner.stop()
+        parseInt(options.limit, 10),
+      );
+      spinner.stop();
 
-      console.log(chalk.bold('\n🚨 Gaming Alerts\n'))
+      console.log(chalk.bold("\n🚨 Gaming Alerts\n"));
 
       if (result.alerts.length === 0) {
-        console.log(chalk.dim('No alerts found'))
-        return
+        console.log(chalk.dim("No alerts found"));
+        return;
       }
 
       const table = new Table({
         head: [
-          chalk.cyan('Agent'),
-          chalk.cyan('Type'),
-          chalk.cyan('Severity'),
-          chalk.cyan('Status'),
-          chalk.cyan('Occurrences'),
+          chalk.cyan("Agent"),
+          chalk.cyan("Type"),
+          chalk.cyan("Severity"),
+          chalk.cyan("Status"),
+          chalk.cyan("Occurrences"),
         ],
-      })
+      });
 
       for (const alert of result.alerts) {
-        const severityColor = {
-          LOW: chalk.blue,
-          MEDIUM: chalk.yellow,
-          HIGH: chalk.red,
-          CRITICAL: chalk.bgRed.white,
-        }[alert.severity] || chalk.white
+        const severityColor =
+          {
+            LOW: chalk.blue,
+            MEDIUM: chalk.yellow,
+            HIGH: chalk.red,
+            CRITICAL: chalk.bgRed.white,
+          }[alert.severity] || chalk.white;
 
-        const statusColor = {
-          ACTIVE: chalk.red,
-          INVESTIGATING: chalk.yellow,
-          RESOLVED: chalk.green,
-          FALSE_POSITIVE: chalk.gray,
-        }[alert.status] || chalk.white
+        const statusColor =
+          {
+            ACTIVE: chalk.red,
+            INVESTIGATING: chalk.yellow,
+            RESOLVED: chalk.green,
+            FALSE_POSITIVE: chalk.gray,
+          }[alert.status] || chalk.white;
 
         table.push([
           alert.agentId,
@@ -360,73 +413,89 @@ program
           severityColor(alert.severity),
           statusColor(alert.status),
           alert.occurrences.toString(),
-        ])
+        ]);
       }
-      console.log(table.toString())
+      console.log(table.toString());
 
-      console.log(chalk.dim(`\nShowing ${result.alerts.length} of ${result.summary.total} alerts`))
+      console.log(
+        chalk.dim(
+          `\nShowing ${result.alerts.length} of ${result.summary.total} alerts`,
+        ),
+      );
     } catch (error) {
-      spinner.fail('Failed to fetch alerts')
-      console.error(chalk.red((error as Error).message))
-      process.exit(1)
+      spinner.fail("Failed to fetch alerts");
+      console.error(chalk.red((error as Error).message));
+      process.exit(1);
     }
-  })
+  });
 
 // Presets command
 program
-  .command('presets')
-  .description('Show preset hierarchy')
+  .command("presets")
+  .description("Show preset hierarchy")
   .action(async () => {
-    const spinner = ora('Fetching presets...').start()
-    const client = getClient()
+    const spinner = ora("Fetching presets...").start();
+    const client = getClient();
 
     try {
-      const presets = await client.getPresetHierarchy()
-      spinner.stop()
+      const presets = await client.getPresetHierarchy();
+      spinner.stop();
 
-      console.log(chalk.bold('\n⚙️  Federated Weight Presets\n'))
+      console.log(chalk.bold("\n⚙️  Federated Weight Presets\n"));
 
       // CAR ID Presets
-      console.log(chalk.bold('📦 CAR Canonical'))
+      console.log(chalk.bold("📦 CAR Canonical"));
       const carTable = new Table({
-        head: [chalk.cyan('ID'), chalk.cyan('Name'), chalk.cyan('Hash')],
-      })
+        head: [chalk.cyan("ID"), chalk.cyan("Name"), chalk.cyan("Hash")],
+      });
       for (const preset of presets.carId) {
-        carTable.push([preset.presetId, preset.name, preset.presetHash.slice(0, 16) + '...'])
+        carTable.push([
+          preset.presetId,
+          preset.name,
+          preset.presetHash.slice(0, 16) + "...",
+        ]);
       }
-      console.log(carTable.toString())
+      console.log(carTable.toString());
 
       // Vorion Presets
-      console.log(chalk.bold('\n📦 Vorion Reference'))
+      console.log(chalk.bold("\n📦 Vorion Reference"));
       const vorionTable = new Table({
-        head: [chalk.cyan('ID'), chalk.cyan('Name'), chalk.cyan('Parent')],
-      })
+        head: [chalk.cyan("ID"), chalk.cyan("Name"), chalk.cyan("Parent")],
+      });
       for (const preset of presets.vorion) {
-        vorionTable.push([preset.presetId, preset.name, preset.parentCarIdPresetId])
+        vorionTable.push([
+          preset.presetId,
+          preset.name,
+          preset.parentCarIdPresetId,
+        ]);
       }
-      console.log(vorionTable.toString())
+      console.log(vorionTable.toString());
 
       // Axiom Presets
-      console.log(chalk.bold('\n📦 Axiom Deployment'))
+      console.log(chalk.bold("\n📦 Axiom Deployment"));
       const axiomTable = new Table({
-        head: [chalk.cyan('ID'), chalk.cyan('Name'), chalk.cyan('Verified')],
-      })
+        head: [chalk.cyan("ID"), chalk.cyan("Name"), chalk.cyan("Verified")],
+      });
       for (const preset of presets.axiom) {
         axiomTable.push([
           preset.presetId,
           preset.name,
-          preset.lineageVerified ? chalk.green('✓') : chalk.red('✗'),
-        ])
+          preset.lineageVerified ? chalk.green("✓") : chalk.red("✗"),
+        ]);
       }
-      console.log(axiomTable.toString())
+      console.log(axiomTable.toString());
 
-      console.log(chalk.dim(`\nTotal: ${presets.summary.carIdCount} CAR, ${presets.summary.vorionCount} Vorion, ${presets.summary.axiomCount} Axiom`))
+      console.log(
+        chalk.dim(
+          `\nTotal: ${presets.summary.carIdCount} CAR, ${presets.summary.vorionCount} Vorion, ${presets.summary.axiomCount} Axiom`,
+        ),
+      );
     } catch (error) {
-      spinner.fail('Failed to fetch presets')
-      console.error(chalk.red((error as Error).message))
-      process.exit(1)
+      spinner.fail("Failed to fetch presets");
+      console.error(chalk.red((error as Error).message));
+      process.exit(1);
     }
-  })
+  });
 
 // Parse and run
-program.parse()
+program.parse();

@@ -5,7 +5,7 @@
  */
 
 // Import Timestamp from primitives (exported from primitives.js, not here to avoid conflict)
-import type { Timestamp } from './primitives.js';
+import type { Timestamp } from "./primitives.js";
 
 /**
  * Unique identifier type
@@ -50,21 +50,21 @@ export type TrustScore = number;
 /**
  * Entity types that can be governed
  */
-export type EntityType = 'agent' | 'user' | 'service' | 'system';
+export type EntityType = "agent" | "user" | "service" | "system";
 
 /**
  * Allowed intent statuses.
  */
 export const INTENT_STATUSES = [
-  'pending',
-  'evaluating',
-  'approved',
-  'denied',
-  'escalated',
-  'executing',
-  'completed',
-  'failed',
-  'cancelled',
+  "pending",
+  "evaluating",
+  "approved",
+  "denied",
+  "escalated",
+  "executing",
+  "completed",
+  "failed",
+  "cancelled",
 ] as const;
 
 /**
@@ -82,13 +82,13 @@ export type IntentStatus = (typeof INTENT_STATUSES)[number];
  *             ['allow', 'deny', 'constrain', 'clarify', 'escalate', 'log', 'audit']
  */
 export type ControlAction =
-  | 'allow'
-  | 'deny'
-  | 'escalate'
-  | 'limit'
-  | 'constrain'
-  | 'monitor'
-  | 'terminate';
+  | "allow"
+  | "deny"
+  | "escalate"
+  | "limit"
+  | "constrain"
+  | "monitor"
+  | "terminate";
 
 /**
  * Entity identity
@@ -160,12 +160,12 @@ export interface Intent {
  * Evaluation stages in the intent lifecycle
  */
 export type EvaluationStage =
-  | 'trust-snapshot'
-  | 'trust-gate'
-  | 'basis'
-  | 'decision'
-  | 'error'
-  | 'cancelled';
+  | "trust-snapshot"
+  | "trust-gate"
+  | "basis"
+  | "decision"
+  | "error"
+  | "cancelled";
 
 /**
  * Strongly typed evaluation result by stage
@@ -173,13 +173,18 @@ export type EvaluationStage =
  * external types (EvaluationResult from BASIS, Decision from ENFORCE)
  */
 export type EvaluationPayload =
-  | { stage: 'trust-snapshot'; result: Record<string, unknown> | null }
-  | { stage: 'trust-gate'; passed: boolean; requiredLevel: number; actualLevel: number }
-  | { stage: 'basis'; evaluation: unknown; namespace: string }
-  | { stage: 'decision'; decision: unknown }
-  | { stage: 'semantic-governance'; result: Record<string, unknown> }
-  | { stage: 'error'; error: { message: string; timestamp: string } }
-  | { stage: 'cancelled'; reason: string; cancelledBy?: string };
+  | { stage: "trust-snapshot"; result: Record<string, unknown> | null }
+  | {
+      stage: "trust-gate";
+      passed: boolean;
+      requiredLevel: number;
+      actualLevel: number;
+    }
+  | { stage: "basis"; evaluation: unknown; namespace: string }
+  | { stage: "decision"; decision: unknown }
+  | { stage: "semantic-governance"; result: Record<string, unknown> }
+  | { stage: "error"; error: { message: string; timestamp: string } }
+  | { stage: "cancelled"; reason: string; cancelledBy?: string };
 
 export interface IntentEvaluationRecord {
   id: ID;
@@ -277,7 +282,7 @@ export interface EscalationRequest {
   reason: string;
   escalatedTo: string;
   timeout: string;
-  status: 'pending' | 'approved' | 'rejected' | 'timeout';
+  status: "pending" | "approved" | "rejected" | "timeout";
   createdAt: Timestamp;
 }
 
@@ -340,10 +345,10 @@ export class VorionError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: Record<string, unknown>
+    public details?: Record<string, unknown>,
   ) {
     super(message);
-    this.name = 'VorionError';
+    this.name = "VorionError";
   }
 }
 
@@ -352,23 +357,23 @@ export class ConstraintViolationError extends VorionError {
     public constraintId: ID,
     public constraintName: string,
     message: string,
-    public suggestion?: string
+    public suggestion?: string,
   ) {
-    super(message, 'CONSTRAINT_VIOLATION', { constraintId, constraintName });
-    this.name = 'ConstraintViolationError';
+    super(message, "CONSTRAINT_VIOLATION", { constraintId, constraintName });
+    this.name = "ConstraintViolationError";
   }
 }
 
 export class TrustInsufficientError extends VorionError {
   constructor(
     public required: TrustLevel,
-    public actual: TrustLevel
+    public actual: TrustLevel,
   ) {
     super(
       `Trust level ${actual} insufficient, requires ${required}`,
-      'TRUST_INSUFFICIENT',
-      { required, actual }
+      "TRUST_INSUFFICIENT",
+      { required, actual },
     );
-    this.name = 'TrustInsufficientError';
+    this.name = "TrustInsufficientError";
   }
 }

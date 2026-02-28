@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import type { ProviderId } from './health-checker.js';
+import type { ProviderId } from "./health-checker.js";
 
 // =============================================================================
 // TYPES
@@ -16,7 +16,7 @@ import type { ProviderId } from './health-checker.js';
 /**
  * Circuit breaker state
  */
-export type CircuitState = 'closed' | 'open' | 'half-open';
+export type CircuitState = "closed" | "open" | "half-open";
 
 /**
  * Circuit breaker configuration
@@ -78,7 +78,7 @@ export interface CallResult {
   success: boolean;
   latencyMs: number;
   error?: string;
-  errorType?: 'timeout' | 'rate_limit' | 'server_error' | 'auth' | 'other';
+  errorType?: "timeout" | "rate_limit" | "server_error" | "auth" | "other";
 }
 
 // =============================================================================
@@ -114,7 +114,8 @@ export class CircuitBreaker {
   private config: CircuitBreakerConfig;
   private circuits: Map<string, CircuitRecord> = new Map();
   private metrics: Map<string, CircuitMetrics> = new Map();
-  private listeners: Set<(key: string, record: CircuitRecord) => void> = new Set();
+  private listeners: Set<(key: string, record: CircuitRecord) => void> =
+    new Set();
   private cleanupTimer: NodeJS.Timeout | null = null;
 
   constructor(config?: Partial<CircuitBreakerConfig>) {
@@ -139,7 +140,7 @@ export class CircuitBreaker {
       circuit = {
         provider,
         model,
-        state: 'closed',
+        state: "closed",
         failures: 0,
         successes: 0,
         lastFailure: null,
@@ -167,7 +168,7 @@ export class CircuitBreaker {
       metrics = {
         provider,
         model,
-        state: 'closed',
+        state: "closed",
         failureRate: 0,
         requestsBlocked: 0,
         requestsAllowed: 0,
@@ -189,20 +190,20 @@ export class CircuitBreaker {
     const metrics = this.getMetrics(provider, model);
 
     switch (circuit.state) {
-      case 'closed':
+      case "closed":
         metrics.requestsAllowed++;
         return true;
 
-      case 'open':
+      case "open":
         // Check if we should transition to half-open
         if (circuit.nextAttempt && new Date() >= circuit.nextAttempt) {
-          this.transitionTo(circuit, 'half-open');
+          this.transitionTo(circuit, "half-open");
           return this.allowHalfOpenRequest(circuit, metrics);
         }
         metrics.requestsBlocked++;
         return false;
 
-      case 'half-open':
+      case "half-open":
         return this.allowHalfOpenRequest(circuit, metrics);
     }
   }
@@ -212,7 +213,7 @@ export class CircuitBreaker {
    */
   private allowHalfOpenRequest(
     circuit: CircuitRecord,
-    metrics: CircuitMetrics
+    metrics: CircuitMetrics,
   ): boolean {
     // Allow a percentage of requests through for testing
     const shouldAllow =
@@ -230,11 +231,7 @@ export class CircuitBreaker {
   /**
    * Record call result
    */
-  recordResult(
-    provider: ProviderId,
-    result: CallResult,
-    model?: string
-  ): void {
+  recordResult(provider: ProviderId, result: CallResult, model?: string): void {
     const circuit = this.getCircuit(provider, model);
     const metrics = this.getMetrics(provider, model);
 
@@ -248,24 +245,21 @@ export class CircuitBreaker {
   /**
    * Record successful call
    */
-  private recordSuccess(
-    circuit: CircuitRecord,
-    metrics: CircuitMetrics
-  ): void {
+  private recordSuccess(circuit: CircuitRecord, metrics: CircuitMetrics): void {
     circuit.successes++;
     circuit.totalSuccesses++;
     circuit.lastSuccess = new Date();
 
     switch (circuit.state) {
-      case 'closed':
+      case "closed":
         // Reset failure count on success
         circuit.failures = 0;
         break;
 
-      case 'half-open':
+      case "half-open":
         // Check if we have enough successes to close
         if (circuit.successes >= this.config.successThreshold) {
-          this.transitionTo(circuit, 'closed');
+          this.transitionTo(circuit, "closed");
           metrics.recoveryCount++;
 
           // Calculate recovery time
@@ -278,7 +272,7 @@ export class CircuitBreaker {
         }
         break;
 
-      case 'open':
+      case "open":
         // Shouldn't happen, but handle anyway
         break;
     }
@@ -294,7 +288,7 @@ export class CircuitBreaker {
     circuit: CircuitRecord,
     metrics: CircuitMetrics,
     error?: string,
-    errorType?: string
+    errorType?: string,
   ): void {
     circuit.failures++;
     circuit.totalFailures++;
@@ -304,7 +298,7 @@ export class CircuitBreaker {
     // Track recent errors
     circuit.recentErrors.push({
       timestamp: new Date(),
-      error: error ?? 'Unknown error',
+      error: error ?? "Unknown error",
     });
     if (circuit.recentErrors.length > 10) {
       circuit.recentErrors.shift();
@@ -313,24 +307,24 @@ export class CircuitBreaker {
     // Clean up old failures outside the window
     const windowStart = new Date(Date.now() - this.config.failureWindowMs);
     circuit.recentErrors = circuit.recentErrors.filter(
-      (e) => e.timestamp >= windowStart
+      (e) => e.timestamp >= windowStart,
     );
 
     switch (circuit.state) {
-      case 'closed':
+      case "closed":
         // Check if we should open the circuit
         if (circuit.failures >= this.config.failureThreshold) {
-          this.transitionTo(circuit, 'open');
+          this.transitionTo(circuit, "open");
           metrics.tripsCount++;
         }
         break;
 
-      case 'half-open':
+      case "half-open":
         // Any failure in half-open should reopen
-        this.transitionTo(circuit, 'open');
+        this.transitionTo(circuit, "open");
         break;
 
-      case 'open':
+      case "open":
         // Already open, extend the timeout
         this.setNextAttempt(circuit);
         break;
@@ -348,24 +342,24 @@ export class CircuitBreaker {
     circuit.state = newState;
     circuit.lastStateChange = new Date();
 
-    if (newState === 'open') {
+    if (newState === "open") {
       this.setNextAttempt(circuit);
     } else {
       circuit.nextAttempt = null;
     }
 
-    if (newState === 'closed') {
+    if (newState === "closed") {
       circuit.failures = 0;
       circuit.successes = 0;
     }
 
-    if (newState === 'half-open') {
+    if (newState === "half-open") {
       circuit.successes = 0;
     }
 
     console.log(
-      `[CIRCUIT] ${circuit.provider}${circuit.model ? `:${circuit.model}` : ''} ` +
-        `transitioned: ${oldState} -> ${newState}`
+      `[CIRCUIT] ${circuit.provider}${circuit.model ? `:${circuit.model}` : ""} ` +
+        `transitioned: ${oldState} -> ${newState}`,
     );
   }
 
@@ -376,7 +370,8 @@ export class CircuitBreaker {
     let timeout = this.config.resetTimeoutMs;
 
     if (this.config.enableJitter) {
-      const jitter = timeout * this.config.jitterFactor * (Math.random() * 2 - 1);
+      const jitter =
+        timeout * this.config.jitterFactor * (Math.random() * 2 - 1);
       timeout += jitter;
     }
 
@@ -386,16 +381,11 @@ export class CircuitBreaker {
   /**
    * Update metrics
    */
-  private updateMetrics(
-    circuit: CircuitRecord,
-    metrics: CircuitMetrics
-  ): void {
+  private updateMetrics(circuit: CircuitRecord, metrics: CircuitMetrics): void {
     metrics.state = circuit.state;
 
     const total = circuit.totalSuccesses + circuit.totalFailures;
-    metrics.failureRate = total > 0
-      ? (circuit.totalFailures / total) * 100
-      : 0;
+    metrics.failureRate = total > 0 ? (circuit.totalFailures / total) * 100 : 0;
   }
 
   /**
@@ -437,11 +427,7 @@ export class CircuitBreaker {
   /**
    * Force circuit state (for testing/manual intervention)
    */
-  forceState(
-    provider: ProviderId,
-    state: CircuitState,
-    model?: string
-  ): void {
+  forceState(provider: ProviderId, state: CircuitState, model?: string): void {
     const circuit = this.getCircuit(provider, model);
     this.transitionTo(circuit, state);
   }
@@ -462,14 +448,14 @@ export class CircuitBreaker {
   resetAll(): void {
     this.circuits.clear();
     this.metrics.clear();
-    console.log('[CIRCUIT] All circuits reset');
+    console.log("[CIRCUIT] All circuits reset");
   }
 
   /**
    * Add state change listener
    */
   onStateChange(
-    listener: (key: string, record: CircuitRecord) => void
+    listener: (key: string, record: CircuitRecord) => void,
   ): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -484,7 +470,7 @@ export class CircuitBreaker {
       try {
         listener(key, circuit);
       } catch (error) {
-        console.error('[CIRCUIT] Listener error:', error);
+        console.error("[CIRCUIT] Listener error:", error);
       }
     }
   }
@@ -508,13 +494,13 @@ export class CircuitBreaker {
       providers[key] = circuit.state;
 
       switch (circuit.state) {
-        case 'closed':
+        case "closed":
           closed++;
           break;
-        case 'open':
+        case "open":
           open++;
           break;
-        case 'half-open':
+        case "half-open":
           halfOpen++;
           break;
       }
@@ -540,7 +526,7 @@ export class CircuitBreaker {
 
       for (const [key, circuit] of this.circuits) {
         if (
-          circuit.state === 'closed' &&
+          circuit.state === "closed" &&
           circuit.lastStateChange.getTime() < staleThreshold
         ) {
           this.circuits.delete(key);
@@ -565,7 +551,7 @@ export class CircuitBreaker {
  * Create circuit breaker instance
  */
 export function createCircuitBreaker(
-  config?: Partial<CircuitBreakerConfig>
+  config?: Partial<CircuitBreakerConfig>,
 ): CircuitBreaker {
   return new CircuitBreaker(config);
 }

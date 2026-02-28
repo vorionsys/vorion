@@ -6,15 +6,15 @@
  * @packageDocumentation
  */
 
-import type { ID } from '../common/types.js';
-import type { TrustRecord } from '../trust-engine/index.js';
-import type { PersistenceProvider, TrustRecordQuery } from './types.js';
+import type { ID } from "../common/types.js";
+import type { TrustRecord } from "../trust-engine/index.js";
+import type { PersistenceProvider, TrustRecordQuery } from "./types.js";
 
 /**
  * In-memory persistence provider
  */
 export class MemoryPersistenceProvider implements PersistenceProvider {
-  readonly name = 'memory';
+  readonly name = "memory";
   private records: Map<ID, TrustRecord> = new Map();
 
   async initialize(): Promise<void> {
@@ -59,18 +59,20 @@ export class MemoryPersistenceProvider implements PersistenceProvider {
     }
 
     // Apply sorting
-    const sortBy = options.sortBy ?? 'score';
-    const sortOrder = options.sortOrder ?? 'desc';
+    const sortBy = options.sortBy ?? "score";
+    const sortOrder = options.sortOrder ?? "desc";
     results.sort((a, b) => {
       let comparison = 0;
-      if (sortBy === 'score') {
+      if (sortBy === "score") {
         comparison = a.score - b.score;
-      } else if (sortBy === 'level') {
+      } else if (sortBy === "level") {
         comparison = a.level - b.level;
-      } else if (sortBy === 'lastCalculatedAt') {
-        comparison = new Date(a.lastCalculatedAt).getTime() - new Date(b.lastCalculatedAt).getTime();
+      } else if (sortBy === "lastCalculatedAt") {
+        comparison =
+          new Date(a.lastCalculatedAt).getTime() -
+          new Date(b.lastCalculatedAt).getTime();
       }
-      return sortOrder === 'asc' ? comparison : -comparison;
+      return sortOrder === "asc" ? comparison : -comparison;
     });
 
     // Apply pagination

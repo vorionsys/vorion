@@ -1,52 +1,37 @@
 # Vorion Open Source
 
-**A small early contribution toward trustworthy autonomous AI agents**
+**The open foundation for trustworthy autonomous AI agents**
 
-We are a tiny team experimenting with open governance primitives. This is v0.1 — rough, incomplete, and explicitly not "the standard." We built it because we needed it ourselves and wanted to share it humbly with the community.
-
-BASIS · ATSF Trust Scoring · CAR Registry · Cognigate Runtime · Kaizen Learning
+BASIS &middot; ATSF Trust Scoring &middot; CAR Registry &middot; Cognigate Runtime &middot; Kaizen Learning
 
 [![CI](https://github.com/vorionsys/vorion/actions/workflows/ci.yml/badge.svg)](https://github.com/vorionsys/vorion/actions)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![npm](https://img.shields.io/badge/npm-%40vorionsys-orange.svg)](https://www.npmjs.com/search?q=%40vorionsys)
-![Stars](https://img.shields.io/github/stars/vorionsys/vorion?style=social)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/vorionsys/vorion/blob/main/LICENSE)
+[![npm](https://img.shields.io/badge/npm-%40vorionsys%2F*-orange.svg)](https://www.npmjs.com/search?q=%40vorionsys)
 
 ```bash
 npm install @vorionsys/atsf-core @vorionsys/car-client
 ```
 
-[Live runtime →](https://cognigate.dev) · [Docs](docs/) · [BASIS spec](docs/BASIS.md) · [Roadmap](docs/ROADMAP.md)
+[Live Runtime](https://cognigate.dev) &middot; [Docs](https://learn.vorion.org) &middot; [BASIS Spec](docs/BASIS.md)
 
-## Why we built this (and why it might not be for you yet)
+---
 
-LangChain, CrewAI, AutoGen, and others are incredible at building agents.
-We kept running into the same wall: **no shared, inspectable way to make those agents trustworthy** at production scale.
+## Why Vorion?
 
-So we started experimenting with a few primitives:
+[LangChain](https://github.com/langchain-ai/langchain), [CrewAI](https://github.com/crewAIInc/crewAI), and [AutoGen](https://github.com/microsoft/autogen) are excellent at **building and orchestrating** agents. Vorion is the open governance layer that makes any of them **production-ready and regulator-friendly**.
 
-- Pre-reasoning intent normalization
-- Simple tiered trust scoring (T0–T7)
-- Basic capability gating
-- Cryptographic audit trails
+| Aspect | LangChain / CrewAI / AutoGen | Vorion (Apache 2.0) |
+|--------|------------------------------|---------------------|
+| Building / Orchestration | Excellent | &mdash; |
+| Governance Standard | None | [BASIS](docs/BASIS.md) (formal spec) |
+| Real-time Trust Scoring | None | ATSF T0&ndash;T7 + cryptographic proofs |
+| Agent Registry | None | CAR + SDK + CLI |
+| Enforcement Runtime | DIY / paid suites | [Cognigate](https://cognigate.dev) (live, open) |
+| License | MIT (core) | Full stack Apache 2.0 |
 
-**This is not production battle-tested.** It has zero external users right now. We are sharing it early because we believe open collaboration is the only way to build the rock AI agents can safely stand on.
+Drop-in compatible &mdash; wrap any LangGraph, CrewAI crew, or AutoGen workflow.
 
-We would love your honest feedback — even if it's "this won't work because…"
-
-### Transparent comparison
-
-| Aspect | Popular Agent Frameworks (LangChain etc.) | Vorion v0.1 (our experiment) | Our current limitation |
-|--------|------------------------------------------|------------------------------|----------------------|
-| Building agents | World-class | — | — |
-| Governance & trust | DIY or commercial guardrails | Early open primitives | No formal verification yet |
-| Trust scoring | None native | Simple ATSF T0–T7 (heuristic) | Arbitrary tiers, no public benchmarks |
-| Agent identity/registry | None | CAR (experimental) | Centralized demo registry |
-| Audit trails | Tracing tools | Basic SHA-256 proof chain | Not yet ZK or blockchain-anchored |
-| License | MIT (core) | Full Apache 2.0 | — |
-
-We are complementary and not trying to replace anything.
-
-This monorepo contains the open-source packages powering the Vorion AI governance ecosystem.
+---
 
 ## Packages
 
@@ -134,15 +119,3 @@ Apache-2.0. See [LICENSE](LICENSE) for details.
 - [Code of Conduct](.github/CODE_OF_CONDUCT.md)
 - [Pull Request Template](.github/pull_request_template.md)
 - [Issue Templates](.github/ISSUE_TEMPLATE)
-
-## The people behind Vorion
-
-Vorion was created by **Alex Blanc** and **Ryan Cason (Bo Xandar Lee)** — two former banquet servers who taught themselves to code with AI and wanted to give something back to the community.
-
-We believe AI is humanity's greatest asset in the making, but it won't happen by chance. It must be guided.
-
-[Read our full story →](https://vorion.org/about)
-
----
-
-*Assisted at every step by multiple LLMs — we believe in crediting the tools that helped us think.*

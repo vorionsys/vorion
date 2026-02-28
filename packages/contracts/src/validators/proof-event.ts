@@ -2,16 +2,20 @@
  * Zod schemas for proof event types
  */
 
-import { z } from 'zod';
-import { proofEventTypeSchema } from './enums.js';
-import type { ProofEvent, ProofEventFilter, LogProofEventRequest } from '../v2/proof-event.js';
+import { z } from "zod";
+import { proofEventTypeSchema } from "./enums.js";
+import type {
+  ProofEvent,
+  ProofEventFilter,
+  LogProofEventRequest,
+} from "../v2/proof-event.js";
 
 /** SHA-256 / SHA3-256 hash pattern (both produce 64-char hex) */
 const sha256Pattern = /^[a-f0-9]{64}$/i;
 
 /** Payload type discriminators */
 const intentReceivedPayloadSchema = z.object({
-  type: z.literal('intent_received'),
+  type: z.literal("intent_received"),
   intentId: z.string().uuid(),
   action: z.string(),
   actionType: z.string(),
@@ -19,7 +23,7 @@ const intentReceivedPayloadSchema = z.object({
 });
 
 const decisionMadePayloadSchema = z.object({
-  type: z.literal('decision_made'),
+  type: z.literal("decision_made"),
   decisionId: z.string().uuid(),
   intentId: z.string().uuid(),
   permitted: z.boolean(),
@@ -29,7 +33,7 @@ const decisionMadePayloadSchema = z.object({
 });
 
 const trustDeltaPayloadSchema = z.object({
-  type: z.literal('trust_delta'),
+  type: z.literal("trust_delta"),
   deltaId: z.string().uuid(),
   previousScore: z.number(),
   newScore: z.number(),
@@ -39,7 +43,7 @@ const trustDeltaPayloadSchema = z.object({
 });
 
 const executionStartedPayloadSchema = z.object({
-  type: z.literal('execution_started'),
+  type: z.literal("execution_started"),
   executionId: z.string().uuid(),
   actionId: z.string().uuid(),
   decisionId: z.string().uuid(),
@@ -47,16 +51,16 @@ const executionStartedPayloadSchema = z.object({
 });
 
 const executionCompletedPayloadSchema = z.object({
-  type: z.literal('execution_completed'),
+  type: z.literal("execution_completed"),
   executionId: z.string().uuid(),
   actionId: z.string().uuid(),
-  status: z.enum(['success', 'partial']),
+  status: z.enum(["success", "partial"]),
   durationMs: z.number(),
   outputHash: z.string(),
 });
 
 const executionFailedPayloadSchema = z.object({
-  type: z.literal('execution_failed'),
+  type: z.literal("execution_failed"),
   executionId: z.string().uuid(),
   actionId: z.string().uuid(),
   error: z.string(),
@@ -65,15 +69,15 @@ const executionFailedPayloadSchema = z.object({
 });
 
 const incidentDetectedPayloadSchema = z.object({
-  type: z.literal('incident_detected'),
+  type: z.literal("incident_detected"),
   incidentId: z.string().uuid(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
+  severity: z.enum(["low", "medium", "high", "critical"]),
   description: z.string(),
   affectedResources: z.array(z.string()),
 });
 
 const rollbackInitiatedPayloadSchema = z.object({
-  type: z.literal('rollback_initiated'),
+  type: z.literal("rollback_initiated"),
   rollbackId: z.string().uuid(),
   executionId: z.string().uuid(),
   reason: z.string(),
@@ -81,7 +85,7 @@ const rollbackInitiatedPayloadSchema = z.object({
 });
 
 const componentRegisteredPayloadSchema = z.object({
-  type: z.literal('component_registered'),
+  type: z.literal("component_registered"),
   componentId: z.string().uuid(),
   componentType: z.string(),
   name: z.string(),
@@ -89,30 +93,34 @@ const componentRegisteredPayloadSchema = z.object({
 });
 
 const componentUpdatedPayloadSchema = z.object({
-  type: z.literal('component_updated'),
+  type: z.literal("component_updated"),
   componentId: z.string().uuid(),
   changes: z.array(z.string()),
   previousVersion: z.string().optional(),
   newVersion: z.string().optional(),
 });
 
-const genericPayloadSchema = z.object({
-  type: z.string(),
-}).passthrough();
+const genericPayloadSchema = z
+  .object({
+    type: z.string(),
+  })
+  .passthrough();
 
 /** Union of all payload types */
-export const proofEventPayloadSchema = z.discriminatedUnion('type', [
-  intentReceivedPayloadSchema,
-  decisionMadePayloadSchema,
-  trustDeltaPayloadSchema,
-  executionStartedPayloadSchema,
-  executionCompletedPayloadSchema,
-  executionFailedPayloadSchema,
-  incidentDetectedPayloadSchema,
-  rollbackInitiatedPayloadSchema,
-  componentRegisteredPayloadSchema,
-  componentUpdatedPayloadSchema,
-]).or(genericPayloadSchema);
+export const proofEventPayloadSchema = z
+  .discriminatedUnion("type", [
+    intentReceivedPayloadSchema,
+    decisionMadePayloadSchema,
+    trustDeltaPayloadSchema,
+    executionStartedPayloadSchema,
+    executionCompletedPayloadSchema,
+    executionFailedPayloadSchema,
+    incidentDetectedPayloadSchema,
+    rollbackInitiatedPayloadSchema,
+    componentRegisteredPayloadSchema,
+    componentUpdatedPayloadSchema,
+  ])
+  .or(genericPayloadSchema);
 
 /** Proof event validator */
 export const proofEventSchema = z.object({
@@ -154,4 +162,6 @@ export const logProofEventRequestSchema = z.object({
 // Type inference from schemas
 export type ValidatedProofEvent = z.infer<typeof proofEventSchema>;
 export type ValidatedProofEventFilter = z.infer<typeof proofEventFilterSchema>;
-export type ValidatedLogProofEventRequest = z.infer<typeof logProofEventRequestSchema>;
+export type ValidatedLogProofEventRequest = z.infer<
+  typeof logProofEventRequestSchema
+>;

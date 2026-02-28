@@ -2,8 +2,8 @@
  * Proof Plane Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { v4 as uuidv4 } from 'uuid';
+import { describe, it, expect, beforeEach } from "vitest";
+import { v4 as uuidv4 } from "uuid";
 import {
   ProofEventType,
   TrustBand,
@@ -14,22 +14,22 @@ import {
   type Decision,
   type TrustProfile,
   ObservationTier,
-} from '@vorionsys/contracts';
+} from "@vorionsys/contracts";
 import {
   ProofPlane,
   createProofPlane,
   createProofPlaneLogger,
-} from '../../src/index.js';
+} from "../../src/index.js";
 
-describe('ProofPlane', () => {
+describe("ProofPlane", () => {
   let proofPlane: ProofPlane;
 
   beforeEach(() => {
-    proofPlane = createProofPlane({ signedBy: 'test-service' });
+    proofPlane = createProofPlane({ signedBy: "test-service" });
   });
 
-  describe('logIntentReceived', () => {
-    it('should log an intent received event', async () => {
+  describe("logIntentReceived", () => {
+    it("should log an intent received event", async () => {
       const intent = createIntent();
       const result = await proofPlane.logIntentReceived(intent);
 
@@ -37,10 +37,10 @@ describe('ProofPlane', () => {
       expect(result.event.eventType).toBe(ProofEventType.INTENT_RECEIVED);
       expect(result.event.correlationId).toBe(intent.correlationId);
       expect(result.event.agentId).toBe(intent.agentId);
-      expect(result.event.payload.type).toBe('intent_received');
+      expect(result.event.payload.type).toBe("intent_received");
     });
 
-    it('should create genesis event with null previousHash', async () => {
+    it("should create genesis event with null previousHash", async () => {
       const intent = createIntent();
       const result = await proofPlane.logIntentReceived(intent);
 
@@ -49,7 +49,7 @@ describe('ProofPlane', () => {
       expect(result.event.previousHash).toBeNull();
     });
 
-    it('should chain subsequent events', async () => {
+    it("should chain subsequent events", async () => {
       const intent1 = createIntent();
       const intent2 = createIntent();
 
@@ -62,31 +62,42 @@ describe('ProofPlane', () => {
     });
   });
 
-  describe('logDecisionMade', () => {
-    it('should log a decision made event', async () => {
+  describe("logDecisionMade", () => {
+    it("should log a decision made event", async () => {
       const decision = createDecision();
       const result = await proofPlane.logDecisionMade(decision);
 
       expect(result.event.eventType).toBe(ProofEventType.DECISION_MADE);
-      expect(result.event.payload.type).toBe('decision_made');
+      expect(result.event.payload.type).toBe("decision_made");
 
-      const payload = result.event.payload as { permitted: boolean; trustBand: string };
+      const payload = result.event.payload as {
+        permitted: boolean;
+        trustBand: string;
+      };
       expect(payload.permitted).toBe(decision.permitted);
       expect(payload.trustBand).toBe(TrustBand[decision.trustBand]);
     });
   });
 
-  describe('logTrustDelta', () => {
-    it('should log a trust delta event', async () => {
+  describe("logTrustDelta", () => {
+    it("should log a trust delta event", async () => {
       const agentId = uuidv4();
-      const prevProfile = createProfile({ agentId, adjustedScore: 450, band: TrustBand.T2_PROVISIONAL });
-      const newProfile = createProfile({ agentId, adjustedScore: 600, band: TrustBand.T3_MONITORED });
+      const prevProfile = createProfile({
+        agentId,
+        adjustedScore: 450,
+        band: TrustBand.T2_PROVISIONAL,
+      });
+      const newProfile = createProfile({
+        agentId,
+        adjustedScore: 600,
+        band: TrustBand.T3_MONITORED,
+      });
 
       const result = await proofPlane.logTrustDelta(
         agentId,
         prevProfile,
         newProfile,
-        'Positive behavioral evidence'
+        "Positive behavioral evidence",
       );
 
       expect(result.event.eventType).toBe(ProofEventType.TRUST_DELTA);
@@ -100,66 +111,72 @@ describe('ProofPlane', () => {
       };
       expect(payload.previousScore).toBe(450);
       expect(payload.newScore).toBe(600);
-      expect(payload.previousBand).toBe('T2_PROVISIONAL');
-      expect(payload.newBand).toBe('T3_MONITORED');
+      expect(payload.previousBand).toBe("T2_PROVISIONAL");
+      expect(payload.newBand).toBe("T3_MONITORED");
     });
   });
 
-  describe('logExecutionStarted', () => {
-    it('should log execution started event', async () => {
+  describe("logExecutionStarted", () => {
+    it("should log execution started event", async () => {
       const result = await proofPlane.logExecutionStarted(
         uuidv4(), // executionId
         uuidv4(), // actionId
         uuidv4(), // decisionId
-        'file-adapter',
+        "file-adapter",
         uuidv4(), // agentId
-        uuidv4()  // correlationId
+        uuidv4(), // correlationId
       );
 
       expect(result.event.eventType).toBe(ProofEventType.EXECUTION_STARTED);
-      expect(result.event.payload.type).toBe('execution_started');
+      expect(result.event.payload.type).toBe("execution_started");
     });
   });
 
-  describe('logExecutionCompleted', () => {
-    it('should log execution completed event', async () => {
+  describe("logExecutionCompleted", () => {
+    it("should log execution completed event", async () => {
       const result = await proofPlane.logExecutionCompleted(
         uuidv4(),
         uuidv4(),
         150, // durationMs
-        'sha256-output-hash',
+        "sha256-output-hash",
         uuidv4(),
-        uuidv4()
+        uuidv4(),
       );
 
       expect(result.event.eventType).toBe(ProofEventType.EXECUTION_COMPLETED);
-      const payload = result.event.payload as { durationMs: number; status: string };
+      const payload = result.event.payload as {
+        durationMs: number;
+        status: string;
+      };
       expect(payload.durationMs).toBe(150);
-      expect(payload.status).toBe('success');
+      expect(payload.status).toBe("success");
     });
   });
 
-  describe('logExecutionFailed', () => {
-    it('should log execution failed event', async () => {
+  describe("logExecutionFailed", () => {
+    it("should log execution failed event", async () => {
       const result = await proofPlane.logExecutionFailed(
         uuidv4(),
         uuidv4(),
-        'Permission denied',
+        "Permission denied",
         100,
         true, // retryable
         uuidv4(),
-        uuidv4()
+        uuidv4(),
       );
 
       expect(result.event.eventType).toBe(ProofEventType.EXECUTION_FAILED);
-      const payload = result.event.payload as { error: string; retryable: boolean };
-      expect(payload.error).toBe('Permission denied');
+      const payload = result.event.payload as {
+        error: string;
+        retryable: boolean;
+      };
+      expect(payload.error).toBe("Permission denied");
       expect(payload.retryable).toBe(true);
     });
   });
 
-  describe('getTrace', () => {
-    it('should return all events for a correlation ID', async () => {
+  describe("getTrace", () => {
+    it("should return all events for a correlation ID", async () => {
       const correlationId = uuidv4();
       const intent = createIntent({ correlationId });
       const decision = createDecision({ correlationId });
@@ -175,8 +192,8 @@ describe('ProofPlane', () => {
     });
   });
 
-  describe('getAgentHistory', () => {
-    it('should return all events for an agent', async () => {
+  describe("getAgentHistory", () => {
+    it("should return all events for an agent", async () => {
       const agentId = uuidv4();
       const intent1 = createIntent({ agentId });
       const intent2 = createIntent({ agentId });
@@ -191,14 +208,14 @@ describe('ProofPlane', () => {
     });
   });
 
-  describe('verifyChain', () => {
-    it('should verify empty chain', async () => {
+  describe("verifyChain", () => {
+    it("should verify empty chain", async () => {
       const result = await proofPlane.verifyChain();
       expect(result.valid).toBe(true);
       expect(result.totalEvents).toBe(0);
     });
 
-    it('should verify chain with events', async () => {
+    it("should verify chain with events", async () => {
       await proofPlane.logIntentReceived(createIntent());
       await proofPlane.logDecisionMade(createDecision());
       await proofPlane.logIntentReceived(createIntent());
@@ -210,8 +227,8 @@ describe('ProofPlane', () => {
     });
   });
 
-  describe('subscribe', () => {
-    it('should call listener on new events', async () => {
+  describe("subscribe", () => {
+    it("should call listener on new events", async () => {
       const events: string[] = [];
       const unsubscribe = proofPlane.subscribe((event) => {
         events.push(event.eventId);
@@ -229,8 +246,8 @@ describe('ProofPlane', () => {
     });
   });
 
-  describe('subscribeToType', () => {
-    it('should only call listener for specific event type', async () => {
+  describe("subscribeToType", () => {
+    it("should only call listener for specific event type", async () => {
       const events: string[] = [];
       proofPlane.subscribeToType(ProofEventType.DECISION_MADE, (event) => {
         events.push(event.eventId);
@@ -244,8 +261,8 @@ describe('ProofPlane', () => {
     });
   });
 
-  describe('getStats', () => {
-    it('should return event statistics', async () => {
+  describe("getStats", () => {
+    it("should return event statistics", async () => {
       await proofPlane.logIntentReceived(createIntent());
       await proofPlane.logDecisionMade(createDecision());
       await proofPlane.logIntentReceived(createIntent());
@@ -258,8 +275,8 @@ describe('ProofPlane', () => {
   });
 });
 
-describe('ProofPlaneLogger', () => {
-  it('should log intent and decision', async () => {
+describe("ProofPlaneLogger", () => {
+  it("should log intent and decision", async () => {
     const proofPlane = createProofPlane();
     const logger = createProofPlaneLogger({
       proofPlane,
@@ -276,7 +293,7 @@ describe('ProofPlaneLogger', () => {
     expect(count).toBe(2);
   });
 
-  it('should respect configuration flags', async () => {
+  it("should respect configuration flags", async () => {
     const proofPlane = createProofPlane();
     const logger = createProofPlaneLogger({
       proofPlane,
@@ -297,13 +314,16 @@ describe('ProofPlaneLogger', () => {
   });
 });
 
-describe('ProofPlane with Hooks', () => {
-  it('should fire EVENT_EMITTED hook when event is logged', async () => {
+describe("ProofPlane with Hooks", () => {
+  it("should fire EVENT_EMITTED hook when event is logged", async () => {
     const hookCalls: Array<{ correlationId: string; eventType: string }> = [];
 
     // Create a mock hook manager
     const mockHookManager = {
-      executeEventEmitted: async (ctx: { correlationId: string; event: { eventType: string } }) => {
+      executeEventEmitted: async (ctx: {
+        correlationId: string;
+        event: { eventType: string };
+      }) => {
         hookCalls.push({
           correlationId: ctx.correlationId,
           eventType: ctx.event.eventType,
@@ -327,7 +347,7 @@ describe('ProofPlane with Hooks', () => {
     expect(hookCalls[0]!.eventType).toBe(ProofEventType.INTENT_RECEIVED);
   });
 
-  it('should fire hook for each event emitted', async () => {
+  it("should fire hook for each event emitted", async () => {
     const hookCalls: string[] = [];
 
     const mockHookManager = {
@@ -353,12 +373,12 @@ describe('ProofPlane with Hooks', () => {
     expect(hookCalls).toContain(ProofEventType.DECISION_MADE);
   });
 
-  it('should not fire hooks when disabled', async () => {
+  it("should not fire hooks when disabled", async () => {
     const hookCalls: string[] = [];
 
     const mockHookManager = {
       executeEventEmitted: async () => {
-        hookCalls.push('called');
+        hookCalls.push("called");
         return { aborted: false };
       },
     };
@@ -375,7 +395,7 @@ describe('ProofPlane with Hooks', () => {
     expect(hookCalls).toHaveLength(0);
   });
 
-  it('should enable hooks by default when hookManager is provided', () => {
+  it("should enable hooks by default when hookManager is provided", () => {
     const mockHookManager = {
       executeEventEmitted: async () => ({ aborted: false }),
     };
@@ -386,14 +406,14 @@ describe('ProofPlane with Hooks', () => {
     expect(proofPlane.getHookManager()).toBe(mockHookManager);
   });
 
-  it('should not enable hooks when no hookManager is provided', () => {
+  it("should not enable hooks when no hookManager is provided", () => {
     const proofPlane = createProofPlane();
 
     expect(proofPlane.isHooksEnabled()).toBe(false);
     expect(proofPlane.getHookManager()).toBeUndefined();
   });
 
-  it('should pass full event to hook', async () => {
+  it("should pass full event to hook", async () => {
     let receivedEvent: Record<string, unknown> | null = null;
 
     const mockHookManager = {
@@ -427,12 +447,12 @@ function createIntent(overrides: Partial<Intent> = {}): Intent {
     intentId: uuidv4(),
     agentId: uuidv4(),
     correlationId: uuidv4(),
-    action: 'read-file',
+    action: "read-file",
     actionType: ActionType.READ,
-    resourceScope: ['/data/test.txt'],
+    resourceScope: ["/data/test.txt"],
     dataSensitivity: DataSensitivity.INTERNAL,
     reversibility: Reversibility.REVERSIBLE,
-    justification: 'Test intent',
+    justification: "Test intent",
     createdAt: new Date(),
     ...overrides,
   };
@@ -447,7 +467,7 @@ function createDecision(overrides: Partial<Decision> = {}): Decision {
     permitted: true,
     trustBand: TrustBand.T2_PROVISIONAL,
     trustScore: 55,
-    reasoning: ['Test decision'],
+    reasoning: ["Test decision"],
     decidedAt: new Date(),
     expiresAt: new Date(Date.now() + 300000),
     latencyMs: 5,

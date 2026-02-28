@@ -57,7 +57,7 @@ export {
   type TierThreshold,
   type TrustTierName,
   type TrustTierCode,
-} from './tiers.js';
+} from "./tiers.js";
 
 // =============================================================================
 // DOMAINS & URLS
@@ -77,7 +77,7 @@ export {
   type VorionDomain,
   type AgentAnchorDomain,
   type CognigateDomain,
-} from './domains.js';
+} from "./domains.js";
 
 // =============================================================================
 // CAPABILITIES
@@ -93,7 +93,7 @@ export {
   getCapabilitiesByCategory,
   getAllCapabilityCodes,
   type CapabilityDefinition,
-} from './capabilities.js';
+} from "./capabilities.js";
 
 // =============================================================================
 // PRODUCTS
@@ -110,7 +110,7 @@ export {
   getProductsByStatus,
   getProductsByOrganization,
   type ProductDefinition,
-} from './products.js';
+} from "./products.js";
 
 // =============================================================================
 // RATE LIMITS & QUOTAS
@@ -127,7 +127,7 @@ export {
   isUnlimited,
   type RateLimitConfig,
   type QuotaConfig,
-} from './rate-limits.js';
+} from "./rate-limits.js";
 
 // =============================================================================
 // ERROR CODES
@@ -150,7 +150,7 @@ export {
   createErrorResponse,
   type ErrorDefinition,
   type ErrorCode,
-} from './error-codes.js';
+} from "./error-codes.js";
 
 // =============================================================================
 // API VERSIONS
@@ -179,7 +179,7 @@ export {
   buildApiUrl,
   VERSION_HEADERS,
   type ApiVersionDefinition,
-} from './api-versions.js';
+} from "./api-versions.js";
 
 // =============================================================================
 // THEMES
@@ -193,7 +193,7 @@ export {
   themeToCssVars,
   type ThemeId,
   type ThemeTokens,
-} from './themes.js';
+} from "./themes.js";
 
 // =============================================================================
 // CAR CATEGORIES
@@ -216,14 +216,14 @@ export {
   type TrustDimension,
   type CARSubcategory,
   type CARCategoryDefinition,
-} from './car-categories.js';
+} from "./car-categories.js";
 
 // =============================================================================
 // PACKAGE VERSION
 // =============================================================================
 
 /** Package version */
-export const VERSION = '1.0.2';
+export const VERSION = "1.0.2";
 
 /** Last updated date */
-export const LAST_UPDATED = '2026-02-16';
+export const LAST_UPDATED = "2026-02-16";

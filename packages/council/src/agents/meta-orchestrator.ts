@@ -10,17 +10,17 @@
  * - Anomaly detection
  */
 
-import type { CouncilState } from '../types/index.js'
+import type { CouncilState } from "../types/index.js";
 
 export class MetaOrchestratorAgent {
-  private agentId: string
+  private agentId: string;
 
-  constructor(agentId: string = 'meta_1') {
-    this.agentId = agentId
+  constructor(agentId: string = "meta_1") {
+    this.agentId = agentId;
   }
 
   trackMetrics(state: CouncilState): void {
-    console.log(`[${this.agentId.toUpperCase()}] Tracking metrics...`)
+    console.log(`[${this.agentId.toUpperCase()}] Tracking metrics...`);
 
     // Track costs, latency, success rates
     const metrics = {
@@ -30,10 +30,13 @@ export class MetaOrchestratorAgent {
       compliancePassed: state.compliance?.passed ?? true,
       qaPassed: state.qa?.passed ?? true,
       errorCount: state.errors.length,
-      iterationCount: state.iterationCount
-    }
+      iterationCount: state.iterationCount,
+    };
 
-    console.log(`[${this.agentId.toUpperCase()}] Metrics:`, JSON.stringify(metrics))
+    console.log(
+      `[${this.agentId.toUpperCase()}] Metrics:`,
+      JSON.stringify(metrics),
+    );
 
     // TODO: Persist metrics to database
     // TODO: Update AI Gateway routing rules if needed
@@ -44,17 +47,17 @@ export class MetaOrchestratorAgent {
     return {
       id: `meta_${agentNumber}`,
       name: `Meta-Orchestrator ${agentNumber}`,
-      role: 'meta_orchestrator' as const,
-      description: 'Monitors costs, performance, and system health',
+      role: "meta_orchestrator" as const,
+      description: "Monitors costs, performance, and system health",
       capabilities: [
-        'Cost tracking',
-        'Performance monitoring',
-        'Route optimization',
-        'Anomaly detection',
-        'System health checks'
+        "Cost tracking",
+        "Performance monitoring",
+        "Route optimization",
+        "Anomaly detection",
+        "System health checks",
       ],
-      model: 'general/fast',
-      systemPrompt: 'Monitor system metrics and optimize routing rules.'
-    }
+      model: "general/fast",
+      systemPrompt: "Monitor system metrics and optimize routing rules.",
+    };
   }
 }

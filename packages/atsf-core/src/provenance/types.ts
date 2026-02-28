@@ -7,7 +7,13 @@
  * @packageDocumentation
  */
 
-import type { ID, Timestamp, TrustLevel, TrustScore, ControlAction } from '../common/types.js';
+import type {
+  ID,
+  Timestamp,
+  TrustLevel,
+  TrustScore,
+  ControlAction,
+} from "../common/types.js";
 
 /**
  * A rule that was considered during decision-making
@@ -83,7 +89,7 @@ export interface CausalStep {
 export interface ChainOutcome {
   action: ControlAction;
   /** Risk level determined */
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   /** Any modifications to the original intent */
   modifications?: string[];
 }
@@ -92,7 +98,12 @@ export interface ChainOutcome {
  * Event that triggered the decision process
  */
 export interface TriggerEvent {
-  eventType: 'intent_submitted' | 'escalation_response' | 'policy_change' | 'trust_update' | 'manual_review';
+  eventType:
+    | "intent_submitted"
+    | "escalation_response"
+    | "policy_change"
+    | "trust_update"
+    | "manual_review";
   eventId: ID;
   timestamp: Timestamp;
   source: string;
@@ -103,7 +114,7 @@ export interface TriggerEvent {
  * Evidence item supporting a decision
  */
 export interface EvidenceItem {
-  type: 'input' | 'computed' | 'codepath' | 'external' | 'historical';
+  type: "input" | "computed" | "codepath" | "external" | "historical";
   /** Pointer to the evidence source */
   pointer: string;
   /** Human-readable summary */

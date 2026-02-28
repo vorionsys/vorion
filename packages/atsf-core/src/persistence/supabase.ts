@@ -6,12 +6,12 @@
  * @packageDocumentation
  */
 
-import type { ID } from '../common/types.js';
-import type { TrustRecord } from '../trust-engine/index.js';
-import type { PersistenceProvider, TrustRecordQuery } from './types.js';
-import { createLogger } from '../common/logger.js';
+import type { ID } from "../common/types.js";
+import type { TrustRecord } from "../trust-engine/index.js";
+import type { PersistenceProvider, TrustRecordQuery } from "./types.js";
+import { createLogger } from "../common/logger.js";
 
-const logger = createLogger({ component: 'persistence-supabase' });
+const logger = createLogger({ component: "persistence-supabase" });
 
 /**
  * Generic database client interface
@@ -26,17 +26,28 @@ export interface DatabaseClient {
  */
 export interface DatabaseQueryBuilder {
   select(columns?: string): DatabaseQueryBuilder;
-  insert(data: Record<string, unknown> | Record<string, unknown>[]): DatabaseQueryBuilder;
+  insert(
+    data: Record<string, unknown> | Record<string, unknown>[],
+  ): DatabaseQueryBuilder;
   update(data: Record<string, unknown>): DatabaseQueryBuilder;
-  upsert(data: Record<string, unknown> | Record<string, unknown>[], options?: { onConflict?: string }): DatabaseQueryBuilder;
+  upsert(
+    data: Record<string, unknown> | Record<string, unknown>[],
+    options?: { onConflict?: string },
+  ): DatabaseQueryBuilder;
   delete(): DatabaseQueryBuilder;
   eq(column: string, value: unknown): DatabaseQueryBuilder;
   gte(column: string, value: unknown): DatabaseQueryBuilder;
   lte(column: string, value: unknown): DatabaseQueryBuilder;
-  order(column: string, options?: { ascending?: boolean }): DatabaseQueryBuilder;
+  order(
+    column: string,
+    options?: { ascending?: boolean },
+  ): DatabaseQueryBuilder;
   range(from: number, to: number): DatabaseQueryBuilder;
   single(): DatabaseQueryBuilder;
-  then<T>(resolve: (result: DatabaseResult<T>) => void, reject?: (error: Error) => void): Promise<DatabaseResult<T>>;
+  then<T>(
+    resolve: (result: DatabaseResult<T>) => void,
+    reject?: (error: Error) => void,
+  ): Promise<DatabaseResult<T>>;
 }
 
 /**
@@ -84,14 +95,14 @@ interface TrustRecordRow {
  * Supabase/PostgreSQL persistence provider
  */
 export class SupabasePersistenceProvider implements PersistenceProvider {
-  readonly name = 'supabase';
+  readonly name = "supabase";
   private client: DatabaseClient;
   private tableName: string;
   private debug: boolean;
 
   constructor(config: SupabasePersistenceConfig) {
     this.client = config.client;
-    this.tableName = config.tableName ?? 'trust_scores';
+    this.tableName = config.tableName ?? "trust_scores";
     this.debug = config.debug ?? false;
   }
 
@@ -100,20 +111,23 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
     try {
       const result = await this.client
         .from(this.tableName)
-        .select('entity_id')
+        .select("entity_id")
         .range(0, 0);
 
       if (result.error) {
         // Table might not exist, log warning but don't fail
         logger.warn(
           { table: this.tableName, error: result.error.message },
-          'Trust scores table may not exist. Run migrations to create it.'
+          "Trust scores table may not exist. Run migrations to create it.",
         );
       } else {
-        logger.info({ table: this.tableName }, 'Supabase persistence initialized');
+        logger.info(
+          { table: this.tableName },
+          "Supabase persistence initialized",
+        );
       }
     } catch (err) {
-      logger.warn({ err }, 'Failed to verify Supabase connection');
+      logger.warn({ err }, "Failed to verify Supabase connection");
     }
   }
 
@@ -122,31 +136,40 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
 
     const result = await this.client
       .from(this.tableName)
-      .upsert(row, { onConflict: 'entity_id' });
+      .upsert(row, { onConflict: "entity_id" });
 
     if (result.error) {
-      logger.error({ error: result.error, entityId: record.entityId }, 'Failed to save trust record');
+      logger.error(
+        { error: result.error, entityId: record.entityId },
+        "Failed to save trust record",
+      );
       throw new Error(`Failed to save trust record: ${result.error.message}`);
     }
 
     if (this.debug) {
-      logger.debug({ entityId: record.entityId, score: record.score }, 'Saved trust record');
+      logger.debug(
+        { entityId: record.entityId, score: record.score },
+        "Saved trust record",
+      );
     }
   }
 
   async get(entityId: ID): Promise<TrustRecord | undefined> {
     const result = await this.client
       .from(this.tableName)
-      .select('*')
-      .eq('entity_id', entityId)
+      .select("*")
+      .eq("entity_id", entityId)
       .single();
 
     if (result.error) {
-      if (result.error.code === 'PGRST116') {
+      if (result.error.code === "PGRST116") {
         // No rows found
         return undefined;
       }
-      logger.error({ error: result.error, entityId }, 'Failed to get trust record');
+      logger.error(
+        { error: result.error, entityId },
+        "Failed to get trust record",
+      );
       throw new Error(`Failed to get trust record: ${result.error.message}`);
     }
 
@@ -161,10 +184,13 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
     const result = await this.client
       .from(this.tableName)
       .delete()
-      .eq('entity_id', entityId);
+      .eq("entity_id", entityId);
 
     if (result.error) {
-      logger.error({ error: result.error, entityId }, 'Failed to delete trust record');
+      logger.error(
+        { error: result.error, entityId },
+        "Failed to delete trust record",
+      );
       throw new Error(`Failed to delete trust record: ${result.error.message}`);
     }
 
@@ -172,12 +198,10 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
   }
 
   async listIds(): Promise<ID[]> {
-    const result = await this.client
-      .from(this.tableName)
-      .select('entity_id');
+    const result = await this.client.from(this.tableName).select("entity_id");
 
     if (result.error) {
-      logger.error({ error: result.error }, 'Failed to list entity IDs');
+      logger.error({ error: result.error }, "Failed to list entity IDs");
       throw new Error(`Failed to list entity IDs: ${result.error.message}`);
     }
 
@@ -186,31 +210,33 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
   }
 
   async query(options: TrustRecordQuery = {}): Promise<TrustRecord[]> {
-    let query = this.client.from(this.tableName).select('*');
+    let query = this.client.from(this.tableName).select("*");
 
     // Apply filters
     if (options.minLevel !== undefined) {
-      query = query.gte('level', options.minLevel);
+      query = query.gte("level", options.minLevel);
     }
     if (options.maxLevel !== undefined) {
-      query = query.lte('level', options.maxLevel);
+      query = query.lte("level", options.maxLevel);
     }
     if (options.minScore !== undefined) {
-      query = query.gte('score', options.minScore);
+      query = query.gte("score", options.minScore);
     }
     if (options.maxScore !== undefined) {
-      query = query.lte('score', options.maxScore);
+      query = query.lte("score", options.maxScore);
     }
 
     // Apply sorting
-    const sortBy = options.sortBy ?? 'score';
-    const sortOrder = options.sortOrder ?? 'desc';
+    const sortBy = options.sortBy ?? "score";
+    const sortOrder = options.sortOrder ?? "desc";
     const columnMap: Record<string, string> = {
-      score: 'score',
-      level: 'level',
-      lastCalculatedAt: 'last_calculated_at',
+      score: "score",
+      level: "level",
+      lastCalculatedAt: "last_calculated_at",
     };
-    query = query.order(columnMap[sortBy] ?? 'score', { ascending: sortOrder === 'asc' });
+    query = query.order(columnMap[sortBy] ?? "score", {
+      ascending: sortOrder === "asc",
+    });
 
     // Apply pagination
     if (options.limit !== undefined || options.offset !== undefined) {
@@ -222,7 +248,7 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
     const result = await query;
 
     if (result.error) {
-      logger.error({ error: result.error }, 'Failed to query trust records');
+      logger.error({ error: result.error }, "Failed to query trust records");
       throw new Error(`Failed to query trust records: ${result.error.message}`);
     }
 
@@ -233,20 +259,18 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
   async exists(entityId: ID): Promise<boolean> {
     const result = await this.client
       .from(this.tableName)
-      .select('entity_id')
-      .eq('entity_id', entityId)
+      .select("entity_id")
+      .eq("entity_id", entityId)
       .single();
 
     return !result.error && result.data !== null;
   }
 
   async count(): Promise<number> {
-    const result = await this.client
-      .from(this.tableName)
-      .select('entity_id');
+    const result = await this.client.from(this.tableName).select("entity_id");
 
     if (result.error) {
-      logger.error({ error: result.error }, 'Failed to count trust records');
+      logger.error({ error: result.error }, "Failed to count trust records");
       throw new Error(`Failed to count trust records: ${result.error.message}`);
     }
 
@@ -259,19 +283,19 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
     const result = await this.client
       .from(this.tableName)
       .delete()
-      .gte('score', 0); // This matches all records
+      .gte("score", 0); // This matches all records
 
     if (result.error) {
-      logger.error({ error: result.error }, 'Failed to clear trust records');
+      logger.error({ error: result.error }, "Failed to clear trust records");
       throw new Error(`Failed to clear trust records: ${result.error.message}`);
     }
 
-    logger.info({ table: this.tableName }, 'Cleared all trust records');
+    logger.info({ table: this.tableName }, "Cleared all trust records");
   }
 
   async close(): Promise<void> {
     // Supabase client doesn't need explicit closing
-    logger.info('Supabase persistence closed');
+    logger.info("Supabase persistence closed");
   }
 
   /**
@@ -309,9 +333,9 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
         identity: components.identity ?? 0.5,
         context: components.context ?? 0.5,
       },
-      signals: row.signals as TrustRecord['signals'],
+      signals: row.signals as TrustRecord["signals"],
       lastCalculatedAt: row.last_calculated_at,
-      history: row.history as TrustRecord['history'],
+      history: row.history as TrustRecord["history"],
       recentFailures: row.recent_failures ?? [],
       recentSuccesses: row.recent_successes ?? [],
       peakScore: row.peak_score ?? row.score,
@@ -323,6 +347,8 @@ export class SupabasePersistenceProvider implements PersistenceProvider {
 /**
  * Create a new Supabase persistence provider
  */
-export function createSupabaseProvider(config: SupabasePersistenceConfig): SupabasePersistenceProvider {
+export function createSupabaseProvider(
+  config: SupabasePersistenceConfig,
+): SupabasePersistenceProvider {
   return new SupabasePersistenceProvider(config);
 }

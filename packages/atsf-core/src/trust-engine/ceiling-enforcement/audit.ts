@@ -1,6 +1,6 @@
 /**
  * Phase 6 Q1: Ceiling Enforcement - Audit Layer
- * 
+ *
  * Core responsibility: Log and track all ceiling enforcement decisions
  * - Dual logging: raw_score + clamped_score for every event
  * - Audit trail: timestamp, reason, context
@@ -11,12 +11,12 @@ import {
   TrustEvent,
   TrustMetrics,
   Phase6ValidationError,
-} from '../phase6-types.js';
+} from "../phase6-types.js";
 import {
   CeilingEnforcementResult,
   ContextType,
   clampTrustScore,
-} from './kernel.js';
+} from "./kernel.js";
 
 /**
  * Audit log entry for a ceiling enforcement operation
@@ -80,8 +80,8 @@ export class CeilingAuditLog {
     eventId: string,
     agentId: string,
     result: CeilingEnforcementResult,
-    reason: string = 'automatic',
-    tags: string[] = []
+    reason: string = "automatic",
+    tags: string[] = [],
   ): CeilingAuditEntry {
     const entry: CeilingAuditEntry = {
       eventId,
@@ -173,7 +173,7 @@ export class CeilingAuditLog {
       maxRawScore = Math.max(maxRawScore, entry.rawScore);
       maxClampingDelta = Math.max(
         maxClampingDelta,
-        entry.rawScore - entry.clampedScore
+        entry.rawScore - entry.clampedScore,
       );
 
       if (entry.ceilingHit) {
@@ -228,7 +228,7 @@ export class CeilingAuditLog {
    */
   detectCeilingAnomalies(
     agentId: string,
-    anomalyThreshold: number = 0.05
+    anomalyThreshold: number = 0.05,
   ): CeilingAuditEntry[] {
     const agentEntries = this.getEntriesForAgent(agentId);
     if (agentEntries.length === 0) {
@@ -236,8 +236,7 @@ export class CeilingAuditLog {
     }
 
     const hitRate =
-      agentEntries.filter((e) => e.ceilingHit).length /
-      agentEntries.length;
+      agentEntries.filter((e) => e.ceilingHit).length / agentEntries.length;
 
     // If hit rate is above threshold (normally 5%), flag as anomaly
     if (hitRate > anomalyThreshold) {

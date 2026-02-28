@@ -11,7 +11,7 @@
  * @module @vorionsys/contracts/canonical/trust-score
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Branded Type Definition
@@ -39,7 +39,9 @@ export declare const TrustScoreBrand: unique symbol;
  * const score: TrustScore = 750; // Error!
  * ```
  */
-export type TrustScore = number & { readonly [TrustScoreBrand]: typeof TrustScoreBrand };
+export type TrustScore = number & {
+  readonly [TrustScoreBrand]: typeof TrustScoreBrand;
+};
 
 // ============================================================================
 // Constants
@@ -104,12 +106,12 @@ export const CIRCUIT_BREAKER_THRESHOLD: TrustScore = 100 as TrustScore;
  * ```
  */
 export function createTrustScore(value: number): TrustScore {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
+  if (typeof value !== "number" || Number.isNaN(value)) {
     throw new Error(`TrustScore must be a valid number, got ${typeof value}`);
   }
 
   if (!Number.isFinite(value)) {
-    throw new Error('TrustScore must be a finite number');
+    throw new Error("TrustScore must be a finite number");
   }
 
   if (value < 0 || value > 1000) {
@@ -136,7 +138,11 @@ export function createTrustScore(value: number): TrustScore {
  * ```
  */
 export function createTrustScoreClamped(value: number): TrustScore {
-  if (typeof value !== 'number' || Number.isNaN(value) || !Number.isFinite(value)) {
+  if (
+    typeof value !== "number" ||
+    Number.isNaN(value) ||
+    !Number.isFinite(value)
+  ) {
     return DEFAULT_TRUST_SCORE;
   }
 
@@ -161,18 +167,21 @@ export function createTrustScoreClamped(value: number): TrustScore {
  * ```
  */
 export function parseTrustScore(
-  value: unknown
+  value: unknown,
 ): { success: true; score: TrustScore } | { success: false; error: string } {
-  if (typeof value !== 'number') {
+  if (typeof value !== "number") {
     return { success: false, error: `Expected number, got ${typeof value}` };
   }
 
   if (Number.isNaN(value) || !Number.isFinite(value)) {
-    return { success: false, error: 'Value must be a finite number' };
+    return { success: false, error: "Value must be a finite number" };
   }
 
   if (value < 0 || value > 1000) {
-    return { success: false, error: `Value must be between 0 and 1000, got ${value}` };
+    return {
+      success: false,
+      error: `Value must be between 0 and 1000, got ${value}`,
+    };
   }
 
   return { success: true, score: Math.round(value) as TrustScore };
@@ -312,14 +321,17 @@ export function trustScoreDifference(a: TrustScore, b: TrustScore): number {
  * ); // 740
  * ```
  */
-export function weightedAverage(scores: TrustScore[], weights?: number[]): TrustScore {
+export function weightedAverage(
+  scores: TrustScore[],
+  weights?: number[],
+): TrustScore {
   if (scores.length === 0) {
-    throw new Error('Cannot calculate average of empty array');
+    throw new Error("Cannot calculate average of empty array");
   }
 
   if (weights) {
     if (weights.length !== scores.length) {
-      throw new Error('Weights array must match scores array length');
+      throw new Error("Weights array must match scores array length");
     }
 
     let normalizedWeights = weights;
@@ -329,7 +341,10 @@ export function weightedAverage(scores: TrustScore[], weights?: number[]): Trust
       normalizedWeights = weights.map((w) => w / totalWeight);
     }
 
-    const weighted = scores.reduce((sum, score, i) => sum + score * normalizedWeights[i]!, 0);
+    const weighted = scores.reduce(
+      (sum, score, i) => sum + score * normalizedWeights[i]!,
+      0,
+    );
     return createTrustScoreClamped(weighted);
   }
 
@@ -361,7 +376,10 @@ export function compareTrustScores(a: TrustScore, b: TrustScore): -1 | 0 | 1 {
  * @param threshold - Minimum required score
  * @returns True if score meets or exceeds threshold
  */
-export function meetsThreshold(score: TrustScore, threshold: TrustScore): boolean {
+export function meetsThreshold(
+  score: TrustScore,
+  threshold: TrustScore,
+): boolean {
   return score >= threshold;
 }
 
@@ -396,7 +414,7 @@ export function isCriticallyLow(score: TrustScore): boolean {
  */
 export function isTrustScoreValue(value: unknown): value is number {
   return (
-    typeof value === 'number' &&
+    typeof value === "number" &&
     Number.isFinite(value) &&
     value >= 0 &&
     value <= 1000
@@ -414,12 +432,12 @@ export function isTrustScoreValue(value: unknown): value is number {
  */
 export const trustScoreValueSchema = z
   .number({
-    required_error: 'Trust score is required',
-    invalid_type_error: 'Trust score must be a number',
+    required_error: "Trust score is required",
+    invalid_type_error: "Trust score must be a number",
   })
-  .min(0, 'Trust score must be at least 0')
-  .max(1000, 'Trust score must be at most 1000')
-  .int('Trust score must be an integer');
+  .min(0, "Trust score must be at least 0")
+  .max(1000, "Trust score must be at most 1000")
+  .int("Trust score must be an integer");
 
 /**
  * Zod schema that validates and transforms to TrustScore branded type.
@@ -431,7 +449,7 @@ export const trustScoreValueSchema = z
  * ```
  */
 export const trustScoreSchema = trustScoreValueSchema.transform(
-  (val) => val as TrustScore
+  (val) => val as TrustScore,
 );
 
 /**
@@ -441,8 +459,8 @@ export const trustScoreSchema = trustScoreValueSchema.transform(
  */
 export const trustScore100Schema = z
   .number()
-  .min(0, 'Trust score must be at least 0')
-  .max(100, 'Trust score must be at most 100')
+  .min(0, "Trust score must be at least 0")
+  .max(100, "Trust score must be at most 100")
   .transform((val) => (val * 10) as TrustScore);
 
 /**
@@ -452,8 +470,8 @@ export const trustScore100Schema = z
  */
 export const trustScoreDecimalSchema = z
   .number()
-  .min(0, 'Trust score must be at least 0')
-  .max(1, 'Trust score must be at most 1')
+  .min(0, "Trust score must be at least 0")
+  .max(1, "Trust score must be at most 1")
   .transform((val) => Math.round(val * 1000) as TrustScore);
 
 /**

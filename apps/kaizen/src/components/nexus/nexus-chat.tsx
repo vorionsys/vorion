@@ -8,7 +8,7 @@ import { ChatMessage } from './chat-message';
 import { ProcessingIndicator } from './processing-indicator';
 import { searchLexicon } from '@/lib/lexicon-data';
 import { generateId, sanitizeHtml } from '@/lib/utils';
-import type { ChatMessage as ChatMessageType, AIModel, ProcessingStatus } from '@/types';
+import type { ChatMessage as ChatMessageType, ProcessingStatus } from '@/types';
 
 interface NexusChatProps {
   isOpen: boolean;
@@ -117,7 +117,7 @@ export function NexusChat({ isOpen, onToggle }: NexusChatProps) {
         perspectives: data.perspectives,
       };
       setMessages(prev => [...prev, response]);
-    } catch (error) {
+    } catch (_error) {
       const errorMessage: ChatMessageType = {
         id: generateId(),
         role: 'assistant',

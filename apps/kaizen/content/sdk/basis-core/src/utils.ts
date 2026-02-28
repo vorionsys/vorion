@@ -7,10 +7,8 @@ import type {
   TrustTier,
   TrustScore,
   TrustComponents,
-  TrustScoreChange,
   Capability,
   RiskLevel,
-  RiskAssessment,
   GovernancePath,
   GovernanceDecision,
 } from './types';

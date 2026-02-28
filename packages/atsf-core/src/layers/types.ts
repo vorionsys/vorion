@@ -7,42 +7,47 @@
  * @packageDocumentation
  */
 
-import type { ID, ControlAction, TrustLevel, Timestamp } from '../common/types.js';
+import type {
+  ID,
+  ControlAction,
+  TrustLevel,
+  Timestamp,
+} from "../common/types.js";
 
 /**
  * Threat classes that security layers can address
  */
 export type ThreatClass =
-  | 'prompt_injection'
-  | 'privilege_escalation'
-  | 'resource_abuse'
-  | 'data_exfiltration'
-  | 'unauthorized_action'
-  | 'trust_manipulation'
-  | 'denial_of_service'
-  | 'replay_attack'
-  | 'side_channel'
-  | 'supply_chain'
-  | 'goal_misalignment'
-  | 'deceptive_output'
-  | 'capability_abuse'
-  | 'audit_evasion';
+  | "prompt_injection"
+  | "privilege_escalation"
+  | "resource_abuse"
+  | "data_exfiltration"
+  | "unauthorized_action"
+  | "trust_manipulation"
+  | "denial_of_service"
+  | "replay_attack"
+  | "side_channel"
+  | "supply_chain"
+  | "goal_misalignment"
+  | "deceptive_output"
+  | "capability_abuse"
+  | "audit_evasion";
 
 /**
  * How a layer should behave on failure
  */
-export type FailMode = 'block' | 'degrade' | 'escalate' | 'warn' | 'log_only';
+export type FailMode = "block" | "degrade" | "escalate" | "warn" | "log_only";
 
 /**
  * Security layer tiers (grouped by defense depth)
  */
 export type LayerTier =
-  | 'input_validation'    // L0-L5: Input sanitization
-  | 'intent_analysis'     // L6-L15: Intent parsing and risk assessment
-  | 'trust_evaluation'    // L16-L25: Trust scoring and capability checks
-  | 'policy_enforcement'  // L26-L35: Rule evaluation and decision
-  | 'output_validation'   // L36-L42: Response sanitization
-  | 'audit_compliance';   // L43-L46: Proof generation and compliance
+  | "input_validation" // L0-L5: Input sanitization
+  | "intent_analysis" // L6-L15: Intent parsing and risk assessment
+  | "trust_evaluation" // L16-L25: Trust scoring and capability checks
+  | "policy_enforcement" // L26-L35: Rule evaluation and decision
+  | "output_validation" // L36-L42: Response sanitization
+  | "audit_compliance"; // L43-L46: Proof generation and compliance
 
 /**
  * Schema definition for layer inputs/outputs
@@ -65,7 +70,7 @@ export interface LayerSchema {
  */
 export interface SchemaValidation {
   field: string;
-  rule: 'required' | 'type' | 'range' | 'pattern' | 'custom';
+  rule: "required" | "type" | "range" | "pattern" | "custom";
   constraint: string | number | boolean | Record<string, unknown>;
   errorMessage: string;
 }
@@ -149,7 +154,7 @@ export interface LayerExecutionResult {
   /** Confidence in this result (0-1) */
   confidence: number;
   /** Risk level determined by this layer */
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   /** Detailed findings */
   findings: LayerFinding[];
   /** Any modifications to the input/intent */
@@ -165,9 +170,9 @@ export interface LayerExecutionResult {
  */
 export interface LayerFinding {
   /** Finding type */
-  type: 'threat_detected' | 'anomaly' | 'policy_violation' | 'warning' | 'info';
+  type: "threat_detected" | "anomaly" | "policy_violation" | "warning" | "info";
   /** Severity */
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   /** Finding code for programmatic handling */
   code: string;
   /** Human-readable description */
@@ -185,7 +190,7 @@ export interface LayerModification {
   /** What was modified */
   target: string;
   /** Type of modification */
-  type: 'sanitize' | 'redact' | 'transform' | 'restrict' | 'annotate';
+  type: "sanitize" | "redact" | "transform" | "restrict" | "annotate";
   /** Original value (may be redacted for sensitive data) */
   originalValue?: unknown;
   /** New value after modification */
@@ -302,7 +307,7 @@ export interface PipelineResult {
   /** Confidence in the decision (0-1) */
   confidence: number;
   /** Overall risk level */
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   /** Results from each layer */
   layerResults: LayerExecutionResult[];
   /** Layers that passed */
@@ -347,12 +352,31 @@ export interface PipelineConfig {
  * Events emitted during pipeline execution
  */
 export type PipelineEvent =
-  | { type: 'pipeline_started'; executionId: ID; timestamp: Timestamp }
-  | { type: 'layer_started'; layerId: number; timestamp: Timestamp }
-  | { type: 'layer_completed'; layerId: number; result: LayerExecutionResult; timestamp: Timestamp }
-  | { type: 'layer_failed'; layerId: number; error: LayerError; timestamp: Timestamp }
-  | { type: 'layer_skipped'; layerId: number; reason: string; timestamp: Timestamp }
-  | { type: 'pipeline_completed'; result: PipelineResult; timestamp: Timestamp };
+  | { type: "pipeline_started"; executionId: ID; timestamp: Timestamp }
+  | { type: "layer_started"; layerId: number; timestamp: Timestamp }
+  | {
+      type: "layer_completed";
+      layerId: number;
+      result: LayerExecutionResult;
+      timestamp: Timestamp;
+    }
+  | {
+      type: "layer_failed";
+      layerId: number;
+      error: LayerError;
+      timestamp: Timestamp;
+    }
+  | {
+      type: "layer_skipped";
+      layerId: number;
+      reason: string;
+      timestamp: Timestamp;
+    }
+  | {
+      type: "pipeline_completed";
+      result: PipelineResult;
+      timestamp: Timestamp;
+    };
 
 /**
  * Listener for pipeline events

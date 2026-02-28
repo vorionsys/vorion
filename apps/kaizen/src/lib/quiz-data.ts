@@ -1,4 +1,4 @@
-import type { QuizQuestion, Quiz, PathDifficulty } from '@/types';
+import type { QuizQuestion, Quiz } from '@/types';
 import { getPathBySlug, getPathTerms } from './learning-paths';
 
 /**
@@ -2297,10 +2297,10 @@ export function getQuestionsForModule(pathSlug: string, moduleId: string): QuizQ
   const path = getPathBySlug(pathSlug);
   if (!path) return [];
 
-  const module = path.modules.find(m => m.id === moduleId);
-  if (!module) return [];
+  const mod = path.modules.find(m => m.id === moduleId);
+  if (!mod) return [];
 
-  return getQuestionsForTerms(module.terms);
+  return getQuestionsForTerms(mod.terms);
 }
 
 /**
@@ -2321,8 +2321,8 @@ export function generateModuleQuiz(pathSlug: string, moduleId: string): Quiz | n
   const path = getPathBySlug(pathSlug);
   if (!path) return null;
 
-  const module = path.modules.find(m => m.id === moduleId);
-  if (!module) return null;
+  const mod = path.modules.find(m => m.id === moduleId);
+  if (!mod) return null;
 
   const questions = getQuestionsForModule(pathSlug, moduleId);
   if (questions.length === 0) return null;
@@ -2332,8 +2332,8 @@ export function generateModuleQuiz(pathSlug: string, moduleId: string): Quiz | n
 
   return {
     id: `quiz-${pathSlug}-${moduleId}`,
-    title: `${module.title} Quiz`,
-    description: `Test your understanding of concepts from "${module.title}"`,
+    title: `${mod.title} Quiz`,
+    description: `Test your understanding of concepts from "${mod.title}"`,
     moduleId,
     pathSlug,
     questions: shuffledQuestions,

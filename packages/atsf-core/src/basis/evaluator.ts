@@ -4,17 +4,17 @@
  * Core evaluation engine for processing constraints against intents.
  */
 
-import { createLogger } from '../common/logger.js';
+import { createLogger } from "../common/logger.js";
 import type {
   Rule,
   RuleNamespace,
   EvaluationContext,
   EvaluationResult,
   RuleResult,
-} from './types.js';
-import type { ControlAction } from '../common/types.js';
+} from "./types.js";
+import type { ControlAction } from "../common/types.js";
 
-const logger = createLogger({ component: 'basis-evaluator' });
+const logger = createLogger({ component: "basis-evaluator" });
 
 /**
  * Rule evaluator class
@@ -27,7 +27,7 @@ export class RuleEvaluator {
    */
   registerNamespace(namespace: RuleNamespace): void {
     this.namespaces.set(namespace.name, namespace);
-    logger.info({ namespace: namespace.name }, 'Namespace registered');
+    logger.info({ namespace: namespace.name }, "Namespace registered");
   }
 
   /**
@@ -35,7 +35,7 @@ export class RuleEvaluator {
    */
   unregisterNamespace(name: string): void {
     this.namespaces.delete(name);
-    logger.info({ namespace: name }, 'Namespace unregistered');
+    logger.info({ namespace: name }, "Namespace unregistered");
   }
 
   /**
@@ -57,12 +57,12 @@ export class RuleEvaluator {
       const result = await this.evaluateRule(rule, context);
       rulesEvaluated.push(result);
 
-      if (!result.matched || result.action === 'deny') {
+      if (!result.matched || result.action === "deny") {
         violatedRules.push(result);
       }
 
       // Stop on first deny
-      if (result.action === 'deny') {
+      if (result.action === "deny") {
         break;
       }
     }
@@ -71,7 +71,7 @@ export class RuleEvaluator {
 
     // Determine final action
     const finalAction = this.determineFinalAction(rulesEvaluated);
-    const passed = finalAction === 'allow';
+    const passed = finalAction === "allow";
 
     logger.info(
       {
@@ -81,7 +81,7 @@ export class RuleEvaluator {
         finalAction,
         durationMs: totalDurationMs,
       },
-      'Evaluation completed'
+      "Evaluation completed",
     );
 
     return {
@@ -123,7 +123,7 @@ export class RuleEvaluator {
       const types = Array.isArray(when.intentType)
         ? when.intentType
         : [when.intentType];
-      if (!types.includes(context.intent.type) && !types.includes('*')) {
+      if (!types.includes(context.intent.type) && !types.includes("*")) {
         return false;
       }
     }
@@ -133,7 +133,7 @@ export class RuleEvaluator {
       const types = Array.isArray(when.entityType)
         ? when.entityType
         : [when.entityType];
-      if (!types.includes(context.entity.type) && !types.includes('*')) {
+      if (!types.includes(context.entity.type) && !types.includes("*")) {
         return false;
       }
     }
@@ -155,36 +155,36 @@ export class RuleEvaluator {
    */
   private evaluateCondition(
     condition: { field: string; operator: string; value: unknown },
-    context: EvaluationContext
+    context: EvaluationContext,
   ): boolean {
     const fieldValue = this.resolveField(condition.field, context);
     const targetValue = condition.value;
 
     switch (condition.operator) {
-      case 'equals':
+      case "equals":
         return fieldValue === targetValue;
-      case 'not_equals':
+      case "not_equals":
         return fieldValue !== targetValue;
-      case 'greater_than':
+      case "greater_than":
         return (fieldValue as number) > (targetValue as number);
-      case 'less_than':
+      case "less_than":
         return (fieldValue as number) < (targetValue as number);
-      case 'greater_than_or_equal':
+      case "greater_than_or_equal":
         return (fieldValue as number) >= (targetValue as number);
-      case 'less_than_or_equal':
+      case "less_than_or_equal":
         return (fieldValue as number) <= (targetValue as number);
-      case 'in':
+      case "in":
         return (targetValue as unknown[]).includes(fieldValue);
-      case 'not_in':
+      case "not_in":
         return !(targetValue as unknown[]).includes(fieldValue);
-      case 'contains':
+      case "contains":
         return String(fieldValue).includes(String(targetValue));
-      case 'exists':
+      case "exists":
         return fieldValue !== undefined && fieldValue !== null;
-      case 'not_exists':
+      case "not_exists":
         return fieldValue === undefined || fieldValue === null;
       default:
-        logger.warn({ operator: condition.operator }, 'Unknown operator');
+        logger.warn({ operator: condition.operator }, "Unknown operator");
         return false;
     }
   }
@@ -193,7 +193,7 @@ export class RuleEvaluator {
    * Resolve a field path to its value in the context
    */
   private resolveField(field: string, context: EvaluationContext): unknown {
-    const parts = field.split('.');
+    const parts = field.split(".");
     let current: unknown = context;
 
     for (const part of parts) {
@@ -211,19 +211,23 @@ export class RuleEvaluator {
    */
   private async evaluateRule(
     rule: Rule,
-    context: EvaluationContext
+    context: EvaluationContext,
   ): Promise<RuleResult> {
     const startTime = performance.now();
-    let action: ControlAction = 'allow';
-    let reason = 'No conditions matched';
+    let action: ControlAction = "allow";
+    let reason = "No conditions matched";
 
     // Evaluate each evaluation step
     for (const evaluation of rule.evaluate) {
-      const conditionMet = this.evaluateExpression(evaluation.condition, context);
+      const conditionMet = this.evaluateExpression(
+        evaluation.condition,
+        context,
+      );
 
       if (conditionMet) {
         action = evaluation.result;
-        reason = evaluation.reason ?? `Condition matched: ${evaluation.condition}`;
+        reason =
+          evaluation.reason ?? `Condition matched: ${evaluation.condition}`;
         break;
       }
     }
@@ -233,7 +237,7 @@ export class RuleEvaluator {
     return {
       ruleId: rule.id,
       ruleName: rule.name,
-      matched: action !== 'deny',
+      matched: action !== "deny",
       action,
       reason,
       details: {
@@ -256,18 +260,18 @@ export class RuleEvaluator {
    */
   private evaluateExpression(
     expression: string,
-    context: EvaluationContext
+    context: EvaluationContext,
   ): boolean {
     const trimmed = expression.trim();
 
     // Handle boolean literals
-    if (trimmed === 'true') return true;
-    if (trimmed === 'false') return false;
+    if (trimmed === "true") return true;
+    if (trimmed === "false") return false;
 
     // Tokenize
     const tokens = this.tokenize(trimmed);
     if (tokens.length === 0) {
-      logger.warn({ expression }, 'Empty expression');
+      logger.warn({ expression }, "Empty expression");
       return true;
     }
 
@@ -276,7 +280,7 @@ export class RuleEvaluator {
       const result = this.parseOrExpression(tokens, context);
       return result.value;
     } catch (error) {
-      logger.error({ expression, error }, 'Expression evaluation failed');
+      logger.error({ expression, error }, "Expression evaluation failed");
       return false;
     }
   }
@@ -298,7 +302,7 @@ export class RuleEvaluator {
       // String literals
       if (expr[i] === "'" || expr[i] === '"') {
         const quote = expr[i];
-        let str = '';
+        let str = "";
         i++; // Skip opening quote
         while (i < expr.length && expr[i] !== quote) {
           str += expr[i];
@@ -311,21 +315,21 @@ export class RuleEvaluator {
 
       // Multi-char operators
       const twoChar = expr.substring(i, i + 2);
-      if (['==', '!=', '>=', '<=', '&&', '||'].includes(twoChar)) {
+      if (["==", "!=", ">=", "<=", "&&", "||"].includes(twoChar)) {
         tokens.push(twoChar);
         i += 2;
         continue;
       }
 
       // Single-char operators and parens
-      if (['>', '<', '(', ')', '!'].includes(expr[i]!)) {
+      if ([">", "<", "(", ")", "!"].includes(expr[i]!)) {
         tokens.push(expr[i]!);
         i++;
         continue;
       }
 
       // Words (identifiers, keywords, numbers)
-      let word = '';
+      let word = "";
       while (i < expr.length && /[a-zA-Z0-9_.]/.test(expr[i]!)) {
         word += expr[i];
         i++;
@@ -344,13 +348,13 @@ export class RuleEvaluator {
   private parseOrExpression(
     tokens: string[],
     context: EvaluationContext,
-    pos: { index: number } = { index: 0 }
+    pos: { index: number } = { index: 0 },
   ): { value: boolean; pos: number } {
     let left = this.parseAndExpression(tokens, context, pos);
 
     while (pos.index < tokens.length) {
       const token = tokens[pos.index];
-      if (token === 'OR' || token === '||') {
+      if (token === "OR" || token === "||") {
         pos.index++;
         const right = this.parseAndExpression(tokens, context, pos);
         left = { value: left.value || right.value, pos: pos.index };
@@ -368,13 +372,13 @@ export class RuleEvaluator {
   private parseAndExpression(
     tokens: string[],
     context: EvaluationContext,
-    pos: { index: number }
+    pos: { index: number },
   ): { value: boolean; pos: number } {
     let left = this.parseNotExpression(tokens, context, pos);
 
     while (pos.index < tokens.length) {
       const token = tokens[pos.index];
-      if (token === 'AND' || token === '&&') {
+      if (token === "AND" || token === "&&") {
         pos.index++;
         const right = this.parseNotExpression(tokens, context, pos);
         left = { value: left.value && right.value, pos: pos.index };
@@ -392,9 +396,9 @@ export class RuleEvaluator {
   private parseNotExpression(
     tokens: string[],
     context: EvaluationContext,
-    pos: { index: number }
+    pos: { index: number },
   ): { value: boolean; pos: number } {
-    if (tokens[pos.index] === 'NOT' || tokens[pos.index] === '!') {
+    if (tokens[pos.index] === "NOT" || tokens[pos.index] === "!") {
       pos.index++;
       const inner = this.parseNotExpression(tokens, context, pos);
       return { value: !inner.value, pos: pos.index };
@@ -409,13 +413,13 @@ export class RuleEvaluator {
   private parseComparison(
     tokens: string[],
     context: EvaluationContext,
-    pos: { index: number }
+    pos: { index: number },
   ): { value: boolean; pos: number } {
     // Handle parentheses
-    if (tokens[pos.index] === '(') {
+    if (tokens[pos.index] === "(") {
       pos.index++;
       const inner = this.parseOrExpression(tokens, context, pos);
-      if (tokens[pos.index] === ')') {
+      if (tokens[pos.index] === ")") {
         pos.index++;
       }
       return inner;
@@ -426,7 +430,10 @@ export class RuleEvaluator {
 
     // Check for comparison operator
     const op = tokens[pos.index];
-    if (!op || !['==', '!=', '>', '<', '>=', '<=', 'in', 'contains'].includes(op)) {
+    if (
+      !op ||
+      !["==", "!=", ">", "<", ">=", "<=", "in", "contains"].includes(op)
+    ) {
       // Truthiness check
       return { value: Boolean(left), pos: pos.index };
     }
@@ -437,28 +444,28 @@ export class RuleEvaluator {
     // Evaluate comparison
     let result: boolean;
     switch (op) {
-      case '==':
+      case "==":
         result = left === right;
         break;
-      case '!=':
+      case "!=":
         result = left !== right;
         break;
-      case '>':
+      case ">":
         result = (left as number) > (right as number);
         break;
-      case '<':
+      case "<":
         result = (left as number) < (right as number);
         break;
-      case '>=':
+      case ">=":
         result = (left as number) >= (right as number);
         break;
-      case '<=':
+      case "<=":
         result = (left as number) <= (right as number);
         break;
-      case 'in':
+      case "in":
         result = Array.isArray(right) && right.includes(left);
         break;
-      case 'contains':
+      case "contains":
         result = String(left).includes(String(right));
         break;
       default:
@@ -474,7 +481,7 @@ export class RuleEvaluator {
   private parseValue(
     tokens: string[],
     context: EvaluationContext,
-    pos: { index: number }
+    pos: { index: number },
   ): unknown {
     const token = tokens[pos.index];
     if (!token) return undefined;
@@ -487,9 +494,9 @@ export class RuleEvaluator {
     }
 
     // Boolean literal
-    if (token === 'true') return true;
-    if (token === 'false') return false;
-    if (token === 'null') return null;
+    if (token === "true") return true;
+    if (token === "false") return false;
+    if (token === "null") return null;
 
     // Number literal
     if (/^-?\d+(\.\d+)?$/.test(token)) {
@@ -514,8 +521,8 @@ export class RuleEvaluator {
       allow: 5,
     };
 
-    let finalAction: ControlAction = 'allow';
-    let lowestPriority = priorities['allow'];
+    let finalAction: ControlAction = "allow";
+    let lowestPriority = priorities["allow"];
 
     for (const result of results) {
       const priority = priorities[result.action];

@@ -17,7 +17,7 @@
  * @module @vorionsys/contracts/car/tiers
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // CAR ID Certification Tiers (T0-T7)
@@ -75,49 +75,57 @@ export const CERTIFICATION_TIERS = [
  * Zod schema for CertificationTier enum validation.
  */
 export const certificationTierSchema = z.nativeEnum(CertificationTier, {
-  errorMap: () => ({ message: 'Invalid certification tier. Must be T0-T7 (0-7).' }),
+  errorMap: () => ({
+    message: "Invalid certification tier. Must be T0-T7 (0-7).",
+  }),
 });
 
 /**
  * Human-readable names for certification tiers.
  */
-export const CERTIFICATION_TIER_NAMES: Readonly<Record<CertificationTier, string>> = {
-  [CertificationTier.T0_SANDBOX]: 'Sandbox',
-  [CertificationTier.T1_OBSERVED]: 'Observed',
-  [CertificationTier.T2_PROVISIONAL]: 'Provisional',
-  [CertificationTier.T3_MONITORED]: 'Monitored',
-  [CertificationTier.T4_STANDARD]: 'Standard',
-  [CertificationTier.T5_TRUSTED]: 'Trusted',
-  [CertificationTier.T6_CERTIFIED]: 'Certified',
-  [CertificationTier.T7_AUTONOMOUS]: 'Autonomous',
+export const CERTIFICATION_TIER_NAMES: Readonly<
+  Record<CertificationTier, string>
+> = {
+  [CertificationTier.T0_SANDBOX]: "Sandbox",
+  [CertificationTier.T1_OBSERVED]: "Observed",
+  [CertificationTier.T2_PROVISIONAL]: "Provisional",
+  [CertificationTier.T3_MONITORED]: "Monitored",
+  [CertificationTier.T4_STANDARD]: "Standard",
+  [CertificationTier.T5_TRUSTED]: "Trusted",
+  [CertificationTier.T6_CERTIFIED]: "Certified",
+  [CertificationTier.T7_AUTONOMOUS]: "Autonomous",
 } as const;
 
 /**
  * Detailed descriptions for certification tiers.
  */
-export const CERTIFICATION_TIER_DESCRIPTIONS: Readonly<Record<CertificationTier, string>> = {
+export const CERTIFICATION_TIER_DESCRIPTIONS: Readonly<
+  Record<CertificationTier, string>
+> = {
   [CertificationTier.T0_SANDBOX]:
-    'Isolated sandbox environment. No external verification, all actions are simulated.',
+    "Isolated sandbox environment. No external verification, all actions are simulated.",
   [CertificationTier.T1_OBSERVED]:
-    'Basic observation period. Identity registered, behavior being monitored.',
+    "Basic observation period. Identity registered, behavior being monitored.",
   [CertificationTier.T2_PROVISIONAL]:
-    'Provisional status. Initial capabilities verified, limited operations permitted.',
+    "Provisional status. Initial capabilities verified, limited operations permitted.",
   [CertificationTier.T3_MONITORED]:
-    'Continuous monitoring active. Ongoing verification of safe operation.',
+    "Continuous monitoring active. Ongoing verification of safe operation.",
   [CertificationTier.T4_STANDARD]:
-    'Standard certification achieved. Can perform routine operations.',
+    "Standard certification achieved. Can perform routine operations.",
   [CertificationTier.T5_TRUSTED]:
-    'Full trust established. Proven track record of reliable behavior.',
+    "Full trust established. Proven track record of reliable behavior.",
   [CertificationTier.T6_CERTIFIED]:
-    'Third-party certified. Independent audit completed, verified compliance.',
+    "Third-party certified. Independent audit completed, verified compliance.",
   [CertificationTier.T7_AUTONOMOUS]:
-    'Highest assurance level. Full certification with autonomous authority.',
+    "Highest assurance level. Full certification with autonomous authority.",
 } as const;
 
 /**
  * Trust score ranges for certification tiers (CAR ID spec scale: 0-1000).
  */
-export const CERTIFICATION_TIER_SCORES: Readonly<Record<CertificationTier, { min: number; max: number }>> = {
+export const CERTIFICATION_TIER_SCORES: Readonly<
+  Record<CertificationTier, { min: number; max: number }>
+> = {
   [CertificationTier.T0_SANDBOX]: { min: 0, max: 199 },
   [CertificationTier.T1_OBSERVED]: { min: 200, max: 349 },
   [CertificationTier.T2_PROVISIONAL]: { min: 350, max: 499 },
@@ -184,49 +192,52 @@ export const RUNTIME_TIERS = [
  * Zod schema for RuntimeTier enum validation.
  */
 export const runtimeTierSchema = z.nativeEnum(RuntimeTier, {
-  errorMap: () => ({ message: 'Invalid runtime tier. Must be T0-T7 (0-7).' }),
+  errorMap: () => ({ message: "Invalid runtime tier. Must be T0-T7 (0-7)." }),
 });
 
 /**
  * Human-readable names for runtime tiers.
  */
 export const RUNTIME_TIER_NAMES: Readonly<Record<RuntimeTier, string>> = {
-  [RuntimeTier.T0_SANDBOX]: 'Sandbox',
-  [RuntimeTier.T1_OBSERVED]: 'Observed',
-  [RuntimeTier.T2_PROVISIONAL]: 'Provisional',
-  [RuntimeTier.T3_MONITORED]: 'Monitored',
-  [RuntimeTier.T4_STANDARD]: 'Standard',
-  [RuntimeTier.T5_TRUSTED]: 'Trusted',
-  [RuntimeTier.T6_CERTIFIED]: 'Certified',
-  [RuntimeTier.T7_AUTONOMOUS]: 'Autonomous',
+  [RuntimeTier.T0_SANDBOX]: "Sandbox",
+  [RuntimeTier.T1_OBSERVED]: "Observed",
+  [RuntimeTier.T2_PROVISIONAL]: "Provisional",
+  [RuntimeTier.T3_MONITORED]: "Monitored",
+  [RuntimeTier.T4_STANDARD]: "Standard",
+  [RuntimeTier.T5_TRUSTED]: "Trusted",
+  [RuntimeTier.T6_CERTIFIED]: "Certified",
+  [RuntimeTier.T7_AUTONOMOUS]: "Autonomous",
 } as const;
 
 /**
  * Detailed descriptions for runtime tiers.
  */
-export const RUNTIME_TIER_DESCRIPTIONS: Readonly<Record<RuntimeTier, string>> = {
-  [RuntimeTier.T0_SANDBOX]:
-    'Isolated sandbox environment. No external access, all actions are simulated.',
-  [RuntimeTier.T1_OBSERVED]:
-    'Observation period. Every action is logged and reviewed, human oversight required.',
-  [RuntimeTier.T2_PROVISIONAL]:
-    'Provisional operations. Limited autonomy with strict policy constraints.',
-  [RuntimeTier.T3_MONITORED]:
-    'Monitored operations. Continuous monitoring with expanding operational freedom.',
-  [RuntimeTier.T4_STANDARD]:
-    'Standard operational trust. Can perform routine operations without approval.',
-  [RuntimeTier.T5_TRUSTED]:
-    'Trusted operations. Expanded capabilities with minimal oversight.',
-  [RuntimeTier.T6_CERTIFIED]:
-    'Certified operations. Independent operation with comprehensive audit trail.',
-  [RuntimeTier.T7_AUTONOMOUS]:
-    'Full autonomy. Mission-critical authority with autonomous decision-making.',
-} as const;
+export const RUNTIME_TIER_DESCRIPTIONS: Readonly<Record<RuntimeTier, string>> =
+  {
+    [RuntimeTier.T0_SANDBOX]:
+      "Isolated sandbox environment. No external access, all actions are simulated.",
+    [RuntimeTier.T1_OBSERVED]:
+      "Observation period. Every action is logged and reviewed, human oversight required.",
+    [RuntimeTier.T2_PROVISIONAL]:
+      "Provisional operations. Limited autonomy with strict policy constraints.",
+    [RuntimeTier.T3_MONITORED]:
+      "Monitored operations. Continuous monitoring with expanding operational freedom.",
+    [RuntimeTier.T4_STANDARD]:
+      "Standard operational trust. Can perform routine operations without approval.",
+    [RuntimeTier.T5_TRUSTED]:
+      "Trusted operations. Expanded capabilities with minimal oversight.",
+    [RuntimeTier.T6_CERTIFIED]:
+      "Certified operations. Independent operation with comprehensive audit trail.",
+    [RuntimeTier.T7_AUTONOMOUS]:
+      "Full autonomy. Mission-critical authority with autonomous decision-making.",
+  } as const;
 
 /**
  * Trust score ranges for runtime tiers (Vorion scale: 0-1000).
  */
-export const RUNTIME_TIER_SCORES: Readonly<Record<RuntimeTier, { min: number; max: number }>> = {
+export const RUNTIME_TIER_SCORES: Readonly<
+  Record<RuntimeTier, { min: number; max: number }>
+> = {
   [RuntimeTier.T0_SANDBOX]: { min: 0, max: 199 },
   [RuntimeTier.T1_OBSERVED]: { min: 200, max: 349 },
   [RuntimeTier.T2_PROVISIONAL]: { min: 350, max: 499 },
@@ -264,11 +275,13 @@ export interface CertificationTierConfig {
 /**
  * Configuration for all certification tiers.
  */
-export const CERTIFICATION_TIER_CONFIGS: Readonly<Record<CertificationTier, CertificationTierConfig>> = {
+export const CERTIFICATION_TIER_CONFIGS: Readonly<
+  Record<CertificationTier, CertificationTierConfig>
+> = {
   [CertificationTier.T0_SANDBOX]: {
     tier: CertificationTier.T0_SANDBOX,
-    code: 'T0',
-    name: 'Sandbox',
+    code: "T0",
+    name: "Sandbox",
     description: CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T0_SANDBOX],
     scoreRange: CERTIFICATION_TIER_SCORES[CertificationTier.T0_SANDBOX],
     requiredAttestations: [],
@@ -276,65 +289,99 @@ export const CERTIFICATION_TIER_CONFIGS: Readonly<Record<CertificationTier, Cert
   },
   [CertificationTier.T1_OBSERVED]: {
     tier: CertificationTier.T1_OBSERVED,
-    code: 'T1',
-    name: 'Observed',
+    code: "T1",
+    name: "Observed",
     description: CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T1_OBSERVED],
     scoreRange: CERTIFICATION_TIER_SCORES[CertificationTier.T1_OBSERVED],
-    requiredAttestations: ['identity'],
+    requiredAttestations: ["identity"],
     maxCapabilityLevel: 2,
   },
   [CertificationTier.T2_PROVISIONAL]: {
     tier: CertificationTier.T2_PROVISIONAL,
-    code: 'T2',
-    name: 'Provisional',
-    description: CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T2_PROVISIONAL],
+    code: "T2",
+    name: "Provisional",
+    description:
+      CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T2_PROVISIONAL],
     scoreRange: CERTIFICATION_TIER_SCORES[CertificationTier.T2_PROVISIONAL],
-    requiredAttestations: ['identity', 'capability_test'],
+    requiredAttestations: ["identity", "capability_test"],
     maxCapabilityLevel: 3,
   },
   [CertificationTier.T3_MONITORED]: {
     tier: CertificationTier.T3_MONITORED,
-    code: 'T3',
-    name: 'Monitored',
-    description: CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T3_MONITORED],
+    code: "T3",
+    name: "Monitored",
+    description:
+      CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T3_MONITORED],
     scoreRange: CERTIFICATION_TIER_SCORES[CertificationTier.T3_MONITORED],
-    requiredAttestations: ['identity', 'capability_test', 'continuous_monitoring'],
+    requiredAttestations: [
+      "identity",
+      "capability_test",
+      "continuous_monitoring",
+    ],
     maxCapabilityLevel: 4,
   },
   [CertificationTier.T4_STANDARD]: {
     tier: CertificationTier.T4_STANDARD,
-    code: 'T4',
-    name: 'Standard',
+    code: "T4",
+    name: "Standard",
     description: CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T4_STANDARD],
     scoreRange: CERTIFICATION_TIER_SCORES[CertificationTier.T4_STANDARD],
-    requiredAttestations: ['identity', 'capability_test', 'continuous_monitoring', 'track_record'],
+    requiredAttestations: [
+      "identity",
+      "capability_test",
+      "continuous_monitoring",
+      "track_record",
+    ],
     maxCapabilityLevel: 5,
   },
   [CertificationTier.T5_TRUSTED]: {
     tier: CertificationTier.T5_TRUSTED,
-    code: 'T5',
-    name: 'Trusted',
+    code: "T5",
+    name: "Trusted",
     description: CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T5_TRUSTED],
     scoreRange: CERTIFICATION_TIER_SCORES[CertificationTier.T5_TRUSTED],
-    requiredAttestations: ['identity', 'capability_test', 'continuous_monitoring', 'track_record', 'trust_verification'],
+    requiredAttestations: [
+      "identity",
+      "capability_test",
+      "continuous_monitoring",
+      "track_record",
+      "trust_verification",
+    ],
     maxCapabilityLevel: 6,
   },
   [CertificationTier.T6_CERTIFIED]: {
     tier: CertificationTier.T6_CERTIFIED,
-    code: 'T6',
-    name: 'Certified',
-    description: CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T6_CERTIFIED],
+    code: "T6",
+    name: "Certified",
+    description:
+      CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T6_CERTIFIED],
     scoreRange: CERTIFICATION_TIER_SCORES[CertificationTier.T6_CERTIFIED],
-    requiredAttestations: ['identity', 'capability_test', 'continuous_monitoring', 'track_record', 'trust_verification', 'third_party_audit'],
+    requiredAttestations: [
+      "identity",
+      "capability_test",
+      "continuous_monitoring",
+      "track_record",
+      "trust_verification",
+      "third_party_audit",
+    ],
     maxCapabilityLevel: 7,
   },
   [CertificationTier.T7_AUTONOMOUS]: {
     tier: CertificationTier.T7_AUTONOMOUS,
-    code: 'T7',
-    name: 'Autonomous',
-    description: CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T7_AUTONOMOUS],
+    code: "T7",
+    name: "Autonomous",
+    description:
+      CERTIFICATION_TIER_DESCRIPTIONS[CertificationTier.T7_AUTONOMOUS],
     scoreRange: CERTIFICATION_TIER_SCORES[CertificationTier.T7_AUTONOMOUS],
-    requiredAttestations: ['identity', 'capability_test', 'continuous_monitoring', 'track_record', 'trust_verification', 'third_party_audit', 'autonomous_certification'],
+    requiredAttestations: [
+      "identity",
+      "capability_test",
+      "continuous_monitoring",
+      "track_record",
+      "trust_verification",
+      "third_party_audit",
+      "autonomous_certification",
+    ],
     maxCapabilityLevel: 7,
   },
 } as const;
@@ -364,11 +411,13 @@ export interface RuntimeTierConfig {
 /**
  * Configuration for all runtime tiers.
  */
-export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfig>> = {
+export const RUNTIME_TIER_CONFIGS: Readonly<
+  Record<RuntimeTier, RuntimeTierConfig>
+> = {
   [RuntimeTier.T0_SANDBOX]: {
     tier: RuntimeTier.T0_SANDBOX,
-    code: 'T0',
-    name: 'Sandbox',
+    code: "T0",
+    name: "Sandbox",
     description: RUNTIME_TIER_DESCRIPTIONS[RuntimeTier.T0_SANDBOX],
     scoreRange: RUNTIME_TIER_SCORES[RuntimeTier.T0_SANDBOX],
     requiresApproval: false, // No approval needed - everything is isolated
@@ -377,8 +426,8 @@ export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfi
   },
   [RuntimeTier.T1_OBSERVED]: {
     tier: RuntimeTier.T1_OBSERVED,
-    code: 'T1',
-    name: 'Observed',
+    code: "T1",
+    name: "Observed",
     description: RUNTIME_TIER_DESCRIPTIONS[RuntimeTier.T1_OBSERVED],
     scoreRange: RUNTIME_TIER_SCORES[RuntimeTier.T1_OBSERVED],
     requiresApproval: true,
@@ -387,8 +436,8 @@ export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfi
   },
   [RuntimeTier.T2_PROVISIONAL]: {
     tier: RuntimeTier.T2_PROVISIONAL,
-    code: 'T2',
-    name: 'Provisional',
+    code: "T2",
+    name: "Provisional",
     description: RUNTIME_TIER_DESCRIPTIONS[RuntimeTier.T2_PROVISIONAL],
     scoreRange: RUNTIME_TIER_SCORES[RuntimeTier.T2_PROVISIONAL],
     requiresApproval: true,
@@ -397,8 +446,8 @@ export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfi
   },
   [RuntimeTier.T3_MONITORED]: {
     tier: RuntimeTier.T3_MONITORED,
-    code: 'T3',
-    name: 'Monitored',
+    code: "T3",
+    name: "Monitored",
     description: RUNTIME_TIER_DESCRIPTIONS[RuntimeTier.T3_MONITORED],
     scoreRange: RUNTIME_TIER_SCORES[RuntimeTier.T3_MONITORED],
     requiresApproval: false,
@@ -407,8 +456,8 @@ export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfi
   },
   [RuntimeTier.T4_STANDARD]: {
     tier: RuntimeTier.T4_STANDARD,
-    code: 'T4',
-    name: 'Standard',
+    code: "T4",
+    name: "Standard",
     description: RUNTIME_TIER_DESCRIPTIONS[RuntimeTier.T4_STANDARD],
     scoreRange: RUNTIME_TIER_SCORES[RuntimeTier.T4_STANDARD],
     requiresApproval: false,
@@ -417,8 +466,8 @@ export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfi
   },
   [RuntimeTier.T5_TRUSTED]: {
     tier: RuntimeTier.T5_TRUSTED,
-    code: 'T5',
-    name: 'Trusted',
+    code: "T5",
+    name: "Trusted",
     description: RUNTIME_TIER_DESCRIPTIONS[RuntimeTier.T5_TRUSTED],
     scoreRange: RUNTIME_TIER_SCORES[RuntimeTier.T5_TRUSTED],
     requiresApproval: false,
@@ -427,8 +476,8 @@ export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfi
   },
   [RuntimeTier.T6_CERTIFIED]: {
     tier: RuntimeTier.T6_CERTIFIED,
-    code: 'T6',
-    name: 'Certified',
+    code: "T6",
+    name: "Certified",
     description: RUNTIME_TIER_DESCRIPTIONS[RuntimeTier.T6_CERTIFIED],
     scoreRange: RUNTIME_TIER_SCORES[RuntimeTier.T6_CERTIFIED],
     requiresApproval: false,
@@ -437,8 +486,8 @@ export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfi
   },
   [RuntimeTier.T7_AUTONOMOUS]: {
     tier: RuntimeTier.T7_AUTONOMOUS,
-    code: 'T7',
-    name: 'Autonomous',
+    code: "T7",
+    name: "Autonomous",
     description: RUNTIME_TIER_DESCRIPTIONS[RuntimeTier.T7_AUTONOMOUS],
     scoreRange: RUNTIME_TIER_SCORES[RuntimeTier.T7_AUTONOMOUS],
     requiresApproval: false,
@@ -454,21 +503,30 @@ export const RUNTIME_TIER_CONFIGS: Readonly<Record<RuntimeTier, RuntimeTierConfi
 /**
  * Checks if one certification tier is higher than another.
  */
-export function isCertificationTierHigher(tier: CertificationTier, other: CertificationTier): boolean {
+export function isCertificationTierHigher(
+  tier: CertificationTier,
+  other: CertificationTier,
+): boolean {
   return tier > other;
 }
 
 /**
  * Checks if a certification tier meets a minimum requirement.
  */
-export function meetsCertificationTier(tier: CertificationTier, minTier: CertificationTier): boolean {
+export function meetsCertificationTier(
+  tier: CertificationTier,
+  minTier: CertificationTier,
+): boolean {
   return tier >= minTier;
 }
 
 /**
  * Compares two certification tiers.
  */
-export function compareCertificationTiers(a: CertificationTier, b: CertificationTier): -1 | 0 | 1 {
+export function compareCertificationTiers(
+  a: CertificationTier,
+  b: CertificationTier,
+): -1 | 0 | 1 {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;
@@ -477,21 +535,30 @@ export function compareCertificationTiers(a: CertificationTier, b: Certification
 /**
  * Checks if one runtime tier is higher than another.
  */
-export function isRuntimeTierHigher(tier: RuntimeTier, other: RuntimeTier): boolean {
+export function isRuntimeTierHigher(
+  tier: RuntimeTier,
+  other: RuntimeTier,
+): boolean {
   return tier > other;
 }
 
 /**
  * Checks if a runtime tier meets a minimum requirement.
  */
-export function meetsRuntimeTier(tier: RuntimeTier, minTier: RuntimeTier): boolean {
+export function meetsRuntimeTier(
+  tier: RuntimeTier,
+  minTier: RuntimeTier,
+): boolean {
   return tier >= minTier;
 }
 
 /**
  * Compares two runtime tiers.
  */
-export function compareRuntimeTiers(a: RuntimeTier, b: RuntimeTier): -1 | 0 | 1 {
+export function compareRuntimeTiers(
+  a: RuntimeTier,
+  b: RuntimeTier,
+): -1 | 0 | 1 {
   if (a < b) return -1;
   if (a > b) return 1;
   return 0;
@@ -600,7 +667,9 @@ export function getRuntimeTierMaxScore(tier: RuntimeTier): number {
 /**
  * Gets the configuration for a certification tier.
  */
-export function getCertificationTierConfig(tier: CertificationTier): CertificationTierConfig {
+export function getCertificationTierConfig(
+  tier: CertificationTier,
+): CertificationTierConfig {
   return CERTIFICATION_TIER_CONFIGS[tier];
 }
 
@@ -628,7 +697,9 @@ export function getRuntimeTierName(tier: RuntimeTier): string {
 /**
  * Gets the description of a certification tier.
  */
-export function getCertificationTierDescription(tier: CertificationTier): string {
+export function getCertificationTierDescription(
+  tier: CertificationTier,
+): string {
   return CERTIFICATION_TIER_DESCRIPTIONS[tier];
 }
 
@@ -651,11 +722,13 @@ export function getRuntimeTierDescription(tier: RuntimeTier): string {
  * @throws Error if the string is not a valid tier
  */
 export function parseCertificationTier(tierStr: string): CertificationTier {
-  const normalized = tierStr.toUpperCase().replace(/^T/, '');
+  const normalized = tierStr.toUpperCase().replace(/^T/, "");
   const tier = parseInt(normalized, 10);
 
   if (isNaN(tier) || tier < 0 || tier > 7) {
-    throw new Error(`Invalid certification tier: ${tierStr}. Must be T0-T7 or 0-7.`);
+    throw new Error(
+      `Invalid certification tier: ${tierStr}. Must be T0-T7 or 0-7.`,
+    );
   }
 
   return tier as CertificationTier;
@@ -669,7 +742,7 @@ export function parseCertificationTier(tierStr: string): CertificationTier {
  * @throws Error if the string is not a valid tier
  */
 export function parseRuntimeTier(tierStr: string): RuntimeTier {
-  const normalized = tierStr.toUpperCase().replace(/^T/, '');
+  const normalized = tierStr.toUpperCase().replace(/^T/, "");
   const tier = parseInt(normalized, 10);
 
   if (isNaN(tier) || tier < 0 || tier > 7) {
@@ -686,9 +759,11 @@ export function parseRuntimeTier(tierStr: string): RuntimeTier {
 /**
  * Type guard to check if a value is a valid CertificationTier.
  */
-export function isCertificationTier(value: unknown): value is CertificationTier {
+export function isCertificationTier(
+  value: unknown,
+): value is CertificationTier {
   return (
-    typeof value === 'number' &&
+    typeof value === "number" &&
     Number.isInteger(value) &&
     value >= 0 &&
     value <= 7
@@ -700,7 +775,7 @@ export function isCertificationTier(value: unknown): value is CertificationTier 
  */
 export function isRuntimeTier(value: unknown): value is RuntimeTier {
   return (
-    typeof value === 'number' &&
+    typeof value === "number" &&
     Number.isInteger(value) &&
     value >= 0 &&
     value <= 7
@@ -749,18 +824,18 @@ export const runtimeTierConfigSchema = z.object({
  */
 export const tierStringSchema = z
   .string()
-  .regex(/^[Tt]?[0-7]$/, 'Tier must be T0-T7 or 0-7');
+  .regex(/^[Tt]?[0-7]$/, "Tier must be T0-T7 or 0-7");
 
 /**
  * Zod schema for parsing and transforming to CertificationTier.
  */
 export const certificationTierStringSchema = tierStringSchema.transform((str) =>
-  parseCertificationTier(str)
+  parseCertificationTier(str),
 );
 
 /**
  * Zod schema for parsing and transforming to RuntimeTier.
  */
 export const runtimeTierStringSchema = tierStringSchema.transform((str) =>
-  parseRuntimeTier(str)
+  parseRuntimeTier(str),
 );

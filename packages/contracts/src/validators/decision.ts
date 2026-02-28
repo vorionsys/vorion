@@ -2,9 +2,14 @@
  * Zod schemas for decision types
  */
 
-import { z } from 'zod';
-import { approvalTypeSchema, trustBandSchema } from './enums.js';
-import type { Decision, DecisionConstraints, RateLimit, ApprovalRequirement } from '../v2/decision.js';
+import { z } from "zod";
+import { approvalTypeSchema, trustBandSchema } from "./enums.js";
+import type {
+  Decision,
+  DecisionConstraints,
+  RateLimit,
+  ApprovalRequirement,
+} from "../v2/decision.js";
 
 /** Rate limit validator */
 export const rateLimitSchema = z.object({
@@ -68,5 +73,9 @@ export const authorizationRequestSchema = z.object({
 
 // Type inference from schemas
 export type ValidatedDecision = z.infer<typeof decisionSchema>;
-export type ValidatedDecisionConstraints = z.infer<typeof decisionConstraintsSchema>;
-export type ValidatedAuthorizationRequest = z.infer<typeof authorizationRequestSchema>;
+export type ValidatedDecisionConstraints = z.infer<
+  typeof decisionConstraintsSchema
+>;
+export type ValidatedAuthorizationRequest = z.infer<
+  typeof authorizationRequestSchema
+>;

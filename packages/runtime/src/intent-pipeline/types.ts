@@ -7,8 +7,13 @@
  * @packageDocumentation
  */
 
-import type { AgentCredentials, Action, TrustSignal, DecisionTier } from '../trust-facade/index.js';
-import type { ProofEvent } from '../proof-committer/index.js';
+import type {
+  AgentCredentials,
+  Action,
+  TrustSignal,
+  DecisionTier,
+} from "../trust-facade/index.js";
+import type { ProofEvent } from "../proof-committer/index.js";
 
 /**
  * An intent submitted by an agent
@@ -84,5 +89,5 @@ export const DEFAULT_INTENT_PIPELINE_CONFIG: IntentPipelineConfig = {
  */
 export type ExecutionHandler = (
   intent: Intent,
-  context: PipelineContext
+  context: PipelineContext,
 ) => Promise<{ success: boolean; result?: unknown; error?: string }>;

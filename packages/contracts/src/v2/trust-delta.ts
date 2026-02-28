@@ -2,31 +2,31 @@
  * Trust Delta types - represents changes to trust state
  */
 
-import type { TrustBand } from './enums.js';
-import type { TrustFactorScores, TrustEvidence } from './trust-profile.js';
+import type { TrustBand } from "./enums.js";
+import type { TrustFactorScores, TrustEvidence } from "./trust-profile.js";
 
 /**
  * Reason for trust change
  */
 export enum TrustDeltaReason {
   /** Positive evidence from successful execution */
-  POSITIVE_EVIDENCE = 'positive_evidence',
+  POSITIVE_EVIDENCE = "positive_evidence",
   /** Negative evidence from failed execution */
-  NEGATIVE_EVIDENCE = 'negative_evidence',
+  NEGATIVE_EVIDENCE = "negative_evidence",
   /** Manual adjustment by administrator */
-  MANUAL_ADJUSTMENT = 'manual_adjustment',
+  MANUAL_ADJUSTMENT = "manual_adjustment",
   /** Time-based decay */
-  TIME_DECAY = 'time_decay',
+  TIME_DECAY = "time_decay",
   /** Band promotion after stability period */
-  BAND_PROMOTION = 'band_promotion',
+  BAND_PROMOTION = "band_promotion",
   /** Band demotion due to incidents */
-  BAND_DEMOTION = 'band_demotion',
+  BAND_DEMOTION = "band_demotion",
   /** Recalculation with new evidence */
-  RECALCULATION = 'recalculation',
+  RECALCULATION = "recalculation",
   /** Observation tier change affecting ceiling */
-  OBSERVATION_TIER_CHANGE = 'observation_tier_change',
+  OBSERVATION_TIER_CHANGE = "observation_tier_change",
   /** Policy change affecting calculation */
-  POLICY_CHANGE = 'policy_change',
+  POLICY_CHANGE = "policy_change",
 }
 
 /**
@@ -137,6 +137,6 @@ export interface TrustTrend {
   bandChanges: number;
   promotions: number;
   demotions: number;
-  trend: 'improving' | 'stable' | 'declining';
+  trend: "improving" | "stable" | "declining";
   volatility: number; // Standard deviation
 }

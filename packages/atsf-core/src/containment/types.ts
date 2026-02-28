@@ -7,19 +7,19 @@
  * @packageDocumentation
  */
 
-import type { ID, Timestamp } from '../common/types.js';
+import type { ID, Timestamp } from "../common/types.js";
 
 /**
  * Containment levels from full autonomy to complete halt
  */
 export type ContainmentLevel =
-  | 'full_autonomy'    // Level 0: Normal operation, no restrictions
-  | 'monitored'        // Level 1: Enhanced logging and monitoring
-  | 'tool_restricted'  // Level 2: Certain tools/capabilities disabled
-  | 'human_in_loop'    // Level 3: Human approval required for actions
-  | 'simulation_only'  // Level 4: Actions simulated but not executed
-  | 'read_only'        // Level 5: Can observe but not act
-  | 'halted';          // Level 6: Complete shutdown
+  | "full_autonomy" // Level 0: Normal operation, no restrictions
+  | "monitored" // Level 1: Enhanced logging and monitoring
+  | "tool_restricted" // Level 2: Certain tools/capabilities disabled
+  | "human_in_loop" // Level 3: Human approval required for actions
+  | "simulation_only" // Level 4: Actions simulated but not executed
+  | "read_only" // Level 5: Can observe but not act
+  | "halted"; // Level 6: Complete shutdown
 
 /**
  * Numeric values for containment levels (for comparisons)
@@ -38,16 +38,16 @@ export const ContainmentLevelValue: Record<ContainmentLevel, number> = {
  * Reason for containment
  */
 export type ContainmentReason =
-  | 'trust_violation'       // Trust score dropped below threshold
-  | 'capability_abuse'      // Capability used inappropriately
-  | 'policy_violation'      // Policy rule triggered
-  | 'anomaly_detected'      // Unusual behavior pattern
-  | 'external_threat'       // External security threat detected
-  | 'resource_exhaustion'   // Resource limits exceeded
-  | 'error_cascade'         // Multiple errors in succession
-  | 'manual_override'       // Human-initiated containment
-  | 'scheduled'             // Scheduled maintenance/audit
-  | 'precautionary';        // Preventive containment
+  | "trust_violation" // Trust score dropped below threshold
+  | "capability_abuse" // Capability used inappropriately
+  | "policy_violation" // Policy rule triggered
+  | "anomaly_detected" // Unusual behavior pattern
+  | "external_threat" // External security threat detected
+  | "resource_exhaustion" // Resource limits exceeded
+  | "error_cascade" // Multiple errors in succession
+  | "manual_override" // Human-initiated containment
+  | "scheduled" // Scheduled maintenance/audit
+  | "precautionary"; // Preventive containment
 
 /**
  * Current containment state for an entity
@@ -86,7 +86,7 @@ export interface ContainmentRestriction {
   /** What is restricted */
   target: string;
   /** Severity of restriction */
-  severity: 'soft' | 'hard';
+  severity: "soft" | "hard";
   /** Can be bypassed with approval */
   bypassable: boolean;
   /** Message shown when restriction is hit */
@@ -97,22 +97,22 @@ export interface ContainmentRestriction {
  * Types of restrictions that can be applied
  */
 export type RestrictionType =
-  | 'capability_blocked'    // Specific capability disabled
-  | 'tool_disabled'         // Tool cannot be used
-  | 'rate_limited'          // Action rate restricted
-  | 'scope_limited'         // Scope of actions limited
-  | 'output_filtered'       // Outputs reviewed/filtered
-  | 'input_validated'       // Extra input validation
-  | 'approval_required'     // Human approval needed
-  | 'logging_enhanced'      // All actions logged
-  | 'network_restricted'    // Network access limited
-  | 'data_access_limited';  // Data access restricted
+  | "capability_blocked" // Specific capability disabled
+  | "tool_disabled" // Tool cannot be used
+  | "rate_limited" // Action rate restricted
+  | "scope_limited" // Scope of actions limited
+  | "output_filtered" // Outputs reviewed/filtered
+  | "input_validated" // Extra input validation
+  | "approval_required" // Human approval needed
+  | "logging_enhanced" // All actions logged
+  | "network_restricted" // Network access limited
+  | "data_access_limited"; // Data access restricted
 
 /**
  * Who/what initiated the containment
  */
 export interface ContainmentInitiator {
-  type: 'system' | 'human' | 'agent' | 'policy' | 'circuit_breaker';
+  type: "system" | "human" | "agent" | "policy" | "circuit_breaker";
   id: ID;
   name: string;
   authority: string;
@@ -135,7 +135,12 @@ export interface ContainmentHistoryEntry {
  */
 export interface DeescalationCondition {
   /** Condition type */
-  type: 'time_elapsed' | 'trust_restored' | 'behavior_normalized' | 'manual_approval' | 'incident_resolved';
+  type:
+    | "time_elapsed"
+    | "trust_restored"
+    | "behavior_normalized"
+    | "manual_approval"
+    | "incident_resolved";
   /** Description of condition */
   description: string;
   /** Target value for condition */
@@ -164,9 +169,9 @@ export interface EscalationStep {
  * Notification requirement for containment events
  */
 export interface NotificationRequirement {
-  channel: 'email' | 'slack' | 'pagerduty' | 'webhook' | 'log';
+  channel: "email" | "slack" | "pagerduty" | "webhook" | "log";
   recipients: string[];
-  severity: 'info' | 'warning' | 'critical';
+  severity: "info" | "warning" | "critical";
   template: string;
 }
 
@@ -214,7 +219,13 @@ export interface ContainmentResult {
  * Action taken during containment change
  */
 export interface ContainmentAction {
-  type: 'level_changed' | 'restriction_added' | 'restriction_removed' | 'notification_sent' | 'capability_revoked' | 'session_terminated';
+  type:
+    | "level_changed"
+    | "restriction_added"
+    | "restriction_removed"
+    | "notification_sent"
+    | "capability_revoked"
+    | "session_terminated";
   target: string;
   details: Record<string, unknown>;
   timestamp: Timestamp;
@@ -242,7 +253,13 @@ export interface ContainmentPolicy {
  * Trigger for containment policy
  */
 export interface PolicyTrigger {
-  type: 'trust_threshold' | 'error_rate' | 'anomaly_score' | 'capability_abuse' | 'time_based' | 'composite';
+  type:
+    | "trust_threshold"
+    | "error_rate"
+    | "anomaly_score"
+    | "capability_abuse"
+    | "time_based"
+    | "composite";
   condition: string;
   threshold: number;
   windowMs?: number;

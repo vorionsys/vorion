@@ -13,15 +13,15 @@
  * Defines hierarchical responsibility and operational scope
  */
 export enum AgentRole {
-  R_L0 = 'R-L0', // Minimal autonomy, strict supervision
-  R_L1 = 'R-L1', // Limited autonomy, high oversight
-  R_L2 = 'R-L2', // Moderate autonomy, medium oversight
-  R_L3 = 'R-L3', // Balanced autonomy, routine oversight
-  R_L4 = 'R-L4', // Higher autonomy, conditional oversight
-  R_L5 = 'R-L5', // Strong autonomy, rare oversight
-  R_L6 = 'R-L6', // Very strong autonomy, minimal oversight
-  R_L7 = 'R-L7', // Near-complete autonomy, exception handling
-  R_L8 = 'R-L8', // Full autonomy, no restrictions
+  R_L0 = "R-L0", // Minimal autonomy, strict supervision
+  R_L1 = "R-L1", // Limited autonomy, high oversight
+  R_L2 = "R-L2", // Moderate autonomy, medium oversight
+  R_L3 = "R-L3", // Balanced autonomy, routine oversight
+  R_L4 = "R-L4", // Higher autonomy, conditional oversight
+  R_L5 = "R-L5", // Strong autonomy, rare oversight
+  R_L6 = "R-L6", // Very strong autonomy, minimal oversight
+  R_L7 = "R-L7", // Near-complete autonomy, exception handling
+  R_L8 = "R-L8", // Full autonomy, no restrictions
 }
 
 /**
@@ -29,12 +29,12 @@ export enum AgentRole {
  * Defines operational authorization scope and resource access
  */
 export enum TrustTier {
-  T0 = 'T0', // Read-only, no state mutations
-  T1 = 'T1', // Read + limited mutations, single domain
-  T2 = 'T2', // Read + mutations, multiple domains
-  T3 = 'T3', // Read + mutations + external API access
-  T4 = 'T4', // Full resource access, regulatory compliance
-  T5 = 'T5', // Unrestricted access, all capabilities
+  T0 = "T0", // Read-only, no state mutations
+  T1 = "T1", // Read + limited mutations, single domain
+  T2 = "T2", // Read + mutations, multiple domains
+  T3 = "T3", // Read + mutations + external API access
+  T4 = "T4", // Full resource access, regulatory compliance
+  T5 = "T5", // Unrestricted access, all capabilities
 }
 
 /**
@@ -144,7 +144,7 @@ export function validateRoleAndTier(role: AgentRole, tier: TrustTier): boolean {
  * Check if value is a valid AgentRole
  */
 export function isValidRole(role: unknown): role is AgentRole {
-  if (typeof role !== 'string') return false;
+  if (typeof role !== "string") return false;
   return Object.values(AgentRole).includes(role as AgentRole);
 }
 
@@ -152,7 +152,7 @@ export function isValidRole(role: unknown): role is AgentRole {
  * Check if value is a valid TrustTier
  */
 export function isValidTier(tier: unknown): tier is TrustTier {
-  if (typeof tier !== 'string') return false;
+  if (typeof tier !== "string") return false;
   return Object.values(TrustTier).includes(tier as TrustTier);
 }
 
@@ -170,54 +170,55 @@ export function getMaxTierForRole(role: AgentRole): TrustTier {
   }
 
   // Debug logging for R-L0
-  const isDebug = role === 'R-L0';
+  const isDebug = role === "R-L0";
   if (isDebug) {
-    console.log('getMaxTierForRole debug for R-L0:');
-    console.log('  roleEntry:', roleEntry);
-    console.log('  TrustTier.T1:', TrustTier.T1);
-    console.log('  roleEntry[TrustTier.T1]:', roleEntry[TrustTier.T1]);
+    console.log("getMaxTierForRole debug for R-L0:");
+    console.log("  roleEntry:", roleEntry);
+    console.log("  TrustTier.T1:", TrustTier.T1);
+    console.log("  roleEntry[TrustTier.T1]:", roleEntry[TrustTier.T1]);
   }
 
   // Check tiers from highest to lowest
   const t5Val = roleEntry[TrustTier.T5];
   if (t5Val === true) {
-    if (isDebug) console.log('  returning T5');
+    if (isDebug) console.log("  returning T5");
     return TrustTier.T5;
   }
-  
+
   const t4Val = roleEntry[TrustTier.T4];
   if (t4Val === true) {
-    if (isDebug) console.log('  returning T4');
+    if (isDebug) console.log("  returning T4");
     return TrustTier.T4;
   }
-  
+
   const t3Val = roleEntry[TrustTier.T3];
   if (t3Val === true) {
-    if (isDebug) console.log('  returning T3');
+    if (isDebug) console.log("  returning T3");
     return TrustTier.T3;
   }
-  
+
   const t2Val = roleEntry[TrustTier.T2];
   if (t2Val === true) {
-    if (isDebug) console.log('  returning T2');
+    if (isDebug) console.log("  returning T2");
     return TrustTier.T2;
   }
-  
+
   const t1Val = roleEntry[TrustTier.T1];
-  if (isDebug) console.log('  t1Val:', t1Val, 't1Val === true:', t1Val === true);
+  if (isDebug)
+    console.log("  t1Val:", t1Val, "t1Val === true:", t1Val === true);
   if (t1Val === true) {
-    if (isDebug) console.log('  returning T1');
+    if (isDebug) console.log("  returning T1");
     return TrustTier.T1;
   }
-  
+
   const t0Val = roleEntry[TrustTier.T0];
   if (t0Val === true) {
-    if (isDebug) console.log('  returning T0');
+    if (isDebug) console.log("  returning T0");
     return TrustTier.T0;
   }
 
   // Fallback
-  if (isDebug) console.log('  returning fallback T0');
+  if (isDebug) console.log("  returning fallback T0");
   return TrustTier.T0;
 }
 
@@ -258,9 +259,9 @@ export class RoleGateValidationError extends Error {
   constructor(
     public role: AgentRole,
     public tier: TrustTier,
-    message?: string
+    message?: string,
   ) {
     super(message || `Invalid role+tier combination: ${role} + ${tier}`);
-    this.name = 'RoleGateValidationError';
+    this.name = "RoleGateValidationError";
   }
 }

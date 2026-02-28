@@ -36,10 +36,20 @@
  */
 
 // Client
-export { CARClient, CARError, createCARClient, createLocalCARClient } from './client.js'
+export {
+  CARClient,
+  CARError,
+  createCARClient,
+  createLocalCARClient,
+} from "./client.js";
 
 // Backwards-compatible aliases (deprecated)
-export { CARClient as ACIClient, CARError as ACIError, createCARClient as createACIClient, createLocalCARClient as createLocalACIClient } from './client.js'
+export {
+  CARClient as ACIClient,
+  CARError as ACIError,
+  createCARClient as createACIClient,
+  createLocalCARClient as createLocalACIClient,
+} from "./client.js";
 
 // Types - Enums
 export type {
@@ -53,7 +63,7 @@ export type {
   AlertSeverity,
   AlertStatus,
   ComplianceFramework,
-} from './types.js'
+} from "./types.js";
 
 // Types - Constants
 export {
@@ -62,7 +72,7 @@ export {
   AGENT_ROLE_LABELS,
   DEFAULT_PROVENANCE_MODIFIERS,
   REGULATORY_CEILINGS,
-} from './types.js'
+} from "./types.js";
 
 // Types - Interfaces
 export type {
@@ -92,7 +102,7 @@ export type {
   TrustTierData,
   RecentEvent,
   DashboardData,
-} from './types.js'
+} from "./types.js";
 
 // Types - Zod Schemas (for runtime validation)
 export {
@@ -107,7 +117,7 @@ export {
   RoleGateRequestSchema,
   CeilingCheckRequestSchema,
   ProvenanceCreateRequestSchema,
-} from './types.js'
+} from "./types.js";
 
 // Types - Utility Functions
-export { getTierFromScore, isRoleAllowedForTier } from './types.js'
+export { getTierFromScore, isRoleAllowedForTier } from "./types.js";

@@ -10,8 +10,13 @@
  * @packageDocumentation
  */
 
-import { BaseSecurityLayer, createLayerConfig } from '../index.js';
-import type { LayerInput, LayerExecutionResult, LayerFinding, LayerTiming } from '../types.js';
+import { BaseSecurityLayer, createLayerConfig } from "../index.js";
+import type {
+  LayerInput,
+  LayerExecutionResult,
+  LayerFinding,
+  LayerTiming,
+} from "../types.js";
 
 /** Default limits — can be overridden via constructor options */
 export interface L1SizeLimits {
@@ -27,7 +32,7 @@ export interface L1SizeLimits {
 
 const DEFAULT_LIMITS: L1SizeLimits = {
   maxPayloadBytes: 1_048_576, // 1 MB
-  maxStringLength: 102_400,   // 100 KB
+  maxStringLength: 102_400, // 100 KB
   maxArrayLength: 10_000,
   maxTotalFields: 1_000,
 };
@@ -42,17 +47,18 @@ export class L1InputSizeLimiter extends BaseSecurityLayer {
 
   constructor(limits?: Partial<L1SizeLimits>) {
     super(
-      createLayerConfig(1, 'Input Size Limiter', {
-        description: 'Enforces payload size, string length, array length, and total field count limits',
-        tier: 'input_validation',
-        primaryThreat: 'denial_of_service',
-        secondaryThreats: ['resource_abuse'],
-        failMode: 'block',
+      createLayerConfig(1, "Input Size Limiter", {
+        description:
+          "Enforces payload size, string length, array length, and total field count limits",
+        tier: "input_validation",
+        primaryThreat: "denial_of_service",
+        secondaryThreats: ["resource_abuse"],
+        failMode: "block",
         required: true,
         timeoutMs: 200,
         parallelizable: true,
         dependencies: [],
-      })
+      }),
     );
     this.limits = { ...DEFAULT_LIMITS, ...limits };
   }
@@ -71,28 +77,33 @@ export class L1InputSizeLimiter extends BaseSecurityLayer {
     } catch {
       const timing = this.buildTiming(startedAt, t0);
       return this.createFailureResult(
-        'deny',
+        "deny",
         0.95,
-        [{
-          type: 'threat_detected',
-          severity: 'high',
-          code: 'L1_UNSERIALIZABLE',
-          description: 'Payload cannot be serialized to JSON — possible circular reference or exotic object',
-          evidence: ['JSON.stringify failed'],
-          remediation: 'Ensure payload is a plain, serializable JSON object',
-        }],
-        timing
+        [
+          {
+            type: "threat_detected",
+            severity: "high",
+            code: "L1_UNSERIALIZABLE",
+            description:
+              "Payload cannot be serialized to JSON — possible circular reference or exotic object",
+            evidence: ["JSON.stringify failed"],
+            remediation: "Ensure payload is a plain, serializable JSON object",
+          },
+        ],
+        timing,
       );
     }
 
     const payloadBytes = new TextEncoder().encode(serialized).length;
     if (payloadBytes > this.limits.maxPayloadBytes) {
       findings.push({
-        type: 'threat_detected',
-        severity: 'high',
-        code: 'L1_PAYLOAD_TOO_LARGE',
+        type: "threat_detected",
+        severity: "high",
+        code: "L1_PAYLOAD_TOO_LARGE",
         description: `Payload size ${payloadBytes} bytes exceeds limit of ${this.limits.maxPayloadBytes} bytes`,
-        evidence: [`size=${payloadBytes}, limit=${this.limits.maxPayloadBytes}`],
+        evidence: [
+          `size=${payloadBytes}, limit=${this.limits.maxPayloadBytes}`,
+        ],
         remediation: `Reduce payload size to under ${this.limits.maxPayloadBytes} bytes`,
       });
     }
@@ -104,14 +115,16 @@ export class L1InputSizeLimiter extends BaseSecurityLayer {
     const walk = (obj: unknown, path: string): void => {
       if (obj === null || obj === undefined) return;
 
-      if (typeof obj === 'string') {
+      if (typeof obj === "string") {
         if (obj.length > this.limits.maxStringLength) {
           violations.push({
-            type: 'threat_detected',
-            severity: 'high',
-            code: 'L1_STRING_TOO_LONG',
+            type: "threat_detected",
+            severity: "high",
+            code: "L1_STRING_TOO_LONG",
             description: `String at '${path}' is ${obj.length} chars, exceeding limit of ${this.limits.maxStringLength}`,
-            evidence: [`path=${path}, length=${obj.length}, limit=${this.limits.maxStringLength}`],
+            evidence: [
+              `path=${path}, length=${obj.length}, limit=${this.limits.maxStringLength}`,
+            ],
             remediation: `Shorten the string at '${path}'`,
           });
         }
@@ -121,11 +134,13 @@ export class L1InputSizeLimiter extends BaseSecurityLayer {
       if (Array.isArray(obj)) {
         if (obj.length > this.limits.maxArrayLength) {
           violations.push({
-            type: 'threat_detected',
-            severity: 'high',
-            code: 'L1_ARRAY_TOO_LONG',
+            type: "threat_detected",
+            severity: "high",
+            code: "L1_ARRAY_TOO_LONG",
             description: `Array at '${path}' has ${obj.length} elements, exceeding limit of ${this.limits.maxArrayLength}`,
-            evidence: [`path=${path}, length=${obj.length}, limit=${this.limits.maxArrayLength}`],
+            evidence: [
+              `path=${path}, length=${obj.length}, limit=${this.limits.maxArrayLength}`,
+            ],
             remediation: `Reduce array size at '${path}'`,
           });
         }
@@ -137,41 +152,46 @@ export class L1InputSizeLimiter extends BaseSecurityLayer {
         return;
       }
 
-      if (typeof obj === 'object') {
+      if (typeof obj === "object") {
         const keys = Object.keys(obj as Record<string, unknown>);
         totalFields += keys.length;
 
         if (totalFields > this.limits.maxTotalFields) {
           violations.push({
-            type: 'threat_detected',
-            severity: 'medium',
-            code: 'L1_TOO_MANY_FIELDS',
+            type: "threat_detected",
+            severity: "medium",
+            code: "L1_TOO_MANY_FIELDS",
             description: `Total field count ${totalFields} exceeds limit of ${this.limits.maxTotalFields}`,
-            evidence: [`totalFields=${totalFields}, limit=${this.limits.maxTotalFields}`],
-            remediation: 'Reduce the number of fields in the payload',
+            evidence: [
+              `totalFields=${totalFields}, limit=${this.limits.maxTotalFields}`,
+            ],
+            remediation: "Reduce the number of fields in the payload",
           });
           return; // stop walking
         }
 
         for (const key of keys) {
-          walk((obj as Record<string, unknown>)[key], path ? `${path}.${key}` : key);
+          walk(
+            (obj as Record<string, unknown>)[key],
+            path ? `${path}.${key}` : key,
+          );
         }
       }
     };
 
-    walk(payload, '');
+    walk(payload, "");
     findings.push(...violations);
 
     const timing = this.buildTiming(startedAt, t0);
-    const hasCritical = findings.some((f) => f.severity === 'critical');
-    const hasHigh = findings.some((f) => f.severity === 'high');
+    const hasCritical = findings.some((f) => f.severity === "critical");
+    const hasHigh = findings.some((f) => f.severity === "high");
     const passed = !hasCritical && !hasHigh;
 
     if (passed) {
-      return this.createSuccessResult('allow', 0.95, findings, [], timing);
+      return this.createSuccessResult("allow", 0.95, findings, [], timing);
     }
 
-    return this.createFailureResult('deny', 0.9, findings, timing);
+    return this.createFailureResult("deny", 0.9, findings, timing);
   }
 
   private buildTiming(startedAt: string, t0: number): LayerTiming {

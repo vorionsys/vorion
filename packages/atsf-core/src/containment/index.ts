@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { ID } from '../common/types.js';
+import { createLogger } from "../common/logger.js";
+import type { ID } from "../common/types.js";
 import {
   ContainmentLevelValue,
   type ContainmentLevel,
@@ -27,31 +27,31 @@ import {
   type ContainmentQuery,
   type ContainmentAuditReport,
   type RestrictionType,
-} from './types.js';
+} from "./types.js";
 
-export * from './types.js';
+export * from "./types.js";
 
-const logger = createLogger({ component: 'containment' });
+const logger = createLogger({ component: "containment" });
 
 /**
  * Default containment configuration
  */
 const DEFAULT_CONFIG: ContainmentConfig = {
-  defaultLevel: 'monitored',
+  defaultLevel: "monitored",
   allowAutoDeescalation: true,
   minLevelChangeIntervalMs: 60000, // 1 minute
   maxHistoryEntries: 100,
   defaultDeescalationConditions: [
     {
-      type: 'time_elapsed',
-      description: 'Wait period completed',
+      type: "time_elapsed",
+      description: "Wait period completed",
       target: 3600000, // 1 hour
       progress: 0,
       met: false,
     },
     {
-      type: 'behavior_normalized',
-      description: 'No violations detected',
+      type: "behavior_normalized",
+      description: "No violations detected",
       target: 10, // 10 successful actions
       progress: 0,
       met: false,
@@ -63,81 +63,84 @@ const DEFAULT_CONFIG: ContainmentConfig = {
 /**
  * Default restrictions for each containment level
  */
-const DEFAULT_LEVEL_RESTRICTIONS: Record<ContainmentLevel, ContainmentRestriction[]> = {
+const DEFAULT_LEVEL_RESTRICTIONS: Record<
+  ContainmentLevel,
+  ContainmentRestriction[]
+> = {
   full_autonomy: [],
   monitored: [
     {
-      type: 'logging_enhanced',
-      target: '*',
-      severity: 'soft',
+      type: "logging_enhanced",
+      target: "*",
+      severity: "soft",
       bypassable: false,
-      message: 'All actions are being logged for monitoring',
+      message: "All actions are being logged for monitoring",
     },
   ],
   tool_restricted: [
     {
-      type: 'capability_blocked',
-      target: 'high_risk_capabilities',
-      severity: 'hard',
+      type: "capability_blocked",
+      target: "high_risk_capabilities",
+      severity: "hard",
       bypassable: true,
-      message: 'High-risk capabilities are restricted',
+      message: "High-risk capabilities are restricted",
     },
     {
-      type: 'logging_enhanced',
-      target: '*',
-      severity: 'soft',
+      type: "logging_enhanced",
+      target: "*",
+      severity: "soft",
       bypassable: false,
-      message: 'Enhanced logging active',
+      message: "Enhanced logging active",
     },
   ],
   human_in_loop: [
     {
-      type: 'approval_required',
-      target: '*',
-      severity: 'hard',
+      type: "approval_required",
+      target: "*",
+      severity: "hard",
       bypassable: false,
-      message: 'Human approval required for all actions',
+      message: "Human approval required for all actions",
     },
   ],
   simulation_only: [
     {
-      type: 'capability_blocked',
-      target: '*',
-      severity: 'hard',
+      type: "capability_blocked",
+      target: "*",
+      severity: "hard",
       bypassable: false,
-      message: 'Actions are simulated only - no real execution',
+      message: "Actions are simulated only - no real execution",
     },
   ],
   read_only: [
     {
-      type: 'capability_blocked',
-      target: 'write_capabilities',
-      severity: 'hard',
+      type: "capability_blocked",
+      target: "write_capabilities",
+      severity: "hard",
       bypassable: false,
-      message: 'Write operations are blocked',
+      message: "Write operations are blocked",
     },
     {
-      type: 'capability_blocked',
-      target: 'execute_capabilities',
-      severity: 'hard',
+      type: "capability_blocked",
+      target: "execute_capabilities",
+      severity: "hard",
       bypassable: false,
-      message: 'Execute operations are blocked',
+      message: "Execute operations are blocked",
     },
   ],
   halted: [
     {
-      type: 'capability_blocked',
-      target: '*',
-      severity: 'hard',
+      type: "capability_blocked",
+      target: "*",
+      severity: "hard",
       bypassable: false,
-      message: 'All operations are blocked - entity is halted',
+      message: "All operations are blocked - entity is halted",
     },
     {
-      type: 'session_terminated' as RestrictionType,
-      target: '*',
-      severity: 'hard',
+      type: "session_terminated" as RestrictionType,
+      target: "*",
+      severity: "hard",
       bypassable: false,
-      message: 'All sessions terminated',
+      message: "All sessions terminated",
     },
   ],
 };
@@ -202,7 +205,7 @@ export class ContainmentService {
         reason: request.reason,
         initiator: request.initiator.id,
       },
-      'Processing containment request'
+      "Processing containment request",
     );
 
     // Get current state
@@ -212,22 +215,26 @@ export class ContainmentService {
     // Check minimum interval between changes
     if (currentState && !request.force) {
       const lastChangeTime = new Date(
-        currentState.history[currentState.history.length - 1]?.timestamp ?? currentState.appliedAt
+        currentState.history[currentState.history.length - 1]?.timestamp ??
+          currentState.appliedAt,
       ).getTime();
       const elapsed = Date.now() - lastChangeTime;
 
       if (elapsed < this.config.minLevelChangeIntervalMs) {
         warnings.push(
-          `Minimum interval not met (${elapsed}ms < ${this.config.minLevelChangeIntervalMs}ms)`
+          `Minimum interval not met (${elapsed}ms < ${this.config.minLevelChangeIntervalMs}ms)`,
         );
-        if (ContainmentLevelValue[request.level] < ContainmentLevelValue[previousLevel]) {
+        if (
+          ContainmentLevelValue[request.level] <
+          ContainmentLevelValue[previousLevel]
+        ) {
           // Don't allow rapid de-escalation
           return {
             success: false,
             previousState: currentState!,
             newState: currentState!,
             actionsTaken: [],
-            errors: ['Cannot de-escalate: minimum interval not met'],
+            errors: ["Cannot de-escalate: minimum interval not met"],
             warnings,
           };
         }
@@ -271,7 +278,10 @@ export class ContainmentService {
       expiresAt,
       initiator: request.initiator,
       history: currentState
-        ? [...currentState.history.slice(-this.config.maxHistoryEntries + 1), historyEntry]
+        ? [
+            ...currentState.history.slice(-this.config.maxHistoryEntries + 1),
+            historyEntry,
+          ]
         : [historyEntry],
       deescalationConditions,
       escalationPath,
@@ -282,7 +292,7 @@ export class ContainmentService {
 
     // Record action
     actionsTaken.push({
-      type: 'level_changed',
+      type: "level_changed",
       target: request.entityId,
       details: {
         previousLevel,
@@ -295,7 +305,7 @@ export class ContainmentService {
     // Apply restrictions
     for (const restriction of allRestrictions) {
       actionsTaken.push({
-        type: 'restriction_added',
+        type: "restriction_added",
         target: restriction.target,
         details: { restriction },
         timestamp: now,
@@ -303,11 +313,11 @@ export class ContainmentService {
     }
 
     // If halted, terminate sessions
-    if (request.level === 'halted') {
+    if (request.level === "halted") {
       actionsTaken.push({
-        type: 'session_terminated',
+        type: "session_terminated",
         target: request.entityId,
-        details: { reason: 'Entity halted' },
+        details: { reason: "Entity halted" },
         timestamp: now,
       });
     }
@@ -323,7 +333,7 @@ export class ContainmentService {
         restrictionCount: allRestrictions.length,
         expiresAt,
       },
-      'Containment applied'
+      "Containment applied",
     );
 
     return {
@@ -343,7 +353,7 @@ export class ContainmentService {
     entityId: ID,
     reason: ContainmentReason,
     explanation: string,
-    initiator: ContainmentInitiator
+    initiator: ContainmentInitiator,
   ): Promise<ContainmentResult> {
     const currentLevel = this.getLevel(entityId);
     const levelValue = ContainmentLevelValue[currentLevel];
@@ -355,7 +365,7 @@ export class ContainmentService {
         previousState: currentState,
         newState: currentState,
         actionsTaken: [],
-        errors: ['Already at maximum containment level'],
+        errors: ["Already at maximum containment level"],
         warnings: [],
       };
     }
@@ -364,7 +374,7 @@ export class ContainmentService {
     const levels = Object.entries(ContainmentLevelValue)
       .sort((a, b) => a[1] - b[1])
       .map((e) => e[0] as ContainmentLevel);
-    const nextLevel = levels[levelValue + 1] ?? 'halted';
+    const nextLevel = levels[levelValue + 1] ?? "halted";
 
     return this.contain({
       entityId,
@@ -382,7 +392,7 @@ export class ContainmentService {
     entityId: ID,
     reason: ContainmentReason,
     explanation: string,
-    initiator: ContainmentInitiator
+    initiator: ContainmentInitiator,
   ): Promise<ContainmentResult> {
     const currentLevel = this.getLevel(entityId);
     const levelValue = ContainmentLevelValue[currentLevel];
@@ -394,7 +404,7 @@ export class ContainmentService {
         previousState: currentState,
         newState: currentState,
         actionsTaken: [],
-        errors: ['Already at minimum containment level'],
+        errors: ["Already at minimum containment level"],
         warnings: [],
       };
     }
@@ -402,14 +412,16 @@ export class ContainmentService {
     // Check de-escalation conditions
     const state = this.states.get(entityId);
     if (state && !this.config.allowAutoDeescalation) {
-      const unmetConditions = state.deescalationConditions.filter((c) => !c.met);
-      if (unmetConditions.length > 0 && initiator.type === 'system') {
+      const unmetConditions = state.deescalationConditions.filter(
+        (c) => !c.met,
+      );
+      if (unmetConditions.length > 0 && initiator.type === "system") {
         return {
           success: false,
           previousState: state,
           newState: state,
           actionsTaken: [],
-          errors: ['De-escalation conditions not met'],
+          errors: ["De-escalation conditions not met"],
           warnings: unmetConditions.map((c) => c.description),
         };
       }
@@ -419,7 +431,7 @@ export class ContainmentService {
     const levels = Object.entries(ContainmentLevelValue)
       .sort((a, b) => a[1] - b[1])
       .map((e) => e[0] as ContainmentLevel);
-    const previousLevel = levels[levelValue - 1] ?? 'full_autonomy';
+    const previousLevel = levels[levelValue - 1] ?? "full_autonomy";
 
     return this.contain({
       entityId,
@@ -436,12 +448,12 @@ export class ContainmentService {
   async release(
     entityId: ID,
     explanation: string,
-    initiator: ContainmentInitiator
+    initiator: ContainmentInitiator,
   ): Promise<ContainmentResult> {
     return this.contain({
       entityId,
-      level: 'full_autonomy',
-      reason: 'manual_override',
+      level: "full_autonomy",
+      reason: "manual_override",
       explanation,
       initiator,
     });
@@ -465,7 +477,7 @@ export class ContainmentService {
     // Update condition progress
     for (const condition of state.deescalationConditions) {
       switch (condition.type) {
-        case 'time_elapsed': {
+        case "time_elapsed": {
           const targetMs = condition.target as number;
           const elapsed = now - appliedAt;
           condition.progress = Math.min(1, elapsed / targetMs);
@@ -490,7 +502,7 @@ export class ContainmentService {
   checkAction(
     entityId: ID,
     action: string,
-    capability?: string
+    capability?: string,
   ): {
     allowed: boolean;
     restrictions: ContainmentRestriction[];
@@ -498,17 +510,21 @@ export class ContainmentService {
   } {
     const state = this.states.get(entityId);
     if (!state) {
-      return { allowed: true, restrictions: [], message: 'No containment in effect' };
+      return {
+        allowed: true,
+        restrictions: [],
+        message: "No containment in effect",
+      };
     }
 
     const level = state.level;
 
     // Halted blocks everything
-    if (level === 'halted') {
+    if (level === "halted") {
       return {
         allowed: false,
         restrictions: state.restrictions,
-        message: 'Entity is halted - all actions blocked',
+        message: "Entity is halted - all actions blocked",
       };
     }
 
@@ -517,11 +533,11 @@ export class ContainmentService {
 
     for (const restriction of state.restrictions) {
       const matches =
-        restriction.target === '*' ||
+        restriction.target === "*" ||
         restriction.target === action ||
         restriction.target === capability;
 
-      if (matches && restriction.severity === 'hard') {
+      if (matches && restriction.severity === "hard") {
         blockingRestrictions.push(restriction);
       }
     }
@@ -530,32 +546,34 @@ export class ContainmentService {
       return {
         allowed: false,
         restrictions: blockingRestrictions,
-        message: blockingRestrictions.map((r) => r.message).join('; '),
+        message: blockingRestrictions.map((r) => r.message).join("; "),
       };
     }
 
     // Special handling for human-in-loop
-    if (level === 'human_in_loop') {
+    if (level === "human_in_loop") {
       return {
         allowed: false,
-        restrictions: state.restrictions.filter((r) => r.type === 'approval_required'),
-        message: 'Human approval required',
+        restrictions: state.restrictions.filter(
+          (r) => r.type === "approval_required",
+        ),
+        message: "Human approval required",
       };
     }
 
     // Simulation-only mode
-    if (level === 'simulation_only') {
+    if (level === "simulation_only") {
       return {
         allowed: true, // Allow but flag as simulation
         restrictions: state.restrictions,
-        message: 'Action will be simulated only',
+        message: "Action will be simulated only",
       };
     }
 
     return {
       allowed: true,
-      restrictions: state.restrictions.filter((r) => r.severity === 'soft'),
-      message: 'Action allowed',
+      restrictions: state.restrictions.filter((r) => r.severity === "soft"),
+      message: "Action allowed",
     };
   }
 
@@ -564,7 +582,7 @@ export class ContainmentService {
    */
   async evaluatePolicies(
     _entityId: ID,
-    context: Record<string, unknown>
+    context: Record<string, unknown>,
   ): Promise<{
     triggeredPolicies: ContainmentPolicy[];
     recommendedLevel: ContainmentLevel;
@@ -582,7 +600,10 @@ export class ContainmentService {
         triggeredPolicies.push(policy);
 
         // Take highest containment level
-        if (ContainmentLevelValue[policy.action.level] > ContainmentLevelValue[highestLevel]) {
+        if (
+          ContainmentLevelValue[policy.action.level] >
+          ContainmentLevelValue[highestLevel]
+        ) {
           highestLevel = policy.action.level;
         }
 
@@ -604,22 +625,22 @@ export class ContainmentService {
    * Evaluate a policy trigger
    */
   private evaluatePolicyTrigger(
-    trigger: ContainmentPolicy['trigger'],
-    context: Record<string, unknown>
+    trigger: ContainmentPolicy["trigger"],
+    context: Record<string, unknown>,
   ): boolean {
     switch (trigger.type) {
-      case 'trust_threshold': {
-        const trustScore = context['trustScore'] as number | undefined;
+      case "trust_threshold": {
+        const trustScore = context["trustScore"] as number | undefined;
         return trustScore !== undefined && trustScore < trigger.threshold;
       }
 
-      case 'error_rate': {
-        const errorRate = context['errorRate'] as number | undefined;
+      case "error_rate": {
+        const errorRate = context["errorRate"] as number | undefined;
         return errorRate !== undefined && errorRate > trigger.threshold;
       }
 
-      case 'anomaly_score': {
-        const anomalyScore = context['anomalyScore'] as number | undefined;
+      case "anomaly_score": {
+        const anomalyScore = context["anomalyScore"] as number | undefined;
         return anomalyScore !== undefined && anomalyScore > trigger.threshold;
       }
 
@@ -631,25 +652,27 @@ export class ContainmentService {
   /**
    * Build de-escalation conditions for a containment request
    */
-  private buildDeescalationConditions(request: ContainmentRequest): DeescalationCondition[] {
+  private buildDeescalationConditions(
+    request: ContainmentRequest,
+  ): DeescalationCondition[] {
     const conditions = [...this.config.defaultDeescalationConditions];
 
     // Add level-specific conditions
     switch (request.level) {
-      case 'halted':
+      case "halted":
         conditions.push({
-          type: 'manual_approval',
-          description: 'Manual approval from administrator required',
-          target: 'admin_approval',
+          type: "manual_approval",
+          description: "Manual approval from administrator required",
+          target: "admin_approval",
           progress: 0,
           met: false,
         });
         break;
 
-      case 'human_in_loop':
+      case "human_in_loop":
         conditions.push({
-          type: 'behavior_normalized',
-          description: '5 consecutive approved actions',
+          type: "behavior_normalized",
+          description: "5 consecutive approved actions",
           target: 5,
           progress: 0,
           met: false,
@@ -663,7 +686,9 @@ export class ContainmentService {
   /**
    * Build escalation path from current level
    */
-  private buildEscalationPath(currentLevel: ContainmentLevel): EscalationStep[] {
+  private buildEscalationPath(
+    currentLevel: ContainmentLevel,
+  ): EscalationStep[] {
     const path: EscalationStep[] = [];
     const levels = Object.entries(ContainmentLevelValue)
       .sort((a, b) => a[1] - b[1])
@@ -680,9 +705,9 @@ export class ContainmentService {
         additionalRestrictions: DEFAULT_LEVEL_RESTRICTIONS[level] ?? [],
         notifications: [
           {
-            channel: level === 'halted' ? 'pagerduty' : 'slack',
-            recipients: ['security-team'],
-            severity: level === 'halted' ? 'critical' : 'warning',
+            channel: level === "halted" ? "pagerduty" : "slack",
+            recipients: ["security-team"],
+            severity: level === "halted" ? "critical" : "warning",
             template: `containment_escalation_${level}`,
           },
         ],
@@ -700,15 +725,15 @@ export class ContainmentService {
     return {
       entityId,
       level: this.config.defaultLevel,
-      reason: 'precautionary',
-      explanation: 'Default containment state',
+      reason: "precautionary",
+      explanation: "Default containment state",
       restrictions: DEFAULT_LEVEL_RESTRICTIONS[this.config.defaultLevel] ?? [],
       appliedAt: now,
       initiator: {
-        type: 'system',
-        id: 'containment-service',
-        name: 'Containment Service',
-        authority: 'system',
+        type: "system",
+        id: "containment-service",
+        name: "Containment Service",
+        authority: "system",
       },
       history: [],
       deescalationConditions: [],
@@ -759,9 +784,12 @@ export class ContainmentService {
   /**
    * Generate audit report
    */
-  async generateAuditReport(startDate: string, endDate: string): Promise<ContainmentAuditReport> {
+  async generateAuditReport(
+    startDate: string,
+    endDate: string,
+  ): Promise<ContainmentAuditReport> {
     const events = this.eventLog.filter(
-      (e) => e.timestamp >= startDate && e.timestamp <= endDate
+      (e) => e.timestamp >= startDate && e.timestamp <= endDate,
     );
 
     const levelCounts: Record<ContainmentLevel, number> = {
@@ -781,7 +809,7 @@ export class ContainmentService {
     let deescalationCount = 0;
 
     for (const event of events) {
-      if (event.type === 'level_changed') {
+      if (event.type === "level_changed") {
         const details = event.details as {
           previousLevel: ContainmentLevel;
           newLevel: ContainmentLevel;
@@ -824,7 +852,8 @@ export class ContainmentService {
       totalEvents: events.length,
       byLevel: levelCounts,
       byReason: reasonCounts as Record<ContainmentReason, number>,
-      averageContainmentDurationMs: this.states.size > 0 ? totalDuration / this.states.size : 0,
+      averageContainmentDurationMs:
+        this.states.size > 0 ? totalDuration / this.states.size : 0,
       frequentEntities,
       escalationRatio: totalRatio > 0 ? escalationCount / totalRatio : 0,
     };
@@ -863,28 +892,36 @@ export class ContainmentService {
 /**
  * Create a new containment service
  */
-export function createContainmentService(config?: Partial<ContainmentConfig>): ContainmentService {
+export function createContainmentService(
+  config?: Partial<ContainmentConfig>,
+): ContainmentService {
   return new ContainmentService(config);
 }
 
 /**
  * Helper to create a system initiator
  */
-export function createSystemInitiator(componentName: string): ContainmentInitiator {
+export function createSystemInitiator(
+  componentName: string,
+): ContainmentInitiator {
   return {
-    type: 'system',
+    type: "system",
     id: componentName,
     name: componentName,
-    authority: 'automated',
+    authority: "automated",
   };
 }
 
 /**
  * Helper to create a human initiator
  */
-export function createHumanInitiator(userId: ID, userName: string, role: string): ContainmentInitiator {
+export function createHumanInitiator(
+  userId: ID,
+  userName: string,
+  role: string,
+): ContainmentInitiator {
   return {
-    type: 'human',
+    type: "human",
     id: userId,
     name: userName,
     authority: role,

@@ -10,14 +10,14 @@
  * @packageDocumentation
  */
 
-import { BaseSecurityLayer, createLayerConfig } from '../index.js';
+import { BaseSecurityLayer, createLayerConfig } from "../index.js";
 import type {
   LayerInput,
   LayerExecutionResult,
   LayerFinding,
   LayerTiming,
   LayerHealthStatus,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * Rate limit configuration
@@ -60,17 +60,18 @@ export class L5RateLimiter extends BaseSecurityLayer {
 
   constructor(config?: Partial<L5RateLimitConfig>) {
     super(
-      createLayerConfig(5, 'Rate Limiter', {
-        description: 'Sliding window rate limiter with burst detection per entity',
-        tier: 'input_validation',
-        primaryThreat: 'denial_of_service',
-        secondaryThreats: ['resource_abuse'],
-        failMode: 'block',
+      createLayerConfig(5, "Rate Limiter", {
+        description:
+          "Sliding window rate limiter with burst detection per entity",
+        tier: "input_validation",
+        primaryThreat: "denial_of_service",
+        secondaryThreats: ["resource_abuse"],
+        failMode: "block",
         required: true,
         timeoutMs: 100,
         parallelizable: false, // Stateful — must run serially
         dependencies: [],
-      })
+      }),
     );
     this.rateLimitConfig = { ...DEFAULT_CONFIG, ...config };
   }
@@ -108,9 +109,9 @@ export class L5RateLimiter extends BaseSecurityLayer {
     // 1. Check rate limit
     if (requestsInWindow > this.rateLimitConfig.maxRequests) {
       findings.push({
-        type: 'threat_detected',
-        severity: 'high',
-        code: 'L5_RATE_LIMIT_EXCEEDED',
+        type: "threat_detected",
+        severity: "high",
+        code: "L5_RATE_LIMIT_EXCEEDED",
         description: `Entity '${entityId}' exceeded rate limit: ${requestsInWindow}/${this.rateLimitConfig.maxRequests} requests in ${this.rateLimitConfig.windowMs}ms window`,
         evidence: [
           `requests=${requestsInWindow}`,
@@ -123,12 +124,14 @@ export class L5RateLimiter extends BaseSecurityLayer {
 
     // 2. Check burst (requests in last 1 second)
     const burstCutoff = now - 1000;
-    const burstCount = window.timestamps.filter((ts) => ts > burstCutoff).length;
+    const burstCount = window.timestamps.filter(
+      (ts) => ts > burstCutoff,
+    ).length;
     if (burstCount > this.rateLimitConfig.burstThreshold) {
       findings.push({
-        type: 'threat_detected',
-        severity: 'high',
-        code: 'L5_BURST_DETECTED',
+        type: "threat_detected",
+        severity: "high",
+        code: "L5_BURST_DETECTED",
         description: `Entity '${entityId}' burst detected: ${burstCount} requests in 1 second (threshold: ${this.rateLimitConfig.burstThreshold})`,
         evidence: [
           `burst=${burstCount}`,
@@ -143,28 +146,30 @@ export class L5RateLimiter extends BaseSecurityLayer {
       const acceleration = this.detectAcceleration(window.timestamps);
       if (acceleration > 2.0) {
         findings.push({
-          type: 'warning',
-          severity: 'medium',
-          code: 'L5_ACCELERATION_DETECTED',
+          type: "warning",
+          severity: "medium",
+          code: "L5_ACCELERATION_DETECTED",
           description: `Entity '${entityId}' request rate accelerating (${acceleration.toFixed(1)}x over window)`,
           evidence: [
             `acceleration=${acceleration.toFixed(1)}x`,
             `totalRequests=${window.totalRequests}`,
           ],
-          remediation: 'Maintain a steady request rate',
+          remediation: "Maintain a steady request rate",
         });
       }
     }
 
     const timing = this.buildTiming(startedAt, t0);
-    const hasHigh = findings.some((f) => f.severity === 'high' || f.severity === 'critical');
+    const hasHigh = findings.some(
+      (f) => f.severity === "high" || f.severity === "critical",
+    );
     const passed = !hasHigh;
 
     if (passed) {
-      return this.createSuccessResult('allow', 0.95, findings, [], timing);
+      return this.createSuccessResult("allow", 0.95, findings, [], timing);
     }
 
-    return this.createFailureResult('limit', 0.9, findings, timing);
+    return this.createFailureResult("limit", 0.9, findings, timing);
   }
 
   /**
@@ -215,7 +220,10 @@ export class L5RateLimiter extends BaseSecurityLayer {
       lastCheck: new Date().toISOString(),
       issues: [],
       metrics: {
-        requestsProcessed: Array.from(this.windows.values()).reduce((sum, w) => sum + w.totalRequests, 0),
+        requestsProcessed: Array.from(this.windows.values()).reduce(
+          (sum, w) => sum + w.totalRequests,
+          0,
+        ),
         averageLatencyMs: 0,
         errorRate: 0,
       },

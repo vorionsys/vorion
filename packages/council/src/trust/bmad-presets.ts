@@ -9,8 +9,16 @@
  * Factor codes replace old dimension names throughout.
  */
 
-import type { TrustConfig, FactorWeightConfig, CreationType } from './presets.js';
-import { BASIS_CANONICAL_PRESETS, CREATION_MODIFIERS, T3_BASELINE } from './presets.js';
+import type {
+  TrustConfig,
+  FactorWeightConfig,
+  CreationType,
+} from "./presets.js";
+import {
+  BASIS_CANONICAL_PRESETS,
+  CREATION_MODIFIERS,
+  T3_BASELINE,
+} from "./presets.js";
 
 // =============================================================================
 // BMAD-SPECIFIC WEIGHT DELTAS
@@ -31,10 +39,10 @@ export const BMAD_DELTAS: Record<string, Partial<FactorWeightConfig>> = {
    * Mapped: CT-OBS boost, CT-ACCT boost, plus OP-HUMAN for coordination
    */
   orchestrator_override: {
-    'CT-OBS':   0.12,
-    'CT-ACCT':  0.09,
-    'OP-HUMAN': 0.08,
-    'SF-LEARN': 0.04,
+    "CT-OBS": 0.12,
+    "CT-ACCT": 0.09,
+    "OP-HUMAN": 0.08,
+    "SF-LEARN": 0.04,
   },
 
   /**
@@ -43,10 +51,10 @@ export const BMAD_DELTAS: Record<string, Partial<FactorWeightConfig>> = {
    * Mapped: CT-COMP boost, CT-REL boost for dependable builds
    */
   builder_override: {
-    'CT-COMP':  0.14,
-    'CT-REL':   0.11,
-    'CT-ACCT':  0.07,
-    'SF-LEARN': 0.05,
+    "CT-COMP": 0.14,
+    "CT-REL": 0.11,
+    "CT-ACCT": 0.07,
+    "SF-LEARN": 0.05,
   },
 
   /**
@@ -55,10 +63,10 @@ export const BMAD_DELTAS: Record<string, Partial<FactorWeightConfig>> = {
    * Mapped: CT-ACCT boost, OP-CONTEXT boost, OP-ALIGN for strategic alignment
    */
   advisor_override: {
-    'CT-ACCT':    0.09,
-    'OP-CONTEXT': 0.09,
-    'OP-ALIGN':   0.08,
-    'SF-HUM':     0.06,
+    "CT-ACCT": 0.09,
+    "OP-CONTEXT": 0.09,
+    "OP-ALIGN": 0.08,
+    "SF-HUM": 0.06,
   },
 
   /**
@@ -67,10 +75,10 @@ export const BMAD_DELTAS: Record<string, Partial<FactorWeightConfig>> = {
    * Mapped: CT-COMP boost, CT-OBS boost, CT-REL for reliable execution
    */
   executor_override: {
-    'CT-COMP':  0.13,
-    'CT-OBS':   0.09,
-    'CT-REL':   0.10,
-    'SF-ADAPT': 0.05,
+    "CT-COMP": 0.13,
+    "CT-OBS": 0.09,
+    "CT-REL": 0.1,
+    "SF-ADAPT": 0.05,
   },
 
   /**
@@ -79,10 +87,10 @@ export const BMAD_DELTAS: Record<string, Partial<FactorWeightConfig>> = {
    * Mapped: CT-OBS moderate, CT-COMP boost, CT-TRANS for clear output
    */
   chronicler_override: {
-    'CT-OBS':   0.07,
-    'CT-COMP':  0.10,
-    'CT-TRANS': 0.08,
-    'CT-SAFE':  0.06,
+    "CT-OBS": 0.07,
+    "CT-COMP": 0.1,
+    "CT-TRANS": 0.08,
+    "CT-SAFE": 0.06,
   },
 
   /**
@@ -91,10 +99,10 @@ export const BMAD_DELTAS: Record<string, Partial<FactorWeightConfig>> = {
    * Mapped: CT-OBS boost, CT-COMP boost, CT-SEC for validation rigor
    */
   validator_override: {
-    'CT-OBS':  0.12,
-    'CT-COMP': 0.10,
-    'CT-SEC':  0.08,
-    'CT-REL':  0.08,
+    "CT-OBS": 0.12,
+    "CT-COMP": 0.1,
+    "CT-SEC": 0.08,
+    "CT-REL": 0.08,
   },
 };
 
@@ -103,7 +111,7 @@ export const BMAD_DELTAS: Record<string, Partial<FactorWeightConfig>> = {
  */
 export function createBmadPreset(
   canonicalName: keyof typeof BASIS_CANONICAL_PRESETS,
-  deltaName?: keyof typeof BMAD_DELTAS
+  deltaName?: keyof typeof BMAD_DELTAS,
 ): FactorWeightConfig {
   const canonical = BASIS_CANONICAL_PRESETS[canonicalName];
   if (!deltaName) return { ...canonical };
@@ -121,29 +129,29 @@ export function createBmadPreset(
 // =============================================================================
 
 export const bmadMasterTrustConfig: TrustConfig = {
-  agentId: 'bmad.core.master',
+  agentId: "bmad.core.master",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE + 200, // 700 - starts at T4 for orchestration
-  targetTier: 'T4',
+  targetTier: "T4",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L4',
-    allowedTiers: ['T4', 'T5'],
+    role: "R-L4",
+    allowedTiers: ["T4", "T5"],
   },
 
-  weights: createBmadPreset('governance_focus', 'orchestrator_override'),
+  weights: createBmadPreset("governance_focus", "orchestrator_override"),
 
   capabilities: {
-    'workflow.orchestrate': { minTier: 'T4', rateLimit: 100 },
-    'knowledge.curate': { minTier: 'T3', rateLimit: 200 },
-    'party.mode': { minTier: 'T3', rateLimit: 50 },
+    "workflow.orchestrate": { minTier: "T4", rateLimit: 100 },
+    "knowledge.curate": { minTier: "T3", rateLimit: 200 },
+    "party.mode": { minTier: "T3", rateLimit: 50 },
   },
 };
 
@@ -152,83 +160,83 @@ export const bmadMasterTrustConfig: TrustConfig = {
 // =============================================================================
 
 export const agentBuilderTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmb.agent-builder',
+  agentId: "bmad.bmb.agent-builder",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L3',
-    allowedTiers: ['T3', 'T4', 'T5'],
+    role: "R-L3",
+    allowedTiers: ["T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('capability_focus', 'builder_override'),
+  weights: createBmadPreset("capability_focus", "builder_override"),
 
   capabilities: {
-    'agent.create': { minTier: 'T3', rateLimit: 50 },
-    'agent.edit': { minTier: 'T3', rateLimit: 100 },
-    'compliance.validate': { minTier: 'T2', rateLimit: 200 },
+    "agent.create": { minTier: "T3", rateLimit: 50 },
+    "agent.edit": { minTier: "T3", rateLimit: 100 },
+    "compliance.validate": { minTier: "T2", rateLimit: 200 },
   },
 };
 
 export const moduleBuilderTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmb.module-builder',
+  agentId: "bmad.bmb.module-builder",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L3',
-    allowedTiers: ['T3', 'T4', 'T5'],
+    role: "R-L3",
+    allowedTiers: ["T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('capability_focus', 'builder_override'),
+  weights: createBmadPreset("capability_focus", "builder_override"),
 
   capabilities: {
-    'module.create': { minTier: 'T3', rateLimit: 30 },
-    'module.edit': { minTier: 'T3', rateLimit: 50 },
-    'brief.create': { minTier: 'T2', rateLimit: 100 },
+    "module.create": { minTier: "T3", rateLimit: 30 },
+    "module.edit": { minTier: "T3", rateLimit: 50 },
+    "brief.create": { minTier: "T2", rateLimit: 100 },
   },
 };
 
 export const workflowBuilderTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmb.workflow-builder',
+  agentId: "bmad.bmb.workflow-builder",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L3',
-    allowedTiers: ['T3', 'T4', 'T5'],
+    role: "R-L3",
+    allowedTiers: ["T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('capability_focus', 'builder_override'),
+  weights: createBmadPreset("capability_focus", "builder_override"),
 
   capabilities: {
-    'workflow.create': { minTier: 'T3', rateLimit: 50 },
-    'workflow.validate': { minTier: 'T2', rateLimit: 200 },
-    'process.optimize': { minTier: 'T3', rateLimit: 100 },
+    "workflow.create": { minTier: "T3", rateLimit: 50 },
+    "workflow.validate": { minTier: "T2", rateLimit: 200 },
+    "process.optimize": { minTier: "T3", rateLimit: 100 },
   },
 };
 
@@ -237,246 +245,246 @@ export const workflowBuilderTrustConfig: TrustConfig = {
 // =============================================================================
 
 export const analystTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.analyst',
+  agentId: "bmad.bmm.analyst",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L2',
-    allowedTiers: ['T2', 'T3', 'T4', 'T5'],
+    role: "R-L2",
+    allowedTiers: ["T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('high_confidence', 'advisor_override'),
+  weights: createBmadPreset("high_confidence", "advisor_override"),
 
   capabilities: {
-    'research.conduct': { minTier: 'T2', rateLimit: 100 },
-    'requirements.elicit': { minTier: 'T3', rateLimit: 50 },
-    'brief.create': { minTier: 'T2', rateLimit: 100 },
+    "research.conduct": { minTier: "T2", rateLimit: 100 },
+    "requirements.elicit": { minTier: "T3", rateLimit: 50 },
+    "brief.create": { minTier: "T2", rateLimit: 100 },
   },
 };
 
 export const bmmArchitectTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.architect',
+  agentId: "bmad.bmm.architect",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE + 200, // 700 - elevated for architecture decisions
-  targetTier: 'T4',
+  targetTier: "T4",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L4',
-    allowedTiers: ['T4', 'T5'],
+    role: "R-L4",
+    allowedTiers: ["T4", "T5"],
   },
 
-  weights: createBmadPreset('governance_focus', 'advisor_override'),
+  weights: createBmadPreset("governance_focus", "advisor_override"),
 
   capabilities: {
-    'architecture.create': { minTier: 'T4', rateLimit: 50 },
-    'architecture.review': { minTier: 'T3', rateLimit: 100 },
-    'design.validate': { minTier: 'T3', rateLimit: 200 },
+    "architecture.create": { minTier: "T4", rateLimit: 50 },
+    "architecture.review": { minTier: "T3", rateLimit: 100 },
+    "design.validate": { minTier: "T3", rateLimit: 200 },
   },
 };
 
 export const devTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.dev',
+  agentId: "bmad.bmm.dev",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L3',
-    allowedTiers: ['T3', 'T4', 'T5'],
+    role: "R-L3",
+    allowedTiers: ["T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('high_confidence', 'executor_override'),
+  weights: createBmadPreset("high_confidence", "executor_override"),
 
   capabilities: {
-    'code.write': { minTier: 'T3', rateLimit: 500 },
-    'code.review': { minTier: 'T3', rateLimit: 200 },
-    'test.maintain': { minTier: 'T2', rateLimit: 500 },
+    "code.write": { minTier: "T3", rateLimit: 500 },
+    "code.review": { minTier: "T3", rateLimit: 200 },
+    "test.maintain": { minTier: "T2", rateLimit: 500 },
   },
 };
 
 export const pmTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.pm',
+  agentId: "bmad.bmm.pm",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE + 200, // 700 - elevated for product decisions
-  targetTier: 'T4',
+  targetTier: "T4",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L4',
-    allowedTiers: ['T4', 'T5'],
+    role: "R-L4",
+    allowedTiers: ["T4", "T5"],
   },
 
-  weights: createBmadPreset('governance_focus', 'advisor_override'),
+  weights: createBmadPreset("governance_focus", "advisor_override"),
 
   capabilities: {
-    'prd.create': { minTier: 'T4', rateLimit: 30 },
-    'epics.create': { minTier: 'T3', rateLimit: 50 },
-    'course.correct': { minTier: 'T4', rateLimit: 20 },
+    "prd.create": { minTier: "T4", rateLimit: 30 },
+    "epics.create": { minTier: "T3", rateLimit: 50 },
+    "course.correct": { minTier: "T4", rateLimit: 20 },
   },
 };
 
 export const smTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.sm',
+  agentId: "bmad.bmm.sm",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L2',
-    allowedTiers: ['T2', 'T3', 'T4', 'T5'],
+    role: "R-L2",
+    allowedTiers: ["T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('high_confidence', 'chronicler_override'),
+  weights: createBmadPreset("high_confidence", "chronicler_override"),
 
   capabilities: {
-    'sprint.plan': { minTier: 'T3', rateLimit: 50 },
-    'story.create': { minTier: 'T2', rateLimit: 200 },
-    'retro.facilitate': { minTier: 'T2', rateLimit: 50 },
+    "sprint.plan": { minTier: "T3", rateLimit: 50 },
+    "story.create": { minTier: "T2", rateLimit: 200 },
+    "retro.facilitate": { minTier: "T2", rateLimit: 50 },
   },
 };
 
 export const teaTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.tea',
+  agentId: "bmad.bmm.tea",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE + 200, // 700 - elevated for test architecture
-  targetTier: 'T4',
+  targetTier: "T4",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L4',
-    allowedTiers: ['T4', 'T5'],
+    role: "R-L4",
+    allowedTiers: ["T4", "T5"],
   },
 
-  weights: createBmadPreset('governance_focus', 'validator_override'),
+  weights: createBmadPreset("governance_focus", "validator_override"),
 
   capabilities: {
-    'test.framework': { minTier: 'T4', rateLimit: 20 },
-    'test.generate': { minTier: 'T3', rateLimit: 200 },
-    'test.review': { minTier: 'T3', rateLimit: 100 },
-    'ci.scaffold': { minTier: 'T4', rateLimit: 20 },
+    "test.framework": { minTier: "T4", rateLimit: 20 },
+    "test.generate": { minTier: "T3", rateLimit: 200 },
+    "test.review": { minTier: "T3", rateLimit: 100 },
+    "ci.scaffold": { minTier: "T4", rateLimit: 20 },
   },
 };
 
 export const techWriterTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.tech-writer',
+  agentId: "bmad.bmm.tech-writer",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE - 200, // 300 - lower risk documentation
-  targetTier: 'T2',
+  targetTier: "T2",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L2',
-    allowedTiers: ['T2', 'T3', 'T4', 'T5'],
+    role: "R-L2",
+    allowedTiers: ["T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('high_confidence', 'chronicler_override'),
+  weights: createBmadPreset("high_confidence", "chronicler_override"),
 
   capabilities: {
-    'docs.create': { minTier: 'T2', rateLimit: 500 },
-    'docs.validate': { minTier: 'T2', rateLimit: 200 },
-    'diagram.generate': { minTier: 'T2', rateLimit: 200 },
+    "docs.create": { minTier: "T2", rateLimit: 500 },
+    "docs.validate": { minTier: "T2", rateLimit: 200 },
+    "diagram.generate": { minTier: "T2", rateLimit: 200 },
   },
 };
 
 export const uxDesignerTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.ux-designer',
+  agentId: "bmad.bmm.ux-designer",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L2',
-    allowedTiers: ['T2', 'T3', 'T4', 'T5'],
+    role: "R-L2",
+    allowedTiers: ["T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('high_confidence', 'advisor_override'),
+  weights: createBmadPreset("high_confidence", "advisor_override"),
 
   capabilities: {
-    'ux.design': { minTier: 'T3', rateLimit: 100 },
-    'wireframe.create': { minTier: 'T2', rateLimit: 200 },
-    'prototype.iterate': { minTier: 'T3', rateLimit: 100 },
+    "ux.design": { minTier: "T3", rateLimit: 100 },
+    "wireframe.create": { minTier: "T2", rateLimit: 200 },
+    "prototype.iterate": { minTier: "T3", rateLimit: 100 },
   },
 };
 
 export const quickFlowSoloDevTrustConfig: TrustConfig = {
-  agentId: 'bmad.bmm.quick-flow-solo-dev',
+  agentId: "bmad.bmm.quick-flow-solo-dev",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L3',
-    allowedTiers: ['T3', 'T4', 'T5'],
+    role: "R-L3",
+    allowedTiers: ["T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('capability_focus', 'executor_override'),
+  weights: createBmadPreset("capability_focus", "executor_override"),
 
   capabilities: {
-    'spec.create': { minTier: 'T3', rateLimit: 50 },
-    'implement.solo': { minTier: 'T3', rateLimit: 100 },
-    'code.review': { minTier: 'T3', rateLimit: 100 },
+    "spec.create": { minTier: "T3", rateLimit: 50 },
+    "implement.solo": { minTier: "T3", rateLimit: 100 },
+    "code.review": { minTier: "T3", rateLimit: 100 },
   },
 };
 
@@ -485,159 +493,159 @@ export const quickFlowSoloDevTrustConfig: TrustConfig = {
 // =============================================================================
 
 export const brainstormingCoachTrustConfig: TrustConfig = {
-  agentId: 'bmad.cis.brainstorming-coach',
+  agentId: "bmad.cis.brainstorming-coach",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE - 200, // 300 - low risk ideation
-  targetTier: 'T2',
+  targetTier: "T2",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L1',
-    allowedTiers: ['T1', 'T2', 'T3', 'T4', 'T5'],
+    role: "R-L1",
+    allowedTiers: ["T1", "T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('context_sensitive', 'advisor_override'),
+  weights: createBmadPreset("context_sensitive", "advisor_override"),
 
   capabilities: {
-    'brainstorm.facilitate': { minTier: 'T2', rateLimit: 100 },
-    'ideas.capture': { minTier: 'T1', rateLimit: 500 },
+    "brainstorm.facilitate": { minTier: "T2", rateLimit: 100 },
+    "ideas.capture": { minTier: "T1", rateLimit: 500 },
   },
 };
 
 export const creativeProblemSolverTrustConfig: TrustConfig = {
-  agentId: 'bmad.cis.creative-problem-solver',
+  agentId: "bmad.cis.creative-problem-solver",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L2',
-    allowedTiers: ['T2', 'T3', 'T4', 'T5'],
+    role: "R-L2",
+    allowedTiers: ["T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('high_confidence', 'advisor_override'),
+  weights: createBmadPreset("high_confidence", "advisor_override"),
 
   capabilities: {
-    'problem.analyze': { minTier: 'T3', rateLimit: 100 },
-    'solution.architect': { minTier: 'T3', rateLimit: 50 },
+    "problem.analyze": { minTier: "T3", rateLimit: 100 },
+    "solution.architect": { minTier: "T3", rateLimit: 50 },
   },
 };
 
 export const designThinkingCoachTrustConfig: TrustConfig = {
-  agentId: 'bmad.cis.design-thinking-coach',
+  agentId: "bmad.cis.design-thinking-coach",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE, // 500
-  targetTier: 'T3',
+  targetTier: "T3",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L2',
-    allowedTiers: ['T2', 'T3', 'T4', 'T5'],
+    role: "R-L2",
+    allowedTiers: ["T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('context_sensitive', 'advisor_override'),
+  weights: createBmadPreset("context_sensitive", "advisor_override"),
 
   capabilities: {
-    'design.thinking': { minTier: 'T2', rateLimit: 100 },
-    'empathy.map': { minTier: 'T2', rateLimit: 200 },
+    "design.thinking": { minTier: "T2", rateLimit: 100 },
+    "empathy.map": { minTier: "T2", rateLimit: 200 },
   },
 };
 
 export const innovationStrategistTrustConfig: TrustConfig = {
-  agentId: 'bmad.cis.innovation-strategist',
+  agentId: "bmad.cis.innovation-strategist",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE + 200, // 700 - elevated for strategic decisions
-  targetTier: 'T4',
+  targetTier: "T4",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L4',
-    allowedTiers: ['T4', 'T5'],
+    role: "R-L4",
+    allowedTiers: ["T4", "T5"],
   },
 
-  weights: createBmadPreset('governance_focus', 'advisor_override'),
+  weights: createBmadPreset("governance_focus", "advisor_override"),
 
   capabilities: {
-    'disruption.identify': { minTier: 'T4', rateLimit: 30 },
-    'model.innovate': { minTier: 'T4', rateLimit: 20 },
+    "disruption.identify": { minTier: "T4", rateLimit: 30 },
+    "model.innovate": { minTier: "T4", rateLimit: 20 },
   },
 };
 
 export const presentationMasterTrustConfig: TrustConfig = {
-  agentId: 'bmad.cis.presentation-master',
+  agentId: "bmad.cis.presentation-master",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE - 200, // 300 - low risk content creation
-  targetTier: 'T2',
+  targetTier: "T2",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L2',
-    allowedTiers: ['T2', 'T3', 'T4', 'T5'],
+    role: "R-L2",
+    allowedTiers: ["T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('capability_focus', 'chronicler_override'),
+  weights: createBmadPreset("capability_focus", "chronicler_override"),
 
   capabilities: {
-    'presentation.create': { minTier: 'T2', rateLimit: 100 },
-    'pitch.design': { minTier: 'T2', rateLimit: 50 },
-    'visual.communicate': { minTier: 'T2', rateLimit: 200 },
+    "presentation.create": { minTier: "T2", rateLimit: 100 },
+    "pitch.design": { minTier: "T2", rateLimit: 50 },
+    "visual.communicate": { minTier: "T2", rateLimit: 200 },
   },
 };
 
 export const storytellerTrustConfig: TrustConfig = {
-  agentId: 'bmad.cis.storyteller',
+  agentId: "bmad.cis.storyteller",
 
   creation: {
-    type: 'fresh' as CreationType,
+    type: "fresh" as CreationType,
     modifier: CREATION_MODIFIERS.fresh,
   },
 
   initialScore: T3_BASELINE - 200, // 300 - low risk narrative
-  targetTier: 'T2',
+  targetTier: "T2",
 
-  context: 'enterprise',
+  context: "enterprise",
 
   roleGates: {
-    role: 'R-L2',
-    allowedTiers: ['T2', 'T3', 'T4', 'T5'],
+    role: "R-L2",
+    allowedTiers: ["T2", "T3", "T4", "T5"],
   },
 
-  weights: createBmadPreset('context_sensitive', 'chronicler_override'),
+  weights: createBmadPreset("context_sensitive", "chronicler_override"),
 
   capabilities: {
-    'narrative.craft': { minTier: 'T2', rateLimit: 100 },
-    'story.structure': { minTier: 'T2', rateLimit: 200 },
+    "narrative.craft": { minTier: "T2", rateLimit: 100 },
+    "story.structure": { minTier: "T2", rateLimit: 200 },
   },
 };
 
@@ -647,30 +655,30 @@ export const storytellerTrustConfig: TrustConfig = {
 
 export const bmadAgentTrustConfigs = {
   // Core
-  'bmad-master': bmadMasterTrustConfig,
+  "bmad-master": bmadMasterTrustConfig,
 
   // BMB
-  'agent-builder': agentBuilderTrustConfig,
-  'module-builder': moduleBuilderTrustConfig,
-  'workflow-builder': workflowBuilderTrustConfig,
+  "agent-builder": agentBuilderTrustConfig,
+  "module-builder": moduleBuilderTrustConfig,
+  "workflow-builder": workflowBuilderTrustConfig,
 
   // BMM
   analyst: analystTrustConfig,
-  'bmm-architect': bmmArchitectTrustConfig,
+  "bmm-architect": bmmArchitectTrustConfig,
   dev: devTrustConfig,
   pm: pmTrustConfig,
   sm: smTrustConfig,
   tea: teaTrustConfig,
-  'tech-writer': techWriterTrustConfig,
-  'ux-designer': uxDesignerTrustConfig,
-  'quick-flow-solo-dev': quickFlowSoloDevTrustConfig,
+  "tech-writer": techWriterTrustConfig,
+  "ux-designer": uxDesignerTrustConfig,
+  "quick-flow-solo-dev": quickFlowSoloDevTrustConfig,
 
   // CIS
-  'brainstorming-coach': brainstormingCoachTrustConfig,
-  'creative-problem-solver': creativeProblemSolverTrustConfig,
-  'design-thinking-coach': designThinkingCoachTrustConfig,
-  'innovation-strategist': innovationStrategistTrustConfig,
-  'presentation-master': presentationMasterTrustConfig,
+  "brainstorming-coach": brainstormingCoachTrustConfig,
+  "creative-problem-solver": creativeProblemSolverTrustConfig,
+  "design-thinking-coach": designThinkingCoachTrustConfig,
+  "innovation-strategist": innovationStrategistTrustConfig,
+  "presentation-master": presentationMasterTrustConfig,
   storyteller: storytellerTrustConfig,
 };
 

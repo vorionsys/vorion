@@ -6,7 +6,7 @@
  * capabilityVectorSatisfies, type guards, and supervision-aware permission calculation.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   isSupervisionActive,
   calculateSupervisedTier,
@@ -24,23 +24,25 @@ import {
   type CapabilityVector,
   type AgentRegistrationOptions,
   type AgentMatchCriteria,
-} from '../src/car/identity';
-import { CapabilityLevel } from '../src/car/levels';
-import { CertificationTier, RuntimeTier } from '../src/car/tiers';
-import { parseCAR } from '../src/car/car-string';
-import { calculateEffectivePermission } from '../src/car/effective-permission';
-import type { Attestation } from '../src/car/attestation';
-import type { DomainCode } from '../src/car/domains';
+} from "../src/car/identity";
+import { CapabilityLevel } from "../src/car/levels";
+import { CertificationTier, RuntimeTier } from "../src/car/tiers";
+import { parseCAR } from "../src/car/car-string";
+import { calculateEffectivePermission } from "../src/car/effective-permission";
+import type { Attestation } from "../src/car/attestation";
+import type { DomainCode } from "../src/car/domains";
 
 // ============================================================================
 // Test Helpers
 // ============================================================================
 
-function createTestSupervision(overrides?: Partial<SupervisionContext>): SupervisionContext {
+function createTestSupervision(
+  overrides?: Partial<SupervisionContext>,
+): SupervisionContext {
   const now = new Date();
   return {
-    supervisorCAR: 'a3i.vorion.supervisor:ABCDEF-L7@1.0.0',
-    supervisorDID: 'did:web:supervisor.vorion.org',
+    supervisorCAR: "a3i.vorion.supervisor:ABCDEF-L7@1.0.0",
+    supervisorDID: "did:web:supervisor.vorion.org",
     supervisorTier: CertificationTier.T5_TRUSTED,
     elevationTiers: 2,
     grantedAt: new Date(now.getTime() - 60000),
@@ -54,14 +56,14 @@ function createTestSupervision(overrides?: Partial<SupervisionContext>): Supervi
 function createTestAttestation(overrides?: Partial<Attestation>): Attestation {
   const now = new Date();
   return {
-    id: 'urn:uuid:test-attestation',
-    issuer: 'did:web:certifier.example.com',
-    subject: 'did:web:agent.acme.com',
-    scope: 'full',
+    id: "urn:uuid:test-attestation",
+    issuer: "did:web:certifier.example.com",
+    subject: "did:web:agent.acme.com",
+    scope: "full",
     certificationTier: CertificationTier.T3_MONITORED,
     issuedAt: new Date(now.getTime() - 86400000),
     expiresAt: new Date(now.getTime() + 86400000 * 365),
-    status: 'active',
+    status: "active",
     ...overrides,
   };
 }
@@ -69,11 +71,11 @@ function createTestAttestation(overrides?: Partial<Attestation>): Attestation {
 function createTestIdentity(overrides?: Partial<AgentIdentity>): AgentIdentity {
   const now = new Date();
   return {
-    car: 'a3i.acme-corp.invoice-bot:ABF-L3@1.0.0',
-    carId: 'a3i.acme-corp.invoice-bot:ABF-L3@1.0.0',
-    did: 'did:web:agent.acme.com',
+    car: "a3i.acme-corp.invoice-bot:ABF-L3@1.0.0",
+    carId: "a3i.acme-corp.invoice-bot:ABF-L3@1.0.0",
+    did: "did:web:agent.acme.com",
     capabilities: {
-      domains: ['A', 'B', 'F'] as DomainCode[],
+      domains: ["A", "B", "F"] as DomainCode[],
       level: CapabilityLevel.L3_EXECUTE,
     },
     attestations: [createTestAttestation()],
@@ -88,27 +90,27 @@ function createTestIdentity(overrides?: Partial<AgentIdentity>): AgentIdentity {
 // isSupervisionActive
 // ============================================================================
 
-describe('isSupervisionActive', () => {
-  it('returns true for active supervision with valid heartbeat', () => {
+describe("isSupervisionActive", () => {
+  it("returns true for active supervision with valid heartbeat", () => {
     const ctx = createTestSupervision();
     expect(isSupervisionActive(ctx)).toBe(true);
   });
 
-  it('returns false when supervision has expired', () => {
+  it("returns false when supervision has expired", () => {
     const ctx = createTestSupervision({
       expiresAt: new Date(Date.now() - 1000),
     });
     expect(isSupervisionActive(ctx)).toBe(false);
   });
 
-  it('returns false when grantedAt is in the future', () => {
+  it("returns false when grantedAt is in the future", () => {
     const ctx = createTestSupervision({
       grantedAt: new Date(Date.now() + 60000),
     });
     expect(isSupervisionActive(ctx)).toBe(false);
   });
 
-  it('returns false when heartbeat deadline missed', () => {
+  it("returns false when heartbeat deadline missed", () => {
     const ctx = createTestSupervision({
       heartbeatIntervalMs: 5000,
       lastHeartbeat: new Date(Date.now() - 60000), // 60s ago, deadline was 5s
@@ -116,7 +118,7 @@ describe('isSupervisionActive', () => {
     expect(isSupervisionActive(ctx)).toBe(false);
   });
 
-  it('returns true when no heartbeat required (heartbeatIntervalMs=0)', () => {
+  it("returns true when no heartbeat required (heartbeatIntervalMs=0)", () => {
     const ctx = createTestSupervision({
       heartbeatIntervalMs: 0,
       lastHeartbeat: undefined,
@@ -124,7 +126,7 @@ describe('isSupervisionActive', () => {
     expect(isSupervisionActive(ctx)).toBe(true);
   });
 
-  it('returns true when heartbeat required but no lastHeartbeat set yet', () => {
+  it("returns true when heartbeat required but no lastHeartbeat set yet", () => {
     const ctx = createTestSupervision({
       heartbeatIntervalMs: 30000,
       lastHeartbeat: undefined,
@@ -137,65 +139,83 @@ describe('isSupervisionActive', () => {
 // calculateSupervisedTier
 // ============================================================================
 
-describe('calculateSupervisedTier', () => {
-  it('elevates base tier by requested amount under active supervision', () => {
+describe("calculateSupervisedTier", () => {
+  it("elevates base tier by requested amount under active supervision", () => {
     const supervision = createTestSupervision({
       supervisorTier: CertificationTier.T5_TRUSTED,
       elevationTiers: 2,
     });
     // base T2 + 2 = T4, cap = T5-1 = T4 → T4
-    const result = calculateSupervisedTier(CertificationTier.T2_PROVISIONAL, supervision);
+    const result = calculateSupervisedTier(
+      CertificationTier.T2_PROVISIONAL,
+      supervision,
+    );
     expect(result).toBe(CertificationTier.T4_STANDARD);
   });
 
-  it('caps elevation at supervisorTier - 1', () => {
+  it("caps elevation at supervisorTier - 1", () => {
     const supervision = createTestSupervision({
       supervisorTier: CertificationTier.T4_STANDARD,
       elevationTiers: 2,
     });
     // base T3 + 2 = T5, but cap = T4-1 = T3 → stays T3
-    const result = calculateSupervisedTier(CertificationTier.T3_MONITORED, supervision);
+    const result = calculateSupervisedTier(
+      CertificationTier.T3_MONITORED,
+      supervision,
+    );
     expect(result).toBe(CertificationTier.T3_MONITORED);
   });
 
-  it('caps elevation at MAX_SUPERVISION_ELEVATION', () => {
+  it("caps elevation at MAX_SUPERVISION_ELEVATION", () => {
     const supervision = createTestSupervision({
       supervisorTier: CertificationTier.T7_AUTONOMOUS,
       elevationTiers: 5, // exceeds MAX_SUPERVISION_ELEVATION (2)
     });
     // base T3 + min(5,2) = T5, cap = T7-1 = T6 → T5
-    const result = calculateSupervisedTier(CertificationTier.T3_MONITORED, supervision);
+    const result = calculateSupervisedTier(
+      CertificationTier.T3_MONITORED,
+      supervision,
+    );
     expect(result).toBe(CertificationTier.T5_TRUSTED);
   });
 
-  it('returns baseTier when supervision is inactive (expired)', () => {
+  it("returns baseTier when supervision is inactive (expired)", () => {
     const supervision = createTestSupervision({
       expiresAt: new Date(Date.now() - 1000),
       supervisorTier: CertificationTier.T7_AUTONOMOUS,
       elevationTiers: 2,
     });
-    const result = calculateSupervisedTier(CertificationTier.T2_PROVISIONAL, supervision);
+    const result = calculateSupervisedTier(
+      CertificationTier.T2_PROVISIONAL,
+      supervision,
+    );
     expect(result).toBe(CertificationTier.T2_PROVISIONAL);
   });
 
-  it('never lowers below baseTier', () => {
+  it("never lowers below baseTier", () => {
     const supervision = createTestSupervision({
       supervisorTier: CertificationTier.T2_PROVISIONAL, // supervisor lower than expected
       elevationTiers: 0,
     });
     // This shouldn't happen in practice (validator prevents it),
     // but the function should still be safe
-    const result = calculateSupervisedTier(CertificationTier.T3_MONITORED, supervision);
+    const result = calculateSupervisedTier(
+      CertificationTier.T3_MONITORED,
+      supervision,
+    );
     expect(result).toBeGreaterThanOrEqual(CertificationTier.T3_MONITORED);
   });
 
-  it('T7 supervisor elevates to at most T6', () => {
+  it("T7 supervisor elevates to at most T6", () => {
     const supervision = createTestSupervision({
       supervisorTier: CertificationTier.T7_AUTONOMOUS,
       elevationTiers: 2,
     });
     // base T5 + 2 = T7, cap = T7-1 = T6 → T6
-    const result = calculateSupervisedTier(CertificationTier.T5_TRUSTED, supervision);
+    const result = calculateSupervisedTier(
+      CertificationTier.T5_TRUSTED,
+      supervision,
+    );
     expect(result).toBe(CertificationTier.T6_CERTIFIED);
   });
 });
@@ -204,73 +224,73 @@ describe('calculateSupervisedTier', () => {
 // validateSupervisionElevation
 // ============================================================================
 
-describe('validateSupervisionElevation', () => {
-  it('validates correct elevation request', () => {
+describe("validateSupervisionElevation", () => {
+  it("validates correct elevation request", () => {
     const result = validateSupervisionElevation(
       CertificationTier.T5_TRUSTED,
       CertificationTier.T2_PROVISIONAL,
-      2
+      2,
     );
     expect(result.valid).toBe(true);
     expect(result.effectiveTier).toBe(CertificationTier.T4_STANDARD);
   });
 
-  it('rejects negative elevation', () => {
+  it("rejects negative elevation", () => {
     const result = validateSupervisionElevation(
       CertificationTier.T5_TRUSTED,
       CertificationTier.T2_PROVISIONAL,
-      -1
+      -1,
     );
     expect(result.valid).toBe(false);
-    expect(result.reason).toContain('-1');
+    expect(result.reason).toContain("-1");
   });
 
-  it('rejects elevation exceeding MAX_SUPERVISION_ELEVATION', () => {
+  it("rejects elevation exceeding MAX_SUPERVISION_ELEVATION", () => {
     const result = validateSupervisionElevation(
       CertificationTier.T5_TRUSTED,
       CertificationTier.T2_PROVISIONAL,
-      3
+      3,
     );
     expect(result.valid).toBe(false);
     expect(result.reason).toContain(`0-${MAX_SUPERVISION_ELEVATION}`);
   });
 
-  it('rejects when supervisor tier equals subject tier', () => {
+  it("rejects when supervisor tier equals subject tier", () => {
     const result = validateSupervisionElevation(
       CertificationTier.T3_MONITORED,
       CertificationTier.T3_MONITORED,
-      1
+      1,
     );
     expect(result.valid).toBe(false);
-    expect(result.reason).toContain('must be higher');
+    expect(result.reason).toContain("must be higher");
   });
 
-  it('rejects when supervisor tier is lower than subject tier', () => {
+  it("rejects when supervisor tier is lower than subject tier", () => {
     const result = validateSupervisionElevation(
       CertificationTier.T2_PROVISIONAL,
       CertificationTier.T4_STANDARD,
-      1
+      1,
     );
     expect(result.valid).toBe(false);
-    expect(result.reason).toContain('must be higher');
+    expect(result.reason).toContain("must be higher");
   });
 
-  it('caps effective tier at supervisorTier - 1', () => {
+  it("caps effective tier at supervisorTier - 1", () => {
     const result = validateSupervisionElevation(
       CertificationTier.T4_STANDARD,
       CertificationTier.T2_PROVISIONAL,
-      2
+      2,
     );
     expect(result.valid).toBe(true);
     // T2 + 2 = T4, cap = T4-1 = T3 → T3
     expect(result.effectiveTier).toBe(CertificationTier.T3_MONITORED);
   });
 
-  it('handles zero elevation', () => {
+  it("handles zero elevation", () => {
     const result = validateSupervisionElevation(
       CertificationTier.T5_TRUSTED,
       CertificationTier.T2_PROVISIONAL,
-      0
+      0,
     );
     expect(result.valid).toBe(true);
     expect(result.effectiveTier).toBe(CertificationTier.T2_PROVISIONAL);
@@ -281,14 +301,14 @@ describe('validateSupervisionElevation', () => {
 // createAgentIdentity
 // ============================================================================
 
-describe('createAgentIdentity', () => {
+describe("createAgentIdentity", () => {
   const baseOptions: AgentRegistrationOptions = {
-    car: 'a3i.acme-corp.invoice-bot:ABF-L3@1.0.0',
-    did: 'did:web:agent.acme.com',
+    car: "a3i.acme-corp.invoice-bot:ABF-L3@1.0.0",
+    did: "did:web:agent.acme.com",
   };
 
-  it('creates identity with parsedCAR capabilities', () => {
-    const parsed = parseCAR('a3i.acme-corp.invoice-bot:ABF-L3@1.0.0');
+  it("creates identity with parsedCAR capabilities", () => {
+    const parsed = parseCAR("a3i.acme-corp.invoice-bot:ABF-L3@1.0.0");
     const identity = createAgentIdentity(baseOptions, parsed);
 
     expect(identity.capabilities.domains).toEqual(parsed.domains);
@@ -296,14 +316,14 @@ describe('createAgentIdentity', () => {
     expect(identity.capabilities.level).toBe(CapabilityLevel.L3_EXECUTE);
   });
 
-  it('creates identity with defaults when no parsedCAR', () => {
+  it("creates identity with defaults when no parsedCAR", () => {
     const identity = createAgentIdentity(baseOptions);
 
     expect(identity.capabilities.domains).toEqual([]);
     expect(identity.capabilities.level).toBe(CapabilityLevel.L0_OBSERVE);
   });
 
-  it('sets timestamps and active flag', () => {
+  it("sets timestamps and active flag", () => {
     const before = new Date();
     const identity = createAgentIdentity(baseOptions);
     const after = new Date();
@@ -314,19 +334,22 @@ describe('createAgentIdentity', () => {
     expect(identity.active).toBe(true);
   });
 
-  it('copies attestations from options', () => {
+  it("copies attestations from options", () => {
     const attestation = createTestAttestation();
-    const identity = createAgentIdentity({ ...baseOptions, attestations: [attestation] });
+    const identity = createAgentIdentity({
+      ...baseOptions,
+      attestations: [attestation],
+    });
     expect(identity.attestations).toHaveLength(1);
     expect(identity.attestations[0]).toBe(attestation);
   });
 
-  it('defaults to empty attestations', () => {
+  it("defaults to empty attestations", () => {
     const identity = createAgentIdentity(baseOptions);
     expect(identity.attestations).toEqual([]);
   });
 
-  it('sets backwards-compat fields', () => {
+  it("sets backwards-compat fields", () => {
     const parsed = parseCAR(baseOptions.car);
     const identity = createAgentIdentity(baseOptions, parsed);
 
@@ -339,8 +362,8 @@ describe('createAgentIdentity', () => {
 // toAgentIdentitySummary
 // ============================================================================
 
-describe('toAgentIdentitySummary', () => {
-  it('extracts correct fields', () => {
+describe("toAgentIdentitySummary", () => {
+  it("extracts correct fields", () => {
     const identity = createTestIdentity();
     const summary = toAgentIdentitySummary(identity);
 
@@ -351,47 +374,55 @@ describe('toAgentIdentitySummary', () => {
     expect(summary.active).toBe(identity.active);
   });
 
-  it('computes certificationTier from highest valid attestation', () => {
+  it("computes certificationTier from highest valid attestation", () => {
     const identity = createTestIdentity({
       attestations: [
-        createTestAttestation({ certificationTier: CertificationTier.T2_PROVISIONAL }),
-        createTestAttestation({ certificationTier: CertificationTier.T4_STANDARD }),
-        createTestAttestation({ certificationTier: CertificationTier.T3_MONITORED }),
+        createTestAttestation({
+          certificationTier: CertificationTier.T2_PROVISIONAL,
+        }),
+        createTestAttestation({
+          certificationTier: CertificationTier.T4_STANDARD,
+        }),
+        createTestAttestation({
+          certificationTier: CertificationTier.T3_MONITORED,
+        }),
       ],
     });
     const summary = toAgentIdentitySummary(identity);
     expect(summary.certificationTier).toBe(CertificationTier.T4_STANDARD);
   });
 
-  it('returns undefined certificationTier when no valid attestations', () => {
+  it("returns undefined certificationTier when no valid attestations", () => {
     const identity = createTestIdentity({ attestations: [] });
     const summary = toAgentIdentitySummary(identity);
     expect(summary.certificationTier).toBeUndefined();
   });
 
-  it('ignores expired attestations', () => {
+  it("ignores expired attestations", () => {
     const identity = createTestIdentity({
       attestations: [
         createTestAttestation({
           certificationTier: CertificationTier.T5_TRUSTED,
           expiresAt: new Date(Date.now() - 1000),
         }),
-        createTestAttestation({ certificationTier: CertificationTier.T2_PROVISIONAL }),
+        createTestAttestation({
+          certificationTier: CertificationTier.T2_PROVISIONAL,
+        }),
       ],
     });
     const summary = toAgentIdentitySummary(identity);
     expect(summary.certificationTier).toBe(CertificationTier.T2_PROVISIONAL);
   });
 
-  it('uses metadata.description as name', () => {
+  it("uses metadata.description as name", () => {
     const identity = createTestIdentity({
-      metadata: { description: 'Invoice Processing Bot' },
+      metadata: { description: "Invoice Processing Bot" },
     });
     const summary = toAgentIdentitySummary(identity);
-    expect(summary.name).toBe('Invoice Processing Bot');
+    expect(summary.name).toBe("Invoice Processing Bot");
   });
 
-  it('returns undefined name when no metadata', () => {
+  it("returns undefined name when no metadata", () => {
     const identity = createTestIdentity({ metadata: undefined });
     const summary = toAgentIdentitySummary(identity);
     expect(summary.name).toBeUndefined();
@@ -402,135 +433,175 @@ describe('toAgentIdentitySummary', () => {
 // matchesAgentCriteria
 // ============================================================================
 
-describe('matchesAgentCriteria', () => {
-  it('matches with empty criteria', () => {
+describe("matchesAgentCriteria", () => {
+  it("matches with empty criteria", () => {
     const identity = createTestIdentity();
     expect(matchesAgentCriteria(identity, {})).toBe(true);
   });
 
-  it('rejects inactive agent when mustBeActive=true', () => {
+  it("rejects inactive agent when mustBeActive=true", () => {
     const identity = createTestIdentity({ active: false });
     expect(matchesAgentCriteria(identity, { mustBeActive: true })).toBe(false);
   });
 
-  it('matches when agent has all required domains', () => {
+  it("matches when agent has all required domains", () => {
     const identity = createTestIdentity();
-    expect(matchesAgentCriteria(identity, {
-      requiredDomains: ['A', 'B'] as DomainCode[],
-    })).toBe(true);
+    expect(
+      matchesAgentCriteria(identity, {
+        requiredDomains: ["A", "B"] as DomainCode[],
+      }),
+    ).toBe(true);
   });
 
-  it('rejects when agent missing required domain', () => {
+  it("rejects when agent missing required domain", () => {
     const identity = createTestIdentity();
-    expect(matchesAgentCriteria(identity, {
-      requiredDomains: ['A', 'S'] as DomainCode[],
-    })).toBe(false);
+    expect(
+      matchesAgentCriteria(identity, {
+        requiredDomains: ["A", "S"] as DomainCode[],
+      }),
+    ).toBe(false);
   });
 
-  it('matches when agent meets minimum level', () => {
+  it("matches when agent meets minimum level", () => {
     const identity = createTestIdentity();
-    expect(matchesAgentCriteria(identity, {
-      minLevel: CapabilityLevel.L3_EXECUTE,
-    })).toBe(true);
+    expect(
+      matchesAgentCriteria(identity, {
+        minLevel: CapabilityLevel.L3_EXECUTE,
+      }),
+    ).toBe(true);
   });
 
-  it('rejects when agent below minimum level', () => {
+  it("rejects when agent below minimum level", () => {
     const identity = createTestIdentity();
-    expect(matchesAgentCriteria(identity, {
-      minLevel: CapabilityLevel.L5_TRUSTED,
-    })).toBe(false);
+    expect(
+      matchesAgentCriteria(identity, {
+        minLevel: CapabilityLevel.L5_TRUSTED,
+      }),
+    ).toBe(false);
   });
 
-  it('matches minimum certification tier from active attestations', () => {
+  it("matches minimum certification tier from active attestations", () => {
     const identity = createTestIdentity({
-      attestations: [createTestAttestation({ certificationTier: CertificationTier.T4_STANDARD })],
+      attestations: [
+        createTestAttestation({
+          certificationTier: CertificationTier.T4_STANDARD,
+        }),
+      ],
     });
-    expect(matchesAgentCriteria(identity, {
-      minCertificationTier: CertificationTier.T3_MONITORED,
-    })).toBe(true);
+    expect(
+      matchesAgentCriteria(identity, {
+        minCertificationTier: CertificationTier.T3_MONITORED,
+      }),
+    ).toBe(true);
   });
 
-  it('rejects when attestation tier too low', () => {
+  it("rejects when attestation tier too low", () => {
     const identity = createTestIdentity({
-      attestations: [createTestAttestation({ certificationTier: CertificationTier.T1_OBSERVED })],
+      attestations: [
+        createTestAttestation({
+          certificationTier: CertificationTier.T1_OBSERVED,
+        }),
+      ],
     });
-    expect(matchesAgentCriteria(identity, {
-      minCertificationTier: CertificationTier.T3_MONITORED,
-    })).toBe(false);
+    expect(
+      matchesAgentCriteria(identity, {
+        minCertificationTier: CertificationTier.T3_MONITORED,
+      }),
+    ).toBe(false);
   });
 
-  it('rejects when no attestations and minCertificationTier required', () => {
+  it("rejects when no attestations and minCertificationTier required", () => {
     const identity = createTestIdentity({ attestations: [] });
-    expect(matchesAgentCriteria(identity, {
-      minCertificationTier: CertificationTier.T1_OBSERVED,
-    })).toBe(false);
+    expect(
+      matchesAgentCriteria(identity, {
+        minCertificationTier: CertificationTier.T1_OBSERVED,
+      }),
+    ).toBe(false);
   });
 
-  it('passes runtime tier check when runtimeTier undefined', () => {
+  it("passes runtime tier check when runtimeTier undefined", () => {
     const identity = createTestIdentity({ runtimeTier: undefined });
-    expect(matchesAgentCriteria(identity, {
-      minRuntimeTier: RuntimeTier.T3_MONITORED,
-    })).toBe(true);
+    expect(
+      matchesAgentCriteria(identity, {
+        minRuntimeTier: RuntimeTier.T3_MONITORED,
+      }),
+    ).toBe(true);
   });
 
-  it('rejects when runtime tier too low', () => {
-    const identity = createTestIdentity({ runtimeTier: RuntimeTier.T1_OBSERVED });
-    expect(matchesAgentCriteria(identity, {
-      minRuntimeTier: RuntimeTier.T3_MONITORED,
-    })).toBe(false);
+  it("rejects when runtime tier too low", () => {
+    const identity = createTestIdentity({
+      runtimeTier: RuntimeTier.T1_OBSERVED,
+    });
+    expect(
+      matchesAgentCriteria(identity, {
+        minRuntimeTier: RuntimeTier.T3_MONITORED,
+      }),
+    ).toBe(false);
   });
 
-  it('rejects when missing required skill', () => {
+  it("rejects when missing required skill", () => {
     const identity = createTestIdentity();
-    expect(matchesAgentCriteria(identity, {
-      requiredSkills: ['nlp' as any],
-    })).toBe(false);
+    expect(
+      matchesAgentCriteria(identity, {
+        requiredSkills: ["nlp" as any],
+      }),
+    ).toBe(false);
   });
 
-  it('rejects when mustHaveValidAttestations but none valid', () => {
+  it("rejects when mustHaveValidAttestations but none valid", () => {
     const identity = createTestIdentity({
-      attestations: [createTestAttestation({
-        status: 'revoked',
-      })],
+      attestations: [
+        createTestAttestation({
+          status: "revoked",
+        }),
+      ],
     });
-    expect(matchesAgentCriteria(identity, {
-      mustHaveValidAttestations: true,
-    })).toBe(false);
+    expect(
+      matchesAgentCriteria(identity, {
+        mustHaveValidAttestations: true,
+      }),
+    ).toBe(false);
   });
 
-  it('filters by organization from parsedCAR', () => {
+  it("filters by organization from parsedCAR", () => {
     const identity = createTestIdentity({
-      parsedCAR: parseCAR('a3i.acme-corp.invoice-bot:ABF-L3@1.0.0'),
+      parsedCAR: parseCAR("a3i.acme-corp.invoice-bot:ABF-L3@1.0.0"),
     });
-    expect(matchesAgentCriteria(identity, { organization: 'acme-corp' })).toBe(true);
-    expect(matchesAgentCriteria(identity, { organization: 'other-org' })).toBe(false);
+    expect(matchesAgentCriteria(identity, { organization: "acme-corp" })).toBe(
+      true,
+    );
+    expect(matchesAgentCriteria(identity, { organization: "other-org" })).toBe(
+      false,
+    );
   });
 
-  it('filters by registry from parsedCAR', () => {
+  it("filters by registry from parsedCAR", () => {
     const identity = createTestIdentity({
-      parsedCAR: parseCAR('a3i.acme-corp.invoice-bot:ABF-L3@1.0.0'),
+      parsedCAR: parseCAR("a3i.acme-corp.invoice-bot:ABF-L3@1.0.0"),
     });
-    expect(matchesAgentCriteria(identity, { registry: 'a3i' })).toBe(true);
-    expect(matchesAgentCriteria(identity, { registry: 'other' })).toBe(false);
+    expect(matchesAgentCriteria(identity, { registry: "a3i" })).toBe(true);
+    expect(matchesAgentCriteria(identity, { registry: "other" })).toBe(false);
   });
 
-  it('applies multiple criteria with AND logic', () => {
+  it("applies multiple criteria with AND logic", () => {
     const identity = createTestIdentity({
-      parsedCAR: parseCAR('a3i.acme-corp.invoice-bot:ABF-L3@1.0.0'),
+      parsedCAR: parseCAR("a3i.acme-corp.invoice-bot:ABF-L3@1.0.0"),
     });
     const criteria: AgentMatchCriteria = {
       mustBeActive: true,
-      requiredDomains: ['A'] as DomainCode[],
+      requiredDomains: ["A"] as DomainCode[],
       minLevel: CapabilityLevel.L3_EXECUTE,
-      organization: 'acme-corp',
+      organization: "acme-corp",
     };
     expect(matchesAgentCriteria(identity, criteria)).toBe(true);
 
     // Fail one criterion
-    expect(matchesAgentCriteria(identity, {
-      ...criteria,
-      minLevel: CapabilityLevel.L7_AUTONOMOUS,
-    })).toBe(false);
+    expect(
+      matchesAgentCriteria(identity, {
+        ...criteria,
+        minLevel: CapabilityLevel.L7_AUTONOMOUS,
+      }),
+    ).toBe(false);
   });
 });
 
@@ -538,56 +609,80 @@ describe('matchesAgentCriteria', () => {
 // capabilityVectorSatisfies
 // ============================================================================
 
-describe('capabilityVectorSatisfies', () => {
-  it('returns true when A has all of B domains and level >= B', () => {
-    const a: CapabilityVector = { domains: ['A', 'B', 'F'] as DomainCode[], level: CapabilityLevel.L5_TRUSTED };
-    const b: CapabilityVector = { domains: ['A', 'B'] as DomainCode[], level: CapabilityLevel.L3_EXECUTE };
-    expect(capabilityVectorSatisfies(a, b)).toBe(true);
-  });
-
-  it('returns false when A missing a domain from B', () => {
-    const a: CapabilityVector = { domains: ['A', 'B'] as DomainCode[], level: CapabilityLevel.L5_TRUSTED };
-    const b: CapabilityVector = { domains: ['A', 'S'] as DomainCode[], level: CapabilityLevel.L3_EXECUTE };
-    expect(capabilityVectorSatisfies(a, b)).toBe(false);
-  });
-
-  it('returns false when A level < B level', () => {
-    const a: CapabilityVector = { domains: ['A', 'B'] as DomainCode[], level: CapabilityLevel.L2_DRAFT };
-    const b: CapabilityVector = { domains: ['A'] as DomainCode[], level: CapabilityLevel.L3_EXECUTE };
-    expect(capabilityVectorSatisfies(a, b)).toBe(false);
-  });
-
-  it('returns true when B has skills and A has them all', () => {
+describe("capabilityVectorSatisfies", () => {
+  it("returns true when A has all of B domains and level >= B", () => {
     const a: CapabilityVector = {
-      domains: ['A'] as DomainCode[],
-      level: CapabilityLevel.L3_EXECUTE,
-      skills: ['nlp', 'cv'] as any[],
+      domains: ["A", "B", "F"] as DomainCode[],
+      level: CapabilityLevel.L5_TRUSTED,
     };
     const b: CapabilityVector = {
-      domains: ['A'] as DomainCode[],
+      domains: ["A", "B"] as DomainCode[],
       level: CapabilityLevel.L3_EXECUTE,
-      skills: ['nlp'] as any[],
     };
     expect(capabilityVectorSatisfies(a, b)).toBe(true);
   });
 
-  it('returns false when B has skills and A missing one', () => {
+  it("returns false when A missing a domain from B", () => {
     const a: CapabilityVector = {
-      domains: ['A'] as DomainCode[],
-      level: CapabilityLevel.L3_EXECUTE,
-      skills: ['nlp'] as any[],
+      domains: ["A", "B"] as DomainCode[],
+      level: CapabilityLevel.L5_TRUSTED,
     };
     const b: CapabilityVector = {
-      domains: ['A'] as DomainCode[],
+      domains: ["A", "S"] as DomainCode[],
       level: CapabilityLevel.L3_EXECUTE,
-      skills: ['nlp', 'cv'] as any[],
     };
     expect(capabilityVectorSatisfies(a, b)).toBe(false);
   });
 
-  it('passes when B has no skills requirement', () => {
-    const a: CapabilityVector = { domains: ['A'] as DomainCode[], level: CapabilityLevel.L3_EXECUTE };
-    const b: CapabilityVector = { domains: ['A'] as DomainCode[], level: CapabilityLevel.L3_EXECUTE };
+  it("returns false when A level < B level", () => {
+    const a: CapabilityVector = {
+      domains: ["A", "B"] as DomainCode[],
+      level: CapabilityLevel.L2_DRAFT,
+    };
+    const b: CapabilityVector = {
+      domains: ["A"] as DomainCode[],
+      level: CapabilityLevel.L3_EXECUTE,
+    };
+    expect(capabilityVectorSatisfies(a, b)).toBe(false);
+  });
+
+  it("returns true when B has skills and A has them all", () => {
+    const a: CapabilityVector = {
+      domains: ["A"] as DomainCode[],
+      level: CapabilityLevel.L3_EXECUTE,
+      skills: ["nlp", "cv"] as any[],
+    };
+    const b: CapabilityVector = {
+      domains: ["A"] as DomainCode[],
+      level: CapabilityLevel.L3_EXECUTE,
+      skills: ["nlp"] as any[],
+    };
+    expect(capabilityVectorSatisfies(a, b)).toBe(true);
+  });
+
+  it("returns false when B has skills and A missing one", () => {
+    const a: CapabilityVector = {
+      domains: ["A"] as DomainCode[],
+      level: CapabilityLevel.L3_EXECUTE,
+      skills: ["nlp"] as any[],
+    };
+    const b: CapabilityVector = {
+      domains: ["A"] as DomainCode[],
+      level: CapabilityLevel.L3_EXECUTE,
+      skills: ["nlp", "cv"] as any[],
+    };
+    expect(capabilityVectorSatisfies(a, b)).toBe(false);
+  });
+
+  it("passes when B has no skills requirement", () => {
+    const a: CapabilityVector = {
+      domains: ["A"] as DomainCode[],
+      level: CapabilityLevel.L3_EXECUTE,
+    };
+    const b: CapabilityVector = {
+      domains: ["A"] as DomainCode[],
+      level: CapabilityLevel.L3_EXECUTE,
+    };
     expect(capabilityVectorSatisfies(a, b)).toBe(true);
   });
 });
@@ -596,75 +691,83 @@ describe('capabilityVectorSatisfies', () => {
 // Type Guards
 // ============================================================================
 
-describe('isCapabilityVector', () => {
-  it('returns true for valid CapabilityVector', () => {
-    expect(isCapabilityVector({ domains: ['A'], level: 3 })).toBe(true);
+describe("isCapabilityVector", () => {
+  it("returns true for valid CapabilityVector", () => {
+    expect(isCapabilityVector({ domains: ["A"], level: 3 })).toBe(true);
   });
 
-  it('returns false for null', () => {
+  it("returns false for null", () => {
     expect(isCapabilityVector(null)).toBe(false);
   });
 
-  it('returns false for string', () => {
-    expect(isCapabilityVector('not a vector')).toBe(false);
+  it("returns false for string", () => {
+    expect(isCapabilityVector("not a vector")).toBe(false);
   });
 
-  it('returns false for missing domains', () => {
+  it("returns false for missing domains", () => {
     expect(isCapabilityVector({ level: 3 })).toBe(false);
   });
 
-  it('returns false for missing level', () => {
-    expect(isCapabilityVector({ domains: ['A'] })).toBe(false);
+  it("returns false for missing level", () => {
+    expect(isCapabilityVector({ domains: ["A"] })).toBe(false);
   });
 });
 
-describe('isAgentIdentity', () => {
-  it('returns true for valid AgentIdentity', () => {
-    expect(isAgentIdentity({
-      car: 'test',
-      did: 'did:web:test',
-      capabilities: { domains: [], level: 0 },
-      attestations: [],
-    })).toBe(true);
+describe("isAgentIdentity", () => {
+  it("returns true for valid AgentIdentity", () => {
+    expect(
+      isAgentIdentity({
+        car: "test",
+        did: "did:web:test",
+        capabilities: { domains: [], level: 0 },
+        attestations: [],
+      }),
+    ).toBe(true);
   });
 
-  it('returns true with carId (backwards compat)', () => {
-    expect(isAgentIdentity({
-      carId: 'test',
-      did: 'did:web:test',
-      capabilities: { domains: [], level: 0 },
-      attestations: [],
-    })).toBe(true);
+  it("returns true with carId (backwards compat)", () => {
+    expect(
+      isAgentIdentity({
+        carId: "test",
+        did: "did:web:test",
+        capabilities: { domains: [], level: 0 },
+        attestations: [],
+      }),
+    ).toBe(true);
   });
 
-  it('returns false for missing required fields', () => {
-    expect(isAgentIdentity({ did: 'test' })).toBe(false);
+  it("returns false for missing required fields", () => {
+    expect(isAgentIdentity({ did: "test" })).toBe(false);
     expect(isAgentIdentity(null)).toBe(false);
     expect(isAgentIdentity(42)).toBe(false);
   });
 });
 
-describe('isAgentIdentitySummary', () => {
-  it('returns true for valid summary', () => {
-    expect(isAgentIdentitySummary({
-      car: 'test',
-      did: 'did:web:test',
-      domains: ['A'],
-      level: 3,
-    })).toBe(true);
+describe("isAgentIdentitySummary", () => {
+  it("returns true for valid summary", () => {
+    expect(
+      isAgentIdentitySummary({
+        car: "test",
+        did: "did:web:test",
+        domains: ["A"],
+        level: 3,
+      }),
+    ).toBe(true);
   });
 
-  it('returns true with carId (backwards compat)', () => {
-    expect(isAgentIdentitySummary({
-      carId: 'test',
-      did: 'did:web:test',
-      domains: ['A'],
-      level: 3,
-    })).toBe(true);
+  it("returns true with carId (backwards compat)", () => {
+    expect(
+      isAgentIdentitySummary({
+        carId: "test",
+        did: "did:web:test",
+        domains: ["A"],
+        level: 3,
+      }),
+    ).toBe(true);
   });
 
-  it('returns false for missing required fields', () => {
-    expect(isAgentIdentitySummary({ car: 'test', did: 'test' })).toBe(false);
+  it("returns false for missing required fields", () => {
+    expect(isAgentIdentitySummary({ car: "test", did: "test" })).toBe(false);
     expect(isAgentIdentitySummary(null)).toBe(false);
   });
 });
@@ -673,8 +776,8 @@ describe('isAgentIdentitySummary', () => {
 // Effective Permission with Supervision
 // ============================================================================
 
-describe('calculateEffectivePermission with supervision', () => {
-  it('boosts certification ceiling when supervision active', () => {
+describe("calculateEffectivePermission with supervision", () => {
+  it("boosts certification ceiling when supervision active", () => {
     const result = calculateEffectivePermission({
       certificationTier: CertificationTier.T2_PROVISIONAL,
       competenceLevel: CapabilityLevel.L7_AUTONOMOUS,
@@ -692,7 +795,7 @@ describe('calculateEffectivePermission with supervision', () => {
     expect(result.level).toBe(CapabilityLevel.L5_TRUSTED);
   });
 
-  it('supervision capped at supervisorTier - 1', () => {
+  it("supervision capped at supervisorTier - 1", () => {
     const result = calculateEffectivePermission({
       certificationTier: CertificationTier.T3_MONITORED,
       competenceLevel: CapabilityLevel.L7_AUTONOMOUS,
@@ -708,7 +811,7 @@ describe('calculateEffectivePermission with supervision', () => {
     expect(result.level).toBe(CapabilityLevel.L4_AUTONOMOUS);
   });
 
-  it('supervision cannot lower base certification tier', () => {
+  it("supervision cannot lower base certification tier", () => {
     const result = calculateEffectivePermission({
       certificationTier: CertificationTier.T4_STANDARD,
       competenceLevel: CapabilityLevel.L7_AUTONOMOUS,
@@ -724,7 +827,7 @@ describe('calculateEffectivePermission with supervision', () => {
     expect(result.level).toBeGreaterThanOrEqual(CapabilityLevel.L5_TRUSTED);
   });
 
-  it('works normally without supervision', () => {
+  it("works normally without supervision", () => {
     const result = calculateEffectivePermission({
       certificationTier: CertificationTier.T3_MONITORED,
       competenceLevel: CapabilityLevel.L4_AUTONOMOUS,
@@ -738,7 +841,7 @@ describe('calculateEffectivePermission with supervision', () => {
     expect(result.constrained).toBe(true);
   });
 
-  it('picks correct minimum even with supervision boost', () => {
+  it("picks correct minimum even with supervision boost", () => {
     const result = calculateEffectivePermission({
       certificationTier: CertificationTier.T2_PROVISIONAL,
       competenceLevel: CapabilityLevel.L7_AUTONOMOUS,
@@ -754,6 +857,6 @@ describe('calculateEffectivePermission with supervision', () => {
     // Runtime: T2 → ceiling=2
     // Runtime is the bottleneck at 2
     expect(result.level).toBe(CapabilityLevel.L2_DRAFT);
-    expect(result.constrainingFactor).toBe('runtime_tier');
+    expect(result.constrainingFactor).toBe("runtime_tier");
   });
 });

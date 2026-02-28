@@ -5,8 +5,8 @@
  * automatically logging authorization decisions to the audit trail.
  */
 
-import type { Intent, Decision } from '@vorionsys/contracts';
-import { ProofPlane } from './proof-plane.js';
+import type { Intent, Decision } from "@vorionsys/contracts";
+import { ProofPlane } from "./proof-plane.js";
 
 /**
  * Interface for proof plane logging (matches A3I's expected interface)
@@ -62,7 +62,9 @@ export class ProofPlaneLoggerImpl implements ProofPlaneLogger {
 /**
  * Create a proof plane logger
  */
-export function createProofPlaneLogger(config: ProofPlaneLoggerConfig): ProofPlaneLoggerImpl {
+export function createProofPlaneLogger(
+  config: ProofPlaneLoggerConfig,
+): ProofPlaneLoggerImpl {
   return new ProofPlaneLoggerImpl(config);
 }
 

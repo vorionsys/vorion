@@ -7,8 +7,8 @@
  * Dual-hash: SHA-256 (primary chain) + SHA3-256 (integrity anchor).
  */
 
-import * as nodeCrypto from 'node:crypto';
-import type { ProofEvent, ProofEventPayload } from '@vorionsys/contracts';
+import * as nodeCrypto from "node:crypto";
+import type { ProofEvent, ProofEventPayload } from "@vorionsys/contracts";
 
 /**
  * Create a SHA-256 hash of the given data
@@ -16,16 +16,16 @@ import type { ProofEvent, ProofEventPayload } from '@vorionsys/contracts';
 export async function sha256(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /**
  * Create a SHA3-256 hash of the given data (integrity anchor)
  */
 export function sha3_256(data: string): string {
-  return nodeCrypto.createHash('sha3-256').update(data).digest('hex');
+  return nodeCrypto.createHash("sha3-256").update(data).digest("hex");
 }
 
 /**
@@ -47,7 +47,9 @@ interface HashableEventData {
 /**
  * Create the hashable representation of an event
  */
-function getHashableData(event: Omit<ProofEvent, 'eventHash' | 'recordedAt'>): HashableEventData {
+function getHashableData(
+  event: Omit<ProofEvent, "eventHash" | "recordedAt">,
+): HashableEventData {
   return {
     eventId: event.eventId,
     eventType: event.eventType,
@@ -55,9 +57,10 @@ function getHashableData(event: Omit<ProofEvent, 'eventHash' | 'recordedAt'>): H
     agentId: event.agentId,
     payload: event.payload,
     previousHash: event.previousHash,
-    occurredAt: event.occurredAt instanceof Date
-      ? event.occurredAt.toISOString()
-      : event.occurredAt,
+    occurredAt:
+      event.occurredAt instanceof Date
+        ? event.occurredAt.toISOString()
+        : event.occurredAt,
     signedBy: event.signedBy,
     signature: event.signature,
   };
@@ -67,7 +70,7 @@ function getHashableData(event: Omit<ProofEvent, 'eventHash' | 'recordedAt'>): H
  * Recursively sort object keys for deterministic serialization
  */
 function sortObjectKeys(obj: unknown): unknown {
-  if (obj === null || typeof obj !== 'object') {
+  if (obj === null || typeof obj !== "object") {
     return obj;
   }
   if (Array.isArray(obj)) {
@@ -84,7 +87,7 @@ function sortObjectKeys(obj: unknown): unknown {
  * Compute the hash of an event's content
  */
 export async function computeEventHash(
-  event: Omit<ProofEvent, 'eventHash' | 'recordedAt'>
+  event: Omit<ProofEvent, "eventHash" | "recordedAt">,
 ): Promise<string> {
   const hashable = getHashableData(event);
   const sortedHashable = sortObjectKeys(hashable);
@@ -96,7 +99,7 @@ export async function computeEventHash(
  * Compute the SHA3-256 integrity anchor hash for an event
  */
 export function computeEventHash3(
-  event: Omit<ProofEvent, 'eventHash' | 'eventHash3' | 'recordedAt'>
+  event: Omit<ProofEvent, "eventHash" | "eventHash3" | "recordedAt">,
 ): string {
   const hashable = getHashableData(event);
   const sortedHashable = sortObjectKeys(hashable);
@@ -125,7 +128,10 @@ export function verifyEventHash3(event: ProofEvent): boolean {
 /**
  * Verify that an event correctly chains to the previous event
  */
-export function verifyChainLink(event: ProofEvent, previousEvent: ProofEvent | null): boolean {
+export function verifyChainLink(
+  event: ProofEvent,
+  previousEvent: ProofEvent | null,
+): boolean {
   if (previousEvent === null) {
     // First event in chain should have null previousHash
     return event.previousHash === null;
@@ -224,7 +230,9 @@ export interface ChainVerificationResult {
 /**
  * Verify a chain and return detailed results
  */
-export async function verifyChainWithDetails(events: ProofEvent[]): Promise<ChainVerificationResult> {
+export async function verifyChainWithDetails(
+  events: ProofEvent[],
+): Promise<ChainVerificationResult> {
   const result = await verifyChain(events);
 
   return {

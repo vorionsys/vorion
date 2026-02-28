@@ -77,7 +77,7 @@ export const CANONICAL_TRUST_WEIGHTS = {
  */
 export const TOTAL_TRUST_WEIGHT = Object.values(CANONICAL_TRUST_WEIGHTS).reduce(
   (sum, weight) => sum + weight,
-  0
+  0,
 );
 
 /**
@@ -90,7 +90,9 @@ export function validateCanonicalWeights(): boolean {
 /**
  * Get normalized weight (0-1) for a metric
  */
-export function getNormalizedWeight(metric: keyof typeof CANONICAL_TRUST_WEIGHTS): number {
+export function getNormalizedWeight(
+  metric: keyof typeof CANONICAL_TRUST_WEIGHTS,
+): number {
   const weight = CANONICAL_TRUST_WEIGHTS[metric];
   return weight / TOTAL_TRUST_WEIGHT;
 }
@@ -111,34 +113,35 @@ export interface CanonicalWeightMetric {
 export function getCanonicalWeightMetrics(): CanonicalWeightMetric[] {
   return [
     {
-      name: 'Success Ratio',
+      name: "Success Ratio",
       weight: WEIGHT_SUCCESS_RATIO,
       percentage: (WEIGHT_SUCCESS_RATIO / TOTAL_TRUST_WEIGHT) * 100,
-      description: 'Fraction of decisions that succeeded without error',
+      description: "Fraction of decisions that succeeded without error",
     },
     {
-      name: 'Authorization History',
+      name: "Authorization History",
       weight: WEIGHT_AUTHORIZATION_HISTORY,
       percentage: (WEIGHT_AUTHORIZATION_HISTORY / TOTAL_TRUST_WEIGHT) * 100,
-      description: 'Alignment between attempted and authorized actions',
+      description: "Alignment between attempted and authorized actions",
     },
     {
-      name: 'Cascade Prevention',
+      name: "Cascade Prevention",
       weight: WEIGHT_CASCADE_PREVENTION,
       percentage: (WEIGHT_CASCADE_PREVENTION / TOTAL_TRUST_WEIGHT) * 100,
-      description: 'How well agent errors are contained and prevented from cascading',
+      description:
+        "How well agent errors are contained and prevented from cascading",
     },
     {
-      name: 'Execution Efficiency',
+      name: "Execution Efficiency",
       weight: WEIGHT_EXECUTION_EFFICIENCY,
       percentage: (WEIGHT_EXECUTION_EFFICIENCY / TOTAL_TRUST_WEIGHT) * 100,
-      description: 'Resource consumption vs. business value delivered',
+      description: "Resource consumption vs. business value delivered",
     },
     {
-      name: 'Behavior Stability',
+      name: "Behavior Stability",
       weight: WEIGHT_BEHAVIOR_STABILITY,
       percentage: (WEIGHT_BEHAVIOR_STABILITY / TOTAL_TRUST_WEIGHT) * 100,
-      description: 'Consistency of agent behavior over time (detects drift)',
+      description: "Consistency of agent behavior over time (detects drift)",
     },
   ];
 }

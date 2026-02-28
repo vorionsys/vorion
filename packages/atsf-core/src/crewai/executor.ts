@@ -6,12 +6,15 @@
  * @packageDocumentation
  */
 
-import { createLogger } from '../common/logger.js';
-import type { TrustLevel } from '../common/types.js';
-import { TrustInsufficientError } from '../common/types.js';
-import type { TrustEngine, TrustRecord } from '../trust-engine/index.js';
-import { TRUST_LEVEL_NAMES } from '../trust-engine/index.js';
-import { CrewTrustCallbackHandler, createCrewTrustCallback } from './callback.js';
+import { createLogger } from "../common/logger.js";
+import type { TrustLevel } from "../common/types.js";
+import { TrustInsufficientError } from "../common/types.js";
+import type { TrustEngine, TrustRecord } from "../trust-engine/index.js";
+import { TRUST_LEVEL_NAMES } from "../trust-engine/index.js";
+import {
+  CrewTrustCallbackHandler,
+  createCrewTrustCallback,
+} from "./callback.js";
 import type {
   CrewAgentConfig,
   CrewConfig,
@@ -20,9 +23,9 @@ import type {
   TrustedTaskResult,
   TrustedCrewResult,
   DelegationResult,
-} from './types.js';
+} from "./types.js";
 
-const logger = createLogger({ component: 'crewai-executor' });
+const logger = createLogger({ component: "crewai-executor" });
 
 // =============================================================================
 // CREW AGENT EXECUTOR
@@ -86,7 +89,7 @@ export class CrewAgentExecutor {
         currentLevel: 0,
         currentScore: 0,
         requiredLevel: minLevel,
-        reason: 'Agent not initialized in trust engine',
+        reason: "Agent not initialized in trust engine",
       };
     }
 
@@ -126,7 +129,7 @@ export class CrewAgentExecutor {
           currentLevel: trustCheck.currentLevel,
           requiredLevel: trustCheck.requiredLevel,
         },
-        'Task execution blocked due to insufficient trust',
+        "Task execution blocked due to insufficient trust",
       );
 
       throw new TrustInsufficientError(
@@ -153,7 +156,7 @@ export class CrewAgentExecutor {
           signalsRecorded: this.callback.signalsRecorded - initialSignals,
           finalScore: finalRecord?.score,
         },
-        'Trusted task execution completed',
+        "Trusted task execution completed",
       );
 
       return {
@@ -237,7 +240,7 @@ export class CrewAgentExecutor {
           to: targetExecutor.agentId,
           taskId: task.taskId,
         },
-        'Task delegation completed',
+        "Task delegation completed",
       );
 
       return {
@@ -274,7 +277,7 @@ export class CrewAgentExecutor {
       entityId: this.config.agentId,
       type: `behavioral.${type}`,
       value,
-      source: 'crewai-manual',
+      source: "crewai-manual",
       timestamp: new Date().toISOString(),
       metadata: { role: this.config.role },
     });
@@ -289,7 +292,7 @@ export class CrewAgentExecutor {
       entityId: this.config.agentId,
       type: `behavioral.${type}`,
       value,
-      source: 'crewai-manual',
+      source: "crewai-manual",
       timestamp: new Date().toISOString(),
       metadata: { role: this.config.role },
     });
@@ -315,7 +318,7 @@ export class CrewExecutor {
     this.trustEngine = trustEngine;
     this.config = {
       crewId: config.crewId,
-      process: config.process ?? 'sequential',
+      process: config.process ?? "sequential",
       minCrewTrust: config.minCrewTrust ?? 1,
       maxTaskFailures: config.maxTaskFailures ?? 0,
       recordCrewEvents: config.recordCrewEvents ?? true,
@@ -366,14 +369,18 @@ export class CrewExecutor {
     }
     logger.info(
       { crewId: this.config.crewId, agentCount: this.agents.size },
-      'Crew initialized',
+      "Crew initialized",
     );
   }
 
   /**
    * Get the average trust level across all crew members
    */
-  async getCrewTrust(): Promise<{ averageScore: number; averageLevel: number; allMeetMinimum: boolean }> {
+  async getCrewTrust(): Promise<{
+    averageScore: number;
+    averageLevel: number;
+    allMeetMinimum: boolean;
+  }> {
     if (this.agents.size === 0) {
       return { averageScore: 0, averageLevel: 0, allMeetMinimum: false };
     }
@@ -425,7 +432,7 @@ export class CrewExecutor {
 
     const agentList = Array.from(this.agents.values());
     if (agentList.length === 0) {
-      throw new Error('Crew has no agents');
+      throw new Error("Crew has no agents");
     }
 
     const results: TrustedTaskResult<T>[] = [];
@@ -458,7 +465,7 @@ export class CrewExecutor {
               tasksFailed,
               maxAllowed: this.config.maxTaskFailures,
             },
-            'Crew aborted due to too many task failures',
+            "Crew aborted due to too many task failures",
           );
           throw error;
         }
@@ -470,7 +477,7 @@ export class CrewExecutor {
             agentId: agent.agentId,
             error: error instanceof Error ? error.message : String(error),
           },
-          'Task failed within tolerance, continuing',
+          "Task failed within tolerance, continuing",
         );
       }
     }

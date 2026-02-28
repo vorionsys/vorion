@@ -18,7 +18,7 @@ import {
   integer,
   bigint,
   uniqueIndex,
-} from 'drizzle-orm/pg-core';
+} from "drizzle-orm/pg-core";
 
 // =============================================================================
 // ENUMS
@@ -27,7 +27,11 @@ import {
 /**
  * API key status enum
  */
-export const apiKeyStatusEnum = pgEnum('api_key_status', ['active', 'revoked', 'expired']);
+export const apiKeyStatusEnum = pgEnum("api_key_status", [
+  "active",
+  "revoked",
+  "expired",
+]);
 
 // =============================================================================
 // API KEYS TABLE
@@ -37,55 +41,66 @@ export const apiKeyStatusEnum = pgEnum('api_key_status', ['active', 'revoked', '
  * API keys table - stores API key records with all metadata
  */
 export const apiKeys = pgTable(
-  'api_keys',
+  "api_keys",
   {
     // Primary key
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: uuid("id").primaryKey().defaultRandom(),
 
     // Key identification
-    name: text('name').notNull(),
-    prefix: text('prefix').notNull().unique(), // First 8 chars for lookup
-    hashedKey: text('hashed_key').notNull(), // SHA-256 hash for validation
+    name: text("name").notNull(),
+    prefix: text("prefix").notNull().unique(), // First 8 chars for lookup
+    hashedKey: text("hashed_key").notNull(), // SHA-256 hash for validation
 
     // Ownership
-    tenantId: text('tenant_id').notNull(),
-    createdBy: text('created_by').notNull(),
+    tenantId: text("tenant_id").notNull(),
+    createdBy: text("created_by").notNull(),
 
     // Permissions
-    scopes: jsonb('scopes').$type<string[]>().notNull().default([]),
+    scopes: jsonb("scopes").$type<string[]>().notNull().default([]),
 
     // Rate limiting configuration
-    rateLimitRequestsPerMinute: integer('rate_limit_requests_per_minute').notNull().default(60),
-    rateLimitRequestsPerHour: integer('rate_limit_requests_per_hour').notNull().default(1000),
-    rateLimitBurstLimit: integer('rate_limit_burst_limit').notNull().default(10),
+    rateLimitRequestsPerMinute: integer("rate_limit_requests_per_minute")
+      .notNull()
+      .default(60),
+    rateLimitRequestsPerHour: integer("rate_limit_requests_per_hour")
+      .notNull()
+      .default(1000),
+    rateLimitBurstLimit: integer("rate_limit_burst_limit")
+      .notNull()
+      .default(10),
 
     // Status
-    status: apiKeyStatusEnum('status').notNull().default('active'),
+    status: apiKeyStatusEnum("status").notNull().default("active"),
 
     // Timestamps
-    expiresAt: timestamp('expires_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
 
     // Additional configuration
-    description: text('description'),
-    allowedIps: jsonb('allowed_ips').$type<string[]>(),
-    metadata: jsonb('metadata').$type<Record<string, unknown>>().default({}),
+    description: text("description"),
+    allowedIps: jsonb("allowed_ips").$type<string[]>(),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
   },
   (table) => ({
     // Index by prefix for fast lookup during validation
-    prefixIdx: index('api_keys_prefix_idx').on(table.prefix),
+    prefixIdx: index("api_keys_prefix_idx").on(table.prefix),
     // Index by tenant for listing keys
-    tenantIdIdx: index('api_keys_tenant_id_idx').on(table.tenantId),
+    tenantIdIdx: index("api_keys_tenant_id_idx").on(table.tenantId),
     // Composite index for listing with status filter
-    tenantStatusIdx: index('api_keys_tenant_status_idx').on(table.tenantId, table.status),
+    tenantStatusIdx: index("api_keys_tenant_status_idx").on(
+      table.tenantId,
+      table.status,
+    ),
     // Index by creator for filtering
-    createdByIdx: index('api_keys_created_by_idx').on(table.createdBy),
+    createdByIdx: index("api_keys_created_by_idx").on(table.createdBy),
     // Index for expiration checks
-    expiresAtIdx: index('api_keys_expires_at_idx').on(table.expiresAt),
+    expiresAtIdx: index("api_keys_expires_at_idx").on(table.expiresAt),
     // Index for status-based queries
-    statusIdx: index('api_keys_status_idx').on(table.status),
-  })
+    statusIdx: index("api_keys_status_idx").on(table.status),
+  }),
 );
 
 // =============================================================================
@@ -100,39 +115,45 @@ export const apiKeys = pgTable(
  * This table includes TTL-based cleanup support.
  */
 export const apiKeyRateLimits = pgTable(
-  'api_key_rate_limits',
+  "api_key_rate_limits",
   {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: uuid("id").primaryKey().defaultRandom(),
 
     // Key reference
-    keyId: uuid('key_id')
+    keyId: uuid("key_id")
       .notNull()
-      .references(() => apiKeys.id, { onDelete: 'cascade' }),
+      .references(() => apiKeys.id, { onDelete: "cascade" }),
 
     // Second window (burst limiting)
-    secondCount: integer('second_count').notNull().default(0),
-    secondResetAt: bigint('second_reset_at', { mode: 'number' }).notNull(),
+    secondCount: integer("second_count").notNull().default(0),
+    secondResetAt: bigint("second_reset_at", { mode: "number" }).notNull(),
 
     // Minute window
-    minuteCount: integer('minute_count').notNull().default(0),
-    minuteResetAt: bigint('minute_reset_at', { mode: 'number' }).notNull(),
+    minuteCount: integer("minute_count").notNull().default(0),
+    minuteResetAt: bigint("minute_reset_at", { mode: "number" }).notNull(),
 
     // Hour window
-    hourCount: integer('hour_count').notNull().default(0),
-    hourResetAt: bigint('hour_reset_at', { mode: 'number' }).notNull(),
+    hourCount: integer("hour_count").notNull().default(0),
+    hourResetAt: bigint("hour_reset_at", { mode: "number" }).notNull(),
 
     // TTL for cleanup - records older than this can be purged
-    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 
     // Last update timestamp
-    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => ({
     // Unique constraint on keyId - one rate limit record per key
-    keyIdUniqueIdx: uniqueIndex('api_key_rate_limits_key_id_unique_idx').on(table.keyId),
+    keyIdUniqueIdx: uniqueIndex("api_key_rate_limits_key_id_unique_idx").on(
+      table.keyId,
+    ),
     // Index for TTL-based cleanup
-    expiresAtIdx: index('api_key_rate_limits_expires_at_idx').on(table.expiresAt),
-  })
+    expiresAtIdx: index("api_key_rate_limits_expires_at_idx").on(
+      table.expiresAt,
+    ),
+  }),
 );
 
 // =============================================================================

@@ -8,7 +8,7 @@
  * - Quiz attempts and scores
  */
 
-import type { QuizAttempt, EarnedCertificate, CertificateLevel } from '@/types';
+import type { QuizAttempt, EarnedCertificate } from '@/types';
 import { checkCertificateEligibility, createEarnedCertificate } from './certificates';
 
 // Storage keys
@@ -172,9 +172,9 @@ export function recalculateStats(progress: UserProgress): void {
     const modules = Object.values(path.modulesProgress);
     totalModulesCompleted += modules.filter(m => m.completed).length;
 
-    for (const module of modules) {
-      totalQuizzesTaken += module.quizAttempts.length;
-      for (const attempt of module.quizAttempts) {
+    for (const mod of modules) {
+      totalQuizzesTaken += mod.quizAttempts.length;
+      for (const attempt of mod.quizAttempts) {
         totalQuizScore += attempt.score;
       }
     }

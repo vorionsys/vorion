@@ -2,22 +2,22 @@
  * Policy Bundle types - compliance rules as data
  */
 
-import type { DataSensitivity, TrustBand, ActionType } from './enums.js';
+import type { DataSensitivity, TrustBand, ActionType } from "./enums.js";
 
 /**
  * Operator for policy conditions
  */
 export enum PolicyOperator {
-  EQUALS = 'equals',
-  NOT_EQUALS = 'not_equals',
-  GREATER_THAN = 'greater_than',
-  LESS_THAN = 'less_than',
-  GREATER_OR_EQUAL = 'greater_or_equal',
-  LESS_OR_EQUAL = 'less_or_equal',
-  IN = 'in',
-  NOT_IN = 'not_in',
-  CONTAINS = 'contains',
-  MATCHES = 'matches',
+  EQUALS = "equals",
+  NOT_EQUALS = "not_equals",
+  GREATER_THAN = "greater_than",
+  LESS_THAN = "less_than",
+  GREATER_OR_EQUAL = "greater_or_equal",
+  LESS_OR_EQUAL = "less_or_equal",
+  IN = "in",
+  NOT_IN = "not_in",
+  CONTAINS = "contains",
+  MATCHES = "matches",
 }
 
 /**
@@ -47,7 +47,7 @@ export interface PolicyRule {
   /** Conditions that must be met */
   conditions: PolicyCondition[];
   /** Effect when conditions match */
-  effect: 'permit' | 'deny';
+  effect: "permit" | "deny";
   /** Optional constraints to apply if permitted */
   constraints?: Partial<{
     requiredApprovals: string[];
@@ -132,7 +132,7 @@ export interface PolicyBundle {
   rules: PolicyRule[];
 
   /** Default effect when no rules match */
-  defaultEffect: 'permit' | 'deny';
+  defaultEffect: "permit" | "deny";
 
   /** Metadata */
   createdAt: Date;
@@ -149,7 +149,7 @@ export interface PolicyEvaluationResult {
   /** Which rule(s) matched */
   matchedRules: string[];
   /** Combined constraints from all matching rules */
-  constraints: PolicyRule['constraints'];
+  constraints: PolicyRule["constraints"];
   /** Reasoning for the decision */
   reasoning: string[];
   /** Time to evaluate (ms) */

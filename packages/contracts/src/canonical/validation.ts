@@ -21,17 +21,17 @@ import {
   ComponentStatus,
   ApprovalType,
   OBSERVATION_CEILINGS,
-} from '../v2/enums.js';
+} from "../v2/enums.js";
 
 import {
   TrustFactorScores,
   DEFAULT_BAND_THRESHOLDS,
   BandThresholds,
   RiskProfile,
-} from '../v2/trust-profile.js';
+} from "../v2/trust-profile.js";
 
-import { TrustDeltaReason } from '../v2/trust-delta.js';
-import { DenialReason } from '../v2/decision.js';
+import { TrustDeltaReason } from "../v2/trust-delta.js";
+import { DenialReason } from "../v2/decision.js";
 
 // ============================================================================
 // Constants
@@ -66,10 +66,12 @@ export class ValidationError extends Error {
     message: string,
     public readonly field: string,
     public readonly value: unknown,
-    public readonly expected: string
+    public readonly expected: string,
   ) {
-    super(`${field}: ${message} (got ${JSON.stringify(value)}, expected ${expected})`);
-    this.name = 'ValidationError';
+    super(
+      `${field}: ${message} (got ${JSON.stringify(value)}, expected ${expected})`,
+    );
+    this.name = "ValidationError";
   }
 }
 
@@ -81,29 +83,34 @@ export class ValidationError extends Error {
  * Check if a value is a valid TrustBand
  */
 export function isTrustBand(value: unknown): value is TrustBand {
-  return typeof value === 'number' && Object.values(TrustBand).includes(value);
+  return typeof value === "number" && Object.values(TrustBand).includes(value);
 }
 
 /**
  * Check if a value is a valid TrustBand name (string form)
  */
-export function isTrustBandName(value: unknown): value is keyof typeof TrustBand {
-  return typeof value === 'string' && value in TrustBand;
+export function isTrustBandName(
+  value: unknown,
+): value is keyof typeof TrustBand {
+  return typeof value === "string" && value in TrustBand;
 }
 
 /**
  * Assert that a value is a valid TrustBand
  * @throws ValidationError if invalid
  */
-export function assertValidTrustBand(value: unknown, field = 'trustBand'): asserts value is TrustBand {
+export function assertValidTrustBand(
+  value: unknown,
+  field = "trustBand",
+): asserts value is TrustBand {
   if (!isTrustBand(value)) {
     throw new ValidationError(
-      'Invalid trust band',
+      "Invalid trust band",
       field,
       value,
       `one of ${Object.keys(TrustBand)
         .filter((k) => isNaN(Number(k)))
-        .join(', ')}`
+        .join(", ")}`,
     );
   }
 }
@@ -112,10 +119,10 @@ export function assertValidTrustBand(value: unknown, field = 'trustBand'): asser
  * Parse a trust band from string or number
  */
 export function parseTrustBand(value: unknown): TrustBand | null {
-  if (typeof value === 'number' && isTrustBand(value)) {
+  if (typeof value === "number" && isTrustBand(value)) {
     return value;
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     // Try as enum key (e.g., "T3_MONITORED")
     if (value in TrustBand) {
       return TrustBand[value as keyof typeof TrustBand];
@@ -141,7 +148,7 @@ export function parseTrustBand(value: unknown): TrustBand | null {
  */
 export function isTrustScore(value: unknown): value is number {
   return (
-    typeof value === 'number' &&
+    typeof value === "number" &&
     !isNaN(value) &&
     value >= TRUST_SCORE_RANGE.min &&
     value <= TRUST_SCORE_RANGE.max
@@ -152,13 +159,16 @@ export function isTrustScore(value: unknown): value is number {
  * Assert that a value is a valid trust score
  * @throws ValidationError if invalid
  */
-export function assertValidTrustScore(value: unknown, field = 'trustScore'): asserts value is number {
+export function assertValidTrustScore(
+  value: unknown,
+  field = "trustScore",
+): asserts value is number {
   if (!isTrustScore(value)) {
     throw new ValidationError(
-      'Invalid trust score',
+      "Invalid trust score",
       field,
       value,
-      `number between ${TRUST_SCORE_RANGE.min} and ${TRUST_SCORE_RANGE.max}`
+      `number between ${TRUST_SCORE_RANGE.min} and ${TRUST_SCORE_RANGE.max}`,
     );
   }
 }
@@ -167,7 +177,10 @@ export function assertValidTrustScore(value: unknown, field = 'trustScore'): ass
  * Clamp a trust score to valid range
  */
 export function clampTrustScore(value: number): number {
-  return Math.max(TRUST_SCORE_RANGE.min, Math.min(TRUST_SCORE_RANGE.max, value));
+  return Math.max(
+    TRUST_SCORE_RANGE.min,
+    Math.min(TRUST_SCORE_RANGE.max, value),
+  );
 }
 
 /**
@@ -186,7 +199,10 @@ export function roundTrustScore(value: number, decimals = 2): number {
  * Check if a value is a valid ObservationTier
  */
 export function isObservationTier(value: unknown): value is ObservationTier {
-  return typeof value === 'string' && Object.values(ObservationTier).includes(value as ObservationTier);
+  return (
+    typeof value === "string" &&
+    Object.values(ObservationTier).includes(value as ObservationTier)
+  );
 }
 
 /**
@@ -195,14 +211,14 @@ export function isObservationTier(value: unknown): value is ObservationTier {
  */
 export function assertValidObservationTier(
   value: unknown,
-  field = 'observationTier'
+  field = "observationTier",
 ): asserts value is ObservationTier {
   if (!isObservationTier(value)) {
     throw new ValidationError(
-      'Invalid observation tier',
+      "Invalid observation tier",
       field,
       value,
-      `one of ${Object.values(ObservationTier).join(', ')}`
+      `one of ${Object.values(ObservationTier).join(", ")}`,
     );
   }
 }
@@ -217,7 +233,10 @@ export function getObservationCeiling(tier: ObservationTier): number {
 /**
  * Apply observation ceiling to a trust score
  */
-export function applyObservationCeiling(score: number, tier: ObservationTier): number {
+export function applyObservationCeiling(
+  score: number,
+  tier: ObservationTier,
+): number {
   const ceiling = getObservationCeiling(tier);
   return Math.min(score, ceiling);
 }
@@ -230,7 +249,10 @@ export function applyObservationCeiling(score: number, tier: ObservationTier): n
  * Check if a value is a valid DataSensitivity
  */
 export function isDataSensitivity(value: unknown): value is DataSensitivity {
-  return typeof value === 'string' && Object.values(DataSensitivity).includes(value as DataSensitivity);
+  return (
+    typeof value === "string" &&
+    Object.values(DataSensitivity).includes(value as DataSensitivity)
+  );
 }
 
 /**
@@ -239,14 +261,14 @@ export function isDataSensitivity(value: unknown): value is DataSensitivity {
  */
 export function assertValidDataSensitivity(
   value: unknown,
-  field = 'dataSensitivity'
+  field = "dataSensitivity",
 ): asserts value is DataSensitivity {
   if (!isDataSensitivity(value)) {
     throw new ValidationError(
-      'Invalid data sensitivity',
+      "Invalid data sensitivity",
       field,
       value,
-      `one of ${Object.values(DataSensitivity).join(', ')}`
+      `one of ${Object.values(DataSensitivity).join(", ")}`,
     );
   }
 }
@@ -272,20 +294,26 @@ export function getDataSensitivityLevel(sensitivity: DataSensitivity): number {
  * Check if a value is a valid Reversibility
  */
 export function isReversibility(value: unknown): value is Reversibility {
-  return typeof value === 'string' && Object.values(Reversibility).includes(value as Reversibility);
+  return (
+    typeof value === "string" &&
+    Object.values(Reversibility).includes(value as Reversibility)
+  );
 }
 
 /**
  * Assert that a value is a valid Reversibility
  * @throws ValidationError if invalid
  */
-export function assertValidReversibility(value: unknown, field = 'reversibility'): asserts value is Reversibility {
+export function assertValidReversibility(
+  value: unknown,
+  field = "reversibility",
+): asserts value is Reversibility {
   if (!isReversibility(value)) {
     throw new ValidationError(
-      'Invalid reversibility',
+      "Invalid reversibility",
       field,
       value,
-      `one of ${Object.values(Reversibility).join(', ')}`
+      `one of ${Object.values(Reversibility).join(", ")}`,
     );
   }
 }
@@ -298,20 +326,26 @@ export function assertValidReversibility(value: unknown, field = 'reversibility'
  * Check if a value is a valid ActionType
  */
 export function isActionType(value: unknown): value is ActionType {
-  return typeof value === 'string' && Object.values(ActionType).includes(value as ActionType);
+  return (
+    typeof value === "string" &&
+    Object.values(ActionType).includes(value as ActionType)
+  );
 }
 
 /**
  * Assert that a value is a valid ActionType
  * @throws ValidationError if invalid
  */
-export function assertValidActionType(value: unknown, field = 'actionType'): asserts value is ActionType {
+export function assertValidActionType(
+  value: unknown,
+  field = "actionType",
+): asserts value is ActionType {
   if (!isActionType(value)) {
     throw new ValidationError(
-      'Invalid action type',
+      "Invalid action type",
       field,
       value,
-      `one of ${Object.values(ActionType).join(', ')}`
+      `one of ${Object.values(ActionType).join(", ")}`,
     );
   }
 }
@@ -324,7 +358,10 @@ export function assertValidActionType(value: unknown, field = 'actionType'): ass
  * Check if a value is a valid ProofEventType
  */
 export function isProofEventType(value: unknown): value is ProofEventType {
-  return typeof value === 'string' && Object.values(ProofEventType).includes(value as ProofEventType);
+  return (
+    typeof value === "string" &&
+    Object.values(ProofEventType).includes(value as ProofEventType)
+  );
 }
 
 /**
@@ -333,14 +370,14 @@ export function isProofEventType(value: unknown): value is ProofEventType {
  */
 export function assertValidProofEventType(
   value: unknown,
-  field = 'proofEventType'
+  field = "proofEventType",
 ): asserts value is ProofEventType {
   if (!isProofEventType(value)) {
     throw new ValidationError(
-      'Invalid proof event type',
+      "Invalid proof event type",
       field,
       value,
-      `one of ${Object.values(ProofEventType).join(', ')}`
+      `one of ${Object.values(ProofEventType).join(", ")}`,
     );
   }
 }
@@ -353,20 +390,26 @@ export function assertValidProofEventType(
  * Check if a value is a valid ComponentType
  */
 export function isComponentType(value: unknown): value is ComponentType {
-  return typeof value === 'string' && Object.values(ComponentType).includes(value as ComponentType);
+  return (
+    typeof value === "string" &&
+    Object.values(ComponentType).includes(value as ComponentType)
+  );
 }
 
 /**
  * Assert that a value is a valid ComponentType
  * @throws ValidationError if invalid
  */
-export function assertValidComponentType(value: unknown, field = 'componentType'): asserts value is ComponentType {
+export function assertValidComponentType(
+  value: unknown,
+  field = "componentType",
+): asserts value is ComponentType {
   if (!isComponentType(value)) {
     throw new ValidationError(
-      'Invalid component type',
+      "Invalid component type",
       field,
       value,
-      `one of ${Object.values(ComponentType).join(', ')}`
+      `one of ${Object.values(ComponentType).join(", ")}`,
     );
   }
 }
@@ -379,7 +422,10 @@ export function assertValidComponentType(value: unknown, field = 'componentType'
  * Check if a value is a valid ComponentStatus
  */
 export function isComponentStatus(value: unknown): value is ComponentStatus {
-  return typeof value === 'string' && Object.values(ComponentStatus).includes(value as ComponentStatus);
+  return (
+    typeof value === "string" &&
+    Object.values(ComponentStatus).includes(value as ComponentStatus)
+  );
 }
 
 /**
@@ -388,14 +434,14 @@ export function isComponentStatus(value: unknown): value is ComponentStatus {
  */
 export function assertValidComponentStatus(
   value: unknown,
-  field = 'componentStatus'
+  field = "componentStatus",
 ): asserts value is ComponentStatus {
   if (!isComponentStatus(value)) {
     throw new ValidationError(
-      'Invalid component status',
+      "Invalid component status",
       field,
       value,
-      `one of ${Object.values(ComponentStatus).join(', ')}`
+      `one of ${Object.values(ComponentStatus).join(", ")}`,
     );
   }
 }
@@ -408,20 +454,26 @@ export function assertValidComponentStatus(
  * Check if a value is a valid ApprovalType
  */
 export function isApprovalType(value: unknown): value is ApprovalType {
-  return typeof value === 'string' && Object.values(ApprovalType).includes(value as ApprovalType);
+  return (
+    typeof value === "string" &&
+    Object.values(ApprovalType).includes(value as ApprovalType)
+  );
 }
 
 /**
  * Assert that a value is a valid ApprovalType
  * @throws ValidationError if invalid
  */
-export function assertValidApprovalType(value: unknown, field = 'approvalType'): asserts value is ApprovalType {
+export function assertValidApprovalType(
+  value: unknown,
+  field = "approvalType",
+): asserts value is ApprovalType {
   if (!isApprovalType(value)) {
     throw new ValidationError(
-      'Invalid approval type',
+      "Invalid approval type",
       field,
       value,
-      `one of ${Object.values(ApprovalType).join(', ')}`
+      `one of ${Object.values(ApprovalType).join(", ")}`,
     );
   }
 }
@@ -434,7 +486,10 @@ export function assertValidApprovalType(value: unknown, field = 'approvalType'):
  * Check if a value is a valid TrustDeltaReason
  */
 export function isTrustDeltaReason(value: unknown): value is TrustDeltaReason {
-  return typeof value === 'string' && Object.values(TrustDeltaReason).includes(value as TrustDeltaReason);
+  return (
+    typeof value === "string" &&
+    Object.values(TrustDeltaReason).includes(value as TrustDeltaReason)
+  );
 }
 
 /**
@@ -443,14 +498,14 @@ export function isTrustDeltaReason(value: unknown): value is TrustDeltaReason {
  */
 export function assertValidTrustDeltaReason(
   value: unknown,
-  field = 'trustDeltaReason'
+  field = "trustDeltaReason",
 ): asserts value is TrustDeltaReason {
   if (!isTrustDeltaReason(value)) {
     throw new ValidationError(
-      'Invalid trust delta reason',
+      "Invalid trust delta reason",
       field,
       value,
-      `one of ${Object.values(TrustDeltaReason).join(', ')}`
+      `one of ${Object.values(TrustDeltaReason).join(", ")}`,
     );
   }
 }
@@ -463,20 +518,26 @@ export function assertValidTrustDeltaReason(
  * Check if a value is a valid DenialReason
  */
 export function isDenialReason(value: unknown): value is DenialReason {
-  return typeof value === 'string' && Object.values(DenialReason).includes(value as DenialReason);
+  return (
+    typeof value === "string" &&
+    Object.values(DenialReason).includes(value as DenialReason)
+  );
 }
 
 /**
  * Assert that a value is a valid DenialReason
  * @throws ValidationError if invalid
  */
-export function assertValidDenialReason(value: unknown, field = 'denialReason'): asserts value is DenialReason {
+export function assertValidDenialReason(
+  value: unknown,
+  field = "denialReason",
+): asserts value is DenialReason {
   if (!isDenialReason(value)) {
     throw new ValidationError(
-      'Invalid denial reason',
+      "Invalid denial reason",
       field,
       value,
-      `one of ${Object.values(DenialReason).join(', ')}`
+      `one of ${Object.values(DenialReason).join(", ")}`,
     );
   }
 }
@@ -489,20 +550,26 @@ export function assertValidDenialReason(value: unknown, field = 'denialReason'):
  * Check if a value is a valid RiskProfile
  */
 export function isRiskProfile(value: unknown): value is RiskProfile {
-  return typeof value === 'string' && Object.values(RiskProfile).includes(value as RiskProfile);
+  return (
+    typeof value === "string" &&
+    Object.values(RiskProfile).includes(value as RiskProfile)
+  );
 }
 
 /**
  * Assert that a value is a valid RiskProfile
  * @throws ValidationError if invalid
  */
-export function assertValidRiskProfile(value: unknown, field = 'riskProfile'): asserts value is RiskProfile {
+export function assertValidRiskProfile(
+  value: unknown,
+  field = "riskProfile",
+): asserts value is RiskProfile {
   if (!isRiskProfile(value)) {
     throw new ValidationError(
-      'Invalid risk profile',
+      "Invalid risk profile",
       field,
       value,
-      `one of ${Object.values(RiskProfile).join(', ')}`
+      `one of ${Object.values(RiskProfile).join(", ")}`,
     );
   }
 }
@@ -514,11 +581,16 @@ export function assertValidRiskProfile(value: unknown, field = 'riskProfile'): a
 /**
  * Check if a value has valid TrustFactorScores structure
  */
-export function isTrustFactorScores(value: unknown): value is TrustFactorScores {
-  if (typeof value !== 'object' || value === null) return false;
+export function isTrustFactorScores(
+  value: unknown,
+): value is TrustFactorScores {
+  if (typeof value !== "object" || value === null) return false;
   const scores = value as Record<string, unknown>;
   return Object.values(scores).every(
-    (v) => typeof v === 'number' && v >= FACTOR_SCORE_RANGE.min && v <= FACTOR_SCORE_RANGE.max
+    (v) =>
+      typeof v === "number" &&
+      v >= FACTOR_SCORE_RANGE.min &&
+      v <= FACTOR_SCORE_RANGE.max,
   );
 }
 
@@ -528,22 +600,32 @@ export function isTrustFactorScores(value: unknown): value is TrustFactorScores 
  */
 export function assertValidTrustFactorScores(
   value: unknown,
-  field = 'factorScores'
+  field = "factorScores",
 ): asserts value is TrustFactorScores {
-  if (typeof value !== 'object' || value === null) {
-    throw new ValidationError('Must be an object', field, value, 'Record<string, number>');
+  if (typeof value !== "object" || value === null) {
+    throw new ValidationError(
+      "Must be an object",
+      field,
+      value,
+      "Record<string, number>",
+    );
   }
   const scores = value as Record<string, unknown>;
   for (const [key, val] of Object.entries(scores)) {
-    if (typeof val !== 'number') {
-      throw new ValidationError(`Factor ${key} must be a number`, field, val, 'number');
+    if (typeof val !== "number") {
+      throw new ValidationError(
+        `Factor ${key} must be a number`,
+        field,
+        val,
+        "number",
+      );
     }
     if (val < FACTOR_SCORE_RANGE.min || val > FACTOR_SCORE_RANGE.max) {
       throw new ValidationError(
         `Factor ${key} score out of range`,
         `${field}.${key}`,
         val,
-        `number between ${FACTOR_SCORE_RANGE.min} and ${FACTOR_SCORE_RANGE.max}`
+        `number between ${FACTOR_SCORE_RANGE.min} and ${FACTOR_SCORE_RANGE.max}`,
       );
     }
   }
@@ -557,23 +639,32 @@ export function assertValidTrustFactorScores(
  * Check if a value has valid BandThresholds structure
  */
 export function isBandThresholds(value: unknown): value is BandThresholds {
-  if (typeof value !== 'object' || value === null) {
+  if (typeof value !== "object" || value === null) {
     return false;
   }
 
   const thresholds = value as Record<string, unknown>;
-  const requiredBands = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'] as const;
+  const requiredBands = [
+    "T0",
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "T7",
+  ] as const;
 
   return requiredBands.every((band) => {
     const bandValue = thresholds[band];
-    if (typeof bandValue !== 'object' || bandValue === null) {
+    if (typeof bandValue !== "object" || bandValue === null) {
       return false;
     }
 
     const range = bandValue as Record<string, unknown>;
     return (
-      typeof range.min === 'number' &&
-      typeof range.max === 'number' &&
+      typeof range.min === "number" &&
+      typeof range.max === "number" &&
       range.min >= 0 &&
       range.max <= 100 &&
       range.min <= range.max
@@ -585,31 +676,58 @@ export function isBandThresholds(value: unknown): value is BandThresholds {
  * Assert that a value has valid BandThresholds
  * @throws ValidationError if invalid
  */
-export function assertValidBandThresholds(value: unknown, field = 'bandThresholds'): asserts value is BandThresholds {
-  if (typeof value !== 'object' || value === null) {
-    throw new ValidationError('Invalid band thresholds', field, value, 'object with T0-T7 ranges');
+export function assertValidBandThresholds(
+  value: unknown,
+  field = "bandThresholds",
+): asserts value is BandThresholds {
+  if (typeof value !== "object" || value === null) {
+    throw new ValidationError(
+      "Invalid band thresholds",
+      field,
+      value,
+      "object with T0-T7 ranges",
+    );
   }
 
   const thresholds = value as Record<string, unknown>;
-  const requiredBands = ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'] as const;
+  const requiredBands = [
+    "T0",
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "T7",
+  ] as const;
 
   for (const band of requiredBands) {
     if (!(band in thresholds)) {
-      throw new ValidationError(`Missing band ${band}`, `${field}.${band}`, undefined, `{min: number, max: number}`);
+      throw new ValidationError(
+        `Missing band ${band}`,
+        `${field}.${band}`,
+        undefined,
+        `{min: number, max: number}`,
+      );
     }
 
     const bandValue = thresholds[band];
-    if (typeof bandValue !== 'object' || bandValue === null) {
-      throw new ValidationError(`Invalid band ${band}`, `${field}.${band}`, bandValue, `{min: number, max: number}`);
+    if (typeof bandValue !== "object" || bandValue === null) {
+      throw new ValidationError(
+        `Invalid band ${band}`,
+        `${field}.${band}`,
+        bandValue,
+        `{min: number, max: number}`,
+      );
     }
 
     const range = bandValue as Record<string, unknown>;
-    if (typeof range.min !== 'number' || typeof range.max !== 'number') {
+    if (typeof range.min !== "number" || typeof range.max !== "number") {
       throw new ValidationError(
         `Invalid band ${band} range`,
         `${field}.${band}`,
         range,
-        `{min: number, max: number}`
+        `{min: number, max: number}`,
       );
     }
 
@@ -618,7 +736,7 @@ export function assertValidBandThresholds(value: unknown, field = 'bandThreshold
         `Band ${band} range out of bounds`,
         `${field}.${band}`,
         range,
-        `min >= 0, max <= 100, min <= max`
+        `min >= 0, max <= 100, min <= max`,
       );
     }
   }
@@ -631,7 +749,10 @@ export function assertValidBandThresholds(value: unknown, field = 'bandThreshold
 /**
  * Calculate the trust band for a given score using default thresholds
  */
-export function calculateTrustBand(score: number, thresholds = DEFAULT_BAND_THRESHOLDS): TrustBand {
+export function calculateTrustBand(
+  score: number,
+  thresholds = DEFAULT_BAND_THRESHOLDS,
+): TrustBand {
   assertValidTrustScore(score);
 
   if (score <= thresholds.T0.max) return TrustBand.T0_SANDBOX;
@@ -663,10 +784,10 @@ export function calculateCompositeScore(
  */
 export function validateObject<T extends Record<string, unknown>>(
   obj: unknown,
-  validators: Record<keyof T, (value: unknown, field: string) => void>
+  validators: Record<keyof T, (value: unknown, field: string) => void>,
 ): obj is T {
-  if (typeof obj !== 'object' || obj === null) {
-    throw new ValidationError('Invalid object', 'root', obj, 'non-null object');
+  if (typeof obj !== "object" || obj === null) {
+    throw new ValidationError("Invalid object", "root", obj, "non-null object");
   }
 
   const record = obj as Record<string, unknown>;
