@@ -1,6 +1,6 @@
 {
   "name": "@vorionsys/atsf-core",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Agentic Trust Scoring Framework - Core runtime for AI agent governance, trust scoring (8-tier T0-T7 model), and policy enforcement",
   "type": "module",
   "main": "./dist/index.js",

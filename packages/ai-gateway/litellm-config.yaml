@@ -217,3 +217,21 @@ litellm_settings:
 
   # Prompt injection detection
   enable_guardrails: true
+
+  # ==========================================
+  # FAILSAFE: Default fallback chain
+  # ==========================================
+  # If primary cloud provider fails after retries,
+  # cascade to local Ollama before giving up.
+  # LiteLLM handles this transparently — no code changes needed.
+  fallbacks:
+    - {"general/premium": ["general/balanced", "general/fast"]}
+    - {"general/balanced": ["general/fast"]}
+    - {"coding/expert": ["coding/fast"]}
+    - {"reasoning/complex": ["reasoning/fast", "general/fast"]}
+    - {"advisor/council": ["advisor/consultation", "general/fast"]}
+    - {"advisor/consultation": ["general/fast"]}
+  default_fallbacks: ["general/fast"]
+  context_window_fallbacks:
+    - {"reasoning/complex": ["general/premium"]}
+    - {"coding/expert": ["coding/fast"]}

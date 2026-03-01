@@ -7,6 +7,7 @@
 import {
   CognigateConfig,
   TrustStatus,
+  GovernanceDecision,
   GovernanceResult,
   Intent,
   IntentParseResult,
@@ -352,19 +353,32 @@ class GovernanceClient {
   }
 
   /**
-   * Enforce governance rules on an intent
+   * Enforce governance rules on an intent.
+   * Falls back to local deny-by-default if the API is unreachable.
    */
   async enforce(intent: Intent): Promise<GovernanceResult> {
-    const response = await this.client.request<GovernanceResult>(
-      "POST",
-      "/governance/enforce",
-      intent,
-    );
-    return GovernanceResultSchema.parse(response) as GovernanceResult;
+    try {
+      const response = await this.client.request<GovernanceResult>(
+        "POST",
+        "/governance/enforce",
+        intent,
+      );
+      return GovernanceResultSchema.parse(response) as GovernanceResult;
+    } catch (error) {
+      // Only fall back for network/server errors, not client errors
+      if (error instanceof CognigateError && error.status && error.status < 500) {
+        throw error;
+      }
+      console.warn(
+        "[Cognigate] API unreachable — applying local deny-by-default enforcement",
+      );
+      return this.localDenyDefault(intent);
+    }
   }
 
   /**
-   * Convenience method: parse and enforce in one call
+   * Convenience method: parse and enforce in one call.
+   * If the API is unreachable, enforce falls back to local deny-by-default.
    */
   async evaluate(
     entityId: string,
@@ -373,12 +387,36 @@ class GovernanceClient {
     intent: Intent;
     result: GovernanceResult;
   }> {
-    const parseResult = await this.parseIntent(entityId, rawInput);
-    const result = await this.enforce(parseResult.intent);
-    return {
-      intent: parseResult.intent,
-      result,
-    };
+    try {
+      const parseResult = await this.parseIntent(entityId, rawInput);
+      const result = await this.enforce(parseResult.intent);
+      return {
+        intent: parseResult.intent,
+        result,
+      };
+    } catch (error) {
+      // If parse fails (API down), create a minimal deny-all result
+      if (error instanceof CognigateError && error.status && error.status < 500) {
+        throw error;
+      }
+      console.warn(
+        "[Cognigate] API unreachable during evaluate — deny-by-default",
+      );
+      const syntheticIntent: Intent = {
+        id: `local-${Date.now()}`,
+        entityId,
+        rawInput,
+        parsedAction: "unknown",
+        parameters: {},
+        riskLevel: "CRITICAL",
+        requiredCapabilities: [],
+        timestamp: new Date(),
+      };
+      return {
+        intent: syntheticIntent,
+        result: this.localDenyDefault(syntheticIntent),
+      };
+    }
   }
 
   /**
@@ -389,11 +427,43 @@ class GovernanceClient {
     action: string,
     capabilities: string[],
   ): Promise<{ allowed: boolean; reason: string }> {
-    return this.client.request("POST", "/governance/check", {
-      entityId,
-      action,
-      capabilities,
-    });
+    try {
+      return await this.client.request("POST", "/governance/check", {
+        entityId,
+        action,
+        capabilities,
+      });
+    } catch (error) {
+      if (error instanceof CognigateError && error.status && error.status < 500) {
+        throw error;
+      }
+      console.warn(
+        "[Cognigate] API unreachable — local deny-by-default for canPerform",
+      );
+      return {
+        allowed: false,
+        reason: "Cognigate API unreachable — deny-by-default (local fallback)",
+      };
+    }
+  }
+
+  /**
+   * Local deny-by-default fallback when Cognigate API is unreachable.
+   * Always denies — safety requires an authoritative governance decision.
+   */
+  private localDenyDefault(intent: Intent): GovernanceResult {
+    return {
+      decision: "DENY" as GovernanceDecision,
+      trustScore: 0,
+      trustTier: TrustTier.T0_SANDBOX,
+      grantedCapabilities: [],
+      deniedCapabilities: intent.requiredCapabilities,
+      reasoning:
+        "Cognigate API unreachable — local deny-by-default policy applied. " +
+        "No actions permitted without authoritative governance decision.",
+      proofId: `local-deny-${Date.now()}`,
+      timestamp: new Date(),
+    };
   }
 }
 

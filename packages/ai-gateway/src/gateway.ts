@@ -58,6 +58,8 @@ export interface GatewayResponse {
     route: "privacy" | "specialized" | "green" | "cost-optimized";
     provider: "anthropic" | "google" | "ollama";
     latency: number;
+    degraded?: boolean; // true when a fallback model was used
+    fallbackReason?: string; // why the primary model failed
     sustainability?: {
       carbonEmitted: number; // kg CO2e
       energyConsumed: number; // kWh
@@ -614,8 +616,55 @@ export class AIGateway {
 
       return gatewayResponse;
     } catch (error) {
-      console.error("[GATEWAY] Request failed:", error);
-      throw error;
+      console.error(
+        `[GATEWAY] Primary model ${decision.model} failed, attempting Ollama fallback...`,
+      );
+
+      // Fallback to local Ollama — always available, zero external deps
+      try {
+        const fallbackModel =
+          decision.route === "specialized" && decision.model.startsWith("coding")
+            ? "privacy/coding"
+            : "general/fast";
+
+        const fallbackResponse = await this.client.chat.completions.create({
+          model: fallbackModel,
+          messages,
+          max_tokens: request.options?.maxTokens || 4096,
+          temperature: request.options?.temperature ?? 0.7,
+          stream: false,
+        });
+
+        const endTime = Date.now();
+        const completion = fallbackResponse as OpenAI.ChatCompletion;
+        const content = completion.choices?.[0]?.message?.content || "";
+        const usage = completion.usage;
+
+        console.warn(
+          `[GATEWAY] Degraded response via ${fallbackModel} (primary: ${decision.model})`,
+        );
+
+        return {
+          content,
+          model: fallbackModel,
+          usage: {
+            inputTokens: usage?.prompt_tokens || 0,
+            outputTokens: usage?.completion_tokens || 0,
+            totalCost: 0, // Ollama is free
+          },
+          metadata: {
+            route: decision.route,
+            provider: "ollama" as const,
+            latency: endTime - startTime,
+            degraded: true,
+            fallbackReason:
+              error instanceof Error ? error.message : "Primary model unavailable",
+          },
+        };
+      } catch (fallbackError) {
+        console.error("[GATEWAY] Ollama fallback also failed:", fallbackError);
+        throw error; // Throw the original error
+      }
     }
   }
 

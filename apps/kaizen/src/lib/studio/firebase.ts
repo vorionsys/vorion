@@ -17,13 +17,14 @@ export function isFirebaseConfigured(): boolean {
   return !!(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId);
 }
 
-let app: FirebaseApp;
-let db: Firestore;
-let auth: Auth;
+let app: FirebaseApp | null = null;
+let db: Firestore | null = null;
+let auth: Auth | null = null;
 
-export function getFirebaseApp(): FirebaseApp {
+export function getFirebaseApp(): FirebaseApp | null {
   if (!isFirebaseConfigured()) {
-    throw new Error('Firebase is not configured. Set NEXT_PUBLIC_FIREBASE_* environment variables.');
+    console.warn('[Studio] Firebase is not configured — running in local-only mode.');
+    return null;
   }
   if (!app && getApps().length === 0) {
     app = initializeApp(firebaseConfig);
@@ -33,16 +34,20 @@ export function getFirebaseApp(): FirebaseApp {
   return app;
 }
 
-export function getFirebaseDb(): Firestore {
+export function getFirebaseDb(): Firestore | null {
+  const firebaseApp = getFirebaseApp();
+  if (!firebaseApp) return null;
   if (!db) {
-    db = getFirestore(getFirebaseApp());
+    db = getFirestore(firebaseApp);
   }
   return db;
 }
 
-export function getFirebaseAuth(): Auth {
+export function getFirebaseAuth(): Auth | null {
+  const firebaseApp = getFirebaseApp();
+  if (!firebaseApp) return null;
   if (!auth) {
-    auth = getAuth(getFirebaseApp());
+    auth = getAuth(firebaseApp);
   }
   return auth;
 }

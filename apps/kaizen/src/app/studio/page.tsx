@@ -119,6 +119,7 @@ export default function StudioPage() {
   useEffect(() => {
     if (!configured) return;
     const auth = getFirebaseAuth();
+    if (!auth) return;
 
     const initAuth = async () => {
       try {
@@ -142,6 +143,7 @@ export default function StudioPage() {
     if (!user || !configured) return;
 
     const db = getFirebaseDb();
+    if (!db) return;
     const globalRef = doc(
       db,
       "artifacts",
@@ -226,6 +228,7 @@ export default function StudioPage() {
     async (change: number) => {
       if (!user) return;
       const db = getFirebaseDb();
+      if (!db) return;
       const globalRef = doc(
         db,
         "artifacts",
@@ -254,6 +257,7 @@ export default function StudioPage() {
 
     addLog("DIRECTOR", `Injecting mandate: "${directorInput}"`, "safe");
     const db = getFirebaseDb();
+    if (!db) return;
 
     await addDoc(
       collection(db, "artifacts", APP_ID, "public", "data", "scratchpad"),
@@ -356,6 +360,7 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
         }
 
         const db = getFirebaseDb();
+        if (!db) return;
         await addDoc(
           collection(db, "artifacts", APP_ID, "public", "data", "scratchpad"),
           {
@@ -401,6 +406,7 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
 
     try {
       const db = getFirebaseDb();
+      if (!db) return;
       await addDoc(
         collection(db, "artifacts", APP_ID, "public", "data", "active_agents"),
         {
@@ -431,6 +437,7 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
 
     try {
       const db = getFirebaseDb();
+      if (!db) return;
       const promises = FACTIONS[factionKey].classes.map((cls) => {
         const name = `${cls.name.split("-")[0]}_${Math.floor(Math.random() * 999)}`;
         return addDoc(
@@ -466,6 +473,7 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
   const banAgent = async (id: string) => {
     if (!user) return;
     const db = getFirebaseDb();
+    if (!db) return;
     await deleteDoc(
       doc(db, "artifacts", APP_ID, "public", "data", "active_agents", id),
     );
