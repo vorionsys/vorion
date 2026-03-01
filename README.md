@@ -131,6 +131,7 @@ Apache-2.0. See [LICENSE](LICENSE) for details.
 
 ## Governance
 
+- [Governance Model](GOVERNANCE.md) — How decisions get made
 - [Contributing](.github/CONTRIBUTING.md)
 - [Security Policy](.github/SECURITY.md)
 - [Code of Conduct](.github/CODE_OF_CONDUCT.md)
@@ -143,9 +144,8 @@ Created by **Alex Blanc** and **Ryan Cason (Bo Xandar Lee)** — two former banq
 
 We believe AI is humanity's greatest asset in the making, but it won't happen by chance. It must be guided.
 
-[Read our full story →](https://vorion.org/about)
+[Read our full story →](https://vorion.org/manifesto)
 
 ---
 
 *Built with BASIS · [vorion.org](https://vorion.org) · Feedback welcome — even the brutal kind.*
-- [Issue Templates](.github/ISSUE_TEMPLATE)
