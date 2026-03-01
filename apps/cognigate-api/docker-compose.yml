@@ -1,24 +1,58 @@
-# Local development/testing with Docker
-# Run: docker-compose up --build
+# ============================================
+# Cognigate API - Docker Compose
+# ============================================
+#
+# REST gateway for Vorion agent governance.
+#
+# Usage:
+#   docker compose up -d --build        # Build and start
+#   docker compose logs -f cognigate    # Watch logs
+#   docker compose down -v              # Stop and remove volumes
+#
+# ============================================
 
 services:
+  # ------------------------------------------
+  # Cognigate API - Governance Gateway
+  # ------------------------------------------
   cognigate-api:
     build:
       context: ../..  # Monorepo root
       dockerfile: apps/cognigate-api/Dockerfile
+    container_name: vorion-cognigate-api
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${COGNIGATE_PORT:-3000}:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=${NODE_ENV:-development}
       - PORT=3000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=${LOG_LEVEL:-info}
       - SQLITE_PATH=/app/data/cognigate.db
+      - ENABLE_AUTH=${ENABLE_AUTH:-true}
+      - COGNIGATE_ALLOWED_ORIGINS=${COGNIGATE_ALLOWED_ORIGINS:-}
     volumes:
       - cognigate-data:/app/data
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
+    networks:
+      - cognigate-network
 
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  cognigate-network:
+    driver: bridge
+    name: vorion-cognigate-network
+
+# ============================================
+# VOLUMES
+# ============================================
 volumes:
   cognigate-data:
+    name: vorion-cognigate-data

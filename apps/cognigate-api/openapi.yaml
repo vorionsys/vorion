@@ -1,0 +1,1832 @@
+openapi: 3.0.3
+
+info:
+  title: Cognigate API
+  version: 0.1.0
+  description: |
+    REST gateway for Vorion agent governance.
+
+    Cognigate provides trust-scored AI agent governance with immutable proof chains.
+    Every agent action is evaluated against an 8-tier trust model (T0-T7), and every
+    decision is recorded as a cryptographically-linked proof commitment.
+
+    ## Key Concepts
+
+    - **Agents** - AI agents registered in the system, each with a trust score and tier.
+    - **Trust** - Dynamic trust scores (0-1000) mapped to 8 tiers (T0 Sandbox through T7 Autonomous).
+    - **Intents** - Structured action requests submitted by agents, evaluated against governance policy.
+    - **Proofs** - Immutable, hash-chained audit records of every governance decision.
+
+    ## Authentication
+
+    All endpoints (except health checks) require an API key passed via:
+    - `Authorization: Bearer <api-key>` header, or
+    - `X-API-Key: <api-key>` header
+
+    ## Rate Limiting
+
+    Global rate limit: 600 requests per minute. Tier-specific limits may apply.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  contact:
+    name: Vorion Systems
+    url: https://vorion.org
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+  - url: https://cognigate.dev/v1
+    description: Production API
+
+tags:
+  - name: health
+    description: Health check and readiness endpoints
+  - name: agents
+    description: Agent registration and management
+  - name: trust
+    description: Trust score management and signals
+  - name: intents
+    description: Intent submission, evaluation, and authorization
+  - name: proofs
+    description: Proof chain queries and verification
+  - name: auth
+    description: API key management
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  # ===========================================================================
+  # HEALTH
+  # ===========================================================================
+
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      description: Returns basic health status of the API server.
+      tags: [health]
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: healthy
+                timestamp: "2026-03-01T12:00:00.000Z"
+                version: "0.1.0"
+
+  /ready:
+    get:
+      operationId: getReady
+      summary: Readiness probe
+      description: |
+        Checks whether all runtime components (TrustFacade, ProofCommitter,
+        IntentPipeline, ProofStore) are initialized and operational.
+      tags: [health]
+      security: []
+      responses:
+        "200":
+          description: All components are ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessResponse"
+              example:
+                ready: true
+                components:
+                  trustFacade: true
+                  proofCommitter: true
+                  intentPipeline: true
+                  proofStore: true
+        "503":
+          description: One or more components are not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessResponse"
+              example:
+                ready: false
+                components:
+                  trustFacade: true
+                  proofCommitter: false
+                  intentPipeline: true
+                  proofStore: false
+
+  /live:
+    get:
+      operationId: getLive
+      summary: Liveness probe
+      description: Minimal liveness check for container orchestrators.
+      tags: [health]
+      security: []
+      responses:
+        "200":
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [alive]
+                properties:
+                  alive:
+                    type: boolean
+                    example: true
+
+  # ===========================================================================
+  # AGENTS
+  # ===========================================================================
+
+  /agents:
+    get:
+      operationId: listAgents
+      summary: List agents
+      description: |
+        Returns a list of all registered agents. Optionally filter by trust tier
+        and limit the number of results. Agents are enriched with live trust data
+        from the TrustFacade.
+      tags: [agents]
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of agents to return
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+        - name: tier
+          in: query
+          description: Filter by trust tier number (0-7)
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 7
+      responses:
+        "200":
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      operationId: registerAgent
+      summary: Register a new agent
+      description: |
+        Registers a new agent through the TrustFacade admission process.
+        The agent is assigned an initial trust score and tier based on the
+        observation tier and admission policy.
+      tags: [agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterAgentRequest"
+            example:
+              name: my-data-agent
+              capabilities:
+                - read_data
+                - write_reports
+              observationTier: GRAY_BOX
+      responses:
+        "201":
+          description: Agent registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterAgentResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: Agent already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /agents/{agentId}:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+
+    get:
+      operationId: getAgent
+      summary: Get agent details
+      description: |
+        Returns detailed information for a specific agent, including live trust
+        score data from the TrustFacade merged with persisted agent records.
+      tags: [agents]
+      responses:
+        "200":
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      operationId: updateAgent
+      summary: Update an agent
+      description: |
+        Updates mutable fields on an agent record (name, capabilities).
+        Requires persistent storage to be available.
+      tags: [agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAgentRequest"
+      responses:
+        "200":
+          description: Agent updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateAgentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "501":
+          description: Persistent storage not available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: deleteAgent
+      summary: Delete (revoke) an agent
+      description: |
+        Revokes an agent in both the TrustFacade and the persistent TrustStore.
+        The agent's trust is immediately zeroed and it can no longer perform actions.
+      tags: [agents]
+      responses:
+        "204":
+          description: Agent revoked successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ===========================================================================
+  # TRUST
+  # ===========================================================================
+
+  /trust/admit:
+    post:
+      operationId: admitAgent
+      summary: Admit an agent (Gate Trust)
+      description: |
+        Submits an agent for Gate Trust admission through the TrustFacade.
+        Returns the initial trust score, tier, observation ceiling, and
+        granted capabilities.
+      tags: [trust]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdmitRequest"
+            example:
+              agentId: agent-abc-123
+              name: market-analyzer
+              capabilities:
+                - read_data
+                - generate_reports
+              observationTier: GRAY_BOX
+      responses:
+        "200":
+          description: Admission result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdmitResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /trust/tiers:
+    get:
+      operationId: getTierThresholds
+      summary: Get trust tier definitions
+      description: |
+        Returns the complete trust tier model with score thresholds and names
+        for all 8 tiers (T0 through T7).
+      tags: [trust]
+      responses:
+        "200":
+          description: Trust tier definitions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TierListResponse"
+              example:
+                tiers:
+                  - number: 0
+                    name: Sandbox
+                    minScore: 0
+                    maxScore: 199
+                  - number: 1
+                    name: Observed
+                    minScore: 200
+                    maxScore: 349
+                  - number: 4
+                    name: Standard
+                    minScore: 650
+                    maxScore: 799
+                  - number: 7
+                    name: Autonomous
+                    minScore: 951
+                    maxScore: 1000
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /trust/{agentId}:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+
+    get:
+      operationId: getTrustInfo
+      summary: Get trust info for an agent
+      description: |
+        Returns the current trust score, tier, tier name, and observation ceiling
+        for a specific agent. If the agent has not been admitted, returns a message
+        indicating the agent should be admitted first.
+      tags: [trust]
+      responses:
+        "200":
+          description: Trust information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustInfoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /trust/{agentId}/signal:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+
+    post:
+      operationId: recordTrustSignal
+      summary: Record a trust signal
+      description: |
+        Records a trust signal (success, failure, violation, or neutral) for an
+        agent. The TrustFacade updates the agent's trust score based on the signal
+        type and weight.
+      tags: [trust]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrustSignalRequest"
+            example:
+              type: success
+              source: task-runner
+              weight: 0.8
+              context:
+                taskId: task-456
+                duration: 1200
+      responses:
+        "200":
+          description: Signal recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustSignalResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /trust/{agentId}/revoke:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+
+    post:
+      operationId: revokeAgent
+      summary: Revoke an agent's trust
+      description: Immediately revokes the agent's trust, preventing further actions.
+      tags: [trust]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  description: Reason for revocation
+                  example: Policy violation detected
+      responses:
+        "200":
+          description: Agent revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevokeResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /trust/{agentId}/history:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+
+    get:
+      operationId: getTrustHistory
+      summary: Get trust signal history
+      description: |
+        Returns the history of trust signals for an agent, sourced from the
+        proof chain. Only events of type `trust_signal` are included.
+      tags: [trust]
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of history entries to return
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 500
+      responses:
+        "200":
+          description: Trust history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustHistoryResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ===========================================================================
+  # INTENTS
+  # ===========================================================================
+
+  /intents:
+    post:
+      operationId: submitIntent
+      summary: Submit an intent for evaluation
+      description: |
+        Submits an agent action intent through the IntentPipeline for trust-based
+        governance evaluation. The intent is classified, evaluated against the
+        agent's trust tier, and a proof commitment is recorded.
+
+        Supports canonical classification fields for fine-grained policy enforcement.
+      tags: [intents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitIntentRequest"
+            example:
+              agentId: agent-abc-123
+              agentName: market-analyzer
+              capabilities:
+                - read_data
+              observationTier: GRAY_BOX
+              action:
+                type: read_database
+                resource: /data/market-prices
+              actionType: read
+              dataSensitivity: INTERNAL
+              reversibility: REVERSIBLE
+      responses:
+        "200":
+          description: Intent evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntentResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /intents/check:
+    post:
+      operationId: checkIntent
+      summary: Authorization dry run
+      description: |
+        Performs a dry-run authorization check without creating a proof record.
+        Returns whether the action would be allowed, the agent's current tier,
+        and the evaluation reason.
+      tags: [intents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitIntentRequest"
+      responses:
+        "200":
+          description: Authorization check result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntentCheckResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /intents/metrics:
+    get:
+      operationId: getIntentMetrics
+      summary: Get intent pipeline metrics
+      description: Returns aggregate metrics from the IntentPipeline.
+      tags: [intents]
+      responses:
+        "200":
+          description: Pipeline metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Runtime metrics from the IntentPipeline
+                additionalProperties: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /intents/{intentId}:
+    parameters:
+      - $ref: "#/components/parameters/IntentId"
+
+    get:
+      operationId: getIntent
+      summary: Get intent by ID
+      description: Returns a previously submitted intent and its evaluation result.
+      tags: [intents]
+      responses:
+        "200":
+          description: Intent details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntentRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      operationId: updateIntent
+      summary: Update intent priority
+      description: Updates the priority or metadata of an existing intent.
+      tags: [intents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                priority:
+                  type: number
+                  description: New priority value
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Updated intent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntentRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      operationId: cancelIntent
+      summary: Cancel an intent
+      description: |
+        Cancels a previously approved intent. Only intents in the `approved`
+        status can be cancelled.
+      tags: [intents]
+      responses:
+        "200":
+          description: Intent cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [intentId, status]
+                properties:
+                  intentId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [cancelled]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Intent is not in a cancellable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /intents/agent/{agentId}:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+
+    get:
+      operationId: listIntentsByAgent
+      summary: List intents for an agent
+      description: Returns the intent history for a specific agent.
+      tags: [intents]
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of intents to return
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 500
+        - name: status
+          in: query
+          description: Filter by intent status
+          schema:
+            type: string
+            enum: [approved, denied]
+      responses:
+        "200":
+          description: List of intents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IntentRecord"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ===========================================================================
+  # PROOFS
+  # ===========================================================================
+
+  /proofs/{proofId}:
+    parameters:
+      - $ref: "#/components/parameters/ProofId"
+
+    get:
+      operationId: getProof
+      summary: Get proof by ID
+      description: Returns a specific proof commitment by its ID.
+      tags: [proofs]
+      responses:
+        "200":
+          description: Proof commitment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProofCommitmentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /proofs/verify:
+    post:
+      operationId: verifyProof
+      summary: Verify a proof commitment
+      description: |
+        Verifies the cryptographic integrity of a proof commitment by
+        recomputing its hash and comparing against the stored value.
+      tags: [proofs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyProofRequest"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyProofResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /proofs/entity/{entityId}:
+    parameters:
+      - $ref: "#/components/parameters/EntityId"
+
+    get:
+      operationId: listProofsForEntity
+      summary: List proofs for an entity
+      description: Returns all proof commitments associated with a specific entity.
+      tags: [proofs]
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of proofs to return
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 500
+      responses:
+        "200":
+          description: Entity proofs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntityProofsResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /proofs/batch/{batchId}:
+    parameters:
+      - name: batchId
+        in: path
+        required: true
+        description: Unique batch identifier
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      operationId: getProofBatch
+      summary: Get proof batch
+      description: |
+        Returns a proof batch with its Merkle root, signature, and the IDs
+        of all commitments in the batch.
+      tags: [proofs]
+      responses:
+        "200":
+          description: Proof batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProofBatchResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /proofs/metrics:
+    get:
+      operationId: getProofMetrics
+      summary: Get proof metrics
+      description: Returns aggregate metrics from the ProofCommitter.
+      tags: [proofs]
+      responses:
+        "200":
+          description: Proof metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Runtime metrics from the ProofCommitter
+                additionalProperties: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /proofs/flush:
+    post:
+      operationId: flushProofs
+      summary: Force flush proof buffer
+      description: |
+        Forces the ProofCommitter to flush its internal buffer, persisting all
+        pending commitments. Primarily useful for testing.
+      tags: [proofs]
+      responses:
+        "200":
+          description: Buffer flushed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [flushed]
+                properties:
+                  flushed:
+                    type: boolean
+                    example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ===========================================================================
+  # AUTH
+  # ===========================================================================
+
+  /auth/keys:
+    get:
+      operationId: listApiKeys
+      summary: List API keys
+      description: |
+        Returns all registered API keys with metadata. The actual key values
+        are not included -- they are only returned at creation time.
+      tags: [auth]
+      responses:
+        "200":
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiKeyInfo"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      operationId: createApiKey
+      summary: Create a new API key
+      description: |
+        Generates a new API key. The raw key is returned only in this response
+        and cannot be retrieved again. Store it securely.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApiKeyRequest"
+            example:
+              name: Production Agent Key
+              permissions:
+                - read
+                - write
+      responses:
+        "201":
+          description: API key created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateApiKeyResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/keys/{keyId}:
+    parameters:
+      - name: keyId
+        in: path
+        required: true
+        description: API key identifier
+        schema:
+          type: string
+          format: uuid
+
+    delete:
+      operationId: deleteApiKey
+      summary: Delete an API key
+      description: Permanently deletes an API key, immediately revoking access.
+      tags: [auth]
+      responses:
+        "204":
+          description: API key deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+# =============================================================================
+# COMPONENTS
+# =============================================================================
+
+components:
+  # ---------------------------------------------------------------------------
+  # Security Schemes
+  # ---------------------------------------------------------------------------
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        API key passed in the Authorization header as `Bearer <api-key>`.
+
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        API key passed in the `X-API-Key` header.
+
+  # ---------------------------------------------------------------------------
+  # Parameters
+  # ---------------------------------------------------------------------------
+
+  parameters:
+    AgentId:
+      name: agentId
+      in: path
+      required: true
+      description: Unique agent identifier
+      schema:
+        type: string
+        example: agent-abc-123
+
+    IntentId:
+      name: intentId
+      in: path
+      required: true
+      description: Unique intent identifier
+      schema:
+        type: string
+        format: uuid
+
+    ProofId:
+      name: proofId
+      in: path
+      required: true
+      description: Unique proof commitment identifier
+      schema:
+        type: string
+        format: uuid
+
+    EntityId:
+      name: entityId
+      in: path
+      required: true
+      description: Entity identifier (typically an agentId)
+      schema:
+        type: string
+        example: agent-abc-123
+
+  # ---------------------------------------------------------------------------
+  # Reusable Responses
+  # ---------------------------------------------------------------------------
+
+  responses:
+    Unauthorized:
+      description: Authentication required or API key invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: E1001
+            message: "API key is missing. Include it in the Authorization header."
+            category: auth
+            retryable: false
+            docsUrl: https://cognigate.dev/docs/authentication
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: E4001
+            message: "Resource not found"
+            category: not_found
+            retryable: false
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: E2001
+            message: "Request body is invalid or malformed."
+            category: validation
+            retryable: false
+
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: E3001
+            message: "Rate limit exceeded. Retry after 60 seconds."
+            category: rate_limit
+            retryable: true
+
+  # ---------------------------------------------------------------------------
+  # Schemas
+  # ---------------------------------------------------------------------------
+
+  schemas:
+    # ---- Enums ----
+
+    TrustTier:
+      type: integer
+      minimum: 0
+      maximum: 7
+      description: |
+        Trust tier number (0-7):
+        - 0: T0 Sandbox (0-199)
+        - 1: T1 Observed (200-349)
+        - 2: T2 Provisional (350-499)
+        - 3: T3 Monitored (500-649)
+        - 4: T4 Standard (650-799)
+        - 5: T5 Trusted (800-875)
+        - 6: T6 Certified (876-950)
+        - 7: T7 Autonomous (951-1000)
+      enum: [0, 1, 2, 3, 4, 5, 6, 7]
+
+    TrustTierName:
+      type: string
+      enum:
+        - Sandbox
+        - Observed
+        - Provisional
+        - Monitored
+        - Standard
+        - Trusted
+        - Certified
+        - Autonomous
+
+    ObservationTier:
+      type: string
+      enum: [BLACK_BOX, GRAY_BOX, WHITE_BOX]
+      description: |
+        Agent observation transparency level:
+        - BLACK_BOX: No internal visibility
+        - GRAY_BOX: Partial visibility
+        - WHITE_BOX: Full internal visibility
+
+    GovernanceDecision:
+      type: string
+      enum: [ALLOW, DENY, ESCALATE, DEGRADE]
+
+    RiskLevel:
+      type: string
+      enum: [LOW, MEDIUM, HIGH, CRITICAL]
+
+    ProofOutcome:
+      type: string
+      enum: [SUCCESS, FAILURE, PARTIAL, PENDING]
+
+    AgentStatus:
+      type: string
+      enum: [ACTIVE, PAUSED, SUSPENDED, TERMINATED]
+
+    SignalType:
+      type: string
+      enum: [success, failure, violation, neutral]
+
+    ActionType:
+      type: string
+      enum: [read, write, delete, execute, communicate, transfer]
+
+    DataSensitivity:
+      type: string
+      enum: [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED]
+
+    Reversibility:
+      type: string
+      enum: [REVERSIBLE, PARTIALLY_REVERSIBLE, IRREVERSIBLE]
+
+    IntentStatus:
+      type: string
+      enum: [approved, denied]
+
+    # ---- Health ----
+
+    HealthResponse:
+      type: object
+      required: [status, timestamp, version]
+      properties:
+        status:
+          type: string
+          example: healthy
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+          example: "0.1.0"
+
+    ReadinessResponse:
+      type: object
+      required: [ready, components]
+      properties:
+        ready:
+          type: boolean
+        components:
+          type: object
+          required: [trustFacade, proofCommitter, intentPipeline, proofStore]
+          properties:
+            trustFacade:
+              type: boolean
+            proofCommitter:
+              type: boolean
+            intentPipeline:
+              type: boolean
+            proofStore:
+              type: boolean
+
+    # ---- Agents ----
+
+    RegisterAgentRequest:
+      type: object
+      required: [name]
+      properties:
+        agentId:
+          type: string
+          description: Optional custom agent ID. A UUID is generated if omitted.
+        name:
+          type: string
+          description: Human-readable agent name
+          minLength: 1
+        capabilities:
+          type: array
+          description: Initial capability set for the agent
+          items:
+            type: string
+          default: []
+        observationTier:
+          $ref: "#/components/schemas/ObservationTier"
+
+    RegisterAgentResponse:
+      type: object
+      required:
+        - agentId
+        - name
+        - capabilities
+        - observationTier
+        - trustScore
+        - trustTier
+        - trustTierName
+        - registeredAt
+      properties:
+        agentId:
+          type: string
+        name:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        observationTier:
+          $ref: "#/components/schemas/ObservationTier"
+        trustScore:
+          type: number
+          minimum: 0
+          maximum: 1000
+        trustTier:
+          $ref: "#/components/schemas/TrustTier"
+        trustTierName:
+          $ref: "#/components/schemas/TrustTierName"
+        observationCeiling:
+          type: number
+          nullable: true
+          description: Maximum trust score achievable at this observation tier
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the agent's admission expires
+        registeredAt:
+          type: string
+          format: date-time
+
+    AgentSummary:
+      type: object
+      required: [agentId, name, trustScore, trustTier, trustTierName, isRevoked]
+      properties:
+        agentId:
+          type: string
+        name:
+          type: string
+        trustScore:
+          type: number
+          minimum: 0
+          maximum: 1000
+        trustTier:
+          $ref: "#/components/schemas/TrustTier"
+        trustTierName:
+          $ref: "#/components/schemas/TrustTierName"
+        isRevoked:
+          type: boolean
+
+    AgentDetail:
+      type: object
+      required: [agentId, name, capabilities, observationTier, trustScore, trustTier, trustTierName, isRevoked]
+      properties:
+        agentId:
+          type: string
+        name:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        observationTier:
+          $ref: "#/components/schemas/ObservationTier"
+        trustScore:
+          type: number
+          minimum: 0
+          maximum: 1000
+        trustTier:
+          $ref: "#/components/schemas/TrustTier"
+        trustTierName:
+          $ref: "#/components/schemas/TrustTierName"
+        observationCeiling:
+          type: number
+          nullable: true
+        isRevoked:
+          type: boolean
+        admittedAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastActivityAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    UpdateAgentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        capabilities:
+          type: array
+          items:
+            type: string
+
+    UpdateAgentResponse:
+      type: object
+      required: [agentId, name, capabilities, updatedAt]
+      properties:
+        agentId:
+          type: string
+        name:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ---- Trust ----
+
+    AdmitRequest:
+      type: object
+      required: [agentId, name, capabilities, observationTier]
+      properties:
+        agentId:
+          type: string
+        name:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        observationTier:
+          $ref: "#/components/schemas/ObservationTier"
+
+    AdmitResponse:
+      type: object
+      required: [admitted, initialTier, initialScore, capabilities]
+      properties:
+        admitted:
+          type: boolean
+          description: Whether the agent was admitted
+        initialTier:
+          $ref: "#/components/schemas/TrustTier"
+        initialScore:
+          type: number
+          minimum: 0
+          maximum: 1000
+        observationCeiling:
+          type: number
+          nullable: true
+        capabilities:
+          type: array
+          items:
+            type: string
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+          description: Reason for denial (when admitted is false)
+
+    TrustInfoResponse:
+      type: object
+      required: [agentId]
+      properties:
+        agentId:
+          type: string
+        score:
+          type: number
+          minimum: 0
+          maximum: 1000
+          nullable: true
+        tier:
+          $ref: "#/components/schemas/TrustTier"
+        tierName:
+          $ref: "#/components/schemas/TrustTierName"
+        observationCeiling:
+          type: number
+          nullable: true
+        lastUpdated:
+          type: string
+          format: date-time
+        message:
+          type: string
+          description: Present when the agent has not been admitted
+
+    TrustSignalRequest:
+      type: object
+      required: [type, source]
+      properties:
+        type:
+          $ref: "#/components/schemas/SignalType"
+        source:
+          type: string
+          description: System or component that generated the signal
+          example: task-runner
+        weight:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.5
+          description: Signal importance weight (0-1)
+        context:
+          type: object
+          additionalProperties: true
+          description: Additional context for the signal
+
+    TrustSignalResponse:
+      type: object
+      required: [accepted, scoreBefore, scoreAfter, change]
+      properties:
+        accepted:
+          type: boolean
+        scoreBefore:
+          type: number
+        scoreAfter:
+          type: number
+        change:
+          type: number
+          description: Delta between scoreAfter and scoreBefore
+        newTier:
+          $ref: "#/components/schemas/TrustTier"
+        newTierName:
+          $ref: "#/components/schemas/TrustTierName"
+
+    RevokeResponse:
+      type: object
+      required: [revoked, agentId, reason]
+      properties:
+        revoked:
+          type: boolean
+        agentId:
+          type: string
+        reason:
+          type: string
+
+    TrustHistoryResponse:
+      type: object
+      required: [agentId, count, signals]
+      properties:
+        agentId:
+          type: string
+        count:
+          type: integer
+        signals:
+          type: array
+          items:
+            type: object
+            required: [timestamp, payload]
+            properties:
+              timestamp:
+                type: number
+                description: Unix timestamp in milliseconds
+              payload:
+                type: object
+                additionalProperties: true
+
+    TierListResponse:
+      type: object
+      required: [tiers]
+      properties:
+        tiers:
+          type: array
+          items:
+            type: object
+            required: [number, name, minScore, maxScore]
+            properties:
+              number:
+                type: integer
+                minimum: 0
+                maximum: 7
+              name:
+                $ref: "#/components/schemas/TrustTierName"
+              minScore:
+                type: integer
+                minimum: 0
+                maximum: 1000
+              maxScore:
+                type: integer
+                minimum: 0
+                maximum: 1000
+
+    # ---- Intents ----
+
+    SubmitIntentRequest:
+      type: object
+      required: [agentId, action]
+      properties:
+        agentId:
+          type: string
+          description: ID of the agent submitting the intent
+        agentName:
+          type: string
+          description: Human-readable agent name (defaults to agentId)
+        capabilities:
+          type: array
+          items:
+            type: string
+          description: Agent's declared capabilities (defaults to wildcard)
+        observationTier:
+          $ref: "#/components/schemas/ObservationTier"
+        action:
+          type: object
+          required: [type, resource]
+          properties:
+            type:
+              type: string
+              description: Action type string (e.g., read_database, send_email)
+              example: read_database
+            resource:
+              type: string
+              description: Target resource path
+              example: /data/market-prices
+            parameters:
+              type: object
+              additionalProperties: true
+        tenantId:
+          type: string
+          description: Multi-tenant isolation identifier
+        correlationId:
+          type: string
+          description: Request correlation ID for distributed tracing
+        actionType:
+          $ref: "#/components/schemas/ActionType"
+        resourceScope:
+          type: array
+          items:
+            type: string
+          description: Resources affected by this action
+        dataSensitivity:
+          $ref: "#/components/schemas/DataSensitivity"
+        reversibility:
+          $ref: "#/components/schemas/Reversibility"
+        context:
+          type: object
+          properties:
+            domain:
+              type: string
+            environment:
+              type: string
+            sessionId:
+              type: string
+            priority:
+              type: number
+            handlesPii:
+              type: boolean
+            handlesPhiData:
+              type: boolean
+          additionalProperties: true
+        expiresInMs:
+          type: integer
+          description: Intent expiration in milliseconds
+        source:
+          type: string
+          description: Source system that generated the intent
+
+    IntentResult:
+      type: object
+      required: [intentId, allowed, tier, reason, proofId, processingTimeMs, classification]
+      properties:
+        intentId:
+          type: string
+          format: uuid
+        allowed:
+          type: boolean
+          description: Whether the action was approved
+        tier:
+          type: string
+          description: Agent's trust tier at time of evaluation
+        reason:
+          type: string
+          description: Human-readable explanation of the decision
+        proofId:
+          type: string
+          description: ID of the proof commitment for this decision
+        constraints:
+          type: object
+          additionalProperties: true
+          description: Any constraints applied to the approved action
+        processingTimeMs:
+          type: number
+          description: Pipeline processing time in milliseconds
+        classification:
+          $ref: "#/components/schemas/IntentClassification"
+
+    IntentCheckResult:
+      type: object
+      required: [wouldAllow, tier, reason, classification]
+      properties:
+        wouldAllow:
+          type: boolean
+          description: Whether the action would be allowed (dry run)
+        tier:
+          type: string
+        reason:
+          type: string
+        classification:
+          $ref: "#/components/schemas/IntentClassification"
+
+    IntentClassification:
+      type: object
+      required: [actionType, dataSensitivity, reversibility, resourceScope]
+      properties:
+        actionType:
+          $ref: "#/components/schemas/ActionType"
+        dataSensitivity:
+          $ref: "#/components/schemas/DataSensitivity"
+        reversibility:
+          $ref: "#/components/schemas/Reversibility"
+        resourceScope:
+          type: array
+          items:
+            type: string
+
+    IntentRecord:
+      type: object
+      required: [intentId, agentId, action, status, tier, reason, proofId, submittedAt, processingTimeMs]
+      properties:
+        intentId:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+        action:
+          type: object
+          required: [type, resource]
+          properties:
+            type:
+              type: string
+            resource:
+              type: string
+            parameters:
+              type: object
+              additionalProperties: true
+        status:
+          $ref: "#/components/schemas/IntentStatus"
+        tier:
+          type: string
+        reason:
+          type: string
+        proofId:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        processingTimeMs:
+          type: number
+        priority:
+          type: number
+        actionType:
+          $ref: "#/components/schemas/ActionType"
+        dataSensitivity:
+          $ref: "#/components/schemas/DataSensitivity"
+        reversibility:
+          $ref: "#/components/schemas/Reversibility"
+        resourceScope:
+          type: array
+          items:
+            type: string
+        tenantId:
+          type: string
+        correlationId:
+          type: string
+        source:
+          type: string
+
+    # ---- Proofs ----
+
+    ProofEvent:
+      type: object
+      required: [type, entityId, payload, timestamp]
+      properties:
+        type:
+          type: string
+          description: Event type (e.g., trust_signal, intent_decision)
+        entityId:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+        timestamp:
+          type: number
+          description: Unix timestamp in milliseconds
+        correlationId:
+          type: string
+
+    ProofCommitmentResponse:
+      type: object
+      required: [proofId, hash, timestamp, event]
+      properties:
+        proofId:
+          type: string
+          format: uuid
+        hash:
+          type: string
+          description: SHA-256 hash of the event data
+        timestamp:
+          type: number
+          description: Unix timestamp in milliseconds
+        event:
+          $ref: "#/components/schemas/ProofEvent"
+
+    VerifyProofRequest:
+      type: object
+      required: [commitment]
+      properties:
+        commitment:
+          type: object
+          required: [id, hash, timestamp, event]
+          properties:
+            id:
+              type: string
+            hash:
+              type: string
+            timestamp:
+              type: number
+            event:
+              $ref: "#/components/schemas/ProofEvent"
+
+    VerifyProofResponse:
+      type: object
+      required: [valid, reason]
+      properties:
+        valid:
+          type: boolean
+          description: Whether the hash matches the event data
+        reason:
+          type: string
+          description: Explanation of the verification result
+
+    EntityProofsResponse:
+      type: object
+      required: [entityId, count, proofs]
+      properties:
+        entityId:
+          type: string
+        count:
+          type: integer
+        proofs:
+          type: array
+          items:
+            type: object
+            required: [proofId, hash, timestamp, eventType]
+            properties:
+              proofId:
+                type: string
+              hash:
+                type: string
+              timestamp:
+                type: number
+              eventType:
+                type: string
+              correlationId:
+                type: string
+
+    ProofBatchResponse:
+      type: object
+      required: [batchId, merkleRoot, signature, eventCount, createdAt, commitmentIds]
+      properties:
+        batchId:
+          type: string
+          format: uuid
+        merkleRoot:
+          type: string
+          description: Merkle root hash of all commitments in the batch
+        signature:
+          type: string
+          description: Cryptographic signature of the batch
+        eventCount:
+          type: integer
+          description: Number of events in the batch
+        createdAt:
+          type: number
+          description: Unix timestamp in milliseconds
+        commitmentIds:
+          type: array
+          items:
+            type: string
+          description: IDs of all commitments in the batch
+
+    # ---- Auth ----
+
+    ApiKeyInfo:
+      type: object
+      required: [keyId, name, permissions, createdAt]
+      properties:
+        keyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreateApiKeyRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: Human-readable name for the key
+        permissions:
+          type: array
+          items:
+            type: string
+          default: [read]
+          description: Permissions granted to this key
+
+    CreateApiKeyResponse:
+      type: object
+      required: [keyId, name, key, permissions, message]
+      properties:
+        keyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        key:
+          type: string
+          description: |
+            The raw API key. This is the ONLY time it is returned.
+            Store it securely -- it cannot be retrieved again.
+        permissions:
+          type: array
+          items:
+            type: string
+        message:
+          type: string
+
+    # ---- Errors ----
+
+    ErrorResponse:
+      type: object
+      required: [code, message, category, retryable]
+      properties:
+        code:
+          type: string
+          description: Vorion error code (e.g., E1001, E4002)
+          example: E4002
+        message:
+          type: string
+          description: Human-readable error message
+        category:
+          type: string
+          enum: [auth, validation, rate_limit, not_found, trust, server, external, config]
+        retryable:
+          type: boolean
+          description: Whether the client should retry the request
+        docsUrl:
+          type: string
+          format: uri
+          description: Link to error documentation
+        requestId:
+          type: string
+          description: Request ID for support reference

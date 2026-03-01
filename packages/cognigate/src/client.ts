@@ -28,11 +28,20 @@ const DEFAULT_BASE_URL = 'https://cognigate.dev/v1';
 const DEFAULT_TIMEOUT = 30000;
 const DEFAULT_RETRIES = 3;
 
+/**
+ * Error class for Cognigate API errors.
+ *
+ * Provides structured error information including a machine-readable
+ * error code, HTTP status, and optional detail payload for debugging.
+ */
 export class CognigateError extends Error {
   constructor(
     message: string,
+    /** Machine-readable error code (e.g., 'MISSING_API_KEY', 'REQUEST_FAILED') */
     public code: string,
+    /** HTTP status code from the API response, if applicable */
     public status?: number,
+    /** Additional error context or field-level details */
     public details?: Record<string, unknown>
   ) {
     super(message);
@@ -40,11 +49,39 @@ export class CognigateError extends Error {
   }
 }
 
+/**
+ * Main Cognigate SDK client for AI agent governance.
+ *
+ * Provides namespaced sub-clients for agents, trust, governance,
+ * and proof operations. Handles authentication, retries with
+ * exponential backoff, and response validation via Zod schemas.
+ *
+ * @example
+ * ```typescript
+ * const client = new Cognigate({ apiKey: 'cg_live_abc123' });
+ *
+ * // Manage agents
+ * const agent = await client.agents.create({ name: 'My Agent' });
+ *
+ * // Check trust
+ * const status = await client.trust.getStatus(agent.id);
+ *
+ * // Evaluate governance
+ * const { result } = await client.governance.evaluate(agent.id, 'Send email to user');
+ *
+ * // Query audit trail
+ * const stats = await client.proofs.getStats(agent.id);
+ * ```
+ */
 export class Cognigate {
   private readonly config: Required<Omit<CognigateConfig, 'webhookSecret'>> & { webhookSecret?: string };
+  /** Sub-client for agent CRUD operations. */
   public readonly agents: AgentsClient;
+  /** Sub-client for trust score queries and outcome reporting. */
   public readonly trust: TrustClient;
+  /** Sub-client for intent parsing, governance enforcement, and permission checks. */
   public readonly governance: GovernanceClient;
+  /** Sub-client for proof record queries and chain integrity verification. */
   public readonly proofs: ProofsClient;
 
   constructor(config: CognigateConfig) {
@@ -69,7 +106,17 @@ export class Cognigate {
   }
 
   /**
-   * Make an authenticated request to the Cognigate API
+   * Make an authenticated request to the Cognigate API with automatic retry.
+   *
+   * Retries on server errors (5xx) and network failures with exponential backoff.
+   * Client errors (4xx) are thrown immediately without retry.
+   *
+   * @typeParam T - Expected response type
+   * @param method - HTTP method
+   * @param path - API path (appended to baseUrl)
+   * @param body - Optional request body (serialized as JSON)
+   * @returns Parsed response data
+   * @throws {CognigateError} On API errors or exhausted retries
    */
   async request<T>(
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
@@ -135,14 +182,19 @@ export class Cognigate {
   }
 
   /**
-   * Check API health
+   * Check the Cognigate API health and version.
+   *
+   * @returns Server health status, API version, and server timestamp
    */
   async health(): Promise<{ status: string; version: string; timestamp: Date }> {
     return this.request('GET', '/health');
   }
 
   /**
-   * Get tier from trust score
+   * Convert a numeric trust score (0-1000) to a TrustTier enum value.
+   *
+   * @param score - Trust score on the 0-1000 scale
+   * @returns The corresponding TrustTier (T0-T7)
    */
   static getTierFromScore(score: number): TrustTier {
     if (score >= 951) return TrustTier.T7_AUTONOMOUS;
@@ -156,14 +208,20 @@ export class Cognigate {
   }
 
   /**
-   * Get tier name
+   * Get the human-readable name for a trust tier.
+   *
+   * @param tier - The trust tier enum value
+   * @returns Human-readable tier name (e.g., 'Standard', 'Trusted')
    */
   static getTierName(tier: TrustTier): string {
     return TIER_THRESHOLDS[tier].name;
   }
 
   /**
-   * Get tier thresholds
+   * Get the score thresholds and name for a trust tier.
+   *
+   * @param tier - The trust tier enum value
+   * @returns Object with min score, max score, and tier name
    */
   static getTierThresholds(tier: TrustTier): { min: number; max: number; name: string } {
     return TIER_THRESHOLDS[tier];
@@ -174,11 +232,20 @@ export class Cognigate {
 // AGENTS CLIENT
 // =============================================================================
 
+/**
+ * Sub-client for agent lifecycle management (CRUD operations).
+ *
+ * Accessed via `client.agents`. Handles creating, reading, updating,
+ * deleting, pausing, and resuming governed agents.
+ */
 class AgentsClient {
   constructor(private client: Cognigate) {}
 
   /**
-   * List all agents
+   * List all agents with optional filtering and pagination.
+   *
+   * @param params - Optional pagination and status filter
+   * @returns Paginated list of agents
    */
   async list(params?: {
     page?: number;
@@ -197,7 +264,11 @@ class AgentsClient {
   }
 
   /**
-   * Get a specific agent
+   * Get a specific agent by ID, with Zod schema validation.
+   *
+   * @param agentId - Unique agent identifier
+   * @returns The validated Agent record
+   * @throws {CognigateError} If the agent is not found
    */
   async get(agentId: string): Promise<Agent> {
     const response = await this.client.request<Agent>('GET', `/agents/${agentId}`);
@@ -205,7 +276,10 @@ class AgentsClient {
   }
 
   /**
-   * Create a new agent
+   * Create a new governed agent.
+   *
+   * @param data - Agent creation parameters (name, description, capabilities)
+   * @returns The newly created Agent record
    */
   async create(data: CreateAgentRequest): Promise<Agent> {
     const response = await this.client.request<Agent>('POST', '/agents', data);
@@ -213,7 +287,11 @@ class AgentsClient {
   }
 
   /**
-   * Update an agent
+   * Update an existing agent's properties.
+   *
+   * @param agentId - Unique agent identifier
+   * @param data - Fields to update (only provided fields are changed)
+   * @returns The updated Agent record
    */
   async update(agentId: string, data: UpdateAgentRequest): Promise<Agent> {
     const response = await this.client.request<Agent>('PATCH', `/agents/${agentId}`, data);
@@ -221,21 +299,29 @@ class AgentsClient {
   }
 
   /**
-   * Delete an agent
+   * Permanently delete an agent and its associated data.
+   *
+   * @param agentId - Unique agent identifier
    */
   async delete(agentId: string): Promise<void> {
     await this.client.request('DELETE', `/agents/${agentId}`);
   }
 
   /**
-   * Pause an agent
+   * Pause an active agent, suspending its governance operations.
+   *
+   * @param agentId - Unique agent identifier
+   * @returns The updated Agent record with PAUSED status
    */
   async pause(agentId: string): Promise<Agent> {
     return this.update(agentId, { status: 'PAUSED' });
   }
 
   /**
-   * Resume an agent
+   * Resume a paused agent, restoring its governance operations.
+   *
+   * @param agentId - Unique agent identifier
+   * @returns The updated Agent record with ACTIVE status
    */
   async resume(agentId: string): Promise<Agent> {
     return this.update(agentId, { status: 'ACTIVE' });
@@ -246,11 +332,24 @@ class AgentsClient {
 // TRUST CLIENT
 // =============================================================================
 
+/**
+ * Sub-client for trust score queries and outcome reporting.
+ *
+ * Accessed via `client.trust`. Provides methods to query current trust
+ * status, view trust history over time, and submit action outcomes
+ * that update trust scores.
+ */
 class TrustClient {
   constructor(private client: Cognigate) {}
 
   /**
-   * Get trust status for an entity
+   * Get the current trust status for an entity (agent).
+   *
+   * Returns the composite trust score, tier, capabilities, factor scores,
+   * compliance state, and any active warnings.
+   *
+   * @param entityId - Unique entity identifier
+   * @returns Validated TrustStatus with full trust profile
    */
   async getStatus(entityId: string): Promise<TrustStatus> {
     const response = await this.client.request<TrustStatus>('GET', `/trust/${entityId}`);
@@ -258,7 +357,11 @@ class TrustClient {
   }
 
   /**
-   * Get trust history
+   * Get the trust score history for an entity over a time range.
+   *
+   * @param entityId - Unique entity identifier
+   * @param params - Optional time range and result limit
+   * @returns Array of trust score snapshots with tier and timestamp
    */
   async getHistory(
     entityId: string,
@@ -276,7 +379,15 @@ class TrustClient {
   }
 
   /**
-   * Submit an outcome to update trust score
+   * Submit an action outcome to update an entity's trust score.
+   *
+   * Positive outcomes increase trust; negative outcomes decrease it.
+   * The response includes the updated trust status.
+   *
+   * @param entityId - Unique entity identifier
+   * @param proofId - Proof record ID from the governance evaluation
+   * @param outcome - Action outcome with success flag and optional metrics
+   * @returns Updated TrustStatus reflecting the score change
    */
   async submitOutcome(
     entityId: string,
@@ -300,11 +411,25 @@ class TrustClient {
 // GOVERNANCE CLIENT
 // =============================================================================
 
+/**
+ * Sub-client for governance operations: intent parsing, enforcement, and permission checks.
+ *
+ * Accessed via `client.governance`. Provides the core governance pipeline:
+ * parse raw input into a structured intent, evaluate it against trust
+ * policies, and optionally check permissions without creating proof records.
+ */
 class GovernanceClient {
   constructor(private client: Cognigate) {}
 
   /**
-   * Parse user intent into structured format
+   * Parse raw user/agent input into a structured Intent.
+   *
+   * The API uses NLP to extract the intended action, parameters,
+   * risk level, and required capabilities from unstructured text.
+   *
+   * @param entityId - ID of the entity submitting the intent
+   * @param rawInput - Unstructured text describing the intended action
+   * @returns Parsed intent with confidence score and alternatives
    */
   async parseIntent(entityId: string, rawInput: string): Promise<IntentParseResult> {
     return this.client.request('POST', '/governance/parse', {
@@ -314,7 +439,13 @@ class GovernanceClient {
   }
 
   /**
-   * Enforce governance rules on an intent
+   * Enforce governance rules on a structured intent.
+   *
+   * Evaluates the intent against the entity's trust score, capabilities,
+   * and active policies. Creates a proof record in the audit trail.
+   *
+   * @param intent - The structured intent to evaluate
+   * @returns Governance decision with capabilities, reasoning, and proof ID
    */
   async enforce(intent: Intent): Promise<GovernanceResult> {
     const response = await this.client.request<GovernanceResult>(
@@ -326,7 +457,14 @@ class GovernanceClient {
   }
 
   /**
-   * Convenience method: parse and enforce in one call
+   * Parse and enforce governance in a single call.
+   *
+   * Combines `parseIntent()` and `enforce()` for convenience.
+   * First parses raw input into an intent, then evaluates it.
+   *
+   * @param entityId - ID of the entity performing the action
+   * @param rawInput - Unstructured text describing the intended action
+   * @returns The parsed intent and its governance evaluation result
    */
   async evaluate(entityId: string, rawInput: string): Promise<{
     intent: Intent;
@@ -341,7 +479,14 @@ class GovernanceClient {
   }
 
   /**
-   * Check if an action is allowed without creating a proof record
+   * Check if an action is allowed without creating a proof record.
+   *
+   * Useful for pre-flight permission checks in UI or planning stages.
+   *
+   * @param entityId - ID of the entity to check
+   * @param action - Action to check permission for
+   * @param capabilities - Capabilities required for the action
+   * @returns Whether the action would be allowed, with a reason
    */
   async canPerform(
     entityId: string,
@@ -360,11 +505,22 @@ class GovernanceClient {
 // PROOFS CLIENT
 // =============================================================================
 
+/**
+ * Sub-client for querying and verifying the immutable proof chain (audit trail).
+ *
+ * Accessed via `client.proofs`. Provides methods to retrieve individual
+ * proof records, list records with filtering, get aggregate statistics,
+ * and verify hash chain integrity.
+ */
 class ProofsClient {
   constructor(private client: Cognigate) {}
 
   /**
-   * Get a specific proof record
+   * Get a specific proof record by ID, with Zod schema validation.
+   *
+   * @param proofId - Unique proof record identifier
+   * @returns The validated ProofRecord
+   * @throws {CognigateError} If the proof is not found
    */
   async get(proofId: string): Promise<ProofRecord> {
     const response = await this.client.request<ProofRecord>('GET', `/proofs/${proofId}`);
@@ -372,7 +528,11 @@ class ProofsClient {
   }
 
   /**
-   * List proof records for an entity
+   * List proof records for an entity with optional filtering and pagination.
+   *
+   * @param entityId - Entity to list proofs for
+   * @param params - Optional pagination, time range, and outcome filters
+   * @returns Paginated list of proof records
    */
   async list(
     entityId: string,
@@ -396,14 +556,23 @@ class ProofsClient {
   }
 
   /**
-   * Get proof chain statistics
+   * Get aggregate statistics for an entity's proof chain.
+   *
+   * @param entityId - Entity to get stats for
+   * @returns Chain statistics including total records, success rate, and integrity status
    */
   async getStats(entityId: string): Promise<ProofChainStats> {
     return this.client.request('GET', `/proofs/stats/${entityId}`);
   }
 
   /**
-   * Verify proof chain integrity
+   * Verify the cryptographic integrity of an entity's proof chain.
+   *
+   * Walks the hash chain and confirms each record's hash matches
+   * its contents and links correctly to the previous record.
+   *
+   * @param entityId - Entity whose proof chain to verify
+   * @returns Verification result with validity flag and any errors found
    */
   async verify(entityId: string): Promise<{
     valid: boolean;

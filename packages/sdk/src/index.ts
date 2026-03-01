@@ -19,7 +19,10 @@ export type {
 } from '@vorionsys/runtime';
 
 /**
- * SDK Configuration
+ * Configuration options for the Vorion SDK client.
+ *
+ * Controls whether the SDK operates in local (in-memory) mode or connects
+ * to a remote Cognigate API for production governance.
  */
 export interface VorionConfig {
   /** API endpoint for hosted Cognigate */
@@ -35,7 +38,10 @@ export interface VorionConfig {
 }
 
 /**
- * Agent registration options
+ * Options for registering an agent with the Vorion governance system.
+ *
+ * Defines the agent's identity, capabilities, and observation tier for
+ * trust evaluation and permission enforcement.
  */
 export interface AgentOptions {
   /** Unique agent identifier */
@@ -51,7 +57,10 @@ export interface AgentOptions {
 }
 
 /**
- * Result of an action request
+ * Result returned from an agent's action request to the governance system.
+ *
+ * Contains the authorization decision, decision tier (GREEN/YELLOW/RED),
+ * a human-readable reason, and a proof ID for audit trail linkage.
  */
 export interface ActionResult {
   /** Whether the action was allowed */
@@ -69,7 +78,10 @@ export interface ActionResult {
 }
 
 /**
- * Trust score information
+ * Current trust score and tier information for an agent.
+ *
+ * Provides a snapshot of the agent's trust standing, including its
+ * numeric score (0-1000), tier classification (T0-T7), and observation tier.
  */
 export interface TrustInfo {
   /** Current trust score (0-1000) */
@@ -268,7 +280,13 @@ export class Vorion {
   }
 
   /**
-   * Register an agent with the governance system
+   * Register an agent with the governance system.
+   *
+   * In remote mode, the agent is admitted via the Cognigate API.
+   * In local mode, the agent is tracked in-memory with a default trust score.
+   *
+   * @param options - Agent identity, capabilities, and observation tier
+   * @returns A registered Agent handle for governance interactions
    */
   async registerAgent(options: AgentOptions): Promise<Agent> {
     const agent = new Agent(this, options);
@@ -288,42 +306,58 @@ export class Vorion {
   }
 
   /**
-   * Get a registered agent by ID
+   * Get a previously registered agent by its unique identifier.
+   *
+   * @param agentId - The agent's unique identifier
+   * @returns The Agent handle, or undefined if not found
    */
   getAgent(agentId: string): Agent | undefined {
     return this.agents.get(agentId);
   }
 
   /**
-   * Get all registered agents
+   * Get all agents currently registered with this SDK instance.
+   *
+   * @returns Array of all registered Agent handles
    */
   getAllAgents(): Agent[] {
     return Array.from(this.agents.values());
   }
 
   /**
-   * Get SDK configuration
+   * Get a copy of the current SDK configuration.
+   *
+   * @returns A shallow copy of the active VorionConfig
    */
   getConfig(): VorionConfig {
     return { ...this.config };
   }
 
   /**
-   * Get the API client (for advanced use)
+   * Get the underlying API client for advanced direct API access.
+   *
+   * @returns The ApiClient instance, or null if running in local mode
    */
   getApiClient(): ApiClient | null {
     return this.apiClient;
   }
 
   /**
-   * Check if running in local mode
+   * Check if the SDK is operating in local (in-memory) mode.
+   *
+   * @returns True if no remote API is configured and governance runs locally
    */
   isLocalMode(): boolean {
     return this.config.localMode ?? true;
   }
 
   /**
-   * Health check (remote mode only)
+   * Perform a health check against the Cognigate API.
+   *
+   * In local mode, returns a synthetic healthy response.
+   * In remote mode, pings the API health endpoint.
+   *
+   * @returns Health status including API version
    */
   async healthCheck(): Promise<{ status: string; version: string }> {
     if (!this.apiClient) {
@@ -334,7 +368,25 @@ export class Vorion {
 }
 
 /**
- * Agent wrapper for simplified governance interactions
+ * Agent handle for interacting with the Vorion governance system.
+ *
+ * Provides methods to request action permissions, report outcomes,
+ * and query trust information. Works transparently in both local and
+ * remote modes via the parent Vorion SDK instance.
+ *
+ * @example
+ * ```typescript
+ * const agent = await vorion.registerAgent({
+ *   agentId: 'my-agent',
+ *   name: 'My Agent',
+ *   capabilities: ['read:*'],
+ * });
+ *
+ * const result = await agent.requestAction({ type: 'read', resource: 'docs/report' });
+ * if (result.allowed) {
+ *   await agent.reportSuccess('read');
+ * }
+ * ```
  */
 export class Agent {
   private sdk: Vorion;
@@ -352,7 +404,14 @@ export class Agent {
   }
 
   /**
-   * Request permission to perform an action
+   * Request permission to perform an action through the governance system.
+   *
+   * Evaluates the action against the agent's trust score, capabilities,
+   * and active policies. Returns an ActionResult indicating whether the
+   * action is allowed, along with a proof ID for audit trail linkage.
+   *
+   * @param action - The action to request, including type, resource, and optional parameters
+   * @returns Authorization decision with proof ID and any applied constraints
    */
   async requestAction(action: {
     type: string;
@@ -421,7 +480,11 @@ export class Agent {
   }
 
   /**
-   * Report action completion (positive signal)
+   * Report successful action completion, sending a positive trust signal.
+   *
+   * Successful outcomes incrementally increase the agent's trust score.
+   *
+   * @param actionType - The type of action that completed successfully
    */
   async reportSuccess(actionType: string): Promise<void> {
     const apiClient = this.sdk.getApiClient();
@@ -439,7 +502,13 @@ export class Agent {
   }
 
   /**
-   * Report action failure (negative signal)
+   * Report action failure, sending a negative trust signal.
+   *
+   * Failures decrease the agent's trust score more heavily than successes
+   * increase it, reflecting the asymmetric risk model.
+   *
+   * @param actionType - The type of action that failed
+   * @param reason - Optional human-readable failure reason for audit logging
    */
   async reportFailure(actionType: string, reason?: string): Promise<void> {
     const apiClient = this.sdk.getApiClient();
@@ -457,7 +526,9 @@ export class Agent {
   }
 
   /**
-   * Get current trust information
+   * Get the agent's current trust score, tier, and observation information.
+   *
+   * @returns Current trust status snapshot for this agent
    */
   async getTrustInfo(): Promise<TrustInfo> {
     const apiClient = this.sdk.getApiClient();
@@ -481,28 +552,36 @@ export class Agent {
   }
 
   /**
-   * Get agent ID
+   * Get the agent's unique identifier.
+   *
+   * @returns The agent ID string
    */
   getId(): string {
     return this.options.agentId;
   }
 
   /**
-   * Get agent name
+   * Get the agent's human-readable name.
+   *
+   * @returns The agent name string
    */
   getName(): string {
     return this.options.name;
   }
 
   /**
-   * Get agent capabilities
+   * Get a copy of the agent's registered capabilities.
+   *
+   * @returns Array of capability strings (e.g., ['read:*', 'write:docs'])
    */
   getCapabilities(): string[] {
     return [...(this.options.capabilities ?? [])];
   }
 
   /**
-   * Get action history
+   * Get a copy of the agent's action history for this session.
+   *
+   * @returns Array of action records with type, authorization result, and timestamp
    */
   getActionHistory(): Array<{ action: string; allowed: boolean; timestamp: number }> {
     return [...this.actionHistory];
@@ -549,7 +628,22 @@ export class Agent {
 }
 
 /**
- * Create a new Vorion SDK instance
+ * Factory function to create a new Vorion SDK instance.
+ *
+ * @param config - Optional SDK configuration. Defaults to local mode if no apiEndpoint is provided.
+ * @returns A configured Vorion SDK instance
+ *
+ * @example
+ * ```typescript
+ * // Local mode (for testing)
+ * const vorion = createVorion();
+ *
+ * // Remote mode (for production)
+ * const vorion = createVorion({
+ *   apiEndpoint: 'https://cognigate.example.com',
+ *   apiKey: 'your-api-key',
+ * });
+ * ```
  */
 export function createVorion(config?: VorionConfig): Vorion {
   return new Vorion(config);
