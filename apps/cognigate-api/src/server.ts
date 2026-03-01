@@ -77,7 +77,12 @@ export async function createServer(config: Partial<ServerConfig> = {}): Promise<
   });
 
   await server.register(cors, {
-    origin: true,
+    origin:
+      serverConfig.logLevel === 'debug' || process.env.NODE_ENV !== 'production'
+        ? true
+        : process.env.COGNIGATE_ALLOWED_ORIGINS?.split(',')
+            .map((s) => s.trim())
+            .filter(Boolean) || false,
     credentials: true,
   });
 

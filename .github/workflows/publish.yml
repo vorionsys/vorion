@@ -8,7 +8,7 @@
 # Packages published:
 #   @vorionsys/basis, @vorionsys/atsf-core, @vorionsys/contracts,
 #   @vorionsys/sdk, @vorionsys/cognigate, @vorionsys/car-cli,
-#   @vorionsys/car-client, @vorionsys/runtime, @vorionsys/platform-core,
+#   @vorionsys/car-client, @vorionsys/runtime,
 #   @vorionsys/proof-plane, @vorionsys/shared-constants, @vorionsys/council,
 #   @vorionsys/ai-gateway
 #
@@ -104,7 +104,6 @@ jobs:
             "packages/car-client"
             "packages/car-cli"
             "packages/sdk"
-            "packages/platform-core"
             "packages/council"
             "packages/ai-gateway"
           )

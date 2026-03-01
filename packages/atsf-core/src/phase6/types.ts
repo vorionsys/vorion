@@ -889,3 +889,16 @@ export function generateHash(data: string): string {
   // This is a placeholder that should be replaced
   return `sha256:${Buffer.from(data).toString('base64').slice(0, 64)}`;
 }
+
+// =============================================================================
+// RE-EXPORTS from trust-engine/phase6-types (legacy compatibility)
+// =============================================================================
+
+export {
+  validateContextType,
+  validateCreationType,
+  CANONICAL_TRUST_PRESETS,
+  CREATION_TYPE_MODIFIERS,
+  type AgentContextPolicy,
+  type TrustEvent,
+} from "../trust-engine/phase6-types.js";

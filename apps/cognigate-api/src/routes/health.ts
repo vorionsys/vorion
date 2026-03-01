@@ -4,6 +4,11 @@
 
 import type { FastifyInstance } from 'fastify';
 import { getContext } from '../context.js';
+import {
+  TrustFacade,
+  ProofCommitter,
+  IntentPipeline,
+} from '@vorionsys/runtime';
 
 export async function healthRoutes(server: FastifyInstance): Promise<void> {
   // Basic health check
@@ -15,54 +20,43 @@ export async function healthRoutes(server: FastifyInstance): Promise<void> {
     };
   });
 
-  // Readiness probe — checks each core component
+  // Readiness probe
   server.get('/ready', async (_request, reply) => {
-    const checks: Record<string, boolean> = {
+    const components: Record<string, boolean> = {
       trustFacade: false,
       proofCommitter: false,
       intentPipeline: false,
+      proofStore: false,
     };
 
     try {
       const ctx = getContext();
 
-      // TrustFacade: verify the instance exists and can be called
-      try {
-        // getAgentTrustInfo returns null for unknown IDs — that's fine, it means the facade is responsive
-        await Promise.resolve(ctx.trustFacade.getAgentTrustInfo('__healthcheck__'));
-        checks.trustFacade = true;
-      } catch {
-        checks.trustFacade = false;
-      }
+      // Verify each component is initialized and the expected type
+      components.trustFacade = ctx.trustFacade instanceof TrustFacade;
+      components.proofCommitter = ctx.proofCommitter instanceof ProofCommitter;
+      components.intentPipeline = ctx.intentPipeline instanceof IntentPipeline;
+      components.proofStore = ctx.proofStore != null;
 
-      // ProofCommitter: verify metrics are accessible (non-blocking)
-      try {
-        const metrics = ctx.proofCommitter.getMetrics();
-        checks.proofCommitter = metrics != null;
-      } catch {
-        checks.proofCommitter = false;
-      }
-
-      // IntentPipeline: verify the pipeline instance is live
-      try {
-        const metrics = ctx.intentPipeline.getMetrics();
-        checks.intentPipeline = metrics != null;
-      } catch {
-        checks.intentPipeline = false;
+      // Lightweight functional check: getMetrics() is synchronous and cheap
+      if (components.proofCommitter) {
+        ctx.proofCommitter.getMetrics();
       }
     } catch {
-      // Context not initialized — all components unhealthy
+      // getContext() throws if context was never initialized
+      const allDown = Object.fromEntries(
+        Object.keys(components).map((k) => [k, false]),
+      );
+      return reply.status(503).send({ ready: false, components: allDown });
     }
 
-    const allHealthy = Object.values(checks).every(Boolean);
+    const allHealthy = Object.values(components).every(Boolean);
 
-    const response = {
-      ready: allHealthy,
-      components: checks,
-      timestamp: new Date().toISOString(),
-    };
+    if (!allHealthy) {
+      return reply.status(503).send({ ready: false, components });
+    }
 
-    return reply.status(allHealthy ? 200 : 503).send(response);
+    return reply.status(200).send({ ready: true, components });
   });
 
   // Liveness probe
