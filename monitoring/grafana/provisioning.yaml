@@ -1,0 +1,67 @@
+# Grafana Datasource Provisioning for Vorion Platform
+#
+# Place this file at: /etc/grafana/provisioning/datasources/vorion.yaml
+# Or mount as a volume when running Grafana in Docker.
+#
+# Prometheus is the primary metrics backend for all Vorion subsystems:
+#   - AI Gateway (SLA tracker, circuit breakers, health checker, quota manager, degraded tracker)
+#   - Trust Engine (trust scores, tier transitions, decay rates)
+#   - Intent Pipeline (intent throughput, allow/deny, processing latency)
+#   - Proof Plane (proof commits, batch processing, chain integrity)
+#
+# Metric naming convention:
+#   vorion_<subsystem>_<metric_name>          (e.g., vorion_gateway_requests_total)
+#   ai_gateway_sla_<metric_name>              (e.g., ai_gateway_sla_availability)
+
+apiVersion: 1
+
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
+datasources:
+  # -----------------------------------------------
+  # Primary Prometheus datasource
+  # -----------------------------------------------
+  - name: Prometheus
+    type: prometheus
+    uid: vorion-prometheus
+    access: proxy
+    orgId: 1
+    # Update this URL to match your Prometheus deployment:
+    #   - Docker Compose: http://prometheus:9090
+    #   - Kubernetes:     http://prometheus-server.monitoring.svc.cluster.local:9090
+    #   - Local dev:      http://localhost:9090
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      # Time interval between Prometheus scrapes (match your prometheus.yml scrape_interval)
+      timeInterval: "15s"
+      # Query timeout
+      queryTimeout: "60s"
+      # HTTP method for queries
+      httpMethod: POST
+      # Enable exemplars (if using tracing)
+      exemplarTraceIdDestinations:
+        - name: traceID
+          datasourceUid: vorion-tempo
+      # Incremental querying for large time ranges
+      incrementalQuerying: true
+      incrementalQueryOverlapWindow: "10m"
+    version: 1
+
+  # -----------------------------------------------
+  # (Optional) Alertmanager for alert routing
+  # -----------------------------------------------
+  # - name: Alertmanager
+  #   type: alertmanager
+  #   uid: vorion-alertmanager
+  #   access: proxy
+  #   orgId: 1
+  #   url: http://alertmanager:9093
+  #   isDefault: false
+  #   editable: true
+  #   jsonData:
+  #     implementation: prometheus
+  #   version: 1

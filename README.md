@@ -13,10 +13,46 @@ BASIS &middot; ATSF Trust Scoring &middot; CAR Registry &middot; Cognigate Runti
 > We are a tiny team experimenting with open governance primitives. We built this because we needed it ourselves and wanted to share it humbly with the community.
 
 ```bash
-npm install @vorionsys/atsf-core @vorionsys/car-client
+npm install @vorionsys/sdk
 ```
 
 [Live Runtime](https://cognigate.dev) &middot; [Docs](https://learn.vorion.org) &middot; [BASIS Spec](docs/BASIS.md) &middot; [Roadmap](docs/ROADMAP.md)
+
+## Quick Start
+
+```typescript
+import { createVorion } from '@vorionsys/sdk';
+
+// Create a local Vorion instance (in-memory, no server required)
+const vorion = createVorion();
+
+// Register an AI agent with declared capabilities
+const agent = await vorion.registerAgent({
+  agentId: 'my-agent',
+  name: 'My AI Agent',
+  capabilities: ['read:documents', 'write:invoices'],
+});
+
+// Request permission before performing an action
+const result = await agent.requestAction({
+  type: 'read',
+  resource: 'documents/quarterly-report.pdf',
+});
+
+if (result.allowed) {
+  // Action approved — execute with trust constraints
+  await performAction();
+  await agent.reportSuccess('read');
+} else {
+  console.log(`Denied: ${result.reason}`);
+}
+
+// Check trust status
+const trust = await agent.getTrustInfo();
+console.log(`Trust: ${trust.score}/1000 — ${trust.tierName} (T${trust.tierNumber})`);
+```
+
+See [examples/](./examples/) for more complete usage, including remote mode, trust scoring, and CAR identity workflows.
 
 ---
 

@@ -29,6 +29,8 @@ import { intentRoutes } from './routes/intents.js';
 import { trustRoutes } from './routes/trust.js';
 import { proofRoutes } from './routes/proofs.js';
 import { healthRoutes } from './routes/health.js';
+import { metricsRoutes } from './routes/metrics.js';
+import { serverMetrics } from './metrics/prometheus.js';
 
 /**
  * Server configuration
@@ -101,6 +103,7 @@ export async function createServer(config: Partial<ServerConfig> = {}): Promise<
         { name: 'intents', description: 'Intent submission and processing' },
         { name: 'trust', description: 'Trust score management' },
         { name: 'proofs', description: 'Proof chain operations' },
+        { name: 'metrics', description: 'Prometheus metrics endpoint' },
       ],
     },
   });
@@ -113,6 +116,26 @@ export async function createServer(config: Partial<ServerConfig> = {}): Promise<
   await server.register(rateLimit, {
     max: 600,
     timeWindow: '1 minute',
+  });
+
+  // Prometheus metrics -- registered before auth so it is unauthenticated
+  await server.register(metricsRoutes);
+
+  // HTTP request tracking hook (feeds ServerMetrics for /metrics endpoint)
+  server.addHook('onResponse', (request, reply, done) => {
+    // Skip tracking the /metrics endpoint itself to avoid feedback loops
+    if (request.url !== '/metrics') {
+      const durationMs = reply.elapsedTime;
+      serverMetrics.recordHttpRequest(request.method, reply.statusCode, durationMs);
+
+      // Track errors
+      if (reply.statusCode >= 500) {
+        serverMetrics.recordError('5xx');
+      } else if (reply.statusCode >= 400) {
+        serverMetrics.recordError('4xx');
+      }
+    }
+    done();
   });
 
   // Authentication (optional based on config)

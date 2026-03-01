@@ -1,0 +1,159 @@
+# =============================================================================
+# Release Notes - Automated GitHub Release Creation
+# =============================================================================
+# Triggered when a version tag (v*) is pushed to the repository.
+# Generates categorized release notes from conventional commits since the
+# previous tag and creates a GitHub Release using the gh CLI.
+#
+# Categories:
+#   - Features (feat:)
+#   - Bug Fixes (fix:)
+#   - Documentation (docs:)
+#   - Performance (perf:)
+#   - Testing (test:)
+#   - Infrastructure (ci:, build:, chore:)
+#   - Other (everything else)
+#
+# Uses GitHub's built-in release notes configuration (.github/release.yml)
+# for automatic categorization via gh release create --generate-notes.
+# =============================================================================
+
+name: Release Notes
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine previous tag
+        id: prev-tag
+        run: |
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          echo "current=$CURRENT_TAG" >> "$GITHUB_OUTPUT"
+
+          # Find the previous tag (the one before the current tag)
+          PREV_TAG=$(git tag --sort=-v:refname | grep '^v' | grep -A1 "^${CURRENT_TAG}$" | tail -1)
+
+          if [ "$PREV_TAG" = "$CURRENT_TAG" ] || [ -z "$PREV_TAG" ]; then
+            # No previous tag found — this is the first release
+            echo "previous=" >> "$GITHUB_OUTPUT"
+            echo "No previous tag found. Will generate notes from full history."
+          else
+            echo "previous=$PREV_TAG" >> "$GITHUB_OUTPUT"
+            echo "Previous tag: $PREV_TAG"
+          fi
+
+      - name: Generate categorized release notes
+        id: notes
+        run: |
+          CURRENT_TAG="${{ steps.prev-tag.outputs.current }}"
+          PREV_TAG="${{ steps.prev-tag.outputs.previous }}"
+
+          if [ -z "$PREV_TAG" ]; then
+            RANGE="$CURRENT_TAG"
+          else
+            RANGE="${PREV_TAG}..${CURRENT_TAG}"
+          fi
+
+          echo "Generating release notes for range: $RANGE"
+
+          # Collect commits grouped by conventional commit type
+          FEATURES=""
+          FIXES=""
+          DOCS=""
+          PERF=""
+          TESTS=""
+          INFRA=""
+          OTHER=""
+
+          while IFS= read -r line; do
+            # Skip empty lines
+            [ -z "$line" ] && continue
+
+            HASH=$(echo "$line" | cut -d' ' -f1)
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            SHORT_HASH="${HASH:0:7}"
+
+            case "$MSG" in
+              feat*)    FEATURES="${FEATURES}- ${MSG} (${SHORT_HASH})"$'\n' ;;
+              fix*)     FIXES="${FIXES}- ${MSG} (${SHORT_HASH})"$'\n' ;;
+              docs*)    DOCS="${DOCS}- ${MSG} (${SHORT_HASH})"$'\n' ;;
+              perf*)    PERF="${PERF}- ${MSG} (${SHORT_HASH})"$'\n' ;;
+              test*)    TESTS="${TESTS}- ${MSG} (${SHORT_HASH})"$'\n' ;;
+              ci*|build*|chore*)
+                        INFRA="${INFRA}- ${MSG} (${SHORT_HASH})"$'\n' ;;
+              *)        OTHER="${OTHER}- ${MSG} (${SHORT_HASH})"$'\n' ;;
+            esac
+          done < <(git log --oneline --no-merges "$RANGE" 2>/dev/null || git log --oneline --no-merges)
+
+          # Build the release body
+          BODY=""
+
+          if [ -n "$FEATURES" ]; then
+            BODY="${BODY}## Features"$'\n\n'"${FEATURES}"$'\n'
+          fi
+          if [ -n "$FIXES" ]; then
+            BODY="${BODY}## Bug Fixes"$'\n\n'"${FIXES}"$'\n'
+          fi
+          if [ -n "$DOCS" ]; then
+            BODY="${BODY}## Documentation"$'\n\n'"${DOCS}"$'\n'
+          fi
+          if [ -n "$PERF" ]; then
+            BODY="${BODY}## Performance"$'\n\n'"${PERF}"$'\n'
+          fi
+          if [ -n "$TESTS" ]; then
+            BODY="${BODY}## Testing"$'\n\n'"${TESTS}"$'\n'
+          fi
+          if [ -n "$INFRA" ]; then
+            BODY="${BODY}## Infrastructure"$'\n\n'"${INFRA}"$'\n'
+          fi
+          if [ -n "$OTHER" ]; then
+            BODY="${BODY}## Other"$'\n\n'"${OTHER}"$'\n'
+          fi
+
+          # Add compare link
+          if [ -n "$PREV_TAG" ]; then
+            BODY="${BODY}"$'\n'"**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURRENT_TAG}"$'\n'
+          fi
+
+          # Write body to a temp file for gh release create
+          echo "$BODY" > /tmp/release-notes.md
+          echo "Generated release notes:"
+          cat /tmp/release-notes.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.prev-tag.outputs.current }}"
+
+          # Create the release with our custom notes, falling back to
+          # GitHub's auto-generated notes if our custom body is empty
+          if [ -s /tmp/release-notes.md ]; then
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes-file /tmp/release-notes.md \
+              --verify-tag
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --generate-notes \
+              --verify-tag
+          fi
+
+          echo "Release created: $TAG"

@@ -1,0 +1,140 @@
+# =============================================================================
+# Commit Lint - Conventional Commit Validation
+# =============================================================================
+# Runs on every pull request targeting main.
+# Validates that the PR title and all commit messages in the PR follow the
+# Conventional Commits specification:
+#   <type>(<optional scope>): <description>
+#
+# Accepted types: feat, fix, docs, chore, refactor, test, perf, ci, build, style
+#
+# Uses a simple bash regex check — no npm dependencies required.
+# =============================================================================
+
+name: Commit Lint
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+concurrency:
+  group: commit-lint-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  lint-pr-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check PR title follows conventional commit format
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          PATTERN='^(feat|fix|docs|chore|refactor|test|perf|ci|build|style)(\(.+\))?: .+$'
+
+          echo "PR title: \"$PR_TITLE\""
+          echo ""
+
+          if [[ "$PR_TITLE" =~ $PATTERN ]]; then
+            echo "PR title follows conventional commit format."
+          else
+            echo "::error::PR title does not follow conventional commit format."
+            echo ""
+            echo "Expected format:"
+            echo "  <type>(<optional scope>): <description>"
+            echo ""
+            echo "Accepted types:"
+            echo "  feat, fix, docs, chore, refactor, test, perf, ci, build, style"
+            echo ""
+            echo "Examples:"
+            echo "  feat: add trust decay visualization"
+            echo "  fix(cognigate): handle null Firebase gracefully"
+            echo "  docs: update CAR client usage examples"
+            echo "  chore(deps): bump vitest to v4"
+            echo ""
+            echo "See: https://www.conventionalcommits.org/"
+            exit 1
+          fi
+
+  lint-commits:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages follow conventional commit format
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          PATTERN='^(feat|fix|docs|chore|refactor|test|perf|ci|build|style)(\(.+\))?: .+$'
+          MERGE_PATTERN='^Merge '
+          REVERT_PATTERN='^Revert '
+
+          echo "Checking commits in range: ${BASE_SHA:0:7}..${HEAD_SHA:0:7}"
+          echo ""
+
+          ERRORS=0
+          CHECKED=0
+
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+
+            HASH=$(echo "$line" | cut -d' ' -f1)
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            SHORT_HASH="${HASH:0:7}"
+
+            # Skip merge commits and reverts
+            if [[ "$MSG" =~ $MERGE_PATTERN ]] || [[ "$MSG" =~ $REVERT_PATTERN ]]; then
+              echo "  SKIP  $SHORT_HASH $MSG"
+              continue
+            fi
+
+            CHECKED=$((CHECKED + 1))
+
+            if [[ "$MSG" =~ $PATTERN ]]; then
+              echo "  OK    $SHORT_HASH $MSG"
+            else
+              echo "  FAIL  $SHORT_HASH $MSG"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < <(git log --oneline "$BASE_SHA".."$HEAD_SHA")
+
+          echo ""
+          echo "=============================="
+          echo "Checked: $CHECKED commit(s)"
+          echo "Failed:  $ERRORS"
+          echo "=============================="
+
+          if [ "$ERRORS" -gt 0 ]; then
+            echo ""
+            echo "::error::$ERRORS commit(s) do not follow conventional commit format."
+            echo ""
+            echo "Expected format:"
+            echo "  <type>(<optional scope>): <description>"
+            echo ""
+            echo "Accepted types:"
+            echo "  feat, fix, docs, chore, refactor, test, perf, ci, build, style"
+            echo ""
+            echo "Examples:"
+            echo "  feat: add trust decay visualization"
+            echo "  fix(cognigate): handle null Firebase gracefully"
+            echo "  docs: update CAR client usage examples"
+            echo ""
+            echo "See: https://www.conventionalcommits.org/"
+            exit 1
+          fi
+
+          echo ""
+          echo "All commit messages follow conventional commit format."
