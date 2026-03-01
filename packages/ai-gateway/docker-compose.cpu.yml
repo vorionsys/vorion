@@ -1,0 +1,108 @@
+# ============================================
+# Vorion AI Gateway - CPU-Only Override
+# ============================================
+#
+# Development override that removes GPU requirements and uses
+# smaller models suitable for CPU inference.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d
+#
+# Performance notes:
+#   - Ollama on CPU: ~2-10 tokens/sec depending on model and CPU cores
+#   - vLLM on CPU:   ~1-5 tokens/sec; experimental but functional
+#   - Expect 5-30s latency per request on a modern 8+ core CPU
+#   - Allocate at least 16 GB RAM for both services simultaneously
+#
+# This configuration is intended for:
+#   - Local development and integration testing
+#   - CI/CD pipelines without GPU runners
+#   - Verifying routing logic without GPU hardware
+#
+# NOT suitable for production workloads.
+#
+# ============================================
+
+services:
+  # ------------------------------------------
+  # Ollama - CPU Mode
+  # ------------------------------------------
+  # Removes GPU reservation. Ollama automatically falls back to
+  # CPU inference when no GPU is detected.
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          # No GPU devices — CPU only
+          memory: 8G
+        limits:
+          memory: 12G
+    environment:
+      # Reduce parallel requests on CPU to avoid OOM
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      # Keep models loaded longer to avoid reload overhead on CPU
+      - OLLAMA_KEEP_ALIVE=15m
+
+  # ------------------------------------------
+  # vLLM - CPU Mode
+  # ------------------------------------------
+  # Uses the official CPU-compatible image from AWS ECR.
+  # This image is built with CPU-optimized kernels (no CUDA required).
+  #
+  # Runs a smaller model (Qwen2.5-1.5B-Instruct) that fits
+  # comfortably in RAM and produces reasonable results for testing.
+  #
+  # For the full list of CPU images:
+  #   https://gallery.ecr.aws/q9t5s3a7/vllm-cpu-release-repo
+  vllm:
+    image: public.ecr.aws/q9t5s3a7/vllm-cpu-release-repo:latest
+    deploy:
+      resources:
+        reservations:
+          # No GPU devices — CPU only
+          memory: 8G
+        limits:
+          memory: 12G
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
+      # Use a small model suitable for CPU inference.
+      # Qwen2.5-1.5B is fast on CPU and does not require gated access.
+      - VLLM_MODEL=${VLLM_MODEL:-Qwen/Qwen2.5-1.5B-Instruct}
+      # CPU-specific tuning: KV cache memory in GB
+      - VLLM_CPU_KVCACHE_SPACE=${VLLM_CPU_KVCACHE_SPACE:-4}
+      # Pin OMP threads to specific cores for better performance.
+      # Example for 8-core CPU: "0-6" (reserve 1 core for the framework).
+      # Leave empty for auto-detection.
+      - VLLM_CPU_OMP_THREADS_BIND=${VLLM_CPU_OMP_THREADS_BIND:-}
+    # Override command: remove GPU-specific flags, add CPU-friendly defaults.
+    # --max-model-len 2048: shorter context to reduce memory pressure
+    # --dtype float32: CPU does not support bfloat16 natively on all hardware
+    command: >
+      --host 0.0.0.0
+      --port 8000
+      --model ${VLLM_MODEL:-Qwen/Qwen2.5-1.5B-Instruct}
+      --dtype auto
+      --max-model-len ${VLLM_MAX_MODEL_LEN:-2048}
+      --max-num-seqs ${VLLM_MAX_NUM_SEQS:-4}
+      --trust-remote-code
+    # IPC host is still needed for PyTorch shared memory on CPU
+    ipc: host
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/models"]
+      interval: 30s
+      timeout: 15s
+      retries: 30
+      # CPU model loading is slower; allow up to 15 minutes
+      start_period: 900s
+
+  # ------------------------------------------
+  # LiteLLM - No changes needed
+  # ------------------------------------------
+  # LiteLLM itself is CPU-only (Python proxy). It inherits all
+  # settings from the base docker-compose.yml. The only difference
+  # is that Ollama and vLLM backends will respond slower on CPU.
+  litellm:
+    # Increase timeout since CPU inference is significantly slower
+    environment:
+      - LITELLM_REQUEST_TIMEOUT=600

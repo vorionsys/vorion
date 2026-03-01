@@ -1,0 +1,198 @@
+# ============================================
+# Vorion AI Gateway - Docker Compose
+# ============================================
+#
+# Full GPU-accelerated stack for local inference and multi-provider routing.
+#
+# Services:
+#   - litellm:  OpenAI-compatible proxy that unifies all model providers
+#   - ollama:   Self-hosted inference (Llama, DeepSeek, Gemma)
+#   - vllm:     High-throughput inference engine (Llama 3.1 8B default)
+#
+# Prerequisites:
+#   - NVIDIA Container Toolkit installed (nvidia-ctk)
+#   - Docker Compose v2.20+ (for GPU resource reservations)
+#   - Sufficient GPU VRAM: ~10 GB for vLLM (8B model), ~8 GB for Ollama models
+#   - HuggingFace token for gated models (set HF_TOKEN in .env)
+#
+# Usage:
+#   docker compose up -d                     # Start all services
+#   docker compose up -d litellm ollama      # Start without vLLM
+#   docker compose logs -f vllm              # Watch vLLM model loading
+#   docker compose --profile monitoring up   # Future: add Prometheus/Grafana
+#
+# CPU-only development:
+#   docker compose -f docker-compose.yml -f docker-compose.cpu.yml up -d
+#
+# ============================================
+
+services:
+  # ------------------------------------------
+  # LiteLLM Proxy - Unified API Gateway
+  # ------------------------------------------
+  # Routes requests across all providers (cloud + local) using
+  # the 4-tier strategy defined in litellm-config.yaml.
+  # All downstream services (Ollama, vLLM) are accessed via
+  # the shared ai-network using Docker DNS names.
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: vorion-litellm
+    restart: unless-stopped
+    ports:
+      - "${LITELLM_PORT:-4000}:4000"
+    volumes:
+      - ./litellm-config.yaml:/app/config.yaml:ro
+    environment:
+      # Core
+      - LITELLM_CONFIG_FILE=/app/config.yaml
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-vorion-dev-key}
+      # Cloud provider keys (set in .env)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # Observability
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-}
+      # Optional persistence
+      - DATABASE_URL=${DATABASE_URL:-}
+      - REDIS_HOST=${REDIS_HOST:-}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    networks:
+      - ai-network
+    depends_on:
+      ollama:
+        condition: service_healthy
+      vllm:
+        condition: service_healthy
+
+  # ------------------------------------------
+  # Ollama - Self-Hosted Inference Server
+  # ------------------------------------------
+  # Provides the privacy tier (PII-safe) and free fallback models.
+  # Models are pulled on first request or via:
+  #   docker compose exec ollama ollama pull llama3.1:8b
+  #   docker compose exec ollama ollama pull deepseek-r1:8b
+  #   docker compose exec ollama ollama pull gemma2:9b
+  ollama:
+    image: ollama/ollama:latest
+    container_name: vorion-ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      # Number of models to keep loaded simultaneously.
+      # Increase if you have sufficient VRAM for multiple models.
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-2}
+      # Maximum VRAM per model (0 = auto). Useful for multi-GPU setups.
+      - OLLAMA_MAX_LOADED_MODELS=${OLLAMA_MAX_LOADED_MODELS:-2}
+      # Keep models loaded for 5 minutes of inactivity
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-5m}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      # Ollama exposes a simple HTTP endpoint at root
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ai-network
+
+  # ------------------------------------------
+  # vLLM - High-Throughput Inference Engine
+  # ------------------------------------------
+  # Runs a single model with continuous batching and PagedAttention
+  # for maximum throughput. Exposes an OpenAI-compatible API at /v1.
+  #
+  # Default model: meta-llama/Llama-3.1-8B-Instruct (~16 GB VRAM)
+  # Override via VLLM_MODEL env var in .env.
+  #
+  # First startup downloads the model from HuggingFace, which may
+  # take 10-30 minutes depending on bandwidth. Subsequent starts
+  # use the cached model in the vllm-models volume.
+  #
+  # Requires HF_TOKEN for gated models (Llama 3.1).
+  # Get your token at: https://huggingface.co/settings/tokens
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: vorion-vllm
+    restart: unless-stopped
+    ports:
+      - "${VLLM_PORT:-8000}:8000"
+    volumes:
+      - vllm-models:/root/.cache/huggingface
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
+      - VLLM_MODEL=${VLLM_MODEL:-meta-llama/Llama-3.1-8B-Instruct}
+    # vLLM CLI arguments passed as the container command.
+    # --host 0.0.0.0: bind to all interfaces inside the container
+    # --port 8000: match the exposed port
+    # --dtype auto: let vLLM pick the best dtype for your GPU (bfloat16 on Ampere+)
+    # --max-model-len: cap context window to limit VRAM; increase if you have headroom
+    # --gpu-memory-utilization: fraction of GPU VRAM to use (0.90 = 90%)
+    # --enable-prefix-caching: cache common prompt prefixes for faster repeated queries
+    command: >
+      --host 0.0.0.0
+      --port 8000
+      --model ${VLLM_MODEL:-meta-llama/Llama-3.1-8B-Instruct}
+      --dtype auto
+      --max-model-len ${VLLM_MAX_MODEL_LEN:-4096}
+      --gpu-memory-utilization ${VLLM_GPU_MEMORY_UTIL:-0.90}
+      --max-num-seqs ${VLLM_MAX_NUM_SEQS:-64}
+      --enable-prefix-caching
+      --trust-remote-code
+    # IPC host mode is required by PyTorch for shared memory between
+    # processes, especially for tensor parallel inference.
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      # /v1/models confirms the model is loaded and ready to serve,
+      # not just that the process is alive (which /health checks).
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      # Model download + GPU loading can take 5-30 minutes on first run.
+      start_period: 600s
+    networks:
+      - ai-network
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  ai-network:
+    driver: bridge
+    name: vorion-ai-network
+
+# ============================================
+# VOLUMES
+# ============================================
+# Named volumes persist model weights across container restarts,
+# preventing re-downloads. Back these up if you have custom fine-tuned models.
+volumes:
+  ollama-models:
+    name: vorion-ollama-models
+  vllm-models:
+    name: vorion-vllm-models
