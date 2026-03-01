@@ -2,26 +2,6 @@
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
-# REGIONAL DEPLOYMENT NOTES
-# -------------------------
-# Wave 1: Single region (iad — Ashburn, US East). Suitable for US consumers.
-# Wave 2+: Add replica regions for large consumers or SLA <50ms p95 requirements.
-#
-# To activate a new region:
-#   1. Complete migration from SQLite to Fly Postgres (see DEPLOYMENT.md)
-#   2. Uncomment the desired region block below
-#   3. Run: fly scale count 2 --region <region>
-#   4. Verify: fly status --app cognigate-api
-#
-# Supported regions (uncomment to activate after Postgres migration):
-#   lhr  = London      — EU consumers          (~90ms RTT from US East)
-#   sjc  = San Jose    — US West consumers      (~60ms RTT from US East)
-#   nrt  = Tokyo       — APAC consumers         (~170ms RTT from US East)
-#   gru  = São Paulo   — LATAM consumers        (~120ms RTT from US East)
-#
-# PERSISTENCE WARNING: SQLite on a local volume is single-region only.
-# Do NOT add replica regions while SQLITE_PATH is active — data will not replicate.
-# See DEPLOYMENT.md for the Fly Postgres migration steps before scaling regions.
 
 app = 'cognigate-api'
 primary_region = 'iad'
@@ -32,7 +12,6 @@ primary_region = 'iad'
 [env]
   NODE_ENV = 'production'
   PORT = '3000'
-  # Wave 1: SQLite on local volume. Remove this and set DATABASE_URL secret before adding regions.
   SQLITE_PATH = '/data/cognigate.db'
 
 [[mounts]]

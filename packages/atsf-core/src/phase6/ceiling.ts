@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
+import { createLogger } from '../common/logger.js';
 import {
   type TrustComputationEvent,
   type RegulatoryAuditEntry,
@@ -30,10 +30,10 @@ import {
   clampToCeiling,
   trustComputationEventSchema,
   regulatoryAuditEntrySchema,
-} from "./types.js";
-import { getAgentContextCeiling } from "./context.js";
+} from './types.js';
+import { getAgentContextCeiling } from './context.js';
 
-const logger = createLogger({ component: "phase6:ceiling" });
+const logger = createLogger({ component: 'phase6:ceiling' });
 
 // =============================================================================
 // HASH UTILITIES
@@ -45,9 +45,9 @@ const logger = createLogger({ component: "phase6:ceiling" });
 async function calculateHash(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 // =============================================================================
@@ -66,28 +66,22 @@ export interface CeilingContext {
 /**
  * Calculate effective ceiling from all sources
  */
-export function calculateEffectiveCeiling(
-  context: CeilingContext,
-): CeilingSource {
+export function calculateEffectiveCeiling(context: CeilingContext): CeilingSource {
   const contextCeiling = getAgentContextCeiling(context.agentContext);
 
-  const sources: {
-    type: CeilingSource["type"];
-    value: number;
-    constraint: string;
-  }[] = [
+  const sources: { type: CeilingSource['type']; value: number; constraint: string }[] = [
     {
-      type: "context",
+      type: 'context',
       value: contextCeiling,
       constraint: `Context type ${context.agentContext.contextType}`,
     },
     {
-      type: "organizational",
+      type: 'organizational',
       value: getOrgCeiling(context.agentContext),
       constraint: `Organization ${context.agentContext.parentOrg.orgId}`,
     },
     {
-      type: "deployment",
+      type: 'deployment',
       value: getDeploymentCeiling(context.agentContext),
       constraint: `Deployment ${context.agentContext.parentOrg.parentDeployment.deploymentId}`,
     },
@@ -96,15 +90,15 @@ export function calculateEffectiveCeiling(
   // Add attestation ceiling if present
   if (context.attestationCeiling !== undefined) {
     sources.push({
-      type: "attestation",
+      type: 'attestation',
       value: context.attestationCeiling,
-      constraint: "TEE attestation",
+      constraint: 'TEE attestation',
     });
   }
 
   // Find minimum ceiling
   const minSource = sources.reduce((min, current) =>
-    current.value < min.value ? current : min,
+    current.value < min.value ? current : min
   );
 
   return minSource;
@@ -114,14 +108,7 @@ export function calculateEffectiveCeiling(
  * Get organizational ceiling (from constraints)
  */
 function getOrgCeiling(context: AgentContext): number {
-  const tierOrder = [
-    TrustTier.T0,
-    TrustTier.T1,
-    TrustTier.T2,
-    TrustTier.T3,
-    TrustTier.T4,
-    TrustTier.T5,
-  ];
+  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
   const tierScores = [99, 299, 499, 699, 899, 1000];
   const idx = tierOrder.indexOf(context.parentOrg.constraints.maxTrustTier);
   return tierScores[idx] ?? 1000;
@@ -131,18 +118,9 @@ function getOrgCeiling(context: AgentContext): number {
  * Get deployment ceiling (from max allowed tier)
  */
 function getDeploymentCeiling(context: AgentContext): number {
-  const tierOrder = [
-    TrustTier.T0,
-    TrustTier.T1,
-    TrustTier.T2,
-    TrustTier.T3,
-    TrustTier.T4,
-    TrustTier.T5,
-  ];
+  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
   const tierScores = [99, 299, 499, 699, 899, 1000];
-  const idx = tierOrder.indexOf(
-    context.parentOrg.parentDeployment.maxAllowedTier,
-  );
+  const idx = tierOrder.indexOf(context.parentOrg.parentDeployment.maxAllowedTier);
   return tierScores[idx] ?? 1000;
 }
 
@@ -168,7 +146,7 @@ export interface KernelValidationResult {
  */
 export function enforceKernelCeiling(
   rawScore: number,
-  ceilingContext: CeilingContext,
+  ceilingContext: CeilingContext
 ): KernelValidationResult {
   // Validate raw score is in valid range
   if (rawScore < 0 || !Number.isFinite(rawScore)) {
@@ -177,12 +155,8 @@ export function enforceKernelCeiling(
       rawScore: 0,
       clampedScore: 0,
       ceilingApplied: true,
-      ceilingSource: {
-        type: "context",
-        value: 0,
-        constraint: "Invalid raw score",
-      },
-      reason: "Raw score must be >= 0 and finite",
+      ceilingSource: { type: 'context', value: 0, constraint: 'Invalid raw score' },
+      reason: 'Raw score must be >= 0 and finite',
     };
   }
 
@@ -232,32 +206,25 @@ export interface PolicyValidationResult {
 export function enforcePolicyCeiling(
   clampedScore: number,
   tier: TrustTier,
-  policyContext: PolicyContext,
+  policyContext: PolicyContext
 ): PolicyValidationResult {
   const appliedPolicies: string[] = [];
 
   // Check required tier if specified
   if (policyContext.requiredTier !== undefined) {
-    const tierOrder = [
-      TrustTier.T0,
-      TrustTier.T1,
-      TrustTier.T2,
-      TrustTier.T3,
-      TrustTier.T4,
-      TrustTier.T5,
-    ];
+    const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
     const currentIdx = tierOrder.indexOf(tier);
     const requiredIdx = tierOrder.indexOf(policyContext.requiredTier);
 
     if (currentIdx < requiredIdx) {
       return {
         valid: false,
-        appliedPolicies: ["tier-requirement"],
-        deniedBy: "tier-requirement",
+        appliedPolicies: ['tier-requirement'],
+        deniedBy: 'tier-requirement',
         reason: `Required tier ${policyContext.requiredTier}, current tier ${tier}`,
       };
     }
-    appliedPolicies.push("tier-requirement:passed");
+    appliedPolicies.push('tier-requirement:passed');
   }
 
   // Policy layer passes
@@ -275,22 +242,17 @@ export function enforcePolicyCeiling(
  * Gaming detection thresholds
  */
 export const GAMING_DETECTION_THRESHOLDS = {
-  varianceAnomaly: 100, // Raw - clamped > 100 triggers flag
-  frequencyAnomaly: 10, // >10 score changes per minute
-  patternWindowMs: 60000, // 1 minute window for pattern detection
-  oscillationThreshold: 5, // >5 tier changes in window = oscillation
+  varianceAnomaly: 100,       // Raw - clamped > 100 triggers flag
+  frequencyAnomaly: 10,        // >10 score changes per minute
+  patternWindowMs: 60000,      // 1 minute window for pattern detection
+  oscillationThreshold: 5,     // >5 tier changes in window = oscillation
 };
 
 /**
  * Gaming detection state per agent
  */
 interface GamingDetectionState {
-  recentEvents: Array<{
-    timestamp: Date;
-    rawScore: number;
-    clampedScore: number;
-    tier: TrustTier;
-  }>;
+  recentEvents: Array<{ timestamp: Date; rawScore: number; clampedScore: number; tier: TrustTier }>;
   lastCleanup: Date;
 }
 
@@ -301,33 +263,23 @@ export function detectGamingIndicators(
   rawScore: number,
   clampedScore: number,
   tier: TrustTier,
-  state: GamingDetectionState,
-): {
-  varianceAnomaly: boolean;
-  frequencyAnomaly: boolean;
-  patternAnomaly: boolean;
-} {
+  state: GamingDetectionState
+): { varianceAnomaly: boolean; frequencyAnomaly: boolean; patternAnomaly: boolean } {
   const now = new Date();
-  const windowStart = new Date(
-    now.getTime() - GAMING_DETECTION_THRESHOLDS.patternWindowMs,
-  );
+  const windowStart = new Date(now.getTime() - GAMING_DETECTION_THRESHOLDS.patternWindowMs);
 
   // Cleanup old events
-  state.recentEvents = state.recentEvents.filter(
-    (e) => e.timestamp > windowStart,
-  );
+  state.recentEvents = state.recentEvents.filter((e) => e.timestamp > windowStart);
 
   // Add current event
   state.recentEvents.push({ timestamp: now, rawScore, clampedScore, tier });
 
   // Variance anomaly: large gap between raw and clamped
   const variance = rawScore - clampedScore;
-  const varianceAnomaly =
-    variance > GAMING_DETECTION_THRESHOLDS.varianceAnomaly;
+  const varianceAnomaly = variance > GAMING_DETECTION_THRESHOLDS.varianceAnomaly;
 
   // Frequency anomaly: too many changes in window
-  const frequencyAnomaly =
-    state.recentEvents.length > GAMING_DETECTION_THRESHOLDS.frequencyAnomaly;
+  const frequencyAnomaly = state.recentEvents.length > GAMING_DETECTION_THRESHOLDS.frequencyAnomaly;
 
   // Pattern anomaly: oscillating tiers
   const tiers = state.recentEvents.map((e) => e.tier);
@@ -337,8 +289,7 @@ export function detectGamingIndicators(
       tierChanges++;
     }
   }
-  const patternAnomaly =
-    tierChanges > GAMING_DETECTION_THRESHOLDS.oscillationThreshold;
+  const patternAnomaly = tierChanges > GAMING_DETECTION_THRESHOLDS.oscillationThreshold;
 
   return { varianceAnomaly, frequencyAnomaly, patternAnomaly };
 }
@@ -348,13 +299,13 @@ export function detectGamingIndicators(
  */
 export function getRetentionRequirements(
   framework: RegulatoryFramework,
-  hasAnomaly: boolean,
+  hasAnomaly: boolean
 ): { required: boolean; retentionDays: number } {
   // Regulatory framework retention periods
   const retentionPeriods: Record<RegulatoryFramework, number> = {
     [RegulatoryFramework.NONE]: hasAnomaly ? 90 : 30,
     [RegulatoryFramework.HIPAA]: 2190, // 6 years
-    [RegulatoryFramework.GDPR]: 365, // 1 year minimum
+    [RegulatoryFramework.GDPR]: 365,   // 1 year minimum
     [RegulatoryFramework.EU_AI_ACT]: 3650, // 10 years for high-risk
     [RegulatoryFramework.SOC2]: 365,
     [RegulatoryFramework.ISO_42001]: 1095, // 3 years
@@ -378,7 +329,7 @@ export async function createTrustComputationEvent(
   rawScore: number,
   ceilingContext: CeilingContext,
   policyContext: PolicyContext,
-  previousEventHash?: string,
+  previousEventHash?: string
 ): Promise<TrustComputationEvent> {
   const now = new Date();
 
@@ -387,20 +338,16 @@ export async function createTrustComputationEvent(
 
   // Policy layer
   const tier = getTierFromScore(kernelResult.clampedScore);
-  const policyResult = enforcePolicyCeiling(
-    kernelResult.clampedScore,
-    tier,
-    policyContext,
-  );
+  const policyResult = enforcePolicyCeiling(kernelResult.clampedScore, tier, policyContext);
 
   // Determine enforcement layer
   let enforcementLayer: EnforcementLayer;
   if (!kernelResult.valid) {
-    enforcementLayer = "kernel";
+    enforcementLayer = 'kernel';
   } else if (!policyResult.valid) {
-    enforcementLayer = "policy";
+    enforcementLayer = 'policy';
   } else {
-    enforcementLayer = "regulatory";
+    enforcementLayer = 'regulatory';
   }
 
   const eventData = {
@@ -442,7 +389,7 @@ export async function createTrustComputationEvent(
       tier,
       ceilingApplied: event.ceilingApplied,
     },
-    "Trust computation event created",
+    'Trust computation event created'
   );
 
   return event;
@@ -457,33 +404,23 @@ export async function createTrustComputationEvent(
  */
 export async function createRegulatoryAuditEntry(
   event: TrustComputationEvent,
-  gamingIndicators: {
-    varianceAnomaly: boolean;
-    frequencyAnomaly: boolean;
-    patternAnomaly: boolean;
-  },
+  gamingIndicators: { varianceAnomaly: boolean; frequencyAnomaly: boolean; patternAnomaly: boolean },
   framework: RegulatoryFramework,
   ledgerSequence: number,
-  previousEntryHash?: string,
+  previousEntryHash?: string
 ): Promise<RegulatoryAuditEntry> {
   const now = new Date();
   const variance = event.rawScore - event.clampedScore;
-  const hasAnomaly =
-    gamingIndicators.varianceAnomaly ||
-    gamingIndicators.frequencyAnomaly ||
-    gamingIndicators.patternAnomaly;
+  const hasAnomaly = gamingIndicators.varianceAnomaly || gamingIndicators.frequencyAnomaly || gamingIndicators.patternAnomaly;
 
   // Determine compliance status
-  let complianceStatus: RegulatoryAuditEntry["complianceStatus"];
+  let complianceStatus: RegulatoryAuditEntry['complianceStatus'];
   if (gamingIndicators.patternAnomaly) {
-    complianceStatus = "violation";
-  } else if (
-    gamingIndicators.varianceAnomaly ||
-    gamingIndicators.frequencyAnomaly
-  ) {
-    complianceStatus = "warning";
+    complianceStatus = 'violation';
+  } else if (gamingIndicators.varianceAnomaly || gamingIndicators.frequencyAnomaly) {
+    complianceStatus = 'warning';
   } else {
-    complianceStatus = "compliant";
+    complianceStatus = 'compliant';
   }
 
   const retention = getRetentionRequirements(framework, hasAnomaly);
@@ -521,7 +458,7 @@ export async function createRegulatoryAuditEntry(
     throw new Error(`Invalid regulatory audit entry: ${parsed.error.message}`);
   }
 
-  if (complianceStatus !== "compliant") {
+  if (complianceStatus !== 'compliant') {
     logger.warn(
       {
         agentId: entry.agentId,
@@ -529,7 +466,7 @@ export async function createRegulatoryAuditEntry(
         variance,
         gamingIndicators,
       },
-      "Compliance issue detected",
+      'Compliance issue detected'
     );
   }
 
@@ -561,7 +498,7 @@ export class CeilingEnforcementService {
     agentId: string,
     rawScore: number,
     ceilingContext: CeilingContext,
-    policyContext?: PolicyContext,
+    policyContext?: PolicyContext
   ): Promise<{
     event: TrustComputationEvent;
     auditEntry: RegulatoryAuditEntry;
@@ -580,7 +517,7 @@ export class CeilingEnforcementService {
       rawScore,
       ceilingContext,
       policyContext ?? { agentId },
-      previousEventHash,
+      previousEventHash
     );
 
     // Store event
@@ -594,7 +531,7 @@ export class CeilingEnforcementService {
       event.rawScore,
       event.clampedScore,
       event.effectiveTier,
-      gamingState,
+      gamingState
     );
 
     // Create audit entry
@@ -603,9 +540,7 @@ export class CeilingEnforcementService {
       gamingIndicators,
       this.regulatoryFramework,
       this.auditLedger.length,
-      this.auditLedger.length > 0
-        ? this.auditLedger[this.auditLedger.length - 1]!.entryHash
-        : undefined,
+      this.auditLedger.length > 0 ? this.auditLedger[this.auditLedger.length - 1]!.entryHash : undefined
     );
 
     this.auditLedger.push(auditEntry);
@@ -625,7 +560,7 @@ export class CeilingEnforcementService {
    */
   getAuditLedger(filter?: {
     agentId?: string;
-    complianceStatus?: RegulatoryAuditEntry["complianceStatus"];
+    complianceStatus?: RegulatoryAuditEntry['complianceStatus'];
     startDate?: Date;
     endDate?: Date;
   }): readonly RegulatoryAuditEntry[] {
@@ -635,9 +570,7 @@ export class CeilingEnforcementService {
       entries = entries.filter((e) => e.agentId === filter.agentId);
     }
     if (filter?.complianceStatus) {
-      entries = entries.filter(
-        (e) => e.complianceStatus === filter.complianceStatus,
-      );
+      entries = entries.filter((e) => e.complianceStatus === filter.complianceStatus);
     }
     if (filter?.startDate) {
       entries = entries.filter((e) => e.timestamp >= filter.startDate!);
@@ -679,9 +612,7 @@ export class CeilingEnforcementService {
 
       // Verify hash
       const { entryHash, ...dataToHash } = entry;
-      const expectedHash = await calculateHash(
-        JSON.stringify({ ...dataToHash, entryHash: undefined }),
-      );
+      const expectedHash = await calculateHash(JSON.stringify({ ...dataToHash, entryHash: undefined }));
       // Note: This check would need the original data structure to work correctly
       // Simplified for this implementation
     }
@@ -695,22 +626,13 @@ export class CeilingEnforcementService {
   getGamingAlerts(): Array<{
     agentId: string;
     alertCount: number;
-    latestStatus: RegulatoryAuditEntry["complianceStatus"];
+    latestStatus: RegulatoryAuditEntry['complianceStatus'];
   }> {
-    const alerts: Map<
-      string,
-      {
-        alertCount: number;
-        latestStatus: RegulatoryAuditEntry["complianceStatus"];
-      }
-    > = new Map();
+    const alerts: Map<string, { alertCount: number; latestStatus: RegulatoryAuditEntry['complianceStatus'] }> = new Map();
 
     for (const entry of this.auditLedger) {
-      if (entry.complianceStatus !== "compliant") {
-        const current = alerts.get(entry.agentId) ?? {
-          alertCount: 0,
-          latestStatus: "compliant",
-        };
+      if (entry.complianceStatus !== 'compliant') {
+        const current = alerts.get(entry.agentId) ?? { alertCount: 0, latestStatus: 'compliant' };
         current.alertCount++;
         current.latestStatus = entry.complianceStatus;
         alerts.set(entry.agentId, current);
@@ -729,10 +651,7 @@ export class CeilingEnforcementService {
   getStats(): {
     totalEvents: number;
     totalAuditEntries: number;
-    complianceBreakdown: Record<
-      RegulatoryAuditEntry["complianceStatus"],
-      number
-    >;
+    complianceBreakdown: Record<RegulatoryAuditEntry['complianceStatus'], number>;
     agentsWithAlerts: number;
   } {
     const complianceBreakdown = {
@@ -763,7 +682,7 @@ export class CeilingEnforcementService {
  * Create a new ceiling enforcement service
  */
 export function createCeilingEnforcementService(
-  framework: RegulatoryFramework = RegulatoryFramework.NONE,
+  framework: RegulatoryFramework = RegulatoryFramework.NONE
 ): CeilingEnforcementService {
   return new CeilingEnforcementService(framework);
 }
@@ -778,4 +697,4 @@ export {
   type CeilingSource,
   type EnforcementLayer,
   RegulatoryFramework,
-} from "./types.js";
+} from './types.js';

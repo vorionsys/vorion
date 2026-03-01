@@ -9,12 +9,12 @@
  * - Can be per-domain, per-tenant, or per-agent
  */
 
-import { CANONICAL_TRUST_WEIGHTS, TOTAL_TRUST_WEIGHT } from "./canonical.js";
+import { CANONICAL_TRUST_WEIGHTS, TOTAL_TRUST_WEIGHT } from './canonical.js';
 
 /**
  * Direction of weight adjustment
  */
-export type WeightAdjustmentDirection = "increase" | "decrease";
+export type WeightAdjustmentDirection = 'increase' | 'decrease';
 
 /**
  * Weight delta specification
@@ -54,19 +54,19 @@ export const AXIOM_DELTA_PRESETS = {
    */
   healthcare: [
     {
-      metric: "cascadePrevention" as const,
+      metric: 'cascadePrevention' as const,
       adjustment: 50,
-      reason: "Healthcare domain requires maximum cascade prevention",
+      reason: 'Healthcare domain requires maximum cascade prevention',
     },
     {
-      metric: "behaviorStability" as const,
+      metric: 'behaviorStability' as const,
       adjustment: 30,
-      reason: "Healthcare requires consistent, predictable behavior",
+      reason: 'Healthcare requires consistent, predictable behavior',
     },
     {
-      metric: "executionEfficiency" as const,
+      metric: 'executionEfficiency' as const,
       adjustment: -20,
-      reason: "Healthcare prioritizes safety over resource efficiency",
+      reason: 'Healthcare prioritizes safety over resource efficiency',
     },
   ],
 
@@ -78,19 +78,19 @@ export const AXIOM_DELTA_PRESETS = {
    */
   finance: [
     {
-      metric: "successRatio" as const,
+      metric: 'successRatio' as const,
       adjustment: 40,
-      reason: "Finance requires high success rate for transaction safety",
+      reason: 'Finance requires high success rate for transaction safety',
     },
     {
-      metric: "authorizationHistory" as const,
+      metric: 'authorizationHistory' as const,
       adjustment: 30,
-      reason: "Finance requires strict authorization compliance",
+      reason: 'Finance requires strict authorization compliance',
     },
     {
-      metric: "behaviorStability" as const,
+      metric: 'behaviorStability' as const,
       adjustment: -10,
-      reason: "Finance agents adapt to market conditions",
+      reason: 'Finance agents adapt to market conditions',
     },
   ],
 
@@ -102,19 +102,19 @@ export const AXIOM_DELTA_PRESETS = {
    */
   manufacturing: [
     {
-      metric: "executionEfficiency" as const,
+      metric: 'executionEfficiency' as const,
       adjustment: 50,
-      reason: "Manufacturing optimizes for throughput and resource utilization",
+      reason: 'Manufacturing optimizes for throughput and resource utilization',
     },
     {
-      metric: "cascadePrevention" as const,
+      metric: 'cascadePrevention' as const,
       adjustment: 20,
-      reason: "Manufacturing prevents production line cascades",
+      reason: 'Manufacturing prevents production line cascades',
     },
     {
-      metric: "behaviorStability" as const,
+      metric: 'behaviorStability' as const,
       adjustment: -15,
-      reason: "Manufacturing behavior adapts to production parameters",
+      reason: 'Manufacturing behavior adapts to production parameters',
     },
   ],
 
@@ -126,19 +126,19 @@ export const AXIOM_DELTA_PRESETS = {
    */
   research: [
     {
-      metric: "behaviorStability" as const,
+      metric: 'behaviorStability' as const,
       adjustment: 40,
-      reason: "Research requires reproducible, consistent behavior",
+      reason: 'Research requires reproducible, consistent behavior',
     },
     {
-      metric: "successRatio" as const,
+      metric: 'successRatio' as const,
       adjustment: 20,
-      reason: "Research emphasizes successful experiments",
+      reason: 'Research emphasizes successful experiments',
     },
     {
-      metric: "authorizationHistory" as const,
+      metric: 'authorizationHistory' as const,
       adjustment: -15,
-      reason: "Research agents need autonomy for exploratory work",
+      reason: 'Research agents need autonomy for exploratory work',
     },
   ],
 } as const;
@@ -148,7 +148,7 @@ export const AXIOM_DELTA_PRESETS = {
  */
 export function applyDelta(
   canonicalWeights: Record<string, number>,
-  delta: WeightDelta,
+  delta: WeightDelta
 ): Record<string, number> {
   // Check expiration
   if (delta.expiresAt && new Date() > delta.expiresAt) {
@@ -170,12 +170,9 @@ export function applyDelta(
  */
 export function applyDeltas(
   canonicalWeights: Record<string, number>,
-  deltas: WeightDelta[],
+  deltas: WeightDelta[]
 ): Record<string, number> {
-  return deltas.reduce(
-    (weights, delta) => applyDelta(weights, delta),
-    canonicalWeights,
-  );
+  return deltas.reduce((weights, delta) => applyDelta(weights, delta), canonicalWeights);
 }
 
 /**
@@ -183,7 +180,7 @@ export function applyDeltas(
  */
 export function validateDeltaAdjustments(
   canonicalWeights: Record<string, number>,
-  deltas: WeightDelta[],
+  deltas: WeightDelta[]
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -194,10 +191,10 @@ export function validateDeltaAdjustments(
   }
 
   if (totalAdjustment < -1000) {
-    errors.push("Total delta adjustments cannot reduce weights below 0");
+    errors.push('Total delta adjustments cannot reduce weights below 0');
   }
   if (totalAdjustment > 1000) {
-    errors.push("Total delta adjustments cannot exceed 1000 additional points");
+    errors.push('Total delta adjustments cannot exceed 1000 additional points');
   }
 
   // Check individual metrics stay in valid range
@@ -221,8 +218,7 @@ export function validateDeltaAdjustments(
  * Get delta adjustments for a specific domain
  */
 export function getDeltasForDomain(domain: string): WeightDelta[] {
-  const preset =
-    AXIOM_DELTA_PRESETS[domain as keyof typeof AXIOM_DELTA_PRESETS];
+  const preset = AXIOM_DELTA_PRESETS[domain as keyof typeof AXIOM_DELTA_PRESETS];
   if (!preset) {
     return [];
   }
@@ -230,7 +226,7 @@ export function getDeltasForDomain(domain: string): WeightDelta[] {
   return preset.map((delta) => ({
     ...delta,
     appliedAt: new Date(),
-    appliedBy: "system",
+    appliedBy: 'system',
     domain,
   }));
 }
@@ -238,9 +234,7 @@ export function getDeltasForDomain(domain: string): WeightDelta[] {
 /**
  * Track weight merge operation
  */
-export function recordWeightMerge(
-  record: WeightMergeRecord,
-): WeightMergeRecord {
+export function recordWeightMerge(record: WeightMergeRecord): WeightMergeRecord {
   return {
     ...record,
     mergedAt: new Date(),

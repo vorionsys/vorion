@@ -7,7 +7,7 @@
  * @see https://cognigate.dev/docs/rate-limits
  */
 
-import { TrustTier } from "./tiers.js";
+import { TrustTier } from './tiers.js';
 
 // =============================================================================
 // RATE LIMIT DEFINITIONS
@@ -53,8 +53,8 @@ export const RATE_LIMITS: Record<TrustTier, RateLimitConfig> = {
     requestsPerHour: 100,
     requestsPerDay: 500,
     burstLimit: 2,
-    maxPayloadBytes: 1024 * 10, // 10 KB
-    maxResponseBytes: 1024 * 100, // 100 KB
+    maxPayloadBytes: 1024 * 10,        // 10 KB
+    maxResponseBytes: 1024 * 100,      // 100 KB
     connectionTimeoutMs: 5000,
     requestTimeoutMs: 10000,
   },
@@ -65,8 +65,8 @@ export const RATE_LIMITS: Record<TrustTier, RateLimitConfig> = {
     requestsPerHour: 500,
     requestsPerDay: 2000,
     burstLimit: 5,
-    maxPayloadBytes: 1024 * 50, // 50 KB
-    maxResponseBytes: 1024 * 500, // 500 KB
+    maxPayloadBytes: 1024 * 50,        // 50 KB
+    maxResponseBytes: 1024 * 500,      // 500 KB
     connectionTimeoutMs: 5000,
     requestTimeoutMs: 15000,
   },
@@ -77,8 +77,8 @@ export const RATE_LIMITS: Record<TrustTier, RateLimitConfig> = {
     requestsPerHour: 2000,
     requestsPerDay: 10000,
     burstLimit: 10,
-    maxPayloadBytes: 1024 * 100, // 100 KB
-    maxResponseBytes: 1024 * 1024, // 1 MB
+    maxPayloadBytes: 1024 * 100,       // 100 KB
+    maxResponseBytes: 1024 * 1024,     // 1 MB
     connectionTimeoutMs: 10000,
     requestTimeoutMs: 30000,
   },
@@ -89,7 +89,7 @@ export const RATE_LIMITS: Record<TrustTier, RateLimitConfig> = {
     requestsPerHour: 5000,
     requestsPerDay: 50000,
     burstLimit: 20,
-    maxPayloadBytes: 1024 * 500, // 500 KB
+    maxPayloadBytes: 1024 * 500,       // 500 KB
     maxResponseBytes: 1024 * 1024 * 5, // 5 MB
     connectionTimeoutMs: 10000,
     requestTimeoutMs: 60000,
@@ -101,7 +101,7 @@ export const RATE_LIMITS: Record<TrustTier, RateLimitConfig> = {
     requestsPerHour: 10000,
     requestsPerDay: 100000,
     burstLimit: 50,
-    maxPayloadBytes: 1024 * 1024, // 1 MB
+    maxPayloadBytes: 1024 * 1024,      // 1 MB
     maxResponseBytes: 1024 * 1024 * 10, // 10 MB
     connectionTimeoutMs: 15000,
     requestTimeoutMs: 120000,
@@ -113,7 +113,7 @@ export const RATE_LIMITS: Record<TrustTier, RateLimitConfig> = {
     requestsPerHour: 30000,
     requestsPerDay: 300000,
     burstLimit: 100,
-    maxPayloadBytes: 1024 * 1024 * 5, // 5 MB
+    maxPayloadBytes: 1024 * 1024 * 5,  // 5 MB
     maxResponseBytes: 1024 * 1024 * 50, // 50 MB
     connectionTimeoutMs: 30000,
     requestTimeoutMs: 300000,
@@ -164,21 +164,15 @@ export function getMinTierForLimits(config: {
   requestsPerHour?: number;
   requestsPerDay?: number;
 }): TrustTier {
-  const tiers = Object.values(TrustTier).filter(
-    (t) => typeof t === "number",
-  ) as TrustTier[];
+  const tiers = Object.values(TrustTier).filter(t => typeof t === 'number') as TrustTier[];
 
   for (const tier of tiers) {
     const limits = RATE_LIMITS[tier];
     if (
-      (config.requestsPerSecond === undefined ||
-        limits.requestsPerSecond >= config.requestsPerSecond) &&
-      (config.requestsPerMinute === undefined ||
-        limits.requestsPerMinute >= config.requestsPerMinute) &&
-      (config.requestsPerHour === undefined ||
-        limits.requestsPerHour >= config.requestsPerHour) &&
-      (config.requestsPerDay === undefined ||
-        limits.requestsPerDay >= config.requestsPerDay)
+      (config.requestsPerSecond === undefined || limits.requestsPerSecond >= config.requestsPerSecond) &&
+      (config.requestsPerMinute === undefined || limits.requestsPerMinute >= config.requestsPerMinute) &&
+      (config.requestsPerHour === undefined || limits.requestsPerHour >= config.requestsPerHour) &&
+      (config.requestsPerDay === undefined || limits.requestsPerDay >= config.requestsPerDay)
     ) {
       return tier;
     }
@@ -192,18 +186,18 @@ export function getMinTierForLimits(config: {
  */
 export function wouldExceedLimit(
   tier: TrustTier,
-  window: "second" | "minute" | "hour" | "day",
+  window: 'second' | 'minute' | 'hour' | 'day',
   currentCount: number,
 ): boolean {
   const limits = RATE_LIMITS[tier];
   switch (window) {
-    case "second":
+    case 'second':
       return currentCount >= limits.requestsPerSecond;
-    case "minute":
+    case 'minute':
       return currentCount >= limits.requestsPerMinute;
-    case "hour":
+    case 'hour':
       return currentCount >= limits.requestsPerHour;
-    case "day":
+    case 'day':
       return currentCount >= limits.requestsPerDay;
   }
 }
@@ -247,8 +241,8 @@ export const TIER_QUOTAS: Record<TrustTier, QuotaConfig> = {
   [TrustTier.T0_SANDBOX]: {
     monthlyApiCalls: 1000,
     monthlyComputeUnits: 100,
-    monthlyStorageBytes: 1024 * 1024 * 10, // 10 MB
-    monthlyBandwidthBytes: 1024 * 1024 * 100, // 100 MB
+    monthlyStorageBytes: 1024 * 1024 * 10,      // 10 MB
+    monthlyBandwidthBytes: 1024 * 1024 * 100,   // 100 MB
     maxAgents: 1,
     maxWebhooks: 1,
     maxTeamMembers: 1,
@@ -257,8 +251,8 @@ export const TIER_QUOTAS: Record<TrustTier, QuotaConfig> = {
   [TrustTier.T1_OBSERVED]: {
     monthlyApiCalls: 10000,
     monthlyComputeUnits: 1000,
-    monthlyStorageBytes: 1024 * 1024 * 100, // 100 MB
-    monthlyBandwidthBytes: 1024 * 1024 * 1024, // 1 GB
+    monthlyStorageBytes: 1024 * 1024 * 100,     // 100 MB
+    monthlyBandwidthBytes: 1024 * 1024 * 1024,  // 1 GB
     maxAgents: 5,
     maxWebhooks: 5,
     maxTeamMembers: 3,
@@ -267,7 +261,7 @@ export const TIER_QUOTAS: Record<TrustTier, QuotaConfig> = {
   [TrustTier.T2_PROVISIONAL]: {
     monthlyApiCalls: 50000,
     monthlyComputeUnits: 5000,
-    monthlyStorageBytes: 1024 * 1024 * 500, // 500 MB
+    monthlyStorageBytes: 1024 * 1024 * 500,     // 500 MB
     monthlyBandwidthBytes: 1024 * 1024 * 1024 * 5, // 5 GB
     maxAgents: 10,
     maxWebhooks: 10,

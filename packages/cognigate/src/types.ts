@@ -4,7 +4,7 @@
  * Core types for the Cognigate AI governance API
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 import {
   TrustTier,
@@ -13,7 +13,7 @@ import {
   getTierName,
   getTierColor,
   type TierThreshold,
-} from "@vorionsys/shared-constants";
+} from '@vorionsys/shared-constants';
 
 // =============================================================================
 // TRUST TIERS (from @vorionsys/shared-constants)
@@ -34,7 +34,7 @@ export {
 // GOVERNANCE DECISIONS
 // =============================================================================
 
-export type GovernanceDecision = "ALLOW" | "DENY" | "ESCALATE" | "DEGRADE";
+export type GovernanceDecision = 'ALLOW' | 'DENY' | 'ESCALATE' | 'DEGRADE';
 
 export interface GovernanceResult {
   decision: GovernanceDecision;
@@ -58,7 +58,7 @@ export interface Intent {
   rawInput: string;
   parsedAction: string;
   parameters: Record<string, unknown>;
-  riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   requiredCapabilities: string[];
   timestamp: Date;
 }
@@ -95,7 +95,7 @@ export interface ProofRecord {
   intentId: string;
   decision: GovernanceDecision;
   action: string;
-  outcome: "SUCCESS" | "FAILURE" | "PARTIAL" | "PENDING";
+  outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL' | 'PENDING';
   trustScoreBefore: number;
   trustScoreAfter: number;
   timestamp: Date;
@@ -123,7 +123,7 @@ export interface Agent {
   ownerId: string;
   trustScore: number;
   trustTier: TrustTier;
-  status: "ACTIVE" | "PAUSED" | "SUSPENDED" | "TERMINATED";
+  status: 'ACTIVE' | 'PAUSED' | 'SUSPENDED' | 'TERMINATED';
   capabilities: string[];
   executions: number;
   successRate: number;
@@ -143,7 +143,7 @@ export interface CreateAgentRequest {
 export interface UpdateAgentRequest {
   name?: string;
   description?: string;
-  status?: "ACTIVE" | "PAUSED";
+  status?: 'ACTIVE' | 'PAUSED';
   metadata?: Record<string, unknown>;
 }
 
@@ -187,15 +187,15 @@ export interface WebhookEvent {
 }
 
 export type WebhookEventType =
-  | "agent.created"
-  | "agent.updated"
-  | "agent.deleted"
-  | "agent.status_changed"
-  | "trust.score_changed"
-  | "trust.tier_changed"
-  | "governance.decision"
-  | "proof.recorded"
-  | "alert.triggered";
+  | 'agent.created'
+  | 'agent.updated'
+  | 'agent.deleted'
+  | 'agent.status_changed'
+  | 'trust.score_changed'
+  | 'trust.tier_changed'
+  | 'governance.decision'
+  | 'proof.recorded'
+  | 'alert.triggered';
 
 // =============================================================================
 // CONFIGURATION
@@ -203,26 +203,7 @@ export type WebhookEventType =
 
 export interface CognigateConfig {
   apiKey: string;
-  /**
-   * Base URL for the Cognigate API.
-   * Override this to route to a regional endpoint:
-   *   - US (default):  https://cognigate.dev/v1
-   *   - EU:            https://eu.cognigate.dev/v1
-   *   - APAC:          https://apac.cognigate.dev/v1
-   *
-   * For large consumers (>500 evaluations/day) or SLA <50ms p95, always set
-   * baseUrl to the nearest regional endpoint. Cross-region calls from EU or
-   * APAC to the default US endpoint add 90–170ms RTT per request.
-   * See apps/cognigate-api/DEPLOYMENT.md for the full regional architecture.
-   */
   baseUrl?: string;
-  /**
-   * Logical region identifier forwarded as `X-Cognigate-Region` on every request.
-   * Used for observability and per-region latency dashboards.
-   * Should match the Fly.io region code of your nearest cognigate-api instance.
-   * Examples: 'iad' (US East, default), 'lhr' (EU), 'nrt' (APAC), 'sjc' (US West)
-   */
-  region?: string;
   timeout?: number;
   retries?: number;
   debug?: boolean;
@@ -246,7 +227,7 @@ export const TrustStatusSchema = z.object({
 });
 
 export const GovernanceResultSchema = z.object({
-  decision: z.enum(["ALLOW", "DENY", "ESCALATE", "DEGRADE"]),
+  decision: z.enum(['ALLOW', 'DENY', 'ESCALATE', 'DEGRADE']),
   trustScore: z.number(),
   trustTier: z.nativeEnum(TrustTier),
   grantedCapabilities: z.array(z.string()),
@@ -261,9 +242,9 @@ export const ProofRecordSchema = z.object({
   id: z.string(),
   entityId: z.string(),
   intentId: z.string(),
-  decision: z.enum(["ALLOW", "DENY", "ESCALATE", "DEGRADE"]),
+  decision: z.enum(['ALLOW', 'DENY', 'ESCALATE', 'DEGRADE']),
   action: z.string(),
-  outcome: z.enum(["SUCCESS", "FAILURE", "PARTIAL", "PENDING"]),
+  outcome: z.enum(['SUCCESS', 'FAILURE', 'PARTIAL', 'PENDING']),
   trustScoreBefore: z.number(),
   trustScoreAfter: z.number(),
   timestamp: z.coerce.date(),
@@ -279,7 +260,7 @@ export const AgentSchema = z.object({
   ownerId: z.string(),
   trustScore: z.number(),
   trustTier: z.nativeEnum(TrustTier),
-  status: z.enum(["ACTIVE", "PAUSED", "SUSPENDED", "TERMINATED"]),
+  status: z.enum(['ACTIVE', 'PAUSED', 'SUSPENDED', 'TERMINATED']),
   capabilities: z.array(z.string()),
   executions: z.number(),
   successRate: z.number(),

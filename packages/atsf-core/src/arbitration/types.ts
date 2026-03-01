@@ -7,13 +7,7 @@
  * @packageDocumentation
  */
 
-import type {
-  ID,
-  TrustLevel,
-  TrustScore,
-  ControlAction,
-  Timestamp,
-} from "../common/types.js";
+import type { ID, TrustLevel, TrustScore, ControlAction, Timestamp } from '../common/types.js';
 
 /**
  * An agent participating in trust arbitration
@@ -41,12 +35,12 @@ export interface ArbitrationAgent {
  * Agent roles that affect voting weight
  */
 export type AgentRole =
-  | "primary" // Main decision-making agent
-  | "validator" // Verifies other agents' outputs
-  | "specialist" // Domain-specific expertise
-  | "supervisor" // Oversight role
-  | "executor" // Carries out actions
-  | "observer"; // Read-only monitoring
+  | 'primary'      // Main decision-making agent
+  | 'validator'    // Verifies other agents' outputs
+  | 'specialist'   // Domain-specific expertise
+  | 'supervisor'   // Oversight role
+  | 'executor'     // Carries out actions
+  | 'observer';    // Read-only monitoring
 
 /**
  * A vote cast by an agent during arbitration
@@ -72,7 +66,7 @@ export interface ArbitrationVote {
  * Evidence supporting a vote
  */
 export interface VoteEvidence {
-  type: "data" | "rule" | "history" | "external" | "inference";
+  type: 'data' | 'rule' | 'history' | 'external' | 'inference';
   source: string;
   summary: string;
   confidence: number;
@@ -95,25 +89,25 @@ export interface TrustConflict {
   /** When the conflict was detected */
   detectedAt: Timestamp;
   /** Severity of the conflict */
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
 /**
  * Types of conflicts that can arise
  */
 export type ConflictType =
-  | "action_disagreement" // Agents disagree on what action to take
-  | "trust_assessment" // Agents disagree on entity trust level
-  | "capability_scope" // Agents disagree on capability permissions
-  | "risk_evaluation" // Agents disagree on risk level
-  | "resource_allocation" // Agents compete for resources
-  | "priority_conflict"; // Agents disagree on task priority
+  | 'action_disagreement'      // Agents disagree on what action to take
+  | 'trust_assessment'         // Agents disagree on entity trust level
+  | 'capability_scope'         // Agents disagree on capability permissions
+  | 'risk_evaluation'          // Agents disagree on risk level
+  | 'resource_allocation'      // Agents compete for resources
+  | 'priority_conflict';       // Agents disagree on task priority
 
 /**
  * Subject of a conflict
  */
 export interface ConflictSubject {
-  type: "entity" | "action" | "resource" | "intent";
+  type: 'entity' | 'action' | 'resource' | 'intent';
   id: ID;
   description: string;
   context: Record<string, unknown>;
@@ -149,12 +143,12 @@ export interface ArbitrationResult {
  * Methods for resolving conflicts
  */
 export type ArbitrationMethod =
-  | "weighted_majority" // Weighted voting based on trust/accuracy
-  | "unanimous_required" // All agents must agree
-  | "supervisor_override" // Supervisor agent makes final call
-  | "consensus_building" // Iterative discussion to reach consensus
-  | "escalate_human" // Escalate to human decision-maker
-  | "default_deny"; // Default to most restrictive action
+  | 'weighted_majority'    // Weighted voting based on trust/accuracy
+  | 'unanimous_required'   // All agents must agree
+  | 'supervisor_override'  // Supervisor agent makes final call
+  | 'consensus_building'   // Iterative discussion to reach consensus
+  | 'escalate_human'       // Escalate to human decision-maker
+  | 'default_deny';        // Default to most restrictive action
 
 /**
  * The final arbitration decision
@@ -200,7 +194,7 @@ export interface ArbitrationRound {
 export interface AgentFeedback {
   fromAgent: ID;
   toAgent: ID;
-  feedbackType: "support" | "challenge" | "question" | "information";
+  feedbackType: 'support' | 'challenge' | 'question' | 'information';
   content: string;
 }
 
@@ -232,12 +226,12 @@ export interface DecayFactor {
  * Types of factors that cause confidence decay
  */
 export type DecayFactorType =
-  | "cross_agent_disagreement" // Agents disagreeing reduces confidence
-  | "historical_inaccuracy" // Past mistakes reduce confidence
-  | "role_mismatch" // Acting outside assigned role
-  | "evidence_conflict" // Conflicting evidence presented
-  | "time_pressure" // Rushed decision
-  | "uncertainty_propagation"; // Uncertainty from upstream agents
+  | 'cross_agent_disagreement'  // Agents disagreeing reduces confidence
+  | 'historical_inaccuracy'    // Past mistakes reduce confidence
+  | 'role_mismatch'            // Acting outside assigned role
+  | 'evidence_conflict'        // Conflicting evidence presented
+  | 'time_pressure'            // Rushed decision
+  | 'uncertainty_propagation'; // Uncertainty from upstream agents
 
 /**
  * Metrics about the consensus process
@@ -290,7 +284,7 @@ export interface ArbitrationConfig {
 export interface ArbitrationRequest {
   conflict: TrustConflict;
   preferredMethod?: ArbitrationMethod;
-  urgency: "low" | "normal" | "high" | "critical";
+  urgency: 'low' | 'normal' | 'high' | 'critical';
   context?: Record<string, unknown>;
 }
 

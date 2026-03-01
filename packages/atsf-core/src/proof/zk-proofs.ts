@@ -17,10 +17,10 @@
  * @packageDocumentation
  */
 
-import * as nodeCrypto from "node:crypto";
-import { createLogger } from "../common/logger.js";
+import * as nodeCrypto from 'node:crypto';
+import { createLogger } from '../common/logger.js';
 
-const logger = createLogger({ component: "proof:zk" });
+const logger = createLogger({ component: 'proof:zk' });
 
 // =============================================================================
 // TYPES
@@ -41,7 +41,7 @@ export interface PedersenCommitment {
  */
 export interface RangeProof {
   proofId: string;
-  proofType: "range";
+  proofType: 'range';
   commitment: string;
   rangeMin: number;
   rangeMax: number;
@@ -54,7 +54,7 @@ export interface RangeProof {
  */
 export interface ThresholdProof {
   proofId: string;
-  proofType: "threshold";
+  proofType: 'threshold';
   commitment: string;
   threshold: number;
   proof: string;
@@ -66,7 +66,7 @@ export interface ThresholdProof {
  */
 export interface MembershipProof {
   proofId: string;
-  proofType: "membership";
+  proofType: 'membership';
   commitment: string;
   setHash: string; // Hash of allowed set
   proof: string;
@@ -78,7 +78,7 @@ export interface MembershipProof {
  */
 export interface TrustTierProof {
   proofId: string;
-  proofType: "trust-tier";
+  proofType: 'trust-tier';
   agentId: string;
   tierCommitment: string;
   tier: string; // T0-T5
@@ -92,9 +92,9 @@ export interface TrustTierProof {
  */
 export interface CompositeProof {
   proofId: string;
-  proofType: "composite";
+  proofType: 'composite';
   statements: Array<{
-    type: "range" | "threshold" | "membership";
+    type: 'range' | 'threshold' | 'membership';
     commitment: string;
     parameters: Record<string, unknown>;
   }>;
@@ -132,18 +132,18 @@ const TIER_BOUNDARIES: Record<string, [number, number]> = {
  * Generate random 256-bit scalar
  */
 function randomScalar(): string {
-  return nodeCrypto.randomBytes(32).toString("hex");
+  return nodeCrypto.randomBytes(32).toString('hex');
 }
 
 /**
  * SHA-256 hash
  */
 function hash(...inputs: string[]): string {
-  const hasher = nodeCrypto.createHash("sha256");
+  const hasher = nodeCrypto.createHash('sha256');
   for (const input of inputs) {
     hasher.update(input);
   }
-  return hasher.digest("hex");
+  return hasher.digest('hex');
 }
 
 /**
@@ -168,7 +168,7 @@ export function createCommitment(value: number): PedersenCommitment {
 export function verifyCommitment(
   commitment: string,
   value: number,
-  blinding: string,
+  blinding: string
 ): boolean {
   const expected = hash(value.toString(), blinding);
   return commitment === expected;
@@ -190,11 +190,11 @@ export function verifyCommitment(
 export function generateRangeProof(
   value: number,
   min: number,
-  max: number,
+  max: number
 ): { proof: RangeProof; secret: PedersenCommitment } | null {
   // Validate range
   if (value < min || value > max) {
-    logger.warn({ value, min, max }, "Value out of range");
+    logger.warn({ value, min, max }, 'Value out of range');
     return null;
   }
 
@@ -231,7 +231,7 @@ export function generateRangeProof(
     commitment.commitment,
     min.toString(),
     max.toString(),
-    ...bitCommitments,
+    ...bitCommitments
   );
 
   // Response
@@ -245,11 +245,11 @@ export function generateRangeProof(
 
   const proof: RangeProof = {
     proofId: nodeCrypto.randomUUID(),
-    proofType: "range",
+    proofType: 'range',
     commitment: commitment.commitment,
     rangeMin: min,
     rangeMax: max,
-    proof: Buffer.from(proofData).toString("base64"),
+    proof: Buffer.from(proofData).toString('base64'),
     createdAt: new Date(),
   };
 
@@ -263,14 +263,14 @@ export function generateRangeProof(
  */
 export function verifyRangeProof(proof: RangeProof): ZKVerificationResult {
   try {
-    const proofData = JSON.parse(Buffer.from(proof.proof, "base64").toString());
+    const proofData = JSON.parse(Buffer.from(proof.proof, 'base64').toString());
 
     // Recompute challenge
     const expectedChallenge = hash(
       proof.commitment,
       proof.rangeMin.toString(),
       proof.rangeMax.toString(),
-      ...proofData.bitCommitments,
+      ...proofData.bitCommitments
     );
 
     if (proofData.challenge !== expectedChallenge) {
@@ -278,7 +278,7 @@ export function verifyRangeProof(proof: RangeProof): ZKVerificationResult {
         valid: false,
         proofId: proof.proofId,
         verifiedAt: new Date(),
-        reason: "Challenge mismatch",
+        reason: 'Challenge mismatch',
       };
     }
 
@@ -297,7 +297,7 @@ export function verifyRangeProof(proof: RangeProof): ZKVerificationResult {
       valid: false,
       proofId: proof.proofId,
       verifiedAt: new Date(),
-      reason: `Proof parsing failed: ${error instanceof Error ? error.message : "Unknown"}`,
+      reason: `Proof parsing failed: ${error instanceof Error ? error.message : 'Unknown'}`,
     };
   }
 }
@@ -311,10 +311,10 @@ export function verifyRangeProof(proof: RangeProof): ZKVerificationResult {
  */
 export function generateThresholdProof(
   value: number,
-  threshold: number,
+  threshold: number
 ): { proof: ThresholdProof; secret: PedersenCommitment } | null {
   if (value < threshold) {
-    logger.warn({ value, threshold }, "Value below threshold");
+    logger.warn({ value, threshold }, 'Value below threshold');
     return null;
   }
 
@@ -327,14 +327,10 @@ export function generateThresholdProof(
   const challenge = hash(
     commitment.commitment,
     threshold.toString(),
-    diffCommitment.commitment,
+    diffCommitment.commitment
   );
 
-  const response = hash(
-    challenge,
-    commitment.blinding,
-    diffCommitment.blinding,
-  );
+  const response = hash(challenge, commitment.blinding, diffCommitment.blinding);
 
   const proofData = JSON.stringify({
     differenceCommitment: diffCommitment.commitment,
@@ -344,10 +340,10 @@ export function generateThresholdProof(
 
   const proof: ThresholdProof = {
     proofId: nodeCrypto.randomUUID(),
-    proofType: "threshold",
+    proofType: 'threshold',
     commitment: commitment.commitment,
     threshold,
-    proof: Buffer.from(proofData).toString("base64"),
+    proof: Buffer.from(proofData).toString('base64'),
     createdAt: new Date(),
   };
 
@@ -357,16 +353,14 @@ export function generateThresholdProof(
 /**
  * Verify a threshold proof
  */
-export function verifyThresholdProof(
-  proof: ThresholdProof,
-): ZKVerificationResult {
+export function verifyThresholdProof(proof: ThresholdProof): ZKVerificationResult {
   try {
-    const proofData = JSON.parse(Buffer.from(proof.proof, "base64").toString());
+    const proofData = JSON.parse(Buffer.from(proof.proof, 'base64').toString());
 
     const expectedChallenge = hash(
       proof.commitment,
       proof.threshold.toString(),
-      proofData.differenceCommitment,
+      proofData.differenceCommitment
     );
 
     if (proofData.challenge !== expectedChallenge) {
@@ -374,7 +368,7 @@ export function verifyThresholdProof(
         valid: false,
         proofId: proof.proofId,
         verifiedAt: new Date(),
-        reason: "Challenge mismatch",
+        reason: 'Challenge mismatch',
       };
     }
 
@@ -388,7 +382,7 @@ export function verifyThresholdProof(
       valid: false,
       proofId: proof.proofId,
       verifiedAt: new Date(),
-      reason: `Proof parsing failed: ${error instanceof Error ? error.message : "Unknown"}`,
+      reason: `Proof parsing failed: ${error instanceof Error ? error.message : 'Unknown'}`,
     };
   }
 }
@@ -405,11 +399,11 @@ export function verifyThresholdProof(
  */
 export function generateMembershipProof(
   value: string,
-  allowedSet: string[],
+  allowedSet: string[]
 ): { proof: MembershipProof; secret: string } | null {
   const valueIndex = allowedSet.indexOf(value);
   if (valueIndex === -1) {
-    logger.warn({ value }, "Value not in allowed set");
+    logger.warn({ value }, 'Value not in allowed set');
     return null;
   }
 
@@ -445,10 +439,10 @@ export function generateMembershipProof(
 
   const proof: MembershipProof = {
     proofId: nodeCrypto.randomUUID(),
-    proofType: "membership",
+    proofType: 'membership',
     commitment,
     setHash,
-    proof: Buffer.from(proofData).toString("base64"),
+    proof: Buffer.from(proofData).toString('base64'),
     createdAt: new Date(),
   };
 
@@ -460,7 +454,7 @@ export function generateMembershipProof(
  */
 export function verifyMembershipProof(
   proof: MembershipProof,
-  allowedSet: string[],
+  allowedSet: string[]
 ): ZKVerificationResult {
   try {
     // Verify set hash
@@ -470,17 +464,17 @@ export function verifyMembershipProof(
         valid: false,
         proofId: proof.proofId,
         verifiedAt: new Date(),
-        reason: "Set hash mismatch",
+        reason: 'Set hash mismatch',
       };
     }
 
-    const proofData = JSON.parse(Buffer.from(proof.proof, "base64").toString());
+    const proofData = JSON.parse(Buffer.from(proof.proof, 'base64').toString());
 
     // Verify challenge
     const expectedChallenge = hash(
       proof.commitment,
       proof.setHash,
-      ...proofData.responses,
+      ...proofData.responses
     );
 
     if (proofData.challenge !== expectedChallenge) {
@@ -488,7 +482,7 @@ export function verifyMembershipProof(
         valid: false,
         proofId: proof.proofId,
         verifiedAt: new Date(),
-        reason: "Challenge mismatch",
+        reason: 'Challenge mismatch',
       };
     }
 
@@ -502,7 +496,7 @@ export function verifyMembershipProof(
       valid: false,
       proofId: proof.proofId,
       verifiedAt: new Date(),
-      reason: `Proof parsing failed: ${error instanceof Error ? error.message : "Unknown"}`,
+      reason: `Proof parsing failed: ${error instanceof Error ? error.message : 'Unknown'}`,
     };
   }
 }
@@ -520,11 +514,11 @@ export function generateTrustTierProof(
   agentId: string,
   score: number,
   tier: string,
-  validityDurationMs: number = 3600000, // 1 hour
+  validityDurationMs: number = 3600000 // 1 hour
 ): { proof: TrustTierProof; secret: PedersenCommitment } | null {
   const tierRange = TIER_BOUNDARIES[tier];
   if (!tierRange) {
-    logger.warn({ tier }, "Invalid tier");
+    logger.warn({ tier }, 'Invalid tier');
     return null;
   }
 
@@ -532,7 +526,7 @@ export function generateTrustTierProof(
 
   // Verify score is in tier
   if (score < min || score > max) {
-    logger.warn({ score, tier, min, max }, "Score not in tier range");
+    logger.warn({ score, tier, min, max }, 'Score not in tier range');
     return null;
   }
 
@@ -547,7 +541,7 @@ export function generateTrustTierProof(
 
   const proof: TrustTierProof = {
     proofId: nodeCrypto.randomUUID(),
-    proofType: "trust-tier",
+    proofType: 'trust-tier',
     agentId,
     tierCommitment,
     tier,
@@ -562,16 +556,14 @@ export function generateTrustTierProof(
 /**
  * Verify a trust tier proof
  */
-export function verifyTrustTierProof(
-  proof: TrustTierProof,
-): ZKVerificationResult {
+export function verifyTrustTierProof(proof: TrustTierProof): ZKVerificationResult {
   // Check validity period
   if (new Date() > proof.validUntil) {
     return {
       valid: false,
       proofId: proof.proofId,
       verifiedAt: new Date(),
-      reason: "Proof has expired",
+      reason: 'Proof has expired',
     };
   }
 
@@ -581,13 +573,13 @@ export function verifyTrustTierProof(
       valid: false,
       proofId: proof.proofId,
       verifiedAt: new Date(),
-      reason: "Invalid tier",
+      reason: 'Invalid tier',
     };
   }
 
   // Verify the embedded proof data directly
   try {
-    const proofData = JSON.parse(Buffer.from(proof.proof, "base64").toString());
+    const proofData = JSON.parse(Buffer.from(proof.proof, 'base64').toString());
 
     // Verify challenge is present and properly formed
     if (!proofData.challenge || !proofData.response) {
@@ -595,16 +587,12 @@ export function verifyTrustTierProof(
         valid: false,
         proofId: proof.proofId,
         verifiedAt: new Date(),
-        reason: "Missing proof components",
+        reason: 'Missing proof components',
       };
     }
 
     // Verify tier commitment includes agent ID and tier
-    const expectedTierCommitment = hash(
-      proof.agentId,
-      proof.tier,
-      proofData.bitCommitments?.[0] ?? "",
-    );
+    const expectedTierCommitment = hash(proof.agentId, proof.tier, proofData.bitCommitments?.[0] ?? '');
     // Note: In a full implementation, we'd verify the commitment chain
 
     return {
@@ -617,7 +605,7 @@ export function verifyTrustTierProof(
       valid: false,
       proofId: proof.proofId,
       verifiedAt: new Date(),
-      reason: `Proof parsing failed: ${error instanceof Error ? error.message : "Unknown"}`,
+      reason: `Proof parsing failed: ${error instanceof Error ? error.message : 'Unknown'}`,
     };
   }
 }
@@ -653,7 +641,7 @@ export class ZKProofService {
 
   constructor(config: Partial<ZKProofConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    logger.info("ZK proof service initialized");
+    logger.info('ZK proof service initialized');
   }
 
   /**
@@ -662,13 +650,13 @@ export class ZKProofService {
   generateTierProof(
     agentId: string,
     score: number,
-    tier: string,
+    tier: string
   ): TrustTierProof | null {
     const result = generateTrustTierProof(
       agentId,
       score,
       tier,
-      this.config.defaultValidityMs,
+      this.config.defaultValidityMs
     );
 
     if (!result) {
@@ -687,30 +675,27 @@ export class ZKProofService {
    */
   verify(
     proof: RangeProof | ThresholdProof | MembershipProof | TrustTierProof,
-    context?: { allowedSet?: string[] },
+    context?: { allowedSet?: string[] }
   ): ZKVerificationResult {
     switch (proof.proofType) {
-      case "range":
+      case 'range':
         return verifyRangeProof(proof as RangeProof);
 
-      case "threshold":
+      case 'threshold':
         return verifyThresholdProof(proof as ThresholdProof);
 
-      case "membership":
+      case 'membership':
         if (!context?.allowedSet) {
           return {
             valid: false,
             proofId: proof.proofId,
             verifiedAt: new Date(),
-            reason: "Allowed set required for membership proof",
+            reason: 'Allowed set required for membership proof',
           };
         }
-        return verifyMembershipProof(
-          proof as MembershipProof,
-          context.allowedSet,
-        );
+        return verifyMembershipProof(proof as MembershipProof, context.allowedSet);
 
-      case "trust-tier":
+      case 'trust-tier':
         return verifyTrustTierProof(proof as TrustTierProof);
 
       default:
@@ -718,7 +703,7 @@ export class ZKProofService {
           valid: false,
           proofId: (proof as { proofId: string }).proofId,
           verifiedAt: new Date(),
-          reason: "Unknown proof type",
+          reason: 'Unknown proof type',
         };
     }
   }
@@ -789,8 +774,6 @@ export class ZKProofService {
 /**
  * Create a ZK proof service
  */
-export function createZKProofService(
-  config?: Partial<ZKProofConfig>,
-): ZKProofService {
+export function createZKProofService(config?: Partial<ZKProofConfig>): ZKProofService {
   return new ZKProofService(config);
 }

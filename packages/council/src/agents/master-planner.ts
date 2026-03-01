@@ -5,8 +5,8 @@
  * Uses hierarchical task decomposition pattern.
  */
 
-import { createGateway, type GatewayMessage } from "@vorionsys/ai-gateway";
-import type { CouncilState, TaskStep } from "../types/index.js";
+import { createGateway, type GatewayMessage } from '@vorionsys/ai-gateway'
+import type { CouncilState, TaskStep } from '../types/index.js'
 
 const SYSTEM_PROMPT = `You are the Master Planner, the chief orchestrator of the Vorion AI Governance Platform's agent workforce.
 
@@ -74,46 +74,46 @@ IMPORTANT:
 - Prefer existing workforce over advisors for execution tasks
 - Use advisors for strategic input, not tactical work
 - Always include rationale for your decisions
-`;
+`
 
 export class MasterPlannerAgent {
-  private gateway = createGateway();
+  private gateway = createGateway()
 
   /**
    * Analyze a user request and create an execution plan
    */
   async plan(state: CouncilState): Promise<CouncilState> {
-    console.log("[MASTER PLANNER] Analyzing request:", state.userRequest);
+    console.log('[MASTER PLANNER] Analyzing request:', state.userRequest)
 
     try {
       const messages: GatewayMessage[] = [
         {
-          role: "user",
+          role: 'user',
           content: `User Request: "${state.userRequest}"
 
 Priority: ${state.metadata.priority}
-Max Cost: $${state.metadata.maxCost || "unlimited"}
+Max Cost: $${state.metadata.maxCost || 'unlimited'}
 
-Please analyze this request and create a detailed execution plan.`,
-        },
-      ];
+Please analyze this request and create a detailed execution plan.`
+        }
+      ]
 
       // Use high-quality model for planning
       const response = await this.gateway.chat({
         messages,
         systemPrompt: SYSTEM_PROMPT,
         metadata: {
-          taskType: "reasoning",
-          priority: "high", // Planning is critical
+          taskType: 'reasoning',
+          priority: 'high' // Planning is critical
         },
         options: {
           maxTokens: 2048,
-          temperature: 0.3, // Lower temperature for consistent planning
-        },
-      });
+          temperature: 0.3 // Lower temperature for consistent planning
+        }
+      })
 
       // Parse the plan
-      const plan = this.parsePlan(response.content);
+      const plan = this.parsePlan(response.content)
 
       // Update state
       return {
@@ -123,30 +123,29 @@ Please analyze this request and create a detailed execution plan.`,
           estimatedCost: plan.totalEstimatedCost,
           estimatedTime: plan.totalEstimatedTime,
           complexity: plan.complexity,
-          createdBy: "master_planner",
+          createdBy: 'master_planner'
         },
-        currentStep: "compliance_check",
-        updatedAt: new Date(),
-      };
+        currentStep: 'compliance_check',
+        updatedAt: new Date()
+      }
     } catch (error) {
-      console.error("[MASTER PLANNER] Error:", error);
+      console.error('[MASTER PLANNER] Error:', error)
 
       return {
         ...state,
         errors: [
           ...state.errors,
           {
-            step: "planning",
-            message:
-              error instanceof Error ? error.message : "Unknown planning error",
-            agentId: "master_planner",
+            step: 'planning',
+            message: error instanceof Error ? error.message : 'Unknown planning error',
+            agentId: 'master_planner',
             timestamp: new Date(),
-            severity: "critical",
-          },
+            severity: 'critical'
+          }
         ],
-        currentStep: "failed",
-        updatedAt: new Date(),
-      };
+        currentStep: 'failed',
+        updatedAt: new Date()
+      }
     }
   }
 
@@ -155,66 +154,58 @@ Please analyze this request and create a detailed execution plan.`,
    * Handles both JSON and text responses
    */
   private parsePlan(content: string): {
-    complexity: "simple" | "moderate" | "complex";
-    steps: TaskStep[];
-    totalEstimatedCost: number;
-    totalEstimatedTime: number;
-    rationale?: string;
+    complexity: 'simple' | 'moderate' | 'complex'
+    steps: TaskStep[]
+    totalEstimatedCost: number
+    totalEstimatedTime: number
+    rationale?: string
   } {
     try {
       // Try to extract JSON from markdown code blocks
-      const jsonMatch =
-        content.match(/```json\n([\s\S]*?)\n```/) ||
-        content.match(/```\n([\s\S]*?)\n```/);
-      const jsonStr = jsonMatch ? jsonMatch[1] : content;
+      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/```\n([\s\S]*?)\n```/)
+      const jsonStr = jsonMatch ? jsonMatch[1] : content
 
-      const parsed = JSON.parse(jsonStr);
+      const parsed = JSON.parse(jsonStr)
 
       // Ensure all steps have required fields
-      const steps: TaskStep[] = parsed.steps.map(
-        (step: Record<string, unknown>, index: number) => ({
-          id: (step.id as string) || `step_${index + 1}`,
-          description: step.description as string,
-          assignTo: step.assignTo as "advisor" | "workforce" | "council",
-          estimatedCost: (step.estimatedCost as number) || 0.01,
-          estimatedTime: (step.estimatedTime as number) || 60,
-          dependencies: (step.dependencies as string[]) || [],
-          status: "pending" as const,
-        }),
-      );
+      const steps: TaskStep[] = parsed.steps.map((step: Record<string, unknown>, index: number) => ({
+        id: (step.id as string) || `step_${index + 1}`,
+        description: step.description as string,
+        assignTo: step.assignTo as 'advisor' | 'workforce' | 'council',
+        estimatedCost: (step.estimatedCost as number) || 0.01,
+        estimatedTime: (step.estimatedTime as number) || 60,
+        dependencies: (step.dependencies as string[]) || [],
+        status: 'pending' as const
+      }))
 
       return {
-        complexity: parsed.complexity || "moderate",
+        complexity: parsed.complexity || 'moderate',
         steps,
-        totalEstimatedCost:
-          parsed.totalEstimatedCost ||
-          steps.reduce((sum, s) => sum + s.estimatedCost, 0),
-        totalEstimatedTime:
-          parsed.totalEstimatedTime ||
-          steps.reduce((sum, s) => sum + s.estimatedTime, 0),
-        rationale: parsed.rationale,
-      };
+        totalEstimatedCost: parsed.totalEstimatedCost || steps.reduce((sum, s) => sum + s.estimatedCost, 0),
+        totalEstimatedTime: parsed.totalEstimatedTime || steps.reduce((sum, s) => sum + s.estimatedTime, 0),
+        rationale: parsed.rationale
+      }
     } catch {
       // Fallback: create a simple single-step plan
-      console.warn("[MASTER PLANNER] Could not parse plan, creating fallback");
+      console.warn('[MASTER PLANNER] Could not parse plan, creating fallback')
 
       return {
-        complexity: "simple",
+        complexity: 'simple',
         steps: [
           {
-            id: "step_1",
-            description: "Process user request",
-            assignTo: "advisor",
+            id: 'step_1',
+            description: 'Process user request',
+            assignTo: 'advisor',
             estimatedCost: 0.05,
             estimatedTime: 120,
             dependencies: [],
-            status: "pending",
-          },
+            status: 'pending'
+          }
         ],
         totalEstimatedCost: 0.05,
         totalEstimatedTime: 120,
-        rationale: "Fallback plan due to parsing error",
-      };
+        rationale: 'Fallback plan due to parsing error'
+      }
     }
   }
 
@@ -223,19 +214,19 @@ Please analyze this request and create a detailed execution plan.`,
    */
   static getConfig() {
     return {
-      id: "master_planner",
-      name: "Master Planner",
-      role: "master_planner" as const,
-      description: "Analyzes requests and creates hierarchical execution plans",
+      id: 'master_planner',
+      name: 'Master Planner',
+      role: 'master_planner' as const,
+      description: 'Analyzes requests and creates hierarchical execution plans',
       capabilities: [
-        "Task decomposition",
-        "Resource allocation",
-        "Cost estimation",
-        "Dependency analysis",
-        "Complexity assessment",
+        'Task decomposition',
+        'Resource allocation',
+        'Cost estimation',
+        'Dependency analysis',
+        'Complexity assessment'
       ],
-      model: "reasoning/complex",
-      systemPrompt: SYSTEM_PROMPT,
-    };
+      model: 'reasoning/complex',
+      systemPrompt: SYSTEM_PROMPT
+    }
   }
 }

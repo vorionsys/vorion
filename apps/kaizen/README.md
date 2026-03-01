@@ -1,6 +1,6 @@
 # Kaizen
 
-**The Agentic AI Knowledge Base** — A comprehensive documentation platform with integrated AI assistance.
+**Interactive AI Learning Experience** — A comprehensive documentation platform with integrated AI assistance.
 
 ## Features
 
@@ -8,7 +8,7 @@
 - **Local-First Knowledge** - 25+ terms in the built-in lexicon, checked before any API call
 - **Glassmorphism UI** - Dark cyberpunk theme with smooth animations
 - **Documentation Hub** - Guides on agent architecture, orchestration, protocols, and safety
-- **SDK Reference** - Vorion CAR, ATSF, and BASIS protocol documentation
+- **SDK Reference** - Vorion and BASIS protocol documentation
 
 ## Quick Start
 
@@ -24,7 +24,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001).
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Project Structure
 
@@ -111,12 +111,12 @@ CNAME learn -> cname.vercel-dns.com
 | Product | Description |
 |---------|-------------|
 | [BASIS](https://vorion.org/basis) | Open standard for AI agent governance |
-| [Vorion](https://vorion.org) | AI governance platform with trust scoring |
+| [Vorion](https://vorion.org) | AI governance platform with certification |
 | [Cognigate](https://cognigate.dev) | Reference implementation of BASIS runtime |
 
 ## Technology Stack
 
-- **Framework**: Next.js 16+ (App Router)
+- **Framework**: Next.js 14+ (App Router)
 - **Styling**: Tailwind CSS 4.0 + custom glassmorphism
 - **AI**: Vercel AI SDK with Google Gemini
 - **Icons**: Lucide React

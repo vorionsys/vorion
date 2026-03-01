@@ -4,7 +4,7 @@
  * Helpers for handling Cognigate webhooks
  */
 
-import { WebhookEvent, WebhookEventType } from "./types.js";
+import { WebhookEvent, WebhookEventType } from './types.js';
 
 /**
  * Verify webhook signature
@@ -12,19 +12,19 @@ import { WebhookEvent, WebhookEventType } from "./types.js";
 export async function verifyWebhookSignature(
   payload: string,
   signature: string,
-  secret: string,
+  secret: string
 ): Promise<boolean> {
   const encoder = new TextEncoder();
   const data = encoder.encode(payload);
   const key = await crypto.subtle.importKey(
-    "raw",
+    'raw',
     encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
+    { name: 'HMAC', hash: 'SHA-256' },
     false,
-    ["sign"],
+    ['sign']
   );
 
-  const signatureBuffer = await crypto.subtle.sign("HMAC", key, data);
+  const signatureBuffer = await crypto.subtle.sign('HMAC', key, data);
   const expectedSignature = bufferToHex(signatureBuffer);
 
   return timingSafeEqual(signature, expectedSignature);
@@ -36,12 +36,12 @@ export async function verifyWebhookSignature(
 export async function parseWebhookPayload(
   body: string,
   signature: string,
-  secret: string,
+  secret: string
 ): Promise<WebhookEvent> {
   const isValid = await verifyWebhookSignature(body, signature, secret);
 
   if (!isValid) {
-    throw new Error("Invalid webhook signature");
+    throw new Error('Invalid webhook signature');
   }
 
   try {
@@ -49,7 +49,7 @@ export async function parseWebhookPayload(
     event.timestamp = new Date(event.timestamp);
     return event;
   } catch {
-    throw new Error("Invalid webhook payload");
+    throw new Error('Invalid webhook payload');
   }
 }
 
@@ -57,14 +57,14 @@ export async function parseWebhookPayload(
  * Webhook handler type
  */
 export type WebhookHandler<T extends WebhookEventType = WebhookEventType> = (
-  event: WebhookEvent & { type: T },
+  event: WebhookEvent & { type: T }
 ) => void | Promise<void>;
 
 /**
  * Webhook router for handling different event types
  */
 export class WebhookRouter {
-  private handlers: Map<WebhookEventType | "*", WebhookHandler[]> = new Map();
+  private handlers: Map<WebhookEventType | '*', WebhookHandler[]> = new Map();
 
   /**
    * Register a handler for a specific event type
@@ -80,9 +80,9 @@ export class WebhookRouter {
    * Register a handler for all events
    */
   onAll(handler: WebhookHandler): this {
-    const existing = this.handlers.get("*") || [];
+    const existing = this.handlers.get('*') || [];
     existing.push(handler);
-    this.handlers.set("*", existing);
+    this.handlers.set('*', existing);
     return this;
   }
 
@@ -91,7 +91,7 @@ export class WebhookRouter {
    */
   async handle(event: WebhookEvent): Promise<void> {
     const typeHandlers = this.handlers.get(event.type) || [];
-    const allHandlers = this.handlers.get("*") || [];
+    const allHandlers = this.handlers.get('*') || [];
 
     const handlers = [...typeHandlers, ...allHandlers];
 
@@ -104,14 +104,10 @@ export class WebhookRouter {
    * Create an Express/Connect compatible middleware
    */
   middleware(secret: string) {
-    return async (
-      req: { headers: Record<string, string>; body: unknown },
-      res: { status: (code: number) => { json: (data: unknown) => void } },
-    ) => {
+    return async (req: { headers: Record<string, string>; body: unknown }, res: { status: (code: number) => { json: (data: unknown) => void } }) => {
       try {
-        const signature = req.headers["x-cognigate-signature"];
-        const body =
-          typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+        const signature = req.headers['x-cognigate-signature'];
+        const body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
 
         const event = await parseWebhookPayload(body, signature, secret);
         await this.handle(event);
@@ -130,8 +126,8 @@ export class WebhookRouter {
 
 function bufferToHex(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 function timingSafeEqual(a: string, b: string): boolean {

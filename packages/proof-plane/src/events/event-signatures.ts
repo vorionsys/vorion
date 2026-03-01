@@ -11,7 +11,7 @@
  * - Deterministic signatures (no random nonce needed)
  */
 
-import type { ProofEvent, ProofEventPayload } from "@vorionsys/contracts";
+import type { ProofEvent, ProofEventPayload } from '@vorionsys/contracts';
 
 /**
  * Signing key pair
@@ -90,7 +90,7 @@ interface SignableEventData {
  * Recursively sort object keys for deterministic serialization
  */
 function sortObjectKeys(obj: unknown): unknown {
-  if (obj === null || typeof obj !== "object") {
+  if (obj === null || typeof obj !== 'object') {
     return obj;
   }
   if (Array.isArray(obj)) {
@@ -107,8 +107,8 @@ function sortObjectKeys(obj: unknown): unknown {
  * Create the signable representation of an event
  */
 function getSignableData(
-  event: Omit<ProofEvent, "signature" | "eventHash" | "recordedAt">,
-  signedBy: string,
+  event: Omit<ProofEvent, 'signature' | 'eventHash' | 'recordedAt'>,
+  signedBy: string
 ): SignableEventData {
   return {
     eventId: event.eventId,
@@ -117,10 +117,9 @@ function getSignableData(
     agentId: event.agentId,
     payload: event.payload,
     previousHash: event.previousHash,
-    occurredAt:
-      event.occurredAt instanceof Date
-        ? event.occurredAt.toISOString()
-        : event.occurredAt,
+    occurredAt: event.occurredAt instanceof Date
+      ? event.occurredAt.toISOString()
+      : event.occurredAt,
     signedBy,
   };
 }
@@ -138,7 +137,7 @@ function serializeForSigning(data: SignableEventData): string {
  */
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
-  let binary = "";
+  let binary = '';
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
@@ -160,28 +159,17 @@ function base64ToUint8Array(base64: string): Uint8Array {
 /**
  * Generate a new Ed25519 signing key pair
  */
-export async function generateSigningKeyPair(
-  owner: string,
-): Promise<SigningKeyPair> {
-  const keyPair = (await crypto.subtle.generateKey(
+export async function generateSigningKeyPair(owner: string): Promise<SigningKeyPair> {
+  const keyPair = await crypto.subtle.generateKey(
     {
-      name: "Ed25519",
+      name: 'Ed25519',
     },
     true, // extractable
-    ["sign", "verify"],
-  )) as {
-    publicKey: Parameters<typeof crypto.subtle.exportKey>[1];
-    privateKey: Parameters<typeof crypto.subtle.exportKey>[1];
-  };
+    ['sign', 'verify']
+  ) as { publicKey: Parameters<typeof crypto.subtle.exportKey>[1]; privateKey: Parameters<typeof crypto.subtle.exportKey>[1] };
 
-  const publicKeyBuffer = await crypto.subtle.exportKey(
-    "raw",
-    keyPair.publicKey,
-  );
-  const privateKeyBuffer = await crypto.subtle.exportKey(
-    "pkcs8",
-    keyPair.privateKey,
-  );
+  const publicKeyBuffer = await crypto.subtle.exportKey('raw', keyPair.publicKey);
+  const privateKeyBuffer = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
 
   const keyId = `ed25519-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -199,9 +187,13 @@ export async function generateSigningKeyPair(
  */
 async function importPrivateKey(privateKeyBase64: string) {
   const keyData = base64ToUint8Array(privateKeyBase64);
-  return crypto.subtle.importKey("pkcs8", keyData, { name: "Ed25519" }, false, [
-    "sign",
-  ]);
+  return crypto.subtle.importKey(
+    'pkcs8',
+    keyData,
+    { name: 'Ed25519' },
+    false,
+    ['sign']
+  );
 }
 
 /**
@@ -209,18 +201,22 @@ async function importPrivateKey(privateKeyBase64: string) {
  */
 async function importPublicKey(publicKeyBase64: string) {
   const keyData = base64ToUint8Array(publicKeyBase64);
-  return crypto.subtle.importKey("raw", keyData, { name: "Ed25519" }, false, [
-    "verify",
-  ]);
+  return crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'Ed25519' },
+    false,
+    ['verify']
+  );
 }
 
 /**
  * Sign an event using Ed25519
  */
 export async function signEvent(
-  event: Omit<ProofEvent, "signature" | "eventHash" | "recordedAt">,
+  event: Omit<ProofEvent, 'signature' | 'eventHash' | 'recordedAt'>,
   privateKeyBase64: string,
-  signedBy: string,
+  signedBy: string
 ): Promise<string> {
   const signableData = getSignableData(event, signedBy);
   const serialized = serializeForSigning(signableData);
@@ -229,9 +225,9 @@ export async function signEvent(
 
   const privateKey = await importPrivateKey(privateKeyBase64);
   const signatureBuffer = await crypto.subtle.sign(
-    { name: "Ed25519" },
+    { name: 'Ed25519' },
     privateKey,
-    data,
+    data
   );
 
   return arrayBufferToBase64(signatureBuffer);
@@ -242,7 +238,7 @@ export async function signEvent(
  */
 export async function verifyEventSignature(
   event: ProofEvent,
-  publicKeyBase64: string,
+  publicKeyBase64: string
 ): Promise<SignatureVerificationResult> {
   const verifiedAt = new Date();
 
@@ -250,7 +246,7 @@ export async function verifyEventSignature(
     return {
       valid: false,
       signer: event.signedBy,
-      error: "Event has no signature",
+      error: 'Event has no signature',
       verifiedAt,
     };
   }
@@ -258,7 +254,7 @@ export async function verifyEventSignature(
   if (!event.signedBy) {
     return {
       valid: false,
-      error: "Event has no signedBy field",
+      error: 'Event has no signedBy field',
       verifiedAt,
     };
   }
@@ -273,17 +269,17 @@ export async function verifyEventSignature(
     const signatureBytes = base64ToUint8Array(event.signature);
 
     const isValid = await crypto.subtle.verify(
-      { name: "Ed25519" },
+      { name: 'Ed25519' },
       publicKey,
       signatureBytes,
-      data,
+      data
     );
 
     return {
       valid: isValid,
       signer: event.signedBy,
       verifiedAt,
-      error: isValid ? undefined : "Signature verification failed",
+      error: isValid ? undefined : 'Signature verification failed',
     };
   } catch (error) {
     return {
@@ -341,10 +337,10 @@ export class EventSigningService {
    * Sign an event
    */
   async sign(
-    event: Omit<ProofEvent, "signature" | "eventHash" | "recordedAt">,
+    event: Omit<ProofEvent, 'signature' | 'eventHash' | 'recordedAt'>
   ): Promise<string> {
     if (!this.privateKey) {
-      throw new Error("Signing service has no private key configured");
+      throw new Error('Signing service has no private key configured');
     }
 
     return signEvent(event, this.privateKey, this.serviceId);
@@ -357,7 +353,7 @@ export class EventSigningService {
     if (!event.signedBy) {
       return {
         valid: false,
-        error: "Event has no signedBy field",
+        error: 'Event has no signedBy field',
         verifiedAt: new Date(),
       };
     }
@@ -408,9 +404,7 @@ export class EventSigningService {
 /**
  * Create an event signing service
  */
-export function createSigningService(
-  config: SigningServiceConfig,
-): EventSigningService {
+export function createSigningService(config: SigningServiceConfig): EventSigningService {
   return new EventSigningService(config);
 }
 
@@ -440,12 +434,9 @@ export interface BatchVerificationResult {
  */
 export async function verifyEventSignatures(
   events: ProofEvent[],
-  signingService: EventSigningService,
+  signingService: EventSigningService
 ): Promise<BatchVerificationResult> {
-  const results: Array<{
-    eventId: string;
-    result: SignatureVerificationResult;
-  }> = [];
+  const results: Array<{ eventId: string; result: SignatureVerificationResult }> = [];
   let validCount = 0;
   let invalidCount = 0;
   let unsignedCount = 0;
@@ -457,7 +448,7 @@ export async function verifyEventSignatures(
         eventId: event.eventId,
         result: {
           valid: false,
-          error: "Event is unsigned",
+          error: 'Event is unsigned',
           verifiedAt: new Date(),
         },
       });

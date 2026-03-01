@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import type { ProviderId } from "./health-checker.js";
+import type { ProviderId } from './health-checker.js';
 
 // =============================================================================
 // TYPES
@@ -17,16 +17,16 @@ import type { ProviderId } from "./health-checker.js";
  * Error classification
  */
 export type ErrorType =
-  | "rate_limit"
-  | "timeout"
-  | "server_error"
-  | "auth"
-  | "invalid_request"
-  | "model_overloaded"
-  | "context_length"
-  | "content_filter"
-  | "network"
-  | "unknown";
+  | 'rate_limit'
+  | 'timeout'
+  | 'server_error'
+  | 'auth'
+  | 'invalid_request'
+  | 'model_overloaded'
+  | 'context_length'
+  | 'content_filter'
+  | 'network'
+  | 'unknown';
 
 /**
  * Retry decision
@@ -101,11 +101,11 @@ const DEFAULT_CONFIG: RetryConfig = {
   enableJitter: true,
   jitterFactor: 0.3,
   retryableErrors: [
-    "rate_limit",
-    "timeout",
-    "server_error",
-    "model_overloaded",
-    "network",
+    'rate_limit',
+    'timeout',
+    'server_error',
+    'model_overloaded',
+    'network',
   ],
 };
 
@@ -116,7 +116,7 @@ const PROVIDER_ERROR_PATTERNS: Record<ProviderId, ErrorPattern[]> = {
   anthropic: [
     {
       pattern: /rate limit/i,
-      type: "rate_limit",
+      type: 'rate_limit',
       retryable: true,
       extractRetryAfter: (error) => {
         const match = error.match(/retry after (\d+)/i);
@@ -125,73 +125,73 @@ const PROVIDER_ERROR_PATTERNS: Record<ProviderId, ErrorPattern[]> = {
     },
     {
       pattern: /overloaded/i,
-      type: "model_overloaded",
+      type: 'model_overloaded',
       retryable: true,
       suggestedDelayMs: 30000,
     },
     {
       pattern: /context length/i,
-      type: "context_length",
+      type: 'context_length',
       retryable: false,
     },
     {
       pattern: /invalid.*api.*key/i,
-      type: "auth",
+      type: 'auth',
       retryable: false,
     },
     {
       pattern: /content.*filter/i,
-      type: "content_filter",
+      type: 'content_filter',
       retryable: false,
     },
     {
       pattern: /500|502|503|504/,
-      type: "server_error",
+      type: 'server_error',
       retryable: true,
     },
     {
       pattern: /timeout/i,
-      type: "timeout",
+      type: 'timeout',
       retryable: true,
     },
   ],
   google: [
     {
       pattern: /RESOURCE_EXHAUSTED/i,
-      type: "rate_limit",
+      type: 'rate_limit',
       retryable: true,
       suggestedDelayMs: 60000,
     },
     {
       pattern: /quota/i,
-      type: "rate_limit",
+      type: 'rate_limit',
       retryable: true,
     },
     {
       pattern: /UNAVAILABLE/i,
-      type: "server_error",
+      type: 'server_error',
       retryable: true,
     },
     {
       pattern: /DEADLINE_EXCEEDED/i,
-      type: "timeout",
+      type: 'timeout',
       retryable: true,
     },
     {
       pattern: /INVALID_ARGUMENT/i,
-      type: "invalid_request",
+      type: 'invalid_request',
       retryable: false,
     },
     {
       pattern: /PERMISSION_DENIED/i,
-      type: "auth",
+      type: 'auth',
       retryable: false,
     },
   ],
   openai: [
     {
       pattern: /rate limit/i,
-      type: "rate_limit",
+      type: 'rate_limit',
       retryable: true,
       extractRetryAfter: (error) => {
         const match = error.match(/retry after (\d+)/i);
@@ -200,27 +200,27 @@ const PROVIDER_ERROR_PATTERNS: Record<ProviderId, ErrorPattern[]> = {
     },
     {
       pattern: /server_error/i,
-      type: "server_error",
+      type: 'server_error',
       retryable: true,
     },
     {
       pattern: /context_length/i,
-      type: "context_length",
+      type: 'context_length',
       retryable: false,
     },
     {
       pattern: /invalid.*api.*key/i,
-      type: "auth",
+      type: 'auth',
       retryable: false,
     },
     {
       pattern: /content.*policy/i,
-      type: "content_filter",
+      type: 'content_filter',
       retryable: false,
     },
     {
       pattern: /model.*overloaded/i,
-      type: "model_overloaded",
+      type: 'model_overloaded',
       retryable: true,
       suggestedDelayMs: 30000,
     },
@@ -228,62 +228,62 @@ const PROVIDER_ERROR_PATTERNS: Record<ProviderId, ErrorPattern[]> = {
   ollama: [
     {
       pattern: /connection refused/i,
-      type: "network",
+      type: 'network',
       retryable: true,
       suggestedDelayMs: 5000,
     },
     {
       pattern: /ECONNREFUSED/i,
-      type: "network",
+      type: 'network',
       retryable: true,
     },
     {
       pattern: /model.*not found/i,
-      type: "invalid_request",
+      type: 'invalid_request',
       retryable: false,
     },
     {
       pattern: /timeout/i,
-      type: "timeout",
+      type: 'timeout',
       retryable: true,
     },
   ],
   azure: [
     {
       pattern: /429/,
-      type: "rate_limit",
+      type: 'rate_limit',
       retryable: true,
     },
     {
       pattern: /500|502|503|504/,
-      type: "server_error",
+      type: 'server_error',
       retryable: true,
     },
     {
       pattern: /unauthorized/i,
-      type: "auth",
+      type: 'auth',
       retryable: false,
     },
   ],
   bedrock: [
     {
       pattern: /ThrottlingException/i,
-      type: "rate_limit",
+      type: 'rate_limit',
       retryable: true,
     },
     {
       pattern: /ServiceUnavailable/i,
-      type: "server_error",
+      type: 'server_error',
       retryable: true,
     },
     {
       pattern: /ModelTimeoutException/i,
-      type: "timeout",
+      type: 'timeout',
       retryable: true,
     },
     {
       pattern: /ValidationException/i,
-      type: "invalid_request",
+      type: 'invalid_request',
       retryable: false,
     },
   ],
@@ -331,16 +331,16 @@ export class RetryHandler {
   classifyError(
     provider: ProviderId,
     error: Error | string,
-    statusCode?: number,
+    statusCode?: number
   ): ErrorType {
-    const errorMessage = typeof error === "string" ? error : error.message;
+    const errorMessage = typeof error === 'string' ? error : error.message;
     const patterns = PROVIDER_ERROR_PATTERNS[provider] ?? [];
 
     // Check provider-specific patterns
     for (const pattern of patterns) {
       const regex =
-        typeof pattern.pattern === "string"
-          ? new RegExp(pattern.pattern, "i")
+        typeof pattern.pattern === 'string'
+          ? new RegExp(pattern.pattern, 'i')
           : pattern.pattern;
 
       if (regex.test(errorMessage)) {
@@ -350,19 +350,18 @@ export class RetryHandler {
 
     // Check status code
     if (statusCode) {
-      if (statusCode === 429) return "rate_limit";
-      if (statusCode === 401 || statusCode === 403) return "auth";
-      if (statusCode >= 500) return "server_error";
-      if (statusCode >= 400) return "invalid_request";
+      if (statusCode === 429) return 'rate_limit';
+      if (statusCode === 401 || statusCode === 403) return 'auth';
+      if (statusCode >= 500) return 'server_error';
+      if (statusCode >= 400) return 'invalid_request';
     }
 
     // Generic patterns
-    if (/timeout/i.test(errorMessage)) return "timeout";
-    if (/network|econnrefused|enotfound/i.test(errorMessage)) return "network";
-    if (/rate.*limit|too many requests/i.test(errorMessage))
-      return "rate_limit";
+    if (/timeout/i.test(errorMessage)) return 'timeout';
+    if (/network|econnrefused|enotfound/i.test(errorMessage)) return 'network';
+    if (/rate.*limit|too many requests/i.test(errorMessage)) return 'rate_limit';
 
-    return "unknown";
+    return 'unknown';
   }
 
   /**
@@ -371,9 +370,9 @@ export class RetryHandler {
   shouldRetry(
     context: RetryContext,
     error: Error | string,
-    statusCode?: number,
+    statusCode?: number
   ): RetryDecision {
-    const errorMessage = typeof error === "string" ? error : error.message;
+    const errorMessage = typeof error === 'string' ? error : error.message;
     const errorType = this.classifyError(context.provider, error, statusCode);
 
     // Update context
@@ -434,7 +433,7 @@ export class RetryHandler {
   private calculateDelay(
     context: RetryContext,
     errorMessage: string,
-    config: RetryConfig,
+    config: RetryConfig
   ): number {
     // Check for Retry-After in error message
     const patterns = PROVIDER_ERROR_PATTERNS[context.provider] ?? [];
@@ -448,8 +447,8 @@ export class RetryHandler {
 
       // Check for suggested delay
       const regex =
-        typeof pattern.pattern === "string"
-          ? new RegExp(pattern.pattern, "i")
+        typeof pattern.pattern === 'string'
+          ? new RegExp(pattern.pattern, 'i')
           : pattern.pattern;
 
       if (regex.test(errorMessage) && pattern.suggestedDelayMs) {
@@ -459,8 +458,7 @@ export class RetryHandler {
 
     // Calculate exponential backoff
     let delay =
-      config.initialDelayMs *
-      Math.pow(config.backoffMultiplier, context.attempt - 1);
+      config.initialDelayMs * Math.pow(config.backoffMultiplier, context.attempt - 1);
 
     // Apply jitter
     if (config.enableJitter) {
@@ -481,7 +479,7 @@ export class RetryHandler {
     options?: {
       model?: string;
       onRetry?: (decision: RetryDecision) => void;
-    },
+    }
   ): Promise<T> {
     const context = this.createContext(provider, options?.model);
 
@@ -490,7 +488,10 @@ export class RetryHandler {
         const result = await operation();
         return result;
       } catch (error) {
-        const decision = this.shouldRetry(context, error as Error);
+        const decision = this.shouldRetry(
+          context,
+          error as Error
+        );
 
         if (!decision.shouldRetry) {
           throw error;
@@ -500,8 +501,8 @@ export class RetryHandler {
         options?.onRetry?.(decision);
 
         console.log(
-          `[RETRY] ${provider}${options?.model ? `:${options.model}` : ""} - ` +
-            `${decision.reason}`,
+          `[RETRY] ${provider}${options?.model ? `:${options.model}` : ''} - ` +
+            `${decision.reason}`
         );
 
         // Wait before retry
@@ -547,15 +548,15 @@ export class RetryHandler {
    */
   getSuggestedWaitTime(
     provider: ProviderId,
-    error: Error | string,
+    error: Error | string
   ): number | null {
-    const errorMessage = typeof error === "string" ? error : error.message;
+    const errorMessage = typeof error === 'string' ? error : error.message;
     const patterns = PROVIDER_ERROR_PATTERNS[provider] ?? [];
 
     for (const pattern of patterns) {
       const regex =
-        typeof pattern.pattern === "string"
-          ? new RegExp(pattern.pattern, "i")
+        typeof pattern.pattern === 'string'
+          ? new RegExp(pattern.pattern, 'i')
           : pattern.pattern;
 
       if (regex.test(errorMessage)) {
@@ -577,7 +578,7 @@ export class RetryHandler {
  * Create retry handler instance
  */
 export function createRetryHandler(
-  config?: Partial<RetryConfig>,
+  config?: Partial<RetryConfig>
 ): RetryHandler {
   return new RetryHandler(config);
 }
@@ -602,7 +603,7 @@ export function calculateBackoff(
   attempt: number,
   baseMs: number = 1000,
   maxMs: number = 60000,
-  multiplier: number = 2,
+  multiplier: number = 2
 ): number {
   const delay = baseMs * Math.pow(multiplier, attempt - 1);
   return Math.min(delay, maxMs);

@@ -104,7 +104,7 @@ Every authorization returns one of three decision tiers:
 
 ### Asymmetric Trust Dynamics
 
-Trust is hard to earn and easy to lose. Decay and recovery dynamics are policy-configurable, preventing rapid trust escalation while enforcing accountability.
+Trust is hard to earn and easy to lose. Failures are penalized 10x more than successes reward, preventing rapid trust escalation while enforcing accountability.
 
 ## Subpath Imports
 

@@ -7,30 +7,27 @@
  * @packageDocumentation
  */
 
-import type { WebhookEvent } from "./types.js";
-import type { WebhookRouter } from "./webhooks.js";
+import type { WebhookEvent } from './types.js';
+import type { WebhookRouter } from './webhooks.js';
 
 /**
  * Structural type for proof-plane integration (avoids hard dependency on @vorionsys/proof-plane)
  */
 export interface ProofPlaneEmitter {
-  logDecisionMade(
-    decision: {
-      decisionId: string;
-      intentId: string;
-      agentId: string;
-      correlationId: string;
-      permitted: boolean;
-      trustBand: number;
-      trustScore: number;
-      reasoning: string[];
-      decidedAt: Date;
-      expiresAt: Date;
-      latencyMs: number;
-      version: number;
-    },
-    correlationId?: string,
-  ): Promise<unknown>;
+  logDecisionMade(decision: {
+    decisionId: string;
+    intentId: string;
+    agentId: string;
+    correlationId: string;
+    permitted: boolean;
+    trustBand: number;
+    trustScore: number;
+    reasoning: string[];
+    decidedAt: Date;
+    expiresAt: Date;
+    latencyMs: number;
+    version: number;
+  }, correlationId?: string): Promise<unknown>;
 }
 
 /**
@@ -70,15 +67,11 @@ export interface ProofBridgeHandle {
  * bridge.disconnect(); // stop forwarding
  * ```
  */
-export function createProofBridge(
-  config: ProofBridgeConfig,
-): ProofBridgeHandle {
+export function createProofBridge(config: ProofBridgeConfig): ProofBridgeHandle {
   const { proofPlane, webhookRouter } = config;
   let connected = true;
 
-  const handler = async (
-    event: WebhookEvent & { type: "governance.decision" },
-  ) => {
+  const handler = async (event: WebhookEvent & { type: 'governance.decision' }) => {
     if (!connected) return;
 
     const payload = event.payload;
@@ -86,20 +79,18 @@ export function createProofBridge(
 
     const decision = {
       decisionId: (payload.decisionId as string) ?? event.id,
-      intentId: (payload.intentId as string) ?? "",
+      intentId: (payload.intentId as string) ?? '',
       agentId: (payload.agentId as string) ?? event.entityId,
       correlationId: (payload.correlationId as string) ?? event.id,
-      permitted: (payload.permitted as boolean) ?? payload.decision === "ALLOW",
+      permitted: (payload.permitted as boolean) ?? payload.decision === 'ALLOW',
       trustBand: (payload.trustBand as number) ?? 4,
       trustScore: (payload.trustScore as number) ?? 0,
       reasoning: Array.isArray(payload.reasoning)
         ? (payload.reasoning as string[])
-        : typeof payload.reasoning === "string"
+        : typeof payload.reasoning === 'string'
           ? [payload.reasoning]
           : [],
-      decidedAt: payload.decidedAt
-        ? new Date(payload.decidedAt as string)
-        : now,
+      decidedAt: payload.decidedAt ? new Date(payload.decidedAt as string) : now,
       expiresAt: payload.expiresAt
         ? new Date(payload.expiresAt as string)
         : new Date(now.getTime() + 24 * 60 * 60 * 1000),
@@ -110,7 +101,7 @@ export function createProofBridge(
     await proofPlane.logDecisionMade(decision, decision.correlationId);
   };
 
-  webhookRouter.on("governance.decision", handler);
+  webhookRouter.on('governance.decision', handler);
 
   return {
     disconnect: () => {

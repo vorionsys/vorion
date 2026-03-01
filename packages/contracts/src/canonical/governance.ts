@@ -9,8 +9,8 @@
  * @module @vorionsys/contracts/canonical/governance
  */
 
-import { z } from "zod";
-import { DenialReason } from "../v2/decision.js";
+import { z } from 'zod';
+import { DenialReason } from '../v2/decision.js';
 
 // Re-export DenialReason for convenience
 export { DenialReason };
@@ -27,30 +27,27 @@ export { DenialReason };
  */
 export enum GovernanceDenialReason {
   /** User lacks required roles for the action */
-  MISSING_ROLES = "missing_roles",
+  MISSING_ROLES = 'missing_roles',
   /** User lacks required permissions for the action */
-  MISSING_PERMISSIONS = "missing_permissions",
+  MISSING_PERMISSIONS = 'missing_permissions',
   /** Action is outside the authorized scope */
-  SCOPE_VIOLATION = "scope_violation",
+  SCOPE_VIOLATION = 'scope_violation',
   /** Human oversight/approval is required but not present */
-  REQUIRES_HUMAN_APPROVAL = "requires_human_approval",
+  REQUIRES_HUMAN_APPROVAL = 'requires_human_approval',
 }
 
 /**
  * Zod schema for GovernanceDenialReason enum validation.
  */
-export const governanceDenialReasonSchema = z.nativeEnum(
-  GovernanceDenialReason,
-  {
-    errorMap: () => ({ message: "Invalid governance denial reason" }),
-  },
-);
+export const governanceDenialReasonSchema = z.nativeEnum(GovernanceDenialReason, {
+  errorMap: () => ({ message: 'Invalid governance denial reason' }),
+});
 
 /**
  * Zod schema for base DenialReason enum validation (from v2/decision.ts).
  */
 export const denialReasonSchema = z.nativeEnum(DenialReason, {
-  errorMap: () => ({ message: "Invalid denial reason" }),
+  errorMap: () => ({ message: 'Invalid denial reason' }),
 });
 
 /**
@@ -166,22 +163,19 @@ export type AuthorizationResultType = z.infer<typeof authorizationResultSchema>;
  * Note: For user management roles, see UserRole in agent.ts
  */
 export type GovernanceRole =
-  | "admin" // Full system access
-  | "operator" // Day-to-day operations
-  | "trainer" // Agent training and certification
-  | "consumer" // Agent usage only
-  | "reviewer" // Audit and review access
-  | "both"; // Combined trainer + consumer
+  | 'admin'      // Full system access
+  | 'operator'   // Day-to-day operations
+  | 'trainer'    // Agent training and certification
+  | 'consumer'   // Agent usage only
+  | 'reviewer'   // Audit and review access
+  | 'both';      // Combined trainer + consumer
 
 /**
  * Zod schema for GovernanceRole validation.
  */
-export const governanceRoleSchema = z.enum(
-  ["admin", "operator", "trainer", "consumer", "reviewer", "both"],
-  {
-    errorMap: () => ({ message: "Invalid governance role" }),
-  },
-);
+export const governanceRoleSchema = z.enum(['admin', 'operator', 'trainer', 'consumer', 'reviewer', 'both'], {
+  errorMap: () => ({ message: 'Invalid governance role' }),
+});
 
 /**
  * Authentication context for an authenticated user/entity.
@@ -264,24 +258,18 @@ export type AuthContextType = z.infer<typeof authContextSchema>;
  * for granularity within each named level.
  */
 export type HierarchyLevel =
-  | "hitl" // Tier 0 - Human authority (highest)
-  | "orch" // Tier 1 - Orchestrators
-  | "metagoat" // Tier 2 - Meta-level agents
-  | "agent" // Tier 3 - Domain specialists
-  | "bot"; // Tier 4 - User-facing (lowest)
+  | 'hitl'      // Tier 0 - Human authority (highest)
+  | 'orch'      // Tier 1 - Orchestrators
+  | 'metagoat'  // Tier 2 - Meta-level agents
+  | 'agent'     // Tier 3 - Domain specialists
+  | 'bot';      // Tier 4 - User-facing (lowest)
 
 /**
  * Zod schema for HierarchyLevel validation.
  */
-export const hierarchyLevelSchema = z.enum(
-  ["hitl", "orch", "metagoat", "agent", "bot"],
-  {
-    errorMap: () => ({
-      message:
-        "Invalid hierarchy level. Must be hitl, orch, metagoat, agent, or bot.",
-    }),
-  },
-);
+export const hierarchyLevelSchema = z.enum(['hitl', 'orch', 'metagoat', 'agent', 'bot'], {
+  errorMap: () => ({ message: 'Invalid hierarchy level. Must be hitl, orch, metagoat, agent, or bot.' }),
+});
 
 /**
  * Numeric tier mapping for hierarchy levels.
@@ -299,11 +287,11 @@ export const HIERARCHY_TIERS: Readonly<Record<HierarchyLevel, number>> = {
  * Array of hierarchy levels in authority order (highest first).
  */
 export const HIERARCHY_ORDER: readonly HierarchyLevel[] = [
-  "hitl",
-  "orch",
-  "metagoat",
-  "agent",
-  "bot",
+  'hitl',
+  'orch',
+  'metagoat',
+  'agent',
+  'bot',
 ] as const;
 
 /**
@@ -353,18 +341,15 @@ export interface HierarchyLevelConfig {
 /**
  * Canonical hierarchy level configurations.
  */
-export const HIERARCHY_LEVELS: Readonly<
-  Record<HierarchyLevel, HierarchyLevelConfig>
-> = {
+export const HIERARCHY_LEVELS: Readonly<Record<HierarchyLevel, HierarchyLevelConfig>> = {
   hitl: {
-    level: "hitl",
+    level: 'hitl',
     tier: 0,
-    name: "Human-In-The-Loop",
-    description:
-      "Human oversight and ultimate authority. Makes final decisions on ethics, safety, strategic direction, and high-stakes operations.",
-    authorityScope: "governance",
+    name: 'Human-In-The-Loop',
+    description: 'Human oversight and ultimate authority. Makes final decisions on ethics, safety, strategic direction, and high-stakes operations.',
+    authorityScope: 'governance',
     authority: 100,
-    canDelegate: ["orch", "metagoat", "agent", "bot"],
+    canDelegate: ['orch', 'metagoat', 'agent', 'bot'],
     reportsTo: null,
     maxAutonomyLevel: 7,
     canTrainOthers: true,
@@ -373,15 +358,14 @@ export const HIERARCHY_LEVELS: Readonly<
     minTrustScore: 0,
   },
   orch: {
-    level: "orch",
+    level: 'orch',
     tier: 1,
-    name: "Orchestrator",
-    description:
-      "Coordinates complex multi-agent workflows. Manages resource allocation, task distribution, and cross-team collaboration.",
-    authorityScope: "coordination",
+    name: 'Orchestrator',
+    description: 'Coordinates complex multi-agent workflows. Manages resource allocation, task distribution, and cross-team collaboration.',
+    authorityScope: 'coordination',
     authority: 80,
-    canDelegate: ["metagoat", "agent", "bot"],
-    reportsTo: "hitl",
+    canDelegate: ['metagoat', 'agent', 'bot'],
+    reportsTo: 'hitl',
     maxAutonomyLevel: 6,
     canTrainOthers: true,
     canApproveOthers: true,
@@ -389,15 +373,14 @@ export const HIERARCHY_LEVELS: Readonly<
     minTrustScore: 876,
   },
   metagoat: {
-    level: "metagoat",
+    level: 'metagoat',
     tier: 2,
-    name: "Metagoat",
-    description:
-      "Meta-level agent that optimizes, teaches, and manages other agents. Handles strategy, capability enhancement, and performance optimization.",
-    authorityScope: "management",
+    name: 'Metagoat',
+    description: 'Meta-level agent that optimizes, teaches, and manages other agents. Handles strategy, capability enhancement, and performance optimization.',
+    authorityScope: 'management',
     authority: 60,
-    canDelegate: ["agent", "bot"],
-    reportsTo: "orch",
+    canDelegate: ['agent', 'bot'],
+    reportsTo: 'orch',
     maxAutonomyLevel: 5,
     canTrainOthers: true,
     canApproveOthers: true,
@@ -405,15 +388,14 @@ export const HIERARCHY_LEVELS: Readonly<
     minTrustScore: 650,
   },
   agent: {
-    level: "agent",
+    level: 'agent',
     tier: 3,
-    name: "Agent",
-    description:
-      "Domain specialist with deep expertise. Executes complex tasks, provides recommendations, and manages bots within their specialty.",
-    authorityScope: "execution",
+    name: 'Agent',
+    description: 'Domain specialist with deep expertise. Executes complex tasks, provides recommendations, and manages bots within their specialty.',
+    authorityScope: 'execution',
     authority: 40,
-    canDelegate: ["bot"],
-    reportsTo: "metagoat",
+    canDelegate: ['bot'],
+    reportsTo: 'metagoat',
     maxAutonomyLevel: 4,
     canTrainOthers: false,
     canApproveOthers: false,
@@ -421,15 +403,14 @@ export const HIERARCHY_LEVELS: Readonly<
     minTrustScore: 350,
   },
   bot: {
-    level: "bot",
+    level: 'bot',
     tier: 4,
-    name: "Bot",
-    description:
-      "User-facing interface with defined persona and guardrails. Handles direct interactions, follows scripts, and escalates when needed.",
-    authorityScope: "interaction",
+    name: 'Bot',
+    description: 'User-facing interface with defined persona and guardrails. Handles direct interactions, follows scripts, and escalates when needed.',
+    authorityScope: 'interaction',
     authority: 20,
     canDelegate: [],
-    reportsTo: "agent",
+    reportsTo: 'agent',
     maxAutonomyLevel: 2,
     canTrainOthers: false,
     canApproveOthers: false,
@@ -465,38 +446,38 @@ export const hierarchyLevelConfigSchema = z.object({
  * Authority scope types defining what kind of authority an entity has.
  */
 export type AuthorityScopeType =
-  | "governance" // Policy and ethics oversight
-  | "coordination" // Workflow and resource coordination
-  | "management" // Entity and capability management
-  | "execution" // Task and operation execution
-  | "interaction"; // User-facing interaction
+  | 'governance'    // Policy and ethics oversight
+  | 'coordination'  // Workflow and resource coordination
+  | 'management'    // Entity and capability management
+  | 'execution'     // Task and operation execution
+  | 'interaction';  // User-facing interaction
 
 /**
  * Zod schema for AuthorityScopeType validation.
  */
 export const authorityScopeTypeSchema = z.enum(
-  ["governance", "coordination", "management", "execution", "interaction"],
-  { errorMap: () => ({ message: "Invalid authority scope type" }) },
+  ['governance', 'coordination', 'management', 'execution', 'interaction'],
+  { errorMap: () => ({ message: 'Invalid authority scope type' }) }
 );
 
 /**
  * Control actions that can be taken by governance rules.
  */
 export type ControlAction =
-  | "allow" // Permit the action
-  | "deny" // Block the action
-  | "constrain" // Allow with constraints
-  | "clarify" // Require clarification
-  | "escalate" // Escalate to higher authority
-  | "log" // Log only, no enforcement
-  | "audit"; // Special audit handling
+  | 'allow'      // Permit the action
+  | 'deny'       // Block the action
+  | 'constrain'  // Allow with constraints
+  | 'clarify'    // Require clarification
+  | 'escalate'   // Escalate to higher authority
+  | 'log'        // Log only, no enforcement
+  | 'audit';     // Special audit handling
 
 /**
  * Zod schema for ControlAction validation.
  */
 export const controlActionSchema = z.enum(
-  ["allow", "deny", "constrain", "clarify", "escalate", "log", "audit"],
-  { errorMap: () => ({ message: "Invalid control action" }) },
+  ['allow', 'deny', 'constrain', 'clarify', 'escalate', 'log', 'audit'],
+  { errorMap: () => ({ message: 'Invalid control action' }) }
 );
 
 /**
@@ -550,14 +531,8 @@ export interface AuthorityScopeTimeRestriction {
  */
 export const authorityScopeTimeRestrictionSchema = z.object({
   daysOfWeek: z.array(z.number().int().min(0).max(6)).readonly().optional(),
-  startTime: z
-    .string()
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
-    .optional(),
-  endTime: z
-    .string()
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
-    .optional(),
+  startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
+  endTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
   timezone: z.string().optional(),
 });
 
@@ -585,18 +560,18 @@ export type AuthorityScopeZodType = z.infer<typeof authorityScopeSchema>;
  * Types of authority that can be held.
  */
 export type AuthorityType =
-  | "system" // Built-in system authority
-  | "role" // Role-based authority
-  | "delegated" // Delegated from another authority
-  | "temporary" // Time-limited authority
-  | "emergency"; // Emergency override authority
+  | 'system'      // Built-in system authority
+  | 'role'        // Role-based authority
+  | 'delegated'   // Delegated from another authority
+  | 'temporary'   // Time-limited authority
+  | 'emergency';  // Emergency override authority
 
 /**
  * Zod schema for AuthorityType validation.
  */
 export const authorityTypeSchema = z.enum(
-  ["system", "role", "delegated", "temporary", "emergency"],
-  { errorMap: () => ({ message: "Invalid authority type" }) },
+  ['system', 'role', 'delegated', 'temporary', 'emergency'],
+  { errorMap: () => ({ message: 'Invalid authority type' }) }
 );
 
 /**
@@ -742,9 +717,7 @@ export function getHierarchyTier(level: HierarchyLevel): number {
  * @param level - The hierarchy level
  * @returns The level configuration
  */
-export function getHierarchyLevelConfig(
-  level: HierarchyLevel,
-): HierarchyLevelConfig {
+export function getHierarchyLevelConfig(level: HierarchyLevel): HierarchyLevelConfig {
   return HIERARCHY_LEVELS[level];
 }
 
@@ -755,10 +728,7 @@ export function getHierarchyLevelConfig(
  * @param b - Second hierarchy level
  * @returns True if a has higher authority than b
  */
-export function isHigherAuthority(
-  a: HierarchyLevel,
-  b: HierarchyLevel,
-): boolean {
+export function isHigherAuthority(a: HierarchyLevel, b: HierarchyLevel): boolean {
   return HIERARCHY_TIERS[a] < HIERARCHY_TIERS[b];
 }
 
@@ -798,10 +768,7 @@ export function getReportingChain(level: HierarchyLevel): HierarchyLevel[] {
  * @param trustScore - The trust score to check (0-1000)
  * @returns True if the trust score meets the minimum
  */
-export function meetsMinimumTrust(
-  level: HierarchyLevel,
-  trustScore: number,
-): boolean {
+export function meetsMinimumTrust(level: HierarchyLevel, trustScore: number): boolean {
   return trustScore >= HIERARCHY_LEVELS[level].minTrustScore;
 }
 
@@ -820,7 +787,7 @@ export function createAllowedResult(options?: {
 }): AuthorizationResult {
   return {
     allowed: true,
-    reason: options?.reason ?? "Authorization granted",
+    reason: options?.reason ?? 'Authorization granted',
     matchedRoles: options?.matchedRoles,
     matchedPermissions: options?.matchedPermissions,
     constraints: options?.constraints,
@@ -840,7 +807,7 @@ export function createDeniedResult(
   options?: {
     reason?: string;
     remediations?: string[];
-  },
+  }
 ): AuthorizationResult {
   return {
     allowed: false,
@@ -862,13 +829,12 @@ export function createGovernanceDeniedResult(
   options?: {
     reason?: string;
     remediations?: string[];
-  },
+  }
 ): AuthorizationResult {
   return {
     allowed: false,
     governanceDenialReason,
-    reason:
-      options?.reason ?? `Authorization denied: ${governanceDenialReason}`,
+    reason: options?.reason ?? `Authorization denied: ${governanceDenialReason}`,
     remediations: options?.remediations,
   };
 }
@@ -881,8 +847,8 @@ export function createGovernanceDeniedResult(
  */
 export function isHierarchyLevel(value: unknown): value is HierarchyLevel {
   return (
-    typeof value === "string" &&
-    ["hitl", "orch", "metagoat", "agent", "bot"].includes(value)
+    typeof value === 'string' &&
+    ['hitl', 'orch', 'metagoat', 'agent', 'bot'].includes(value)
   );
 }
 
@@ -892,18 +858,10 @@ export function isHierarchyLevel(value: unknown): value is HierarchyLevel {
  * @param value - Value to check
  * @returns True if value is a valid AuthorityScopeType
  */
-export function isAuthorityScopeType(
-  value: unknown,
-): value is AuthorityScopeType {
+export function isAuthorityScopeType(value: unknown): value is AuthorityScopeType {
   return (
-    typeof value === "string" &&
-    [
-      "governance",
-      "coordination",
-      "management",
-      "execution",
-      "interaction",
-    ].includes(value)
+    typeof value === 'string' &&
+    ['governance', 'coordination', 'management', 'execution', 'interaction'].includes(value)
   );
 }
 
@@ -916,18 +874,17 @@ export function isAuthorityScopeType(
  *
  * @deprecated Use HierarchyLevel directly. This is for migration only.
  */
-export const NUMBERED_LEVEL_TO_NAMED: Readonly<Record<string, HierarchyLevel>> =
-  {
-    L0: "bot",
-    L1: "agent",
-    L2: "metagoat",
-    L3: "orch",
-    L4: "orch",
-    L5: "orch",
-    L6: "hitl",
-    L7: "hitl",
-    L8: "hitl",
-  } as const;
+export const NUMBERED_LEVEL_TO_NAMED: Readonly<Record<string, HierarchyLevel>> = {
+  L0: 'bot',
+  L1: 'agent',
+  L2: 'metagoat',
+  L3: 'orch',
+  L4: 'orch',
+  L5: 'orch',
+  L6: 'hitl',
+  L7: 'hitl',
+  L8: 'hitl',
+} as const;
 
 /**
  * Converts a numbered level to a named hierarchy level.
@@ -937,5 +894,5 @@ export const NUMBERED_LEVEL_TO_NAMED: Readonly<Record<string, HierarchyLevel>> =
  * @returns The corresponding named HierarchyLevel
  */
 export function numberedToNamedLevel(numberedLevel: string): HierarchyLevel {
-  return NUMBERED_LEVEL_TO_NAMED[numberedLevel] ?? "bot";
+  return NUMBERED_LEVEL_TO_NAMED[numberedLevel] ?? 'bot';
 }

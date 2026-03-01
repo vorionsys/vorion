@@ -11,7 +11,7 @@ import type {
   TrustBand,
   TrustFactorScores,
   RiskProfile,
-} from "@vorionsys/contracts";
+} from '@vorionsys/contracts';
 
 import type {
   ID,
@@ -20,7 +20,7 @@ import type {
   TrustComponents,
   IntentStatus,
   RiskLevel,
-} from "./types.js";
+} from './types.js';
 
 // ============================================================================
 // Legacy Type Definitions (for explicit typing in adapters)
@@ -173,12 +173,12 @@ export function adaptLegacyIntent(intent: LegacyIntent): CanonicalIntent {
   return {
     intentId: intent.id,
     agentId: intent.entityId,
-    correlationId: (intent.metadata?.correlationId as string) ?? intent.id,
+    correlationId: intent.metadata?.correlationId as string ?? intent.id,
     action: intent.goal,
-    actionType: (intent.context?.actionType as string) ?? "execute",
+    actionType: (intent.context?.actionType as string) ?? 'execute',
     resourceScope: (intent.context?.resources as string[]) ?? [],
-    dataSensitivity: (intent.context?.dataSensitivity as string) ?? "INTERNAL",
-    reversibility: (intent.context?.reversibility as string) ?? "REVERSIBLE",
+    dataSensitivity: (intent.context?.dataSensitivity as string) ?? 'INTERNAL',
+    reversibility: (intent.context?.reversibility as string) ?? 'REVERSIBLE',
     context: {
       ...intent.context,
       metadata: intent.metadata,
@@ -188,7 +188,7 @@ export function adaptLegacyIntent(intent: LegacyIntent): CanonicalIntent {
     expiresAt: intent.metadata?.expiresAt
       ? new Date(intent.metadata.expiresAt as string)
       : undefined,
-    source: (intent.metadata?.source as string) ?? "atsf-core-legacy",
+    source: (intent.metadata?.source as string) ?? 'atsf-core-legacy',
   };
 }
 
@@ -213,9 +213,9 @@ export function adaptCanonicalIntent(intent: CanonicalIntent): LegacyIntent {
     metadata: {
       correlationId: intent.correlationId,
       source: intent.source,
-      ...((intent.context.metadata as Record<string, unknown>) ?? {}),
+      ...(intent.context.metadata as Record<string, unknown> ?? {}),
     },
-    status: (intent.context.legacyStatus as IntentStatus) ?? "pending",
+    status: (intent.context.legacyStatus as IntentStatus) ?? 'pending',
     createdAt: intent.createdAt.toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -237,34 +237,34 @@ export function adaptCanonicalIntent(intent: CanonicalIntent): LegacyIntent {
  */
 const SIGNAL_TYPE_TO_FACTOR: Record<string, string> = {
   // Behavioral signals -> CT-REL (Reliability)
-  behavioral: "CT-REL",
-  "behavioral.task_completed": "CT-REL",
-  "behavioral.task_failed": "CT-REL",
-  "behavioral.api_success": "CT-REL",
-  "behavioral.api_error": "CT-REL",
-  action: "CT-REL",
-  error: "CT-REL",
+  'behavioral': 'CT-REL',
+  'behavioral.task_completed': 'CT-REL',
+  'behavioral.task_failed': 'CT-REL',
+  'behavioral.api_success': 'CT-REL',
+  'behavioral.api_error': 'CT-REL',
+  'action': 'CT-REL',
+  'error': 'CT-REL',
 
   // Compliance/Governance signals -> CT-ACCT (Accountability)
-  compliance: "CT-ACCT",
-  credential: "CT-ACCT",
-  policy: "CT-ACCT",
-  governance: "CT-ACCT",
+  'compliance': 'CT-ACCT',
+  'credential': 'CT-ACCT',
+  'policy': 'CT-ACCT',
+  'governance': 'CT-ACCT',
 
   // Identity/Capability signals -> CT-ID (Identity Verification)
-  identity: "CT-ID",
-  capability: "CT-COMP",
-  skill: "CT-COMP",
+  'identity': 'CT-ID',
+  'capability': 'CT-COMP',
+  'skill': 'CT-COMP',
 
   // Context signals -> OP-CONTEXT (Context Awareness)
-  context: "OP-CONTEXT",
-  environment: "OP-CONTEXT",
-  temporal: "OP-CONTEXT",
+  'context': 'OP-CONTEXT',
+  'environment': 'OP-CONTEXT',
+  'temporal': 'OP-CONTEXT',
 
   // Assurance signals -> CT-OBS (Observability)
-  assurance: "CT-OBS",
-  verification: "CT-OBS",
-  audit: "CT-OBS",
+  'assurance': 'CT-OBS',
+  'verification': 'CT-OBS',
+  'audit': 'CT-OBS',
 };
 
 /**
@@ -279,16 +279,13 @@ const SIGNAL_TYPE_TO_FACTOR: Record<string, string> = {
  * const evidence = adaptLegacyTrustSignal(legacySignal);
  * ```
  */
-export function adaptLegacyTrustSignal(
-  signal: LegacySignal,
-): CanonicalTrustSignal {
+export function adaptLegacyTrustSignal(signal: LegacySignal): CanonicalTrustSignal {
   // Determine factor code from signal type
   const signalTypeKey = signal.type.toLowerCase();
-  const basePart = signalTypeKey.split(".")[0] ?? signalTypeKey;
-  const factorCode =
-    SIGNAL_TYPE_TO_FACTOR[signalTypeKey] ??
-    SIGNAL_TYPE_TO_FACTOR[basePart] ??
-    "CT-REL"; // Default to Reliability
+  const basePart = signalTypeKey.split('.')[0] ?? signalTypeKey;
+  const factorCode = SIGNAL_TYPE_TO_FACTOR[signalTypeKey]
+    ?? SIGNAL_TYPE_TO_FACTOR[basePart]
+    ?? 'CT-REL'; // Default to Reliability
 
   // Convert value to impact (-1000 to +1000 scale)
   // Legacy values are typically 0-1 or 0-100
@@ -308,7 +305,7 @@ export function adaptLegacyTrustSignal(
     evidenceId: signal.id,
     factorCode,
     impact: Math.max(-1000, Math.min(1000, impact)),
-    source: signal.source ?? "atsf-core-legacy",
+    source: signal.source ?? 'atsf-core-legacy',
     collectedAt: new Date(signal.timestamp),
     metadata: signal.metadata,
   };
@@ -323,7 +320,7 @@ export function adaptLegacyTrustSignal(
  */
 export function adaptCanonicalTrustSignal(
   evidence: CanonicalTrustSignal,
-  entityId: ID,
+  entityId: ID
 ): LegacySignal {
   // Convert impact back to 0-1 value scale (from -1000 to +1000)
   const value = (evidence.impact + 1000) / 2000;
@@ -347,10 +344,10 @@ export function adaptCanonicalTrustSignal(
  * Maps numeric risk values to RiskLevel
  */
 export function adaptRiskLevelFromNumber(n: number): RiskLevel {
-  if (n <= 0.25) return "low";
-  if (n <= 0.5) return "medium";
-  if (n <= 0.75) return "high";
-  return "critical";
+  if (n <= 0.25) return 'low';
+  if (n <= 0.5) return 'medium';
+  if (n <= 0.75) return 'high';
+  return 'critical';
 }
 
 /**
@@ -358,16 +355,11 @@ export function adaptRiskLevelFromNumber(n: number): RiskLevel {
  */
 export function adaptRiskLevelToNumber(level: RiskLevel): number {
   switch (level) {
-    case "low":
-      return 0.125;
-    case "medium":
-      return 0.375;
-    case "high":
-      return 0.625;
-    case "critical":
-      return 0.875;
-    default:
-      return 0.5;
+    case 'low': return 0.125;
+    case 'medium': return 0.375;
+    case 'high': return 0.625;
+    case 'critical': return 0.875;
+    default: return 0.5;
   }
 }
 
@@ -379,16 +371,11 @@ export function adaptRiskLevelToNumber(level: RiskLevel): number {
  */
 export function adaptRiskLevelToProfile(level: RiskLevel): RiskProfile {
   switch (level) {
-    case "low":
-      return "IMMEDIATE" as RiskProfile;
-    case "medium":
-      return "SHORT_TERM" as RiskProfile;
-    case "high":
-      return "MEDIUM_TERM" as RiskProfile;
-    case "critical":
-      return "LONG_TERM" as RiskProfile;
-    default:
-      return "SHORT_TERM" as RiskProfile;
+    case 'low': return 'IMMEDIATE' as RiskProfile;
+    case 'medium': return 'SHORT_TERM' as RiskProfile;
+    case 'high': return 'MEDIUM_TERM' as RiskProfile;
+    case 'critical': return 'LONG_TERM' as RiskProfile;
+    default: return 'SHORT_TERM' as RiskProfile;
   }
 }
 
@@ -405,14 +392,12 @@ export function adaptRiskLevelToProfile(level: RiskLevel): RiskProfile {
  * @param components - Legacy TrustComponents (behavioral, compliance, identity, context)
  * @returns Canonical TrustFactorScores (factor code → 0.0-1.0)
  */
-export function adaptLegacyTrustComponents(
-  components: TrustComponents,
-): TrustFactorScores {
+export function adaptLegacyTrustComponents(components: TrustComponents): TrustFactorScores {
   return {
-    "CT-REL": components.behavioral / 100, // Reliability <- behavioral
-    "CT-ACCT": components.compliance / 100, // Accountability <- compliance
-    "CT-ID": components.identity / 100, // Identity <- identity
-    "OP-CONTEXT": components.context / 100, // Context Awareness <- context
+    'CT-REL': components.behavioral / 100,   // Reliability <- behavioral
+    'CT-ACCT': components.compliance / 100,   // Accountability <- compliance
+    'CT-ID': components.identity / 100,       // Identity <- identity
+    'OP-CONTEXT': components.context / 100,   // Context Awareness <- context
   };
 }
 
@@ -425,14 +410,12 @@ export function adaptLegacyTrustComponents(
  * @param factors - Canonical TrustFactorScores (factor code → 0.0-1.0)
  * @returns Legacy TrustComponents (behavioral, compliance, identity, context)
  */
-export function adaptCanonicalTrustFactors(
-  factors: TrustFactorScores,
-): TrustComponents {
+export function adaptCanonicalTrustFactors(factors: TrustFactorScores): TrustComponents {
   return {
-    behavioral: (factors["CT-REL"] ?? 0.5) * 100,
-    compliance: (factors["CT-ACCT"] ?? 0.5) * 100,
-    identity: (factors["CT-ID"] ?? 0.5) * 100,
-    context: (factors["OP-CONTEXT"] ?? 0.5) * 100,
+    behavioral: (factors['CT-REL'] ?? 0.5) * 100,
+    compliance: (factors['CT-ACCT'] ?? 0.5) * 100,
+    identity: (factors['CT-ID'] ?? 0.5) * 100,
+    context: (factors['OP-CONTEXT'] ?? 0.5) * 100,
   };
 }
 
@@ -450,9 +433,7 @@ export function adaptLegacyIntents(intents: LegacyIntent[]): CanonicalIntent[] {
 /**
  * Batch adapt multiple legacy signals
  */
-export function adaptLegacyTrustSignals(
-  signals: LegacySignal[],
-): CanonicalTrustSignal[] {
+export function adaptLegacyTrustSignals(signals: LegacySignal[]): CanonicalTrustSignal[] {
   return signals.map(adaptLegacyTrustSignal);
 }
 
@@ -465,7 +446,7 @@ export type {
   TrustFactorScores,
   TrustEvidence,
   RiskProfile,
-} from "@vorionsys/contracts";
+} from '@vorionsys/contracts';
 
 export type {
   TrustLevel,
@@ -475,4 +456,4 @@ export type {
   Intent,
   IntentStatus,
   RiskLevel,
-} from "./types.js";
+} from './types.js';

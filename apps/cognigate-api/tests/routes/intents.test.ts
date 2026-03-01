@@ -32,13 +32,13 @@ beforeAll(async () => {
     payload: { name: 'intent-route-test-agent', capabilities: ['read', 'write', 'delete'] },
   });
   agentId = JSON.parse(res.payload).agentId;
-}, 30000);
+});
 
 afterAll(async () => {
   if (server) {
     await server.close();
   }
-}, 30000);
+});
 
 // =============================================================================
 // POST /api/v1/intents — Submit

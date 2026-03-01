@@ -11,15 +11,15 @@
  * @module @orion/contracts/canonical/intent
  */
 
-import { z } from "zod";
-import type { TrustBand } from "./trust-band.js";
-import { trustBandSchema } from "./trust-band.js";
-import { trustScoreValueSchema, type TrustScore } from "./trust-score.js";
+import { z } from 'zod';
+import type { TrustBand } from './trust-band.js';
+import { trustBandSchema } from './trust-band.js';
+import { trustScoreValueSchema, type TrustScore } from './trust-score.js';
 export type { TrustScore };
 
 // Re-export enums from v2 to avoid duplication
-export { ActionType, DataSensitivity, Reversibility } from "../v2/enums.js";
-import { ActionType, DataSensitivity, Reversibility } from "../v2/enums.js";
+export { ActionType, DataSensitivity, Reversibility } from '../v2/enums.js';
+import { ActionType, DataSensitivity, Reversibility } from '../v2/enums.js';
 
 /**
  * Intent lifecycle status.
@@ -31,58 +31,58 @@ import { ActionType, DataSensitivity, Reversibility } from "../v2/enums.js";
  */
 export type IntentStatus =
   /** Intent received, awaiting evaluation */
-  | "pending"
+  | 'pending'
   /** Intent is being evaluated by trust/policy systems */
-  | "evaluating"
+  | 'evaluating'
   /** Intent approved, awaiting execution */
-  | "approved"
+  | 'approved'
   /** Intent denied by policy or trust requirements */
-  | "denied"
+  | 'denied'
   /** Intent escalated for human review */
-  | "escalated"
+  | 'escalated'
   /** Intent is currently being executed */
-  | "executing"
+  | 'executing'
   /** Intent execution completed successfully */
-  | "completed"
+  | 'completed'
   /** Intent execution failed */
-  | "failed"
+  | 'failed'
   /** Intent was cancelled before completion */
-  | "cancelled";
+  | 'cancelled';
 
 /**
  * All possible intent status values as an array.
  */
 export const INTENT_STATUS_VALUES: readonly IntentStatus[] = [
-  "pending",
-  "evaluating",
-  "approved",
-  "denied",
-  "escalated",
-  "executing",
-  "completed",
-  "failed",
-  "cancelled",
+  'pending',
+  'evaluating',
+  'approved',
+  'denied',
+  'escalated',
+  'executing',
+  'completed',
+  'failed',
+  'cancelled',
 ] as const;
 
 /**
  * Terminal intent statuses (intent lifecycle has ended).
  */
 export const TERMINAL_INTENT_STATUSES: readonly IntentStatus[] = [
-  "denied",
-  "completed",
-  "failed",
-  "cancelled",
+  'denied',
+  'completed',
+  'failed',
+  'cancelled',
 ] as const;
 
 /**
  * Active intent statuses (intent is still in progress).
  */
 export const ACTIVE_INTENT_STATUSES: readonly IntentStatus[] = [
-  "pending",
-  "evaluating",
-  "approved",
-  "escalated",
-  "executing",
+  'pending',
+  'evaluating',
+  'approved',
+  'escalated',
+  'executing',
 ] as const;
 
 // ============================================================================
@@ -106,7 +106,7 @@ export interface IntentContext {
    * Deployment environment.
    * Different policies may apply per environment.
    */
-  environment?: "production" | "staging" | "development" | "test" | string;
+  environment?: 'production' | 'staging' | 'development' | 'test' | string;
 
   /**
    * User or entity on whose behalf the agent is acting.
@@ -446,10 +446,7 @@ export interface CreateIntentRequest {
  * @returns True if value is a valid IntentStatus
  */
 export function isIntentStatus(value: unknown): value is IntentStatus {
-  return (
-    typeof value === "string" &&
-    INTENT_STATUS_VALUES.includes(value as IntentStatus)
-  );
+  return typeof value === 'string' && INTENT_STATUS_VALUES.includes(value as IntentStatus);
 }
 
 /**
@@ -483,61 +480,56 @@ export function isActiveStatus(status: IntentStatus): boolean {
  * Zod schema for ActionType enum.
  */
 export const actionTypeSchema = z.nativeEnum(ActionType, {
-  errorMap: () => ({ message: "Invalid action type" }),
+  errorMap: () => ({ message: 'Invalid action type' }),
 });
 
 /**
  * Zod schema for DataSensitivity enum.
  */
 export const dataSensitivitySchema = z.nativeEnum(DataSensitivity, {
-  errorMap: () => ({ message: "Invalid data sensitivity level" }),
+  errorMap: () => ({ message: 'Invalid data sensitivity level' }),
 });
 
 /**
  * Zod schema for Reversibility enum.
  */
 export const reversibilitySchema = z.nativeEnum(Reversibility, {
-  errorMap: () => ({ message: "Invalid reversibility value" }),
+  errorMap: () => ({ message: 'Invalid reversibility value' }),
 });
 
 /**
  * Zod schema for IntentStatus.
  */
-export const intentStatusSchema = z.enum(
-  [
-    "pending",
-    "evaluating",
-    "approved",
-    "denied",
-    "escalated",
-    "executing",
-    "completed",
-    "failed",
-    "cancelled",
-  ],
-  {
-    errorMap: () => ({ message: "Invalid intent status" }),
-  },
-);
+export const intentStatusSchema = z.enum([
+  'pending',
+  'evaluating',
+  'approved',
+  'denied',
+  'escalated',
+  'executing',
+  'completed',
+  'failed',
+  'cancelled',
+], {
+  errorMap: () => ({ message: 'Invalid intent status' }),
+});
 
 /**
  * Zod schema for IntentContext.
  */
-export const intentContextSchema = z
-  .object({
-    domain: z.string().optional(),
-    environment: z.string().optional(),
-    onBehalfOf: z.string().optional(),
-    sessionId: z.string().optional(),
-    parentIntentId: z.string().uuid().optional(),
-    priority: z.number().int().min(0).max(10).optional(),
-    handlesPii: z.boolean().optional(),
-    handlesPhi: z.boolean().optional(),
-    jurisdictions: z.array(z.string()).optional(),
-    tags: z.array(z.string()).optional(),
-    metadata: z.record(z.unknown()).optional(),
-  })
-  .strict();
+export const intentContextSchema = z.object({
+  domain: z.string().optional(),
+  environment: z.string().optional(),
+  onBehalfOf: z.string().optional(),
+  sessionId: z.string().optional(),
+  parentIntentId: z.string().uuid().optional(),
+  priority: z.number().int().min(0).max(10).optional(),
+  handlesPii: z.boolean().optional(),
+  handlesPhi: z.boolean().optional(),
+  jurisdictions: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.unknown()).optional(),
+}).strict();
 
 /**
  * Zod schema for TrustSnapshot.
@@ -626,6 +618,4 @@ export type IntentContextInput = z.input<typeof intentContextSchema>;
 /**
  * Inferred CreateIntentRequest type from Zod schema.
  */
-export type CreateIntentRequestInput = z.input<
-  typeof createIntentRequestSchema
->;
+export type CreateIntentRequestInput = z.input<typeof createIntentRequestSchema>;

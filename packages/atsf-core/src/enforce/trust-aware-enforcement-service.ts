@@ -14,10 +14,10 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
-import type { ID, TrustLevel, TrustScore } from "../common/types.js";
-import type { TrustEngine } from "../trust-engine/index.js";
-import { TRUST_LEVEL_NAMES, TRUST_THRESHOLDS } from "../trust-engine/index.js";
+import { createLogger } from '../common/logger.js';
+import type { ID, TrustLevel, TrustScore } from '../common/types.js';
+import type { TrustEngine } from '../trust-engine/index.js';
+import { TRUST_LEVEL_NAMES, TRUST_THRESHOLDS } from '../trust-engine/index.js';
 import type {
   IEnforcementService,
   EnforcementContext,
@@ -30,9 +30,9 @@ import type {
   RefinementRequest,
   WorkflowInstance,
   WorkflowState,
-} from "./types.js";
+} from './index.js';
 
-const logger = createLogger({ component: "trust-aware-enforcement" });
+const logger = createLogger({ component: 'trust-aware-enforcement' });
 
 // =============================================================================
 // RISK CLASSIFICATION
@@ -42,7 +42,7 @@ const logger = createLogger({ component: "trust-aware-enforcement" });
  * Risk level computed from intent metadata.
  * Used to determine constraint strictness.
  */
-type RiskLevel = "low" | "medium" | "high" | "critical";
+type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
 // =============================================================================
 // SECURITY POLICY ENGINE INTERFACE
@@ -53,9 +53,9 @@ type RiskLevel = "low" | "medium" | "high" | "critical";
  * Minimal interface to avoid hard dependency on @vorionsys/security.
  */
 export interface PolicyEvaluationInput {
-  intent: import("../common/types.js").Intent;
-  trustScore: import("../common/types.js").TrustScore;
-  trustLevel: import("../common/types.js").TrustLevel;
+  intent: import('../common/types.js').Intent;
+  trustScore: import('../common/types.js').TrustScore;
+  trustLevel: import('../common/types.js').TrustLevel;
   context?: Record<string, unknown>;
 }
 
@@ -65,7 +65,7 @@ export interface PolicyEvaluationInput {
 export interface PolicyViolation {
   policyId: string;
   policyName: string;
-  action: "deny" | "escalate" | "limit" | "monitor";
+  action: 'deny' | 'escalate' | 'limit' | 'monitor';
   reason: string;
 }
 
@@ -85,41 +85,37 @@ function computeRiskLevel(context: EnforcementContext): RiskLevel {
   const intent = context.intent;
 
   // Irreversible + high sensitivity = critical
-  if (
-    intent.reversibility === "IRREVERSIBLE" &&
-    intent.dataSensitivity === "RESTRICTED"
-  ) {
-    return "critical";
+  if (intent.reversibility === 'IRREVERSIBLE' && intent.dataSensitivity === 'RESTRICTED') {
+    return 'critical';
   }
 
   // Delete/execute with restricted data = high
   if (
-    (intent.actionType === "delete" || intent.actionType === "execute") &&
-    (intent.dataSensitivity === "RESTRICTED" ||
-      intent.dataSensitivity === "CONFIDENTIAL")
+    (intent.actionType === 'delete' || intent.actionType === 'execute') &&
+    (intent.dataSensitivity === 'RESTRICTED' || intent.dataSensitivity === 'CONFIDENTIAL')
   ) {
-    return "high";
+    return 'high';
   }
 
   // Irreversible actions = high
-  if (intent.reversibility === "IRREVERSIBLE") {
-    return "high";
+  if (intent.reversibility === 'IRREVERSIBLE') {
+    return 'high';
   }
 
   // Write/transfer with confidential data = medium
   if (
-    (intent.actionType === "write" || intent.actionType === "transfer") &&
-    intent.dataSensitivity === "CONFIDENTIAL"
+    (intent.actionType === 'write' || intent.actionType === 'transfer') &&
+    intent.dataSensitivity === 'CONFIDENTIAL'
   ) {
-    return "medium";
+    return 'medium';
   }
 
   // Read-only or public data = low
-  if (intent.actionType === "read" || intent.dataSensitivity === "PUBLIC") {
-    return "low";
+  if (intent.actionType === 'read' || intent.dataSensitivity === 'PUBLIC') {
+    return 'low';
   }
 
-  return "medium";
+  return 'medium';
 }
 
 // =============================================================================
@@ -132,12 +128,12 @@ function computeRiskLevel(context: EnforcementContext): RiskLevel {
 function buildConstraints(
   riskLevel: RiskLevel,
   trustLevel: TrustLevel,
-  policy: Required<Omit<TrustAwareEnforcementConfig, "policyEngine">>,
+  policy: Required<Omit<TrustAwareEnforcementConfig, 'policyEngine'>>,
   defaultConstraints?: Partial<DecisionConstraints>,
 ): DecisionConstraints {
   const base: DecisionConstraints = {
-    allowedTools: defaultConstraints?.allowedTools ?? ["*"],
-    dataScopes: defaultConstraints?.dataScopes ?? ["*"],
+    allowedTools: defaultConstraints?.allowedTools ?? ['*'],
+    dataScopes: defaultConstraints?.dataScopes ?? ['*'],
     rateLimits: defaultConstraints?.rateLimits ?? [],
     requiredApprovals: defaultConstraints?.requiredApprovals ?? [],
     reversibilityRequired: false,
@@ -145,29 +141,26 @@ function buildConstraints(
   };
 
   // Tighten constraints based on risk
-  if (riskLevel === "critical" || riskLevel === "high") {
+  if (riskLevel === 'critical' || riskLevel === 'high') {
     base.reversibilityRequired = true;
     base.maxExecutionTimeMs = 300_000; // 5 minutes
     base.maxRetries = 1;
   }
 
-  if (riskLevel === "critical") {
+  if (riskLevel === 'critical') {
     base.requiredApprovals = [
       {
-        type: "human_review",
-        approver: "admin",
+        type: 'human_review',
+        approver: 'admin',
         timeoutMs: policy.refinementDeadlineMs,
-        reason: "Critical risk action requires human approval",
+        reason: 'Critical risk action requires human approval',
       },
     ];
   }
 
   // Lower trust = tighter constraints
   if (trustLevel <= 2) {
-    base.maxExecutionTimeMs = Math.min(
-      base.maxExecutionTimeMs ?? 600_000,
-      60_000,
-    );
+    base.maxExecutionTimeMs = Math.min(base.maxExecutionTimeMs ?? 600_000, 60_000);
     base.maxRetries = 1;
   }
 
@@ -190,42 +183,40 @@ function buildRefinementOptions(
   // Always offer "add constraints"
   options.push({
     id: crypto.randomUUID(),
-    action: "ADD_CONSTRAINTS",
-    description: "Accept additional operational constraints to proceed",
-    successProbability: riskLevel === "high" ? 0.6 : 0.9,
-    effort: "low",
+    action: 'ADD_CONSTRAINTS',
+    description: 'Accept additional operational constraints to proceed',
+    successProbability: riskLevel === 'high' ? 0.6 : 0.9,
+    effort: 'low',
   });
 
   // Offer scope reduction for high-risk
-  if (riskLevel === "high" || riskLevel === "critical") {
+  if (riskLevel === 'high' || riskLevel === 'critical') {
     options.push({
       id: crypto.randomUUID(),
-      action: "REDUCE_SCOPE",
-      description:
-        "Reduce the scope of the action (e.g., fewer resources, read-only)",
+      action: 'REDUCE_SCOPE',
+      description: 'Reduce the scope of the action (e.g., fewer resources, read-only)',
       successProbability: 0.8,
-      effort: "medium",
+      effort: 'medium',
     });
   }
 
   // Offer human approval
   options.push({
     id: crypto.randomUUID(),
-    action: "REQUEST_APPROVAL",
-    description: "Request explicit human approval for this action",
+    action: 'REQUEST_APPROVAL',
+    description: 'Request explicit human approval for this action',
     successProbability: 0.7,
-    effort: "medium",
+    effort: 'medium',
   });
 
   // Offer decomposition for complex actions
-  if (riskLevel !== "low") {
+  if (riskLevel !== 'low') {
     options.push({
       id: crypto.randomUUID(),
-      action: "DECOMPOSE",
-      description:
-        "Break this action into smaller, individually-approvable steps",
+      action: 'DECOMPOSE',
+      description: 'Break this action into smaller, individually-approvable steps',
       successProbability: 0.85,
-      effort: "high",
+      effort: 'high',
     });
   }
 
@@ -233,10 +224,10 @@ function buildRefinementOptions(
   if (trustLevel >= 2 && trustLevel <= 4) {
     options.push({
       id: crypto.randomUUID(),
-      action: "WAIT_FOR_TRUST",
-      description: "Continue building trust through lower-risk actions first",
+      action: 'WAIT_FOR_TRUST',
+      description: 'Continue building trust through lower-risk actions first',
       successProbability: 0.5,
-      effort: "high",
+      effort: 'high',
     });
   }
 
@@ -266,9 +257,7 @@ export interface TrustAwareEnforcementConfig {
   policyEngine?: IPolicyEngine;
 }
 
-const DEFAULT_CONFIG: Required<
-  Omit<TrustAwareEnforcementConfig, "policyEngine">
-> = {
+const DEFAULT_CONFIG: Required<Omit<TrustAwareEnforcementConfig, 'policyEngine'>> = {
   autoApproveLevel: 4 as TrustLevel,
   requireRefinementLevel: 2 as TrustLevel,
   autoDenyLevel: 0 as TrustLevel,
@@ -292,7 +281,7 @@ const DEFAULT_CONFIG: Required<
  * - Full audit trail via decision/workflow records
  */
 export class TrustAwareEnforcementService implements IEnforcementService {
-  private config: Required<Omit<TrustAwareEnforcementConfig, "policyEngine">>;
+  private config: Required<Omit<TrustAwareEnforcementConfig, 'policyEngine'>>;
   private policy: EnforcementPolicy;
   private decisions = new Map<ID, FluidDecision>();
   private workflows = new Map<ID, WorkflowInstance>(); // keyed by intentId
@@ -306,12 +295,9 @@ export class TrustAwareEnforcementService implements IEnforcementService {
   ) {
     this.trustEngine = trustEngine;
     this.policyEngine = config?.policyEngine ?? null;
-    this.config = {
-      ...DEFAULT_CONFIG,
-      ...(config ? { ...config, policyEngine: undefined } : {}),
-    };
+    this.config = { ...DEFAULT_CONFIG, ...(config ? { ...config, policyEngine: undefined } : {}) };
     this.policy = policy ?? {
-      defaultAction: "deny",
+      defaultAction: 'deny',
       trustThresholds: {
         autoApproveLevel: this.config.autoApproveLevel,
         requireRefinementLevel: this.config.requireRefinementLevel,
@@ -362,36 +348,36 @@ export class TrustAwareEnforcementService implements IEnforcementService {
       if (violations.length > 0) {
         logger.info(
           { intentId: intent.id, violationCount: violations.length },
-          "Security policy violations detected",
+          'Security policy violations detected',
         );
 
         // Convert violations to RuleResult entries for tier determination
         for (const violation of violations) {
-          if (violation.action === "deny") {
+          if (violation.action === 'deny') {
             evaluation.violatedRules.push({
               ruleId: violation.policyId,
               ruleName: violation.policyName,
               matched: true,
-              action: "deny",
+              action: 'deny',
               reason: violation.reason,
-              details: { source: "security-policy-engine" },
+              details: { source: 'security-policy-engine' },
               durationMs: 0,
             });
-          } else if (violation.action === "escalate") {
+          } else if (violation.action === 'escalate') {
             evaluation.violatedRules.push({
               ruleId: violation.policyId,
               ruleName: violation.policyName,
               matched: true,
-              action: "escalate",
+              action: 'escalate',
               reason: violation.reason,
-              details: { source: "security-policy-engine" },
+              details: { source: 'security-policy-engine' },
               durationMs: 0,
             });
           }
         }
 
         // If any deny violations, mark evaluation as failed
-        if (violations.some((v) => v.action === "deny")) {
+        if (violations.some((v) => v.action === 'deny')) {
           evaluation.passed = false;
         }
       }
@@ -409,20 +395,18 @@ export class TrustAwareEnforcementService implements IEnforcementService {
       agentId: intent.entityId,
       correlationId,
       tier,
-      permitted: tier === "GREEN",
+      permitted: tier === 'GREEN',
       trustBand: `T${trustLevel}_${this.getTrustBandName(trustLevel)}`,
       trustScore,
       reasoning: this.buildReasoning(tier, evaluation, trustLevel, riskLevel),
       refinementAttempt: 0,
       decidedAt: now,
-      expiresAt: new Date(
-        Date.now() + this.config.decisionExpirationMs,
-      ).toISOString(),
+      expiresAt: new Date(Date.now() + this.config.decisionExpirationMs).toISOString(),
       latencyMs,
     };
 
     // Tier-specific enrichment
-    if (tier === "GREEN") {
+    if (tier === 'GREEN') {
       decision.constraints = buildConstraints(
         riskLevel,
         trustLevel,
@@ -431,38 +415,28 @@ export class TrustAwareEnforcementService implements IEnforcementService {
       );
     }
 
-    if (tier === "YELLOW") {
+    if (tier === 'YELLOW') {
       decision.refinementDeadline = new Date(
         Date.now() + this.config.refinementDeadlineMs,
       ).toISOString();
       decision.maxRefinementAttempts = this.config.maxRefinementAttempts;
-      decision.refinementOptions = buildRefinementOptions(
-        riskLevel,
-        trustLevel,
-      );
+      decision.refinementOptions = buildRefinementOptions(riskLevel, trustLevel);
     }
 
-    if (tier === "RED") {
+    if (tier === 'RED') {
       const violatedPolicies = evaluation.violatedRules
-        .filter((r) => r.action === "deny" || r.action === "terminate")
+        .filter((r) => r.action === 'deny' || r.action === 'terminate')
         .map((r) => ({
           policyId: r.ruleId,
           policyName: r.ruleName,
-          severity:
-            r.action === "terminate"
-              ? ("critical" as const)
-              : ("error" as const),
+          severity: r.action === 'terminate' ? 'critical' as const : 'error' as const,
         }));
 
-      decision.denialReason =
-        violatedPolicies.length > 0
-          ? `Policy violations: ${violatedPolicies.map((p) => p.policyName).join(", ")}`
-          : `Trust level T${trustLevel} below minimum threshold`;
-      decision.hardDenial = evaluation.violatedRules.some(
-        (r) => r.action === "terminate",
-      );
-      decision.violatedPolicies =
-        violatedPolicies.length > 0 ? violatedPolicies : undefined;
+      decision.denialReason = violatedPolicies.length > 0
+        ? `Policy violations: ${violatedPolicies.map((p) => p.policyName).join(', ')}`
+        : `Trust level T${trustLevel} below minimum threshold`;
+      decision.hardDenial = evaluation.violatedRules.some((r) => r.action === 'terminate');
+      decision.violatedPolicies = violatedPolicies.length > 0 ? violatedPolicies : undefined;
     }
 
     // Store
@@ -479,7 +453,7 @@ export class TrustAwareEnforcementService implements IEnforcementService {
       currentDecisionId: decision.id,
       stateHistory: [
         {
-          from: "SUBMITTED",
+          from: 'SUBMITTED',
           to: this.tierToState(tier),
           reason: `Decision: ${tier} (trust=T${trustLevel}, risk=${riskLevel})`,
           timestamp: now,
@@ -502,7 +476,7 @@ export class TrustAwareEnforcementService implements IEnforcementService {
         riskLevel,
         latencyMs,
       },
-      "Enforcement decision made",
+      'Enforcement decision made',
     );
 
     return {
@@ -513,13 +487,10 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     };
   }
 
-  async refine(
-    request: RefinementRequest,
-    tenantId: ID,
-  ): Promise<FluidDecisionResult | null> {
+  async refine(request: RefinementRequest, tenantId: ID): Promise<FluidDecisionResult | null> {
     const original = this.decisions.get(request.decisionId);
     if (!original || original.tenantId !== tenantId) return null;
-    if (original.tier !== "YELLOW") return null;
+    if (original.tier !== 'YELLOW') return null;
 
     // Check refinement deadline
     if (original.refinementDeadline) {
@@ -527,22 +498,18 @@ export class TrustAwareEnforcementService implements IEnforcementService {
       if (Date.now() > deadline) {
         logger.warn(
           { decisionId: request.decisionId },
-          "Refinement deadline exceeded",
+          'Refinement deadline exceeded',
         );
         return null;
       }
     }
 
     // Check attempt limit
-    const maxAttempts =
-      original.maxRefinementAttempts ?? this.config.maxRefinementAttempts;
+    const maxAttempts = original.maxRefinementAttempts ?? this.config.maxRefinementAttempts;
     if (original.refinementAttempt >= maxAttempts) {
       logger.warn(
-        {
-          decisionId: request.decisionId,
-          attempts: original.refinementAttempt,
-        },
-        "Max refinement attempts reached",
+        { decisionId: request.decisionId, attempts: original.refinementAttempt },
+        'Max refinement attempts reached',
       );
       return null;
     }
@@ -554,10 +521,7 @@ export class TrustAwareEnforcementService implements IEnforcementService {
       .filter((opt): opt is RefinementOption => opt !== undefined);
 
     if (selectedOptions.length === 0) {
-      logger.warn(
-        { decisionId: request.decisionId },
-        "No valid refinement options selected",
-      );
+      logger.warn({ decisionId: request.decisionId }, 'No valid refinement options selected');
       return null;
     }
 
@@ -565,8 +529,8 @@ export class TrustAwareEnforcementService implements IEnforcementService {
 
     // Compute resulting constraints from refinements
     const mergedConstraints: DecisionConstraints = {
-      allowedTools: ["*"],
-      dataScopes: ["*"],
+      allowedTools: ['*'],
+      dataScopes: ['*'],
       rateLimits: [],
       requiredApprovals: [],
       reversibilityRequired: true, // Refinement always requires reversibility
@@ -579,12 +543,12 @@ export class TrustAwareEnforcementService implements IEnforcementService {
       if (opt.resultingConstraints) {
         Object.assign(mergedConstraints, opt.resultingConstraints);
       }
-      if (opt.action === "REQUEST_APPROVAL") {
+      if (opt.action === 'REQUEST_APPROVAL') {
         mergedConstraints.requiredApprovals.push({
-          type: "human_review",
-          approver: "admin",
+          type: 'human_review',
+          approver: 'admin',
           timeoutMs: this.config.refinementDeadlineMs,
-          reason: "Refinement requested human approval",
+          reason: 'Refinement requested human approval',
         });
       }
     }
@@ -593,18 +557,16 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     const refined: FluidDecision = {
       ...original,
       id: crypto.randomUUID(),
-      tier: "GREEN",
+      tier: 'GREEN',
       permitted: true,
       refinementAttempt: original.refinementAttempt + 1,
       reasoning: [
-        `Refined from YELLOW to GREEN via: ${selectedOptions.map((o) => o.action).join(", ")}`,
-        "Additional constraints applied",
+        `Refined from YELLOW to GREEN via: ${selectedOptions.map((o) => o.action).join(', ')}`,
+        'Additional constraints applied',
       ],
       constraints: mergedConstraints,
       decidedAt: now,
-      expiresAt: new Date(
-        Date.now() + this.config.decisionExpirationMs,
-      ).toISOString(),
+      expiresAt: new Date(Date.now() + this.config.decisionExpirationMs).toISOString(),
       latencyMs: 0,
     };
 
@@ -614,13 +576,13 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     const workflow = this.workflows.get(original.intentId);
     if (workflow) {
       const previousState = workflow.state;
-      workflow.state = "APPROVED";
+      workflow.state = 'APPROVED';
       workflow.currentDecisionId = refined.id;
       workflow.updatedAt = now;
       workflow.stateHistory.push({
         from: previousState,
-        to: "APPROVED",
-        reason: `Refined via: ${selectedOptions.map((o) => o.action).join(", ")}`,
+        to: 'APPROVED',
+        reason: `Refined via: ${selectedOptions.map((o) => o.action).join(', ')}`,
         timestamp: now,
       });
     }
@@ -632,13 +594,13 @@ export class TrustAwareEnforcementService implements IEnforcementService {
         attempt: refined.refinementAttempt,
         actions: selectedOptions.map((o) => o.action),
       },
-      "Decision refined to GREEN",
+      'Decision refined to GREEN',
     );
 
     return {
       decision: refined,
       workflow: workflow!,
-      tier: "GREEN",
+      tier: 'GREEN',
     };
   }
 
@@ -654,10 +616,7 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     return decision;
   }
 
-  async getWorkflow(
-    intentId: ID,
-    tenantId: ID,
-  ): Promise<WorkflowInstance | null> {
+  async getWorkflow(intentId: ID, tenantId: ID): Promise<WorkflowInstance | null> {
     const workflow = this.workflows.get(intentId);
     if (!workflow || workflow.tenantId !== tenantId) return null;
     return workflow;
@@ -669,8 +628,7 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     // Sync threshold config from policy
     if (policy.trustThresholds) {
       this.config.autoApproveLevel = policy.trustThresholds.autoApproveLevel;
-      this.config.requireRefinementLevel =
-        policy.trustThresholds.requireRefinementLevel;
+      this.config.requireRefinementLevel = policy.trustThresholds.requireRefinementLevel;
       this.config.autoDenyLevel = policy.trustThresholds.autoDenyLevel;
     }
   }
@@ -690,11 +648,7 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     this.config = { ...this.config, ...restUpdates };
 
     // Sync policy thresholds if updated
-    if (
-      updates.autoApproveLevel !== undefined ||
-      updates.requireRefinementLevel !== undefined ||
-      updates.autoDenyLevel !== undefined
-    ) {
+    if (updates.autoApproveLevel !== undefined || updates.requireRefinementLevel !== undefined || updates.autoDenyLevel !== undefined) {
       this.policy.trustThresholds = {
         autoApproveLevel: this.config.autoApproveLevel,
         requireRefinementLevel: this.config.requireRefinementLevel,
@@ -704,17 +658,14 @@ export class TrustAwareEnforcementService implements IEnforcementService {
 
     logger.info(
       { previous: previousConfig, updated: this.config },
-      "Enforcement policy refreshed at runtime",
+      'Enforcement policy refreshed at runtime',
     );
   }
 
   /**
    * Get current policy configuration (for inspection/debugging).
    */
-  getPolicy(): {
-    config: Required<Omit<TrustAwareEnforcementConfig, "policyEngine">>;
-    policy: EnforcementPolicy;
-  } {
+  getPolicy(): { config: Required<Omit<TrustAwareEnforcementConfig, 'policyEngine'>>; policy: EnforcementPolicy } {
     return { config: { ...this.config }, policy: { ...this.policy } };
   }
 
@@ -730,7 +681,7 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     this.policyEngine = engine;
     logger.info(
       { hasEngine: engine !== null },
-      "Security policy engine updated",
+      'Security policy engine updated',
     );
   }
 
@@ -766,77 +717,59 @@ export class TrustAwareEnforcementService implements IEnforcementService {
     riskLevel: RiskLevel,
   ): DecisionTier {
     // Hard denials from rule violations
-    if (
-      evaluation.violatedRules.some(
-        (r) => r.action === "deny" || r.action === "terminate",
-      )
-    ) {
-      return "RED";
+    if (evaluation.violatedRules.some((r) => r.action === 'deny' || r.action === 'terminate')) {
+      return 'RED';
     }
 
     // Trust below auto-deny threshold
     if (trustLevel < this.config.autoDenyLevel) {
-      return "RED";
+      return 'RED';
     }
 
     // Critical risk always requires at least YELLOW unless T6+
-    if (riskLevel === "critical" && trustLevel < 6) {
-      return trustLevel < this.config.requireRefinementLevel ? "RED" : "YELLOW";
+    if (riskLevel === 'critical' && trustLevel < 6) {
+      return trustLevel < this.config.requireRefinementLevel ? 'RED' : 'YELLOW';
     }
 
     // High risk requires higher trust for auto-approve
-    if (riskLevel === "high") {
-      const elevatedApproveLevel = Math.min(
-        7,
-        this.config.autoApproveLevel + 1,
-      ) as TrustLevel;
-      if (trustLevel >= elevatedApproveLevel && evaluation.passed)
-        return "GREEN";
-      if (trustLevel < this.config.requireRefinementLevel) return "RED";
-      return "YELLOW";
+    if (riskLevel === 'high') {
+      const elevatedApproveLevel = Math.min(7, this.config.autoApproveLevel + 1) as TrustLevel;
+      if (trustLevel >= elevatedApproveLevel && evaluation.passed) return 'GREEN';
+      if (trustLevel < this.config.requireRefinementLevel) return 'RED';
+      return 'YELLOW';
     }
 
     // Standard tier determination
-    if (trustLevel >= this.config.autoApproveLevel && evaluation.passed)
-      return "GREEN";
-    if (trustLevel < this.config.requireRefinementLevel) return "YELLOW";
-    return "YELLOW";
+    if (trustLevel >= this.config.autoApproveLevel && evaluation.passed) return 'GREEN';
+    if (trustLevel < this.config.requireRefinementLevel) return 'YELLOW';
+    return 'YELLOW';
   }
 
   private buildReasoning(
     tier: DecisionTier,
-    evaluation: {
-      passed: boolean;
-      violatedRules: Array<{ action: string; reason: string }>;
-    },
+    evaluation: { passed: boolean; violatedRules: Array<{ action: string; reason: string }> },
     trustLevel: TrustLevel,
     riskLevel: RiskLevel,
   ): string[] {
     const reasons: string[] = [];
     const bandName = this.getTrustBandName(trustLevel);
 
-    if (tier === "GREEN") {
-      reasons.push(
-        `Trust T${trustLevel} (${bandName}) meets auto-approve threshold`,
-      );
+    if (tier === 'GREEN') {
+      reasons.push(`Trust T${trustLevel} (${bandName}) meets auto-approve threshold`);
       reasons.push(`Risk level: ${riskLevel}`);
-      if (evaluation.passed) reasons.push("All policy checks passed");
-    } else if (tier === "YELLOW") {
+      if (evaluation.passed) reasons.push('All policy checks passed');
+    } else if (tier === 'YELLOW') {
       reasons.push(`Trust T${trustLevel} (${bandName}) requires refinement`);
       reasons.push(`Risk level: ${riskLevel}`);
-      reasons.push(
-        "Refinement options available — select one or more to proceed",
-      );
+      reasons.push('Refinement options available — select one or more to proceed');
     } else {
       if (evaluation.violatedRules.length > 0) {
-        reasons.push("Policy violations detected:");
+        reasons.push('Policy violations detected:');
         for (const rule of evaluation.violatedRules.slice(0, 5)) {
           reasons.push(`  - ${rule.reason}`);
         }
       } else {
-        reasons.push(
-          `Trust T${trustLevel} (${bandName}) below minimum threshold`,
-        );
+        reasons.push(`Trust T${trustLevel} (${bandName}) below minimum threshold`);
       }
       reasons.push(`Risk level: ${riskLevel}`);
     }
@@ -846,16 +779,13 @@ export class TrustAwareEnforcementService implements IEnforcementService {
 
   private tierToState(tier: DecisionTier): WorkflowState {
     switch (tier) {
-      case "GREEN":
-        return "APPROVED";
-      case "YELLOW":
-        return "PENDING_REFINEMENT";
-      case "RED":
-        return "DENIED";
+      case 'GREEN': return 'APPROVED';
+      case 'YELLOW': return 'PENDING_REFINEMENT';
+      case 'RED': return 'DENIED';
     }
   }
 
   private getTrustBandName(level: TrustLevel): string {
-    return TRUST_LEVEL_NAMES[level] ?? "Unknown";
+    return TRUST_LEVEL_NAMES[level] ?? 'Unknown';
   }
 }

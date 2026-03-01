@@ -11,7 +11,7 @@
  * @module @vorionsys/contracts/canonical/risk-level
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // ============================================================================
 // Type Definition
@@ -35,7 +35,7 @@ import { z } from "zod";
  * const risk: RiskLevel = 'medium';
  * ```
  */
-export type RiskLevel = "low" | "medium" | "high" | "critical";
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
 // ============================================================================
 // Constants
@@ -46,12 +46,7 @@ export type RiskLevel = "low" | "medium" | "high" | "critical";
  *
  * Useful for iteration, validation, and UI components.
  */
-export const RISK_LEVELS: readonly RiskLevel[] = [
-  "low",
-  "medium",
-  "high",
-  "critical",
-] as const;
+export const RISK_LEVELS: readonly RiskLevel[] = ['low', 'medium', 'high', 'critical'] as const;
 
 /**
  * Numeric values for risk levels (0-3 scale).
@@ -78,10 +73,10 @@ export const RISK_LEVEL_VALUES: Readonly<Record<RiskLevel, number>> = {
  * @internal
  */
 const NUMERIC_TO_RISK_LEVEL: Readonly<Record<number, RiskLevel>> = {
-  0: "low",
-  1: "medium",
-  2: "high",
-  3: "critical",
+  0: 'low',
+  1: 'medium',
+  2: 'high',
+  3: 'critical',
 } as const;
 
 /**
@@ -90,10 +85,10 @@ const NUMERIC_TO_RISK_LEVEL: Readonly<Record<number, RiskLevel>> = {
  * Useful for display in UIs and reports.
  */
 export const RISK_LEVEL_LABELS: Readonly<Record<RiskLevel, string>> = {
-  low: "Low Risk",
-  medium: "Medium Risk",
-  high: "High Risk",
-  critical: "Critical Risk",
+  low: 'Low Risk',
+  medium: 'Medium Risk',
+  high: 'High Risk',
+  critical: 'Critical Risk',
 } as const;
 
 /**
@@ -102,11 +97,10 @@ export const RISK_LEVEL_LABELS: Readonly<Record<RiskLevel, string>> = {
  * Provides guidance on what each level means and when to use it.
  */
 export const RISK_LEVEL_DESCRIPTIONS: Readonly<Record<RiskLevel, string>> = {
-  low: "Minimal risk. Standard operation with normal monitoring.",
-  medium: "Moderate risk. Enhanced monitoring and logging recommended.",
-  high: "Significant risk. Additional safeguards and review required.",
-  critical:
-    "Severe risk. Human intervention may be required. Proceed with extreme caution.",
+  low: 'Minimal risk. Standard operation with normal monitoring.',
+  medium: 'Moderate risk. Enhanced monitoring and logging recommended.',
+  high: 'Significant risk. Additional safeguards and review required.',
+  critical: 'Severe risk. Human intervention may be required. Proceed with extreme caution.',
 } as const;
 
 /**
@@ -116,16 +110,16 @@ export const RISK_LEVEL_DESCRIPTIONS: Readonly<Record<RiskLevel, string>> = {
  * red for high, and dark red for critical.
  */
 export const RISK_LEVEL_COLORS: Readonly<Record<RiskLevel, string>> = {
-  low: "#22c55e", // Green
-  medium: "#f59e0b", // Amber
-  high: "#ef4444", // Red
-  critical: "#7f1d1d", // Dark Red
+  low: '#22c55e',      // Green
+  medium: '#f59e0b',   // Amber
+  high: '#ef4444',     // Red
+  critical: '#7f1d1d', // Dark Red
 } as const;
 
 /**
  * Default risk level for unclassified items.
  */
-export const DEFAULT_RISK_LEVEL: RiskLevel = "low";
+export const DEFAULT_RISK_LEVEL: RiskLevel = 'low';
 
 // ============================================================================
 // Conversion Functions
@@ -148,10 +142,10 @@ export const DEFAULT_RISK_LEVEL: RiskLevel = "low";
  * ```
  */
 export function riskLevelFromNumber(n: number): RiskLevel {
-  if (n <= 0) return "low";
-  if (n === 1) return "medium";
-  if (n === 2) return "high";
-  return "critical"; // 3, 4, or higher all map to critical
+  if (n <= 0) return 'low';
+  if (n === 1) return 'medium';
+  if (n === 2) return 'high';
+  return 'critical'; // 3, 4, or higher all map to critical
 }
 
 /**
@@ -190,14 +184,14 @@ export function riskLevelToNumber(level: RiskLevel): number {
  * ```
  */
 export function parseRiskLevel(value: unknown): RiskLevel | null {
-  if (typeof value === "number") {
+  if (typeof value === 'number') {
     if (value >= 0 && value <= 4 && Number.isInteger(value)) {
       return riskLevelFromNumber(value);
     }
     return null;
   }
 
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     const normalized = value.toLowerCase().trim();
     if (RISK_LEVELS.includes(normalized as RiskLevel)) {
       return normalized as RiskLevel;
@@ -222,7 +216,7 @@ export function parseRiskLevel(value: unknown): RiskLevel | null {
  */
 export function parseRiskLevelOrDefault(
   value: unknown,
-  defaultLevel: RiskLevel = DEFAULT_RISK_LEVEL,
+  defaultLevel: RiskLevel = DEFAULT_RISK_LEVEL
 ): RiskLevel {
   return parseRiskLevel(value) ?? defaultLevel;
 }
@@ -302,9 +296,9 @@ export function isRiskHigherThan(level: RiskLevel, other: RiskLevel): boolean {
  * ```
  */
 export function maxRiskLevel(levels: RiskLevel[]): RiskLevel {
-  if (levels.length === 0) return "low";
+  if (levels.length === 0) return 'low';
   return levels.reduce((max, level) =>
-    isRiskHigherThan(level, max) ? level : max,
+    isRiskHigherThan(level, max) ? level : max
   );
 }
 
@@ -321,9 +315,9 @@ export function maxRiskLevel(levels: RiskLevel[]): RiskLevel {
  * ```
  */
 export function minRiskLevel(levels: RiskLevel[]): RiskLevel {
-  if (levels.length === 0) return "critical";
+  if (levels.length === 0) return 'critical';
   return levels.reduce((min, level) =>
-    isRiskHigherThan(min, level) ? level : min,
+    isRiskHigherThan(min, level) ? level : min
   );
 }
 
@@ -347,7 +341,7 @@ export function minRiskLevel(levels: RiskLevel[]): RiskLevel {
 export function escalateRiskLevel(level: RiskLevel): RiskLevel {
   const currentValue = RISK_LEVEL_VALUES[level];
   const escalatedValue = Math.min(currentValue + 1, 3);
-  return NUMERIC_TO_RISK_LEVEL[escalatedValue] ?? "critical";
+  return NUMERIC_TO_RISK_LEVEL[escalatedValue] ?? 'critical';
 }
 
 /**
@@ -366,7 +360,7 @@ export function escalateRiskLevel(level: RiskLevel): RiskLevel {
 export function deescalateRiskLevel(level: RiskLevel): RiskLevel {
   const currentValue = RISK_LEVEL_VALUES[level];
   const deescalatedValue = Math.max(currentValue - 1, 0);
-  return NUMERIC_TO_RISK_LEVEL[deescalatedValue] ?? "low";
+  return NUMERIC_TO_RISK_LEVEL[deescalatedValue] ?? 'low';
 }
 
 // ============================================================================
@@ -387,7 +381,7 @@ export function deescalateRiskLevel(level: RiskLevel): RiskLevel {
  * ```
  */
 export function isRiskLevel(value: unknown): value is RiskLevel {
-  return typeof value === "string" && RISK_LEVELS.includes(value as RiskLevel);
+  return typeof value === 'string' && RISK_LEVELS.includes(value as RiskLevel);
 }
 
 /**
@@ -399,7 +393,7 @@ export function isRiskLevel(value: unknown): value is RiskLevel {
  * @returns True if level requires elevated attention
  */
 export function requiresElevatedAttention(level: RiskLevel): boolean {
-  return level === "high" || level === "critical";
+  return level === 'high' || level === 'critical';
 }
 
 /**
@@ -409,7 +403,7 @@ export function requiresElevatedAttention(level: RiskLevel): boolean {
  * @returns True if level is critical
  */
 export function isCriticalRisk(level: RiskLevel): boolean {
-  return level === "critical";
+  return level === 'critical';
 }
 
 // ============================================================================
@@ -461,10 +455,9 @@ export function getRiskLevelColor(level: RiskLevel): string {
  * riskLevelSchema.parse('severe'); // Throws ZodError
  * ```
  */
-export const riskLevelSchema = z.enum(["low", "medium", "high", "critical"], {
+export const riskLevelSchema = z.enum(['low', 'medium', 'high', 'critical'], {
   errorMap: () => ({
-    message:
-      "Invalid risk level. Must be 'low', 'medium', 'high', or 'critical'.",
+    message: "Invalid risk level. Must be 'low', 'medium', 'high', or 'critical'.",
   }),
 });
 
@@ -518,10 +511,10 @@ export const riskLevelUnionSchema = z.union([
  * @deprecated Use RiskLevel string type directly. This is for migration only.
  */
 export const RiskLevelEnum = {
-  LOW: "low" as RiskLevel,
-  MEDIUM: "medium" as RiskLevel,
-  HIGH: "high" as RiskLevel,
-  CRITICAL: "critical" as RiskLevel,
+  LOW: 'low' as RiskLevel,
+  MEDIUM: 'medium' as RiskLevel,
+  HIGH: 'high' as RiskLevel,
+  CRITICAL: 'critical' as RiskLevel,
 } as const;
 
 /**
@@ -530,14 +523,14 @@ export const RiskLevelEnum = {
  * @deprecated Use RiskLevel string type directly. This is for migration only.
  */
 export const LEGACY_RISK_LEVEL_MAP: Readonly<Record<string, RiskLevel>> = {
-  LOW: "low",
-  MEDIUM: "medium",
-  HIGH: "high",
-  CRITICAL: "critical",
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
   // Numeric string variants
-  "0": "low",
-  "1": "medium",
-  "2": "high",
-  "3": "critical",
-  "4": "critical",
+  '0': 'low',
+  '1': 'medium',
+  '2': 'high',
+  '3': 'critical',
+  '4': 'critical',
 } as const;

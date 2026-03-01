@@ -32,7 +32,7 @@ import {
   RoleGateRequestSchema,
   CeilingCheckRequestSchema,
   ProvenanceCreateRequestSchema,
-} from "./types.js";
+} from './types.js'
 
 // =============================================================================
 // CLIENT CLASS
@@ -44,7 +44,7 @@ import {
  * @example
  * ```typescript
  * const client = new CARClient({
- *   baseUrl: 'https://api.vorion.org',
+ *   baseUrl: 'https://api.agentanchorai.com',
  *   apiKey: 'your-api-key',
  * })
  *
@@ -67,18 +67,18 @@ import {
  * ```
  */
 export class CARClient {
-  private baseUrl: string;
-  private apiKey?: string;
-  private timeout: number;
-  private headers: Record<string, string>;
-  private debug: boolean;
+  private baseUrl: string
+  private apiKey?: string
+  private timeout: number
+  private headers: Record<string, string>
+  private debug: boolean
 
   constructor(config: CARClientConfig) {
-    this.baseUrl = config.baseUrl.replace(/\/$/, ""); // Remove trailing slash
-    this.apiKey = config.apiKey;
-    this.timeout = config.timeout ?? 30000;
-    this.headers = config.headers ?? {};
-    this.debug = config.debug ?? false;
+    this.baseUrl = config.baseUrl.replace(/\/$/, '') // Remove trailing slash
+    this.apiKey = config.apiKey
+    this.timeout = config.timeout ?? 30000
+    this.headers = config.headers ?? {}
+    this.debug = config.debug ?? false
   }
 
   // ===========================================================================
@@ -89,35 +89,34 @@ export class CARClient {
     method: string,
     path: string,
     body?: unknown,
-    params?: Record<string, string>,
+    params?: Record<string, string>
   ): Promise<T> {
-    const url = new URL(`${this.baseUrl}${path}`);
+    const url = new URL(`${this.baseUrl}${path}`)
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          url.searchParams.append(key, value);
+          url.searchParams.append(key, value)
         }
-      });
+      })
     }
 
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...this.headers,
-    };
+    }
 
     if (this.apiKey) {
-      headers["Authorization"] = `Bearer ${this.apiKey}`;
+      headers['Authorization'] = `Bearer ${this.apiKey}`
     }
 
     if (this.debug) {
-      console.log(`[CAR Client] ${method} ${url.toString()}`);
-      if (body)
-        console.log("[CAR Client] Body:", JSON.stringify(body, null, 2));
+      console.log(`[CAR Client] ${method} ${url.toString()}`)
+      if (body) console.log('[CAR Client] Body:', JSON.stringify(body, null, 2))
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout)
 
     try {
       const response = await fetch(url.toString(), {
@@ -125,54 +124,50 @@ export class CARClient {
         headers,
         body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
-      });
+      })
 
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId)
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (!response.ok) {
         throw new CARError(
           data.error || `HTTP ${response.status}`,
           response.status,
-          data,
-        );
+          data
+        )
       }
 
       if (this.debug) {
-        console.log("[CAR Client] Response:", JSON.stringify(data, null, 2));
+        console.log('[CAR Client] Response:', JSON.stringify(data, null, 2))
       }
 
-      return data as T;
+      return data as T
     } catch (error) {
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId)
 
       if (error instanceof CARError) {
-        throw error;
+        throw error
       }
 
-      if ((error as Error).name === "AbortError") {
-        throw new CARError("Request timeout", 408);
+      if ((error as Error).name === 'AbortError') {
+        throw new CARError('Request timeout', 408)
       }
 
-      throw new CARError((error as Error).message, 0);
+      throw new CARError((error as Error).message, 0)
     }
   }
 
   private get<T>(path: string, params?: Record<string, string>): Promise<T> {
-    return this.request<T>("GET", path, undefined, params);
+    return this.request<T>('GET', path, undefined, params)
   }
 
-  private post<T>(
-    path: string,
-    body?: unknown,
-    params?: Record<string, string>,
-  ): Promise<T> {
-    return this.request<T>("POST", path, body, params);
+  private post<T>(path: string, body?: unknown, params?: Record<string, string>): Promise<T> {
+    return this.request<T>('POST', path, body, params)
   }
 
   private patch<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>("PATCH", path, body);
+    return this.request<T>('PATCH', path, body)
   }
 
   // ===========================================================================
@@ -183,7 +178,7 @@ export class CARClient {
    * Get Phase 6 dashboard statistics
    */
   async getStats(): Promise<DashboardData> {
-    return this.get<DashboardData>("/api/phase6/stats");
+    return this.get<DashboardData>('/api/phase6/stats')
   }
 
   // ===========================================================================
@@ -194,10 +189,8 @@ export class CARClient {
    * Get full context hierarchy
    */
   async getContextHierarchy(): Promise<ContextHierarchy> {
-    const response = await this.get<{ data: ContextHierarchy }>(
-      "/api/phase6/context",
-    );
-    return response.data;
+    const response = await this.get<{ data: ContextHierarchy }>('/api/phase6/context')
+    return response.data
   }
 
   /**
@@ -205,69 +198,57 @@ export class CARClient {
    */
   async getDeployments(): Promise<DeploymentContext[]> {
     const response = await this.get<{ data: DeploymentContext[] }>(
-      "/api/phase6/context",
-      { tier: "deployment" },
-    );
-    return response.data;
+      '/api/phase6/context',
+      { tier: 'deployment' }
+    )
+    return response.data
   }
 
   /**
    * Get organization contexts
    */
   async getOrganizations(deploymentId?: string): Promise<OrgContext[]> {
-    const params: Record<string, string> = { tier: "organization" };
-    if (deploymentId) params.deploymentId = deploymentId;
+    const params: Record<string, string> = { tier: 'organization' }
+    if (deploymentId) params.deploymentId = deploymentId
 
-    const response = await this.get<{ data: OrgContext[] }>(
-      "/api/phase6/context",
-      params,
-    );
-    return response.data;
+    const response = await this.get<{ data: OrgContext[] }>('/api/phase6/context', params)
+    return response.data
   }
 
   /**
    * Get agent contexts
    */
-  async getAgents(
-    deploymentId?: string,
-    orgId?: string,
-  ): Promise<AgentContext[]> {
-    const params: Record<string, string> = { tier: "agent" };
-    if (deploymentId) params.deploymentId = deploymentId;
-    if (orgId) params.orgId = orgId;
+  async getAgents(deploymentId?: string, orgId?: string): Promise<AgentContext[]> {
+    const params: Record<string, string> = { tier: 'agent' }
+    if (deploymentId) params.deploymentId = deploymentId
+    if (orgId) params.orgId = orgId
 
-    const response = await this.get<{ data: AgentContext[] }>(
-      "/api/phase6/context",
-      params,
-    );
-    return response.data;
+    const response = await this.get<{ data: AgentContext[] }>('/api/phase6/context', params)
+    return response.data
   }
 
   /**
    * Get operation contexts
    */
   async getOperations(agentId?: string): Promise<OperationContext[]> {
-    const params: Record<string, string> = { tier: "operation" };
-    if (agentId) params.agentId = agentId;
+    const params: Record<string, string> = { tier: 'operation' }
+    if (agentId) params.agentId = agentId
 
-    const response = await this.get<{ data: OperationContext[] }>(
-      "/api/phase6/context",
-      params,
-    );
-    return response.data;
+    const response = await this.get<{ data: OperationContext[] }>('/api/phase6/context', params)
+    return response.data
   }
 
   /**
    * Create a deployment context
    */
   async createDeployment(
-    data: Omit<DeploymentContext, "id" | "createdAt" | "frozenAt">,
+    data: Omit<DeploymentContext, 'id' | 'createdAt' | 'frozenAt'>
   ): Promise<DeploymentContext> {
     const response = await this.post<{ data: DeploymentContext }>(
-      "/api/phase6/context",
-      { tier: "deployment", ...data },
-    );
-    return response.data;
+      '/api/phase6/context',
+      { tier: 'deployment', ...data }
+    )
+    return response.data
   }
 
   // ===========================================================================
@@ -297,8 +278,8 @@ export class CARClient {
    */
   async evaluateRoleGate(request: RoleGateRequest): Promise<RoleGateResponse> {
     // Validate request
-    const validated = RoleGateRequestSchema.parse(request);
-    return this.post<RoleGateResponse>("/api/phase6/role-gates", validated);
+    const validated = RoleGateRequestSchema.parse(request)
+    return this.post<RoleGateResponse>('/api/phase6/role-gates', validated)
   }
 
   /**
@@ -306,17 +287,14 @@ export class CARClient {
    */
   async getRoleGateEvaluations(
     agentId?: string,
-    options?: { limit?: number; includeMatrix?: boolean },
-  ): Promise<{
-    evaluations: RoleGateEvaluation[];
-    summary: Record<string, number>;
-  }> {
-    const params: Record<string, string> = {};
-    if (agentId) params.agentId = agentId;
-    if (options?.limit) params.limit = String(options.limit);
-    if (options?.includeMatrix) params.includeMatrix = "true";
+    options?: { limit?: number; includeMatrix?: boolean }
+  ): Promise<{ evaluations: RoleGateEvaluation[]; summary: Record<string, number> }> {
+    const params: Record<string, string> = {}
+    if (agentId) params.agentId = agentId
+    if (options?.limit) params.limit = String(options.limit)
+    if (options?.includeMatrix) params.includeMatrix = 'true'
 
-    return this.get("/api/phase6/role-gates", params);
+    return this.get('/api/phase6/role-gates', params)
   }
 
   // ===========================================================================
@@ -339,12 +317,10 @@ export class CARClient {
    * }
    * ```
    */
-  async checkCeiling(
-    request: CeilingCheckRequest,
-  ): Promise<CeilingCheckResponse> {
+  async checkCeiling(request: CeilingCheckRequest): Promise<CeilingCheckResponse> {
     // Validate request
-    const validated = CeilingCheckRequestSchema.parse(request);
-    return this.post<CeilingCheckResponse>("/api/phase6/ceiling", validated);
+    const validated = CeilingCheckRequestSchema.parse(request)
+    return this.post<CeilingCheckResponse>('/api/phase6/ceiling', validated)
   }
 
   /**
@@ -352,14 +328,14 @@ export class CARClient {
    */
   async getCeilingEvents(
     agentId?: string,
-    options?: { limit?: number; includeConfig?: boolean },
+    options?: { limit?: number; includeConfig?: boolean }
   ): Promise<{ events: CeilingEvent[]; summary: Record<string, number> }> {
-    const params: Record<string, string> = {};
-    if (agentId) params.agentId = agentId;
-    if (options?.limit) params.limit = String(options.limit);
-    if (options?.includeConfig) params.includeConfig = "true";
+    const params: Record<string, string> = {}
+    if (agentId) params.agentId = agentId
+    if (options?.limit) params.limit = String(options.limit)
+    if (options?.includeConfig) params.includeConfig = 'true'
 
-    return this.get("/api/phase6/ceiling", params);
+    return this.get('/api/phase6/ceiling', params)
   }
 
   // ===========================================================================
@@ -371,22 +347,20 @@ export class CARClient {
    */
   async getGamingAlerts(
     status?: AlertStatus,
-    limit?: number,
+    limit?: number
   ): Promise<{ alerts: GamingAlert[]; summary: Record<string, number> }> {
-    const params: Record<string, string> = {};
-    if (status) params.status = status;
-    if (limit) params.limit = String(limit);
+    const params: Record<string, string> = {}
+    if (status) params.status = status
+    if (limit) params.limit = String(limit)
 
-    return this.get("/api/phase6/alerts", params);
+    return this.get('/api/phase6/alerts', params)
   }
 
   /**
    * Create a gaming alert
    */
-  async createGamingAlert(
-    request: GamingAlertCreateRequest,
-  ): Promise<{ alert: GamingAlert }> {
-    return this.post("/api/phase6/alerts", request);
+  async createGamingAlert(request: GamingAlertCreateRequest): Promise<{ alert: GamingAlert }> {
+    return this.post('/api/phase6/alerts', request)
   }
 
   /**
@@ -396,14 +370,14 @@ export class CARClient {
     alertId: string,
     status: AlertStatus,
     resolvedBy?: string,
-    resolutionNotes?: string,
+    resolutionNotes?: string
   ): Promise<{ alert: GamingAlert }> {
-    return this.patch("/api/phase6/alerts", {
+    return this.patch('/api/phase6/alerts', {
       alertId,
       status,
       resolvedBy,
       resolutionNotes,
-    });
+    })
   }
 
   // ===========================================================================
@@ -414,10 +388,8 @@ export class CARClient {
    * Get all presets with hierarchy
    */
   async getPresetHierarchy(): Promise<PresetHierarchy> {
-    const response = await this.get<{ data: PresetHierarchy }>(
-      "/api/phase6/presets",
-    );
-    return response.data;
+    const response = await this.get<{ data: PresetHierarchy }>('/api/phase6/presets')
+    return response.data
   }
 
   /**
@@ -425,10 +397,10 @@ export class CARClient {
    */
   async getCARPresets(): Promise<CARPreset[]> {
     const response = await this.get<{ data: { presets: CARPreset[] } }>(
-      "/api/phase6/presets",
-      { tier: "carId" },
-    );
-    return response.data.presets;
+      '/api/phase6/presets',
+      { tier: 'carId' }
+    )
+    return response.data.presets
   }
 
   /**
@@ -436,39 +408,33 @@ export class CARClient {
    */
   async getVorionPresets(): Promise<VorionPreset[]> {
     const response = await this.get<{ data: { presets: VorionPreset[] } }>(
-      "/api/phase6/presets",
-      { tier: "vorion" },
-    );
-    return response.data.presets;
+      '/api/phase6/presets',
+      { tier: 'vorion' }
+    )
+    return response.data.presets
   }
 
   /**
    * Get Axiom deployment presets
    */
   async getAxiomPresets(deploymentId?: string): Promise<AxiomPreset[]> {
-    const params: Record<string, string> = { tier: "axiom" };
-    if (deploymentId) params.deploymentId = deploymentId;
+    const params: Record<string, string> = { tier: 'axiom' }
+    if (deploymentId) params.deploymentId = deploymentId
 
     const response = await this.get<{ data: { presets: AxiomPreset[] } }>(
-      "/api/phase6/presets",
-      params,
-    );
-    return response.data.presets;
+      '/api/phase6/presets',
+      params
+    )
+    return response.data.presets
   }
 
   /**
    * Verify preset lineage
    */
-  async verifyPresetLineage(axiomPresetId: string): Promise<{
-    verified: boolean;
-    lineage?: Record<string, unknown>;
-    reason?: string;
-  }> {
-    return this.post(
-      "/api/phase6/presets",
-      { axiomPresetId },
-      { action: "verify-lineage" },
-    );
+  async verifyPresetLineage(
+    axiomPresetId: string
+  ): Promise<{ verified: boolean; lineage?: Record<string, unknown>; reason?: string }> {
+    return this.post('/api/phase6/presets', { axiomPresetId }, { action: 'verify-lineage' })
   }
 
   // ===========================================================================
@@ -478,15 +444,13 @@ export class CARClient {
   /**
    * Get provenance records
    */
-  async getProvenance(agentId?: string): Promise<{
-    records: Provenance[];
-    summary: Record<string, number>;
-    lineage?: Provenance[];
-  }> {
-    const params: Record<string, string> = {};
-    if (agentId) params.agentId = agentId;
+  async getProvenance(
+    agentId?: string
+  ): Promise<{ records: Provenance[]; summary: Record<string, number>; lineage?: Provenance[] }> {
+    const params: Record<string, string> = {}
+    if (agentId) params.agentId = agentId
 
-    return this.get("/api/phase6/provenance", params);
+    return this.get('/api/phase6/provenance', params)
   }
 
   /**
@@ -510,12 +474,10 @@ export class CARClient {
    * })
    * ```
    */
-  async createProvenance(
-    request: ProvenanceCreateRequest,
-  ): Promise<{ record: Provenance }> {
+  async createProvenance(request: ProvenanceCreateRequest): Promise<{ record: Provenance }> {
     // Validate request
-    const validated = ProvenanceCreateRequestSchema.parse(request);
-    return this.post("/api/phase6/provenance", validated);
+    const validated = ProvenanceCreateRequestSchema.parse(request)
+    return this.post('/api/phase6/provenance', validated)
   }
 
   // ===========================================================================
@@ -526,11 +488,11 @@ export class CARClient {
    * Health check
    */
   async healthCheck(): Promise<{ status: string; version: string }> {
-    const stats = await this.getStats();
+    const stats = await this.getStats()
     return {
-      status: "healthy",
+      status: 'healthy',
       version: `${stats.version.major}.${stats.version.minor}.${stats.version.patch}`,
-    };
+    }
   }
 }
 
@@ -542,42 +504,42 @@ export class CARClient {
  * CAR Client Error
  */
 export class CARError extends Error {
-  public readonly statusCode: number;
-  public readonly details?: unknown;
+  public readonly statusCode: number
+  public readonly details?: unknown
 
   constructor(message: string, statusCode: number, details?: unknown) {
-    super(message);
-    this.name = "CARError";
-    this.statusCode = statusCode;
-    this.details = details;
+    super(message)
+    this.name = 'CARError'
+    this.statusCode = statusCode
+    this.details = details
   }
 
   /**
    * Check if error is a specific HTTP status
    */
   isStatus(status: number): boolean {
-    return this.statusCode === status;
+    return this.statusCode === status
   }
 
   /**
    * Check if error is a client error (4xx)
    */
   isClientError(): boolean {
-    return this.statusCode >= 400 && this.statusCode < 500;
+    return this.statusCode >= 400 && this.statusCode < 500
   }
 
   /**
    * Check if error is a server error (5xx)
    */
   isServerError(): boolean {
-    return this.statusCode >= 500;
+    return this.statusCode >= 500
   }
 
   /**
    * Check if error is a timeout
    */
   isTimeout(): boolean {
-    return this.statusCode === 408;
+    return this.statusCode === 408
   }
 }
 
@@ -591,13 +553,13 @@ export class CARError extends Error {
  * @example
  * ```typescript
  * const client = createCARClient({
- *   baseUrl: 'https://api.vorion.org',
+ *   baseUrl: 'https://api.agentanchorai.com',
  *   apiKey: process.env.CAR_API_KEY,
  * })
  * ```
  */
 export function createCARClient(config: CARClientConfig): CARClient {
-  return new CARClient(config);
+  return new CARClient(config)
 }
 
 /**
@@ -607,5 +569,5 @@ export function createLocalCARClient(port: number = 3000): CARClient {
   return new CARClient({
     baseUrl: `http://localhost:${port}`,
     debug: true,
-  });
+  })
 }

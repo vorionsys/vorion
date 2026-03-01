@@ -4,7 +4,7 @@
  * Foundational types used across all contract versions.
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // ============================================================================
 // IDENTIFIERS
@@ -20,7 +20,7 @@ export const CorrelationIdSchema = z.string().min(1).max(128);
 // ACTORS
 // ============================================================================
 
-export const ActorTypeSchema = z.enum(["HUMAN", "AGENT", "SYSTEM", "EXTERNAL"]);
+export const ActorTypeSchema = z.enum(['HUMAN', 'AGENT', 'SYSTEM', 'EXTERNAL']);
 
 export const ActorSchema = z.object({
   type: ActorTypeSchema,
@@ -33,26 +33,17 @@ export const ActorSchema = z.object({
 // TRUST BANDS (Vorion ATP)
 // ============================================================================
 
-export const TrustBandSchema = z.enum([
-  "T0",
-  "T1",
-  "T2",
-  "T3",
-  "T4",
-  "T5",
-  "T6",
-  "T7",
-]);
+export const TrustBandSchema = z.enum(['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']);
 
 export const TrustBandDescriptions = {
-  T0: "Sandbox — isolated testing, maximum restrictions",
-  T1: "Observed — read-only, monitored",
-  T2: "Provisional — basic operations, heavy supervision",
-  T3: "Monitored — standard operations, continuous monitoring",
-  T4: "Standard — external API access, policy-governed",
-  T5: "Trusted — cross-agent communication, delegated tasks",
-  T6: "Certified — admin tasks, agent spawning, minimal oversight",
-  T7: "Autonomous — full autonomy, self-governance",
+  T0: 'Sandbox — isolated testing, maximum restrictions',
+  T1: 'Observed — read-only, monitored',
+  T2: 'Provisional — basic operations, heavy supervision',
+  T3: 'Monitored — standard operations, continuous monitoring',
+  T4: 'Standard — external API access, policy-governed',
+  T5: 'Trusted — cross-agent communication, delegated tasks',
+  T6: 'Certified — admin tasks, agent spawning, minimal oversight',
+  T7: 'Autonomous — full autonomy, self-governance',
 } as const;
 
 // ============================================================================
@@ -60,12 +51,12 @@ export const TrustBandDescriptions = {
 // ============================================================================
 
 export const AutonomyLevelSchema = z.enum([
-  "NONE", // T0: No execution
-  "HITL", // T1: Human-in-the-loop mandatory
-  "CONSTRAINED", // T2: Limited actions
-  "SUPERVISED", // T3: Monitored execution
-  "BROAD", // T4: Expanded capabilities
-  "FULL", // T5: Full autonomy with proof
+  'NONE',        // T0: No execution
+  'HITL',        // T1: Human-in-the-loop mandatory
+  'CONSTRAINED', // T2: Limited actions
+  'SUPERVISED',  // T3: Monitored execution
+  'BROAD',       // T4: Expanded capabilities
+  'FULL',        // T5: Full autonomy with proof
 ]);
 
 // ============================================================================
@@ -73,39 +64,27 @@ export const AutonomyLevelSchema = z.enum([
 // ============================================================================
 
 export const DecisionOutcomeSchema = z.enum([
-  "PERMIT",
-  "DENY",
-  "ESCALATE",
-  "PENDING",
+  'PERMIT',
+  'DENY',
+  'ESCALATE',
+  'PENDING',
 ]);
 
 export const ExecutionOutcomeSchema = z.enum([
-  "SUCCESS",
-  "FAILURE",
-  "ERROR",
-  "TIMEOUT",
-  "CANCELLED",
-  "BLOCKED",
+  'SUCCESS',
+  'FAILURE',
+  'ERROR',
+  'TIMEOUT',
+  'CANCELLED',
+  'BLOCKED',
 ]);
 
 // ============================================================================
 // SEVERITY & RISK
 // ============================================================================
 
-export const SeveritySchema = z.enum([
-  "CRITICAL",
-  "HIGH",
-  "MEDIUM",
-  "LOW",
-  "INFO",
-]);
-export const RiskLevelSchema = z.enum([
-  "EXTREME",
-  "HIGH",
-  "MEDIUM",
-  "LOW",
-  "NEGLIGIBLE",
-]);
+export const SeveritySchema = z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO']);
+export const RiskLevelSchema = z.enum(['EXTREME', 'HIGH', 'MEDIUM', 'LOW', 'NEGLIGIBLE']);
 
 // ============================================================================
 // TYPE EXPORTS

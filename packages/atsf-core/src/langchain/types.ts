@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import type { TrustLevel } from "../common/types.js";
+import type { TrustLevel } from '../common/types.js';
 
 /**
  * Trust-aware agent configuration
@@ -39,17 +39,17 @@ export interface TrustAwareAgentConfig {
  * Trust callback event types
  */
 export type TrustCallbackEvent =
-  | "tool_start"
-  | "tool_end"
-  | "tool_error"
-  | "llm_start"
-  | "llm_end"
-  | "llm_error"
-  | "chain_start"
-  | "chain_end"
-  | "chain_error"
-  | "agent_action"
-  | "agent_finish";
+  | 'tool_start'
+  | 'tool_end'
+  | 'tool_error'
+  | 'llm_start'
+  | 'llm_end'
+  | 'llm_error'
+  | 'chain_start'
+  | 'chain_end'
+  | 'chain_error'
+  | 'agent_action'
+  | 'agent_finish';
 
 /**
  * Trust signal source
@@ -91,16 +91,16 @@ export interface TrustedExecutionResult<T = unknown> {
  * LLM error classification for better error handling
  */
 export type LLMErrorType =
-  | "rate_limit" // API rate limit exceeded
-  | "context_length" // Input/output too long
-  | "authentication" // API key invalid or expired
-  | "model_unavailable" // Model not available or overloaded
-  | "content_filter" // Content blocked by safety filters
-  | "timeout" // Request timed out
-  | "network" // Network connectivity issues
-  | "invalid_request" // Malformed request
-  | "server_error" // Provider server error (5xx)
-  | "unknown"; // Unclassified error
+  | 'rate_limit'        // API rate limit exceeded
+  | 'context_length'    // Input/output too long
+  | 'authentication'    // API key invalid or expired
+  | 'model_unavailable' // Model not available or overloaded
+  | 'content_filter'    // Content blocked by safety filters
+  | 'timeout'           // Request timed out
+  | 'network'           // Network connectivity issues
+  | 'invalid_request'   // Malformed request
+  | 'server_error'      // Provider server error (5xx)
+  | 'unknown';          // Unclassified error
 
 /**
  * Classified LLM error with metadata
@@ -129,11 +129,7 @@ export interface LLMRetryConfig {
   /** Error types that should trigger retry (default: rate_limit, timeout, network, server_error) */
   retryableErrors?: LLMErrorType[];
   /** Callback when retry is attempted */
-  onRetry?: (
-    error: ClassifiedLLMError,
-    attempt: number,
-    delayMs: number,
-  ) => void;
+  onRetry?: (error: ClassifiedLLMError, attempt: number, delayMs: number) => void;
 }
 
 /**

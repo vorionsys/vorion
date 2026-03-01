@@ -10,6 +10,9 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
+import rateLimit from '@fastify/rate-limit';
 import {
   SERVER_ERRORS,
   NOT_FOUND_ERRORS,
@@ -76,6 +79,35 @@ export async function createServer(config: Partial<ServerConfig> = {}): Promise<
   await server.register(cors, {
     origin: true,
     credentials: true,
+  });
+
+  // OpenAPI documentation
+  await server.register(swagger, {
+    openapi: {
+      info: {
+        title: 'Cognigate API',
+        description: 'REST gateway for Vorion agent governance',
+        version: '0.1.0',
+      },
+      servers: [{ url: `http://localhost:${serverConfig.port}` }],
+      tags: [
+        { name: 'health', description: 'Health check endpoints' },
+        { name: 'agents', description: 'Agent management' },
+        { name: 'intents', description: 'Intent submission and processing' },
+        { name: 'trust', description: 'Trust score management' },
+        { name: 'proofs', description: 'Proof chain operations' },
+      ],
+    },
+  });
+
+  await server.register(swaggerUi, {
+    routePrefix: '/docs',
+  });
+
+  // Global rate limiting (default: T4 standard tier)
+  await server.register(rateLimit, {
+    max: 600,
+    timeWindow: '1 minute',
   });
 
   // Authentication (optional based on config)

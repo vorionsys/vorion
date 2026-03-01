@@ -9,7 +9,7 @@
  * - Hook integration for EVENT_EMITTED notifications
  */
 
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 import {
   ProofEventType,
   TrustBand,
@@ -26,34 +26,34 @@ import {
   type ExecutionCompletedPayload,
   type ExecutionFailedPayload,
   type ShadowModeStatus,
-} from "@vorionsys/contracts";
+} from '@vorionsys/contracts';
 import {
   type ProofEventStore,
   type EventQueryOptions,
   type EventQueryResult,
   type EventStats,
-} from "../events/event-store.js";
-import { createInMemoryEventStore } from "../events/memory-store.js";
+} from '../events/event-store.js';
+import { createInMemoryEventStore } from '../events/memory-store.js';
 import {
   type ProofEventEmitter,
   type EmitResult,
   type EventListener,
   createEventEmitter,
-} from "../events/event-emitter.js";
+} from '../events/event-emitter.js';
 import {
   type ChainVerificationResult,
   verifyChainWithDetails,
-} from "../events/hash-chain.js";
+} from '../events/hash-chain.js';
 import {
   type EventSigningService,
   type SignatureVerificationResult,
   type BatchVerificationResult,
   verifyEventSignatures,
-} from "../events/event-signatures.js";
+} from '../events/event-signatures.js';
 
 /**
  * Hook manager interface for event notifications
- * (Implemented by @vorion/a3i HookManager)
+ * (Implemented by @vorionsys/a3i HookManager)
  */
 export interface EventHookManager {
   executeEventEmitted(context: {
@@ -90,7 +90,7 @@ export interface ProofPlaneConfig {
    * Environment tag for the proof plane instance
    * Helps distinguish production vs testnet events
    */
-  environment?: "production" | "testnet" | "development";
+  environment?: 'production' | 'testnet' | 'development';
   /**
    * Enable Ed25519 digital signatures for events
    *
@@ -126,17 +126,17 @@ export class ProofPlane {
   private readonly hookManager?: EventHookManager;
   private readonly enableHooks: boolean;
   private readonly shadowMode: ShadowModeStatus;
-  private readonly environment: "production" | "testnet" | "development";
+  private readonly environment: 'production' | 'testnet' | 'development';
   private readonly signingService?: EventSigningService;
   private readonly enableSignatures: boolean;
 
   constructor(config: ProofPlaneConfig = {}) {
     this.store = config.store ?? createInMemoryEventStore();
-    this.signedBy = config.signedBy ?? "orion-proof-plane";
+    this.signedBy = config.signedBy ?? 'orion-proof-plane';
     this.hookManager = config.hookManager;
-    this.enableHooks = config.enableHooks ?? config.hookManager !== undefined;
-    this.shadowMode = config.shadowMode ?? "production";
-    this.environment = config.environment ?? "production";
+    this.enableHooks = config.enableHooks ?? (config.hookManager !== undefined);
+    this.shadowMode = config.shadowMode ?? 'production';
+    this.environment = config.environment ?? 'production';
     this.signingService = config.signingService;
     this.enableSignatures = config.enableSignatures ?? false;
 
@@ -162,7 +162,7 @@ export class ProofPlane {
     this.emitter.addListener((event) => {
       // Fire hook asynchronously (don't block event emission)
       this.fireEventEmittedHook(event).catch((error) => {
-        console.error("[ProofPlane] Failed to fire EVENT_EMITTED hook:", error);
+        console.error('[ProofPlane] Failed to fire EVENT_EMITTED hook:', error);
       });
     });
   }
@@ -188,10 +188,10 @@ export class ProofPlane {
    */
   async logIntentReceived(
     intent: Intent,
-    correlationId?: string,
+    correlationId?: string
   ): Promise<EmitResult> {
     const payload: IntentReceivedPayload = {
-      type: "intent_received",
+      type: 'intent_received',
       intentId: intent.intentId,
       action: intent.action,
       actionType: intent.actionType,
@@ -202,7 +202,7 @@ export class ProofPlane {
       ProofEventType.INTENT_RECEIVED,
       correlationId ?? intent.correlationId,
       payload,
-      intent.agentId,
+      intent.agentId
     );
   }
 
@@ -211,10 +211,10 @@ export class ProofPlane {
    */
   async logDecisionMade(
     decision: Decision,
-    correlationId?: string,
+    correlationId?: string
   ): Promise<EmitResult> {
     const payload: DecisionMadePayload = {
-      type: "decision_made",
+      type: 'decision_made',
       decisionId: decision.decisionId,
       intentId: decision.intentId,
       permitted: decision.permitted,
@@ -227,7 +227,7 @@ export class ProofPlane {
       ProofEventType.DECISION_MADE,
       correlationId ?? decision.correlationId,
       payload,
-      decision.agentId,
+      decision.agentId
     );
   }
 
@@ -239,10 +239,10 @@ export class ProofPlane {
     previousProfile: TrustProfile,
     newProfile: TrustProfile,
     reason: string,
-    correlationId?: string,
+    correlationId?: string
   ): Promise<EmitResult> {
     const payload: TrustDeltaPayload = {
-      type: "trust_delta",
+      type: 'trust_delta',
       deltaId: uuidv4(),
       previousScore: previousProfile.adjustedScore,
       newScore: newProfile.adjustedScore,
@@ -255,7 +255,7 @@ export class ProofPlane {
       ProofEventType.TRUST_DELTA,
       correlationId ?? uuidv4(),
       payload,
-      agentId,
+      agentId
     );
   }
 
@@ -268,10 +268,10 @@ export class ProofPlane {
     decisionId: string,
     adapterId: string,
     agentId: string,
-    correlationId: string,
+    correlationId: string
   ): Promise<EmitResult> {
     const payload: ExecutionStartedPayload = {
-      type: "execution_started",
+      type: 'execution_started',
       executionId,
       actionId,
       decisionId,
@@ -282,7 +282,7 @@ export class ProofPlane {
       ProofEventType.EXECUTION_STARTED,
       correlationId,
       payload,
-      agentId,
+      agentId
     );
   }
 
@@ -296,10 +296,10 @@ export class ProofPlane {
     outputHash: string,
     agentId: string,
     correlationId: string,
-    status: "success" | "partial" = "success",
+    status: 'success' | 'partial' = 'success'
   ): Promise<EmitResult> {
     const payload: ExecutionCompletedPayload = {
-      type: "execution_completed",
+      type: 'execution_completed',
       executionId,
       actionId,
       status,
@@ -311,7 +311,7 @@ export class ProofPlane {
       ProofEventType.EXECUTION_COMPLETED,
       correlationId,
       payload,
-      agentId,
+      agentId
     );
   }
 
@@ -325,10 +325,10 @@ export class ProofPlane {
     durationMs: number,
     retryable: boolean,
     agentId: string,
-    correlationId: string,
+    correlationId: string
   ): Promise<EmitResult> {
     const payload: ExecutionFailedPayload = {
-      type: "execution_failed",
+      type: 'execution_failed',
       executionId,
       actionId,
       error,
@@ -340,7 +340,7 @@ export class ProofPlane {
       ProofEventType.EXECUTION_FAILED,
       correlationId,
       payload,
-      agentId,
+      agentId
     );
   }
 
@@ -351,7 +351,7 @@ export class ProofPlane {
     eventType: ProofEventType,
     correlationId: string,
     payload: ProofEventPayload,
-    agentId?: string,
+    agentId?: string
   ): Promise<EmitResult> {
     return this.emitter.emitTyped(eventType, correlationId, payload, agentId);
   }
@@ -379,7 +379,7 @@ export class ProofPlane {
    */
   async queryEvents(
     filter?: ProofEventFilter,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<EventQueryResult> {
     return this.store.query(filter, options);
   }
@@ -388,16 +388,13 @@ export class ProofPlane {
    * Get all events for a correlation ID (trace a request)
    */
   async getTrace(correlationId: string): Promise<ProofEvent[]> {
-    return this.store.getByCorrelationId(correlationId, { order: "asc" });
+    return this.store.getByCorrelationId(correlationId, { order: 'asc' });
   }
 
   /**
    * Get all events for an agent
    */
-  async getAgentHistory(
-    agentId: string,
-    options?: EventQueryOptions,
-  ): Promise<ProofEvent[]> {
+  async getAgentHistory(agentId: string, options?: EventQueryOptions): Promise<ProofEvent[]> {
     return this.store.getByAgentId(agentId, options);
   }
 
@@ -406,7 +403,7 @@ export class ProofPlane {
    */
   async getEventsByType(
     eventType: ProofEventType,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<ProofEvent[]> {
     return this.store.getByType(eventType, options);
   }
@@ -432,10 +429,7 @@ export class ProofPlane {
   /**
    * Verify the entire event chain
    */
-  async verifyChain(
-    fromEventId?: string,
-    limit?: number,
-  ): Promise<ChainVerificationResult> {
+  async verifyChain(fromEventId?: string, limit?: number): Promise<ChainVerificationResult> {
     const events = await this.store.getChain(fromEventId, limit);
     return verifyChainWithDetails(events);
   }
@@ -443,12 +437,8 @@ export class ProofPlane {
   /**
    * Verify chain integrity for a specific correlation ID
    */
-  async verifyCorrelationChain(
-    correlationId: string,
-  ): Promise<ChainVerificationResult> {
-    const events = await this.store.getByCorrelationId(correlationId, {
-      order: "asc",
-    });
+  async verifyCorrelationChain(correlationId: string): Promise<ChainVerificationResult> {
+    const events = await this.store.getByCorrelationId(correlationId, { order: 'asc' });
     return verifyChainWithDetails(events);
   }
 
@@ -482,13 +472,11 @@ export class ProofPlane {
    *
    * Requires a signing service with trusted keys configured.
    */
-  async verifyEventSignature(
-    event: ProofEvent,
-  ): Promise<SignatureVerificationResult> {
+  async verifyEventSignature(event: ProofEvent): Promise<SignatureVerificationResult> {
     if (!this.signingService) {
       return {
         valid: false,
-        error: "No signing service configured for verification",
+        error: 'No signing service configured for verification',
         verifiedAt: new Date(),
       };
     }
@@ -501,20 +489,18 @@ export class ProofPlane {
    *
    * Returns detailed results for each event.
    */
-  async verifySignatures(
-    events: ProofEvent[],
-  ): Promise<BatchVerificationResult> {
+  async verifySignatures(events: ProofEvent[]): Promise<BatchVerificationResult> {
     if (!this.signingService) {
       return {
         totalEvents: events.length,
         validCount: 0,
         invalidCount: 0,
         unsignedCount: events.length,
-        results: events.map((e) => ({
+        results: events.map(e => ({
           eventId: e.eventId,
           result: {
             valid: false,
-            error: "No signing service configured for verification",
+            error: 'No signing service configured for verification',
             verifiedAt: new Date(),
           },
         })),
@@ -528,12 +514,8 @@ export class ProofPlane {
   /**
    * Verify signatures for all events in a correlation chain
    */
-  async verifyCorrelationSignatures(
-    correlationId: string,
-  ): Promise<BatchVerificationResult> {
-    const events = await this.store.getByCorrelationId(correlationId, {
-      order: "asc",
-    });
+  async verifyCorrelationSignatures(correlationId: string): Promise<BatchVerificationResult> {
+    const events = await this.store.getByCorrelationId(correlationId, { order: 'asc' });
     return this.verifySignatures(events);
   }
 
@@ -544,7 +526,7 @@ export class ProofPlane {
    */
   async verifyChainAndSignatures(
     fromEventId?: string,
-    limit?: number,
+    limit?: number
   ): Promise<{
     chain: ChainVerificationResult;
     signatures: BatchVerificationResult;
@@ -576,10 +558,7 @@ export class ProofPlane {
   /**
    * Subscribe to events of a specific type
    */
-  subscribeToType(
-    eventType: ProofEventType,
-    listener: EventListener,
-  ): () => void {
+  subscribeToType(eventType: ProofEventType, listener: EventListener): () => void {
     const filteredListener: EventListener = (event) => {
       if (event.eventType === eventType) {
         return listener(event);
@@ -629,7 +608,7 @@ export class ProofPlane {
    * Check if this proof plane is in shadow mode
    */
   isShadowMode(): boolean {
-    return this.shadowMode !== "production";
+    return this.shadowMode !== 'production';
   }
 
   /**
@@ -651,11 +630,11 @@ export class ProofPlane {
    */
   async getUnverifiedShadowEvents(
     agentId?: string,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<ProofEvent[]> {
     const result = await this.store.query(
       { agentId },
-      { ...options, shadowModeOnly: ["shadow", "testnet"] },
+      { ...options, shadowModeOnly: ['shadow', 'testnet'] }
     );
     return result.events;
   }
@@ -668,17 +647,15 @@ export class ProofPlane {
     eventId: string,
     verificationId: string,
     verifiedBy: string,
-    approved: boolean,
+    approved: boolean
   ): Promise<EmitResult> {
     const event = await this.store.get(eventId);
     if (!event) {
       throw new Error(`Event ${eventId} not found`);
     }
 
-    if (event.shadowMode !== "shadow" && event.shadowMode !== "testnet") {
-      throw new Error(
-        `Event ${eventId} is not a shadow event (status: ${event.shadowMode ?? "production"})`,
-      );
+    if (event.shadowMode !== 'shadow' && event.shadowMode !== 'testnet') {
+      throw new Error(`Event ${eventId} is not a shadow event (status: ${event.shadowMode ?? 'production'})`);
     }
 
     // Log verification as a new event
@@ -686,15 +663,15 @@ export class ProofPlane {
       ProofEventType.COMPONENT_UPDATED,
       event.correlationId,
       {
-        type: "shadow_verification",
+        type: 'shadow_verification',
         eventId,
         verificationId,
         verifiedBy,
         approved,
-        newStatus: approved ? "verified" : "rejected",
+        newStatus: approved ? 'verified' : 'rejected',
         previousStatus: event.shadowMode,
       },
-      event.agentId,
+      event.agentId
     );
   }
 

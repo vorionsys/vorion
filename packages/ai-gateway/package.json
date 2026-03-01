@@ -1,6 +1,6 @@
 {
   "name": "@vorionsys/ai-gateway",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "Multi-provider AI Gateway with intelligent routing, privacy protection, sustainability tracking, and cost optimization",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"No tests yet\""
+    "test": "vitest run"
   },
   "dependencies": {
     "nanoid": "^5.0.0",
@@ -30,7 +30,8 @@
   "devDependencies": {
     "@types/node": "^22.10.5",
     "tsx": "^4.7.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "@vorionsys/contracts": "^0.1.2"

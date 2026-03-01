@@ -2,26 +2,26 @@
  * Logging configuration for Vorion
  */
 
-import pino from "pino";
+import pino from 'pino';
 
-const level = process.env["VORION_LOG_LEVEL"] ?? "info";
+const level = process.env['VORION_LOG_LEVEL'] ?? 'info';
 
 export const logger = pino({
   level,
   transport:
-    process.env["NODE_ENV"] !== "production"
+    process.env['NODE_ENV'] !== 'production'
       ? {
-          target: "pino-pretty",
+          target: 'pino-pretty',
           options: {
             colorize: true,
-            translateTime: "SYS:standard",
-            ignore: "pid,hostname",
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname',
           },
         }
       : undefined,
   base: {
-    service: "vorion",
-    version: process.env["npm_package_version"],
+    service: 'vorion',
+    version: process.env['npm_package_version'],
   },
 });
 

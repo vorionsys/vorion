@@ -7,7 +7,7 @@
  * Extracted from BAI Command Center for the Vorion AI Governance Platform
  */
 
-export { CouncilOrchestrator } from "./graphs/council-workflow.js";
+export { CouncilOrchestrator } from './graphs/council-workflow.js'
 export type {
   CouncilState,
   CouncilRequest,
@@ -16,8 +16,8 @@ export type {
   CouncilAgentRole,
   TaskStep,
   ComplianceIssue,
-  QAFeedback,
-} from "./types/index.js";
+  QAFeedback
+} from './types/index.js'
 
 export {
   MasterPlannerAgent,
@@ -25,5 +25,5 @@ export {
   RoutingAgent,
   QAAgent,
   MetaOrchestratorAgent,
-  HumanGatewayAgent,
-} from "./agents/index.js";
+  HumanGatewayAgent
+} from './agents/index.js'

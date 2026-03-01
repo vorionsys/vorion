@@ -21,11 +21,11 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:coverage": "vitest run --coverage"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@vorionsys/ai-gateway": "^0.1.0",
+    "@vorionsys/basis": "*",
     "zod": "^3.24.1"
   },
   "peerDependencies": {

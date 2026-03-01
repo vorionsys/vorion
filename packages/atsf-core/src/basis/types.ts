@@ -2,7 +2,7 @@
  * BASIS type definitions
  */
 
-import type { ID, Timestamp, ControlAction } from "../common/types.js";
+import type { ID, Timestamp, ControlAction } from '../common/types.js';
 
 /**
  * Rule namespace for organizing constraints
@@ -53,19 +53,19 @@ export interface ConditionExpression {
  * Supported condition operators
  */
 export type ConditionOperator =
-  | "equals"
-  | "not_equals"
-  | "greater_than"
-  | "less_than"
-  | "greater_than_or_equal"
-  | "less_than_or_equal"
-  | "in"
-  | "not_in"
-  | "contains"
-  | "not_contains"
-  | "matches"
-  | "exists"
-  | "not_exists";
+  | 'equals'
+  | 'not_equals'
+  | 'greater_than'
+  | 'less_than'
+  | 'greater_than_or_equal'
+  | 'less_than_or_equal'
+  | 'in'
+  | 'not_in'
+  | 'contains'
+  | 'not_contains'
+  | 'matches'
+  | 'exists'
+  | 'not_exists';
 
 /**
  * Rule evaluation step

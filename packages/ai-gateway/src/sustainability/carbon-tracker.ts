@@ -5,23 +5,23 @@
  */
 
 export interface CarbonMetrics {
-  taskId: string;
-  modelProvider: string;
-  modelName: string;
-  tokensInput: number;
-  tokensOutput: number;
-  duration: number; // milliseconds
-  energyConsumed: number; // kWh
-  carbonEmitted: number; // kg CO2e
-  timestamp: Date;
+  taskId: string
+  modelProvider: string
+  modelName: string
+  tokensInput: number
+  tokensOutput: number
+  duration: number // milliseconds
+  energyConsumed: number // kWh
+  carbonEmitted: number // kg CO2e
+  timestamp: Date
 }
 
 export interface ModelEnergyProfile {
-  provider: string;
-  model: string;
-  energyPerToken: number; // Wh per token
-  carbonIntensity: number; // kg CO2e per kWh
-  isGreenOptimized: boolean;
+  provider: string
+  model: string
+  energyPerToken: number // Wh per token
+  carbonIntensity: number // kg CO2e per kWh
+  isGreenOptimized: boolean
 }
 
 /**
@@ -31,83 +31,83 @@ export interface ModelEnergyProfile {
 export class CarbonTracker {
   private static MODEL_ENERGY_PROFILES: Record<string, ModelEnergyProfile> = {
     // Anthropic - Cloud-based (US average grid)
-    "claude-opus-4": {
-      provider: "anthropic",
-      model: "claude-opus-4",
+    'claude-opus-4': {
+      provider: 'anthropic',
+      model: 'claude-opus-4',
       energyPerToken: 0.000025, // 25 uWh per token (large model estimate)
       carbonIntensity: 0.386, // kg CO2e per kWh (US grid average 2025)
       isGreenOptimized: false,
     },
-    "claude-sonnet-4-5": {
-      provider: "anthropic",
-      model: "claude-sonnet-4-5",
+    'claude-sonnet-4-5': {
+      provider: 'anthropic',
+      model: 'claude-sonnet-4-5',
       energyPerToken: 0.000015, // 15 uWh per token
       carbonIntensity: 0.386,
       isGreenOptimized: false,
     },
-    "claude-haiku-4": {
-      provider: "anthropic",
-      model: "claude-haiku-4",
+    'claude-haiku-4': {
+      provider: 'anthropic',
+      model: 'claude-haiku-4',
       energyPerToken: 0.000008, // 8 uWh per token (efficient)
       carbonIntensity: 0.386,
       isGreenOptimized: false,
     },
 
     // Google - Using renewable energy (lower carbon intensity)
-    "gemini-2.5-pro": {
-      provider: "google",
-      model: "gemini-2.5-pro",
-      energyPerToken: 0.00002, // 20 uWh per token
+    'gemini-2.5-pro': {
+      provider: 'google',
+      model: 'gemini-2.5-pro',
+      energyPerToken: 0.000020, // 20 uWh per token
       carbonIntensity: 0.128, // Google's renewable-powered data centers
       isGreenOptimized: true,
     },
-    "gemini-2.5-flash": {
-      provider: "google",
-      model: "gemini-2.5-flash",
+    'gemini-2.5-flash': {
+      provider: 'google',
+      model: 'gemini-2.5-flash',
       energyPerToken: 0.000006, // 6 uWh per token (very efficient)
       carbonIntensity: 0.128,
       isGreenOptimized: true,
     },
 
     // OpenAI - Cloud-based (improving renewable usage)
-    "gpt-4o": {
-      provider: "openai",
-      model: "gpt-4o",
+    'gpt-4o': {
+      provider: 'openai',
+      model: 'gpt-4o',
       energyPerToken: 0.000018, // 18 uWh per token
-      carbonIntensity: 0.25, // Azure's carbon commitment
+      carbonIntensity: 0.250, // Azure's carbon commitment
       isGreenOptimized: false,
     },
-    "gpt-4o-mini": {
-      provider: "openai",
-      model: "gpt-4o-mini",
+    'gpt-4o-mini': {
+      provider: 'openai',
+      model: 'gpt-4o-mini',
       energyPerToken: 0.000007, // 7 uWh per token
-      carbonIntensity: 0.25,
+      carbonIntensity: 0.250,
       isGreenOptimized: true,
     },
 
     // Self-hosted Ollama (depends on local grid)
-    "llama-3.1-70b": {
-      provider: "ollama",
-      model: "llama-3.1-70b",
+    'llama-3.1-70b': {
+      provider: 'ollama',
+      model: 'llama-3.1-70b',
       energyPerToken: 0.000012, // 12 uWh per token (on-premise efficiency)
       carbonIntensity: 0.386, // Assumes US grid average (configurable)
       isGreenOptimized: false,
     },
-    "deepseek-r1": {
-      provider: "ollama",
-      model: "deepseek-r1",
-      energyPerToken: 0.00001, // 10 uWh per token
+    'deepseek-r1': {
+      provider: 'ollama',
+      model: 'deepseek-r1',
+      energyPerToken: 0.000010, // 10 uWh per token
       carbonIntensity: 0.386,
       isGreenOptimized: false,
     },
-    "llama-3.2-90b": {
-      provider: "ollama",
-      model: "llama-3.2-90b",
+    'llama-3.2-90b': {
+      provider: 'ollama',
+      model: 'llama-3.2-90b',
       energyPerToken: 0.000014, // 14 uWh per token (larger model)
       carbonIntensity: 0.386,
       isGreenOptimized: false,
     },
-  };
+  }
 
   /**
    * Track carbon emissions for a task
@@ -118,13 +118,13 @@ export class CarbonTracker {
     modelName: string,
     tokensInput: number,
     tokensOutput: number,
-    duration: number,
+    duration: number
   ): Promise<CarbonMetrics> {
-    const profile = this.getModelProfile(modelProvider, modelName);
+    const profile = this.getModelProfile(modelProvider, modelName)
 
-    const totalTokens = tokensInput + tokensOutput;
-    const energyConsumed = (totalTokens * profile.energyPerToken) / 1000; // Convert Wh to kWh
-    const carbonEmitted = energyConsumed * profile.carbonIntensity;
+    const totalTokens = tokensInput + tokensOutput
+    const energyConsumed = totalTokens * profile.energyPerToken / 1000 // Convert Wh to kWh
+    const carbonEmitted = energyConsumed * profile.carbonIntensity
 
     const metrics: CarbonMetrics = {
       taskId,
@@ -136,37 +136,35 @@ export class CarbonTracker {
       energyConsumed,
       carbonEmitted,
       timestamp: new Date(),
-    };
+    }
 
     console.log(
-      `[CARBON_TRACKER] Task ${taskId}: ${carbonEmitted.toFixed(6)} kg CO2e (${energyConsumed.toFixed(6)} kWh)`,
-    );
+      `[CARBON_TRACKER] Task ${taskId}: ${carbonEmitted.toFixed(6)} kg CO2e (${energyConsumed.toFixed(6)} kWh)`
+    )
 
-    return metrics;
+    return metrics
   }
 
   /**
    * Get model energy profile
    */
   private getModelProfile(provider: string, model: string): ModelEnergyProfile {
-    const key = `${model}`;
-    const profile = CarbonTracker.MODEL_ENERGY_PROFILES[key];
+    const key = `${model}`
+    const profile = CarbonTracker.MODEL_ENERGY_PROFILES[key]
 
     if (profile) {
-      return profile;
+      return profile
     }
 
     // Default profile for unknown models
-    console.warn(
-      `[CARBON_TRACKER] No profile for ${provider}/${model}, using default`,
-    );
+    console.warn(`[CARBON_TRACKER] No profile for ${provider}/${model}, using default`)
     return {
       provider,
       model,
       energyPerToken: 0.000015, // Conservative estimate
       carbonIntensity: 0.386,
       isGreenOptimized: false,
-    };
+    }
   }
 
   /**
@@ -174,8 +172,8 @@ export class CarbonTracker {
    */
   getGreenModels(): ModelEnergyProfile[] {
     return Object.values(CarbonTracker.MODEL_ENERGY_PROFILES).filter(
-      (profile) => profile.isGreenOptimized,
-    );
+      (profile) => profile.isGreenOptimized
+    )
   }
 
   /**
@@ -184,26 +182,26 @@ export class CarbonTracker {
   calculateSavings(
     baselineModel: string,
     greenModel: string,
-    tokens: number,
+    tokens: number
   ): {
-    energySaved: number;
-    carbonSaved: number;
-    savingsPercent: number;
+    energySaved: number
+    carbonSaved: number
+    savingsPercent: number
   } {
-    const baseline = this.getModelProfile("", baselineModel);
-    const green = this.getModelProfile("", greenModel);
+    const baseline = this.getModelProfile('', baselineModel)
+    const green = this.getModelProfile('', greenModel)
 
-    const baselineEnergy = (tokens * baseline.energyPerToken) / 1000;
-    const greenEnergy = (tokens * green.energyPerToken) / 1000;
+    const baselineEnergy = tokens * baseline.energyPerToken / 1000
+    const greenEnergy = tokens * green.energyPerToken / 1000
 
-    const baselineCarbon = baselineEnergy * baseline.carbonIntensity;
-    const greenCarbon = greenEnergy * green.carbonIntensity;
+    const baselineCarbon = baselineEnergy * baseline.carbonIntensity
+    const greenCarbon = greenEnergy * green.carbonIntensity
 
-    const energySaved = baselineEnergy - greenEnergy;
-    const carbonSaved = baselineCarbon - greenCarbon;
-    const savingsPercent = (carbonSaved / baselineCarbon) * 100;
+    const energySaved = baselineEnergy - greenEnergy
+    const carbonSaved = baselineCarbon - greenCarbon
+    const savingsPercent = (carbonSaved / baselineCarbon) * 100
 
-    return { energySaved, carbonSaved, savingsPercent };
+    return { energySaved, carbonSaved, savingsPercent }
   }
 
   /**
@@ -211,13 +209,13 @@ export class CarbonTracker {
    */
   async getAggregateMetrics(
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<{
-    totalTasks: number;
-    totalEnergy: number;
-    totalCarbon: number;
-    avgCarbonPerTask: number;
-    greenTaskPercent: number;
+    totalTasks: number
+    totalEnergy: number
+    totalCarbon: number
+    avgCarbonPerTask: number
+    greenTaskPercent: number
   }> {
     // Would query from database in production
     // For now, return mock data
@@ -227,7 +225,7 @@ export class CarbonTracker {
       totalCarbon: 0.92, // kg CO2e
       avgCarbonPerTask: 0.0061, // kg CO2e
       greenTaskPercent: 45.5, // %
-    };
+    }
   }
 
   /**
@@ -236,41 +234,41 @@ export class CarbonTracker {
    */
   async getCarbonIntensityForecast(): Promise<
     Array<{
-      hour: number;
-      intensity: number; // kg CO2e per kWh
-      isLowEmission: boolean;
+      hour: number
+      intensity: number // kg CO2e per kWh
+      isLowEmission: boolean
     }>
   > {
     // In production, would use WattTime API or similar
     // Simulated 24-hour profile with lower emissions at night
-    const baseIntensity = 0.386;
-    const forecast = [];
+    const baseIntensity = 0.386
+    const forecast = []
 
     for (let hour = 0; hour < 24; hour++) {
       // Lower emissions 10pm-6am (off-peak)
-      const isOffPeak = hour >= 22 || hour <= 6;
+      const isOffPeak = hour >= 22 || hour <= 6
       const intensity = isOffPeak
         ? baseIntensity * 0.7 // 30% lower at night
-        : baseIntensity * 1.1; // 10% higher during day
+        : baseIntensity * 1.1 // 10% higher during day
 
       forecast.push({
         hour,
         intensity,
         isLowEmission: isOffPeak,
-      });
+      })
     }
 
-    return forecast;
+    return forecast
   }
 
   /**
    * Check if current time is low-emission period
    */
   async isLowEmissionPeriod(): Promise<boolean> {
-    const hour = new Date().getHours();
-    const forecast = await this.getCarbonIntensityForecast();
-    const current = forecast.find((f) => f.hour === hour);
-    return current?.isLowEmission ?? false;
+    const hour = new Date().getHours()
+    const forecast = await this.getCarbonIntensityForecast()
+    const current = forecast.find((f) => f.hour === hour)
+    return current?.isLowEmission ?? false
   }
 
   /**
@@ -278,40 +276,40 @@ export class CarbonTracker {
    */
   async getGreenRecommendation(
     taskType: string,
-    priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
   ): Promise<{
-    model: string;
-    provider: string;
-    reason: string;
+    model: string
+    provider: string
+    reason: string
   }> {
-    const isLowEmission = await this.isLowEmissionPeriod();
+    const isLowEmission = await this.isLowEmissionPeriod()
 
     // For non-critical tasks, always prefer green models
-    if (priority === "LOW" || priority === "MEDIUM") {
+    if (priority === 'LOW' || priority === 'MEDIUM') {
       return {
-        model: "gemini-2.5-flash",
-        provider: "google",
-        reason: "Green-optimized model with renewable energy",
-      };
+        model: 'gemini-2.5-flash',
+        provider: 'google',
+        reason: 'Green-optimized model with renewable energy',
+      }
     }
 
     // For critical tasks during low-emission periods, can use larger green models
-    if (priority === "HIGH" && isLowEmission) {
+    if (priority === 'HIGH' && isLowEmission) {
       return {
-        model: "gemini-2.5-pro",
-        provider: "google",
-        reason: "High-quality green model during off-peak hours",
-      };
+        model: 'gemini-2.5-pro',
+        provider: 'google',
+        reason: 'High-quality green model during off-peak hours',
+      }
     }
 
     // For critical tasks during high-emission periods, use quality model but log impact
     return {
-      model: "claude-sonnet-4-5",
-      provider: "anthropic",
-      reason: "Quality priority, consider rescheduling non-urgent tasks",
-    };
+      model: 'claude-sonnet-4-5',
+      provider: 'anthropic',
+      reason: 'Quality priority, consider rescheduling non-urgent tasks',
+    }
   }
 }
 
 // Export singleton
-export const carbonTracker = new CarbonTracker();
+export const carbonTracker = new CarbonTracker()

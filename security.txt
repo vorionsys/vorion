@@ -1,0 +1,11 @@
+# Vorion Security Policy
+# https://securitytxt.org/
+
+Contact: mailto:security@vorion.org
+Policy: https://github.com/vorionsys/vorion/blob/main/.github/SECURITY.md
+
+Preferred-Languages: en
+
+Canonical: https://vorion.org/.well-known/security.txt
+
+Expires: 2027-03-01T23:59:59.000Z

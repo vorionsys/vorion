@@ -5,17 +5,17 @@
  * Part of BASIS (Baseline Authority for Safe & Interoperable Systems)
  */
 
-export * from "./identity.js";
-export * from "./authorization.js";
-export * from "./accountability.js";
-export * from "./behavior.js";
-export * from "./types.js";
+export * from './identity.js';
+export * from './authorization.js';
+export * from './accountability.js';
+export * from './behavior.js';
+export * from './types.js';
 
-import { IdentityVerifier } from "./identity.js";
-import { AuthorizationManager } from "./authorization.js";
-import { AccountabilityChain } from "./accountability.js";
-import { BehaviorMonitor } from "./behavior.js";
-import { KYAConfig, AnomalyAlert } from "./types.js";
+import { IdentityVerifier } from './identity.js';
+import { AuthorizationManager } from './authorization.js';
+import { AccountabilityChain } from './accountability.js';
+import { BehaviorMonitor } from './behavior.js';
+import { KYAConfig, AnomalyAlert } from './types.js';
 
 /**
  * Main KYA Framework SDK
@@ -61,13 +61,13 @@ export class KYA {
       challenge: params.proof.challenge,
       signature: params.proof.signature,
       timestamp: params.proof.timestamp,
-      publicKey: "", // Will be resolved from DID
+      publicKey: '', // Will be resolved from DID
     });
 
     if (!identityValid) {
       return {
         allowed: false,
-        reason: "Identity verification failed",
+        reason: 'Identity verification failed',
         trustScore: 0,
         anomalies: [],
       };
@@ -102,9 +102,9 @@ export class KYA {
       agentDID: params.agentDID,
       action: params.action,
       resource: params.resource,
-      outcome: "success",
+      outcome: 'success',
       evidence: {
-        intentHash: "",
+        intentHash: '',
         authorizationDecision: authDecision,
       },
       signature: params.proof.signature,
@@ -113,7 +113,7 @@ export class KYA {
 
     return {
       allowed: true,
-      reason: "Verified and authorized",
+      reason: 'Verified and authorized',
       trustScore: await this.behavior.getTrustScore(params.agentDID),
       anomalies: anomalies.map((a: AnomalyAlert) => a.type),
     };

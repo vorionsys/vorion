@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import type { TrustLevel } from "../common/types.js";
+import type { TrustLevel, TrustScore } from '../common/types.js';
 
 // =============================================================================
 // CREW CONFIGURATION
@@ -69,7 +69,7 @@ export interface CrewConfig {
 /**
  * Crew execution process type
  */
-export type CrewProcess = "sequential" | "hierarchical";
+export type CrewProcess = 'sequential' | 'hierarchical';
 
 // =============================================================================
 // TASK TYPES
@@ -99,15 +99,15 @@ export interface CrewTaskConfig {
  * CrewAI callback event types
  */
 export type CrewCallbackEvent =
-  | "task_start"
-  | "task_end"
-  | "task_error"
-  | "delegation_start"
-  | "delegation_end"
-  | "delegation_error"
-  | "crew_start"
-  | "crew_end"
-  | "crew_error";
+  | 'task_start'
+  | 'task_end'
+  | 'task_error'
+  | 'delegation_start'
+  | 'delegation_end'
+  | 'delegation_error'
+  | 'crew_start'
+  | 'crew_end'
+  | 'crew_error';
 
 /**
  * Trust signal source for crew events
@@ -172,4 +172,74 @@ export interface DelegationResult<T = unknown> {
   toAgentId: string;
   trustCheck: CrewTrustCheckResult;
   delegateeTrustCheck: CrewTrustCheckResult;
+}
+
+// =============================================================================
+// TRUST-GATED EXECUTOR TYPES
+// =============================================================================
+
+/**
+ * Configuration for the TrustGatedCrewExecutor wrapper
+ */
+export interface TrustGatedCrewExecutorConfig {
+  /** Crew configuration */
+  crew: CrewConfig;
+  /** Agent configurations */
+  agents: CrewAgentConfig[];
+  /** Minimum trust score (0-1000) required before task execution (default: 200) */
+  trustScoreThreshold?: TrustScore;
+  /** Minimum trust level required before task execution (default: 1) */
+  trustLevelThreshold?: TrustLevel;
+  /** Trust score penalty applied on task failure (default: 0.1 signal value = failure) */
+  failureDecaySignalValue?: number;
+  /** Trust score reward applied on task success (default: 0.85 signal value = success) */
+  successRecoverySignalValue?: number;
+  /** Tenant ID for enforcement context (default: 'default') */
+  tenantId?: string;
+  /** Whether to run enforcement (intent -> enforce -> execute) when available (default: true) */
+  enableEnforcement?: boolean;
+}
+
+/**
+ * Result of a trust-gated task execution attempt
+ */
+export interface TrustGatedTaskResult<T = unknown> {
+  /** Whether the task was allowed to execute */
+  allowed: boolean;
+  /** The task execution result (if allowed and successful) */
+  result?: TrustedTaskResult<T>;
+  /** The agent that was assigned to the task */
+  agentId: string;
+  /** The task that was attempted */
+  taskId: string;
+  /** Trust score at time of decision */
+  trustScoreAtDecision: TrustScore;
+  /** Trust level at time of decision */
+  trustLevelAtDecision: TrustLevel;
+  /** Enforcement tier (GREEN/YELLOW/RED) if enforcement was used */
+  enforcementTier?: 'GREEN' | 'YELLOW' | 'RED';
+  /** Human-readable reason for the decision */
+  reason: string;
+  /** Duration of the gating decision in ms */
+  gatingLatencyMs: number;
+}
+
+/**
+ * Aggregated result from a trust-gated crew kickoff
+ */
+export interface TrustGatedCrewResult<T = unknown> {
+  /** Results for each task (including denied tasks) */
+  taskResults: TrustGatedTaskResult<T>[];
+  /** The inner crew result (only tasks that executed) */
+  crewResult?: TrustedCrewResult<T>;
+  /** Total tasks attempted */
+  totalTasks: number;
+  /** Tasks that were allowed and completed */
+  tasksCompleted: number;
+  /** Tasks denied by trust gating */
+  tasksDeniedByTrust: number;
+  /** Tasks that failed during execution */
+  tasksFailed: number;
+  /** Crew ID */
+  crewId: string;
 }

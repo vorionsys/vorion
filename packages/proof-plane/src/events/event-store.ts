@@ -11,7 +11,7 @@ import type {
   ProofEventSummary,
   ProofEventType,
   ShadowModeStatus,
-} from "@vorionsys/contracts";
+} from '@vorionsys/contracts';
 
 /**
  * Query options for event retrieval
@@ -22,7 +22,7 @@ export interface EventQueryOptions {
   /** Number of events to skip */
   offset?: number;
   /** Sort order (default: ascending by occurredAt) */
-  order?: "asc" | "desc";
+  order?: 'asc' | 'desc';
   /** Include event payload in results */
   includePayload?: boolean;
   /**
@@ -74,7 +74,7 @@ export interface EventStats {
    * Events by shadow mode status
    * Tracks how many events are pending HITL verification
    */
-  byShadowMode?: Record<ShadowModeStatus | "production", number>;
+  byShadowMode?: Record<ShadowModeStatus | 'production', number>;
 }
 
 /**
@@ -105,51 +105,32 @@ export interface ProofEventStore {
   /**
    * Query events with filters
    */
-  query(
-    filter?: ProofEventFilter,
-    options?: EventQueryOptions,
-  ): Promise<EventQueryResult>;
+  query(filter?: ProofEventFilter, options?: EventQueryOptions): Promise<EventQueryResult>;
 
   /**
    * Get events by correlation ID (for tracing a request)
    */
-  getByCorrelationId(
-    correlationId: string,
-    options?: EventQueryOptions,
-  ): Promise<ProofEvent[]>;
+  getByCorrelationId(correlationId: string, options?: EventQueryOptions): Promise<ProofEvent[]>;
 
   /**
    * Get events by agent ID
    */
-  getByAgentId(
-    agentId: string,
-    options?: EventQueryOptions,
-  ): Promise<ProofEvent[]>;
+  getByAgentId(agentId: string, options?: EventQueryOptions): Promise<ProofEvent[]>;
 
   /**
    * Get events in a time range
    */
-  getByTimeRange(
-    from: Date,
-    to: Date,
-    options?: EventQueryOptions,
-  ): Promise<ProofEvent[]>;
+  getByTimeRange(from: Date, to: Date, options?: EventQueryOptions): Promise<ProofEvent[]>;
 
   /**
    * Get events by type
    */
-  getByType(
-    eventType: ProofEventType,
-    options?: EventQueryOptions,
-  ): Promise<ProofEvent[]>;
+  getByType(eventType: ProofEventType, options?: EventQueryOptions): Promise<ProofEvent[]>;
 
   /**
    * Get event summaries (lightweight list without payloads)
    */
-  getSummaries(
-    filter?: ProofEventFilter,
-    options?: EventQueryOptions,
-  ): Promise<ProofEventSummary[]>;
+  getSummaries(filter?: ProofEventFilter, options?: EventQueryOptions): Promise<ProofEventSummary[]>;
 
   /**
    * Get the chain of events from a starting point
@@ -185,10 +166,10 @@ export class EventStoreError extends Error {
   constructor(
     message: string,
     public readonly code: EventStoreErrorCode,
-    public readonly eventId?: string,
+    public readonly eventId?: string
   ) {
     super(message);
-    this.name = "EventStoreError";
+    this.name = 'EventStoreError';
   }
 }
 
@@ -197,13 +178,13 @@ export class EventStoreError extends Error {
  */
 export enum EventStoreErrorCode {
   /** Event already exists (duplicate ID) */
-  DUPLICATE_EVENT = "DUPLICATE_EVENT",
+  DUPLICATE_EVENT = 'DUPLICATE_EVENT',
   /** Event not found */
-  NOT_FOUND = "NOT_FOUND",
+  NOT_FOUND = 'NOT_FOUND',
   /** Invalid event data */
-  INVALID_EVENT = "INVALID_EVENT",
+  INVALID_EVENT = 'INVALID_EVENT',
   /** Chain integrity error */
-  CHAIN_INTEGRITY = "CHAIN_INTEGRITY",
+  CHAIN_INTEGRITY = 'CHAIN_INTEGRITY',
   /** Storage error */
-  STORAGE_ERROR = "STORAGE_ERROR",
+  STORAGE_ERROR = 'STORAGE_ERROR',
 }

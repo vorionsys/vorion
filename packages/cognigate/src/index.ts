@@ -31,13 +31,8 @@
  */
 
 // Main client
-export { Cognigate, CognigateError } from "./client.js";
-export type {
-  AgentsClient,
-  TrustClient,
-  GovernanceClient,
-  ProofsClient,
-} from "./client.js";
+export { Cognigate, CognigateError } from './client.js';
+export type { AgentsClient, TrustClient, GovernanceClient, ProofsClient } from './client.js';
 
 // Types
 export {
@@ -59,7 +54,7 @@ export {
   type WebhookEvent,
   type WebhookEventType,
   type CognigateConfig,
-} from "./types.js";
+} from './types.js';
 
 // Schemas for runtime validation
 export {
@@ -67,7 +62,7 @@ export {
   GovernanceResultSchema,
   ProofRecordSchema,
   AgentSchema,
-} from "./types.js";
+} from './types.js';
 
 // Webhooks
 export {
@@ -75,7 +70,7 @@ export {
   parseWebhookPayload,
   WebhookRouter,
   type WebhookHandler,
-} from "./webhooks.js";
+} from './webhooks.js';
 
 // Proof bridge
 export {
@@ -83,7 +78,14 @@ export {
   type ProofPlaneEmitter,
   type ProofBridgeConfig,
   type ProofBridgeHandle,
-} from "./proof-bridge.js";
+} from './proof-bridge.js';
+
+// Sandbox (worker-thread-based isolated execution)
+export {
+  WorkerSandbox,
+  type SandboxContext,
+  type SandboxResult,
+} from './sandbox/index.js';
 
 // Re-export zod for convenience
-export { z } from "zod";
+export { z } from 'zod';

@@ -15,16 +15,16 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Kaizen | The Agentic AI Knowledge Base',
+  title: 'Kaizen | Interactive AI Learning Experience',
   description: 'Comprehensive documentation covering autonomous AI agents, multi-agent systems, governance protocols, and the Vorion ecosystem.',
-  keywords: ['AI agents', 'agentic AI', 'BASIS', 'CAR', 'Cognigate', 'Vorion', 'AI governance'],
+  keywords: ['AI agents', 'agentic AI', 'BASIS', 'Vorion', 'Cognigate', 'AI governance', 'interactive learning'],
   authors: [{ name: 'Vorion' }],
   icons: {
     icon: '/vorion.png',
     apple: '/vorion.png',
   },
   openGraph: {
-    title: 'Kaizen | The Agentic AI Knowledge Base',
+    title: 'Kaizen | Interactive AI Learning Experience',
     description: 'Comprehensive documentation for autonomous AI agents and governance protocols.',
     type: 'website',
     url: 'https://learn.vorion.org',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Kaizen',
-    description: 'The Agentic AI Knowledge Base',
+    description: 'Interactive AI Learning Experience',
   },
 };
 

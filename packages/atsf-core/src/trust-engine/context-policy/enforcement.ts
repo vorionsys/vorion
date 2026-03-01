@@ -1,6 +1,6 @@
 /**
  * Phase 6 Q2: Context Policy - Enforcement Layer
- *
+ * 
  * Core responsibility: Enforce immutable agent context at instantiation
  * - Context set at construction, never changes
  * - Unforgeable governance audit trail
@@ -8,15 +8,15 @@
  * - <0.5ms validation latency
  */
 
-import { AgentContextPolicy } from "../phase6-types.js";
+import { AgentContextPolicy } from '../phase6-types';
 
 /**
  * Valid context types for agents
  */
 export enum ContextType {
-  LOCAL = "local", // 0-700: Test/sandbox only
-  ENTERPRISE = "enterprise", // 0-900: Internal operations
-  SOVEREIGN = "sovereign", // 0-1000: External/regulatory
+  LOCAL = 'local',             // 0-700: Test/sandbox only
+  ENTERPRISE = 'enterprise',   // 0-900: Internal operations
+  SOVEREIGN = 'sovereign',     // 0-1000: External/regulatory
 }
 
 /**
@@ -47,7 +47,7 @@ export function computeContextHash(
   agentId: string,
   tenantId: string,
   createdAt: Date,
-  createdBy: string,
+  createdBy: string
 ): string {
   const data = `${contextType}|${agentId}|${tenantId}|${createdAt.toISOString()}|${createdBy}`;
   // Simple hash for demo (production would use crypto.createHash)
@@ -68,7 +68,7 @@ export function createAgentContext(
   contextType: ContextType,
   agentId: string,
   tenantId: string,
-  createdBy: string,
+  createdBy: string
 ): AgentContext {
   // Validate context type
   if (!validateContextType(contextType)) {
@@ -81,7 +81,7 @@ export function createAgentContext(
     agentId,
     tenantId,
     createdAt,
-    createdBy,
+    createdBy
   );
 
   return Object.freeze({
@@ -104,7 +104,7 @@ export function verifyContextIntegrity(context: AgentContext): boolean {
     context.agentId,
     context.tenantId,
     context.createdAt,
-    context.createdBy,
+    context.createdBy
   );
   return context.contextHash === expectedHash;
 }
@@ -129,7 +129,7 @@ export function getContextCeiling(contextType: ContextType): number {
  */
 export function validateContextForOperation(
   context: AgentContext,
-  requiredContext: ContextType,
+  requiredContext: ContextType
 ): boolean {
   // Can't operate in a context more privileged than the agent's context
   const contextHierarchy = [
@@ -151,7 +151,7 @@ export function validateContextForOperation(
  */
 export function validateTenantIsolation(
   context: AgentContext,
-  targetTenantId: string,
+  targetTenantId: string
 ): boolean {
   return context.tenantId === targetTenantId;
 }

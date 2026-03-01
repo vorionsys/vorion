@@ -99,7 +99,7 @@ export function checkCertificateEligibility(
   pathSlug: string,
   quizScore: number,
   modulesCompletedPercent: number,
-  _termsMasteredPercent: number
+  termsMasteredPercent: number
 ): { eligible: boolean; level: CertificateLevel | null; requirements: CertificateRequirement[] } {
   const levels: CertificateLevel[] = ['master', 'expert', 'practitioner', 'foundation'];
 

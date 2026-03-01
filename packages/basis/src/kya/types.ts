@@ -13,7 +13,7 @@ export interface KYAConfig {
 }
 
 export interface DIDResolverConfig {
-  networks: string[]; // e.g., ['vorion', 'ethereum', 'polygon']
+  networks: string[];  // e.g., ['vorion', 'ethereum', 'polygon']
   resolverUrl?: string;
   cacheEnabled?: boolean;
 }
@@ -24,7 +24,7 @@ export interface PolicyEngineConfig {
 }
 
 export interface DatabaseConfig {
-  type: "sqlite" | "postgres";
+  type: 'sqlite' | 'postgres';
   connectionString: string;
 }
 
@@ -33,7 +33,7 @@ export interface DatabaseConfig {
 // ============================================================================
 
 export interface DIDDocument {
-  "@context": string[];
+  '@context': string[];
   id: string;
   controller: string;
   verificationMethod: VerificationMethod[];
@@ -58,7 +58,7 @@ export interface ServiceEndpoint {
 
 export interface KYAMetadata {
   trustScore: number;
-  tier: "T0" | "T1" | "T2" | "T3" | "T4" | "T5";
+  tier: 'T0' | 'T1' | 'T2' | 'T3' | 'T4' | 'T5';
   certified: boolean;
   certifier?: string;
   certificationDate?: string;
@@ -115,8 +115,8 @@ export interface KYACapability {
 export interface PolicyBundle {
   id: string;
   version: string;
-  jurisdiction: "US" | "EU" | "CA" | "SG" | "Global";
-  industry?: "finance" | "healthcare" | "government" | "enterprise";
+  jurisdiction: 'US' | 'EU' | 'CA' | 'SG' | 'Global';
+  industry?: 'finance' | 'healthcare' | 'government' | 'enterprise';
   constraints: Constraint[];
   obligations: Obligation[];
   permissions: Permission[];
@@ -125,9 +125,9 @@ export interface PolicyBundle {
 export interface Constraint {
   id: string;
   description: string;
-  rule: string; // CEL expression or JSON Logic
-  severity: "low" | "medium" | "high" | "critical";
-  enforcement: "block" | "warn" | "log";
+  rule: string;  // CEL expression or JSON Logic
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  enforcement: 'block' | 'warn' | 'log';
 }
 
 export interface Obligation {
@@ -155,7 +155,7 @@ export interface AccountabilityRecord {
   agentDID: string;
   action: string;
   resource: string;
-  outcome: "success" | "failure" | "denied";
+  outcome: 'success' | 'failure' | 'denied';
   evidence: {
     intentHash: string;
     authorizationDecision: AuthorizationDecision;
@@ -197,11 +197,11 @@ export interface BehaviorProfile {
 }
 
 export interface AnomalyAlert {
-  severity: "low" | "medium" | "high" | "critical";
+  severity: 'low' | 'medium' | 'high' | 'critical';
   type: string;
   description: string;
   evidence: unknown;
-  recommendedAction: "log" | "warn" | "throttle" | "suspend";
+  recommendedAction: 'log' | 'warn' | 'throttle' | 'suspend';
   trustImpact: number;
 }
 
@@ -211,23 +211,23 @@ export interface AnomalyAlert {
 
 export interface TrustScoreComponents {
   runtimeFactors: {
-    impact: number; // 0-1 (blast radius)
-    confidence: number; // 0-1 (parsing certainty)
-    precedent: number; // 0-1 (history match)
-    context: number; // 0-1 (environmental safety)
+    impact: number;       // 0-1 (blast radius)
+    confidence: number;   // 0-1 (parsing certainty)
+    precedent: number;    // 0-1 (history match)
+    context: number;      // 0-1 (environmental safety)
   };
   cumulativeTrust: {
-    CT: number; // Cumulative earned
-    BT: number; // Burned (negative)
-    GT: number; // Granted (certifications)
-    XT: number; // Exceptional (peer-awarded)
-    AC: number; // Agent class base
+    CT: number;           // Cumulative earned
+    BT: number;           // Burned (negative)
+    GT: number;           // Granted (certifications)
+    XT: number;           // Exceptional (peer-awarded)
+    AC: number;           // Agent class base
   };
   developmentLineage?: {
-    governanceCoverage: number; // 0-1
-    testCoverage: number; // 0-1
-    reviewDepth: number; // 0-1
-    patternCompliance: number; // 0-1
+    governanceCoverage: number;  // 0-1
+    testCoverage: number;        // 0-1
+    reviewDepth: number;         // 0-1
+    patternCompliance: number;   // 0-1
   };
 }
 

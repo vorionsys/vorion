@@ -37,7 +37,7 @@ All data is fetched from a running CAR API instance via `@vorionsys/car-client`.
 
 ```bash
 # Point at your CAR API (defaults to http://localhost:3000)
-export CAR_API_URL=https://api.vorion.org
+export CAR_API_URL=https://api.agentanchorai.com
 export CAR_API_KEY=your-api-key
 
 # Dashboard overview
@@ -234,7 +234,7 @@ The package also re-exports the full `@vorionsys/car-client` SDK for programmati
 import { createCARClient } from '@vorionsys/car-cli'
 
 const client = createCARClient({
-  baseUrl: 'https://api.vorion.org',
+  baseUrl: 'https://api.agentanchorai.com',
   apiKey: process.env.CAR_API_KEY,
 })
 

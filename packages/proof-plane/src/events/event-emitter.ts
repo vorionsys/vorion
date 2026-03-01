@@ -5,25 +5,17 @@
  * ensuring immutability and tamper detection.
  */
 
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 import type {
   ProofEvent,
   ProofEventPayload,
   ProofEventType,
   LogProofEventRequest,
   ShadowModeStatus,
-} from "@vorionsys/contracts";
-import {
-  type ProofEventStore,
-  EventStoreError,
-  EventStoreErrorCode,
-} from "./event-store.js";
-import {
-  computeEventHash,
-  computeEventHash3,
-  getGenesisHash,
-} from "./hash-chain.js";
-import { type EventSigningService, signEvent } from "./event-signatures.js";
+} from '@vorionsys/contracts';
+import { type ProofEventStore, EventStoreError, EventStoreErrorCode } from './event-store.js';
+import { computeEventHash, computeEventHash3, getGenesisHash } from './hash-chain.js';
+import { type EventSigningService, signEvent } from './event-signatures.js';
 
 /**
  * Configuration for the event emitter
@@ -117,13 +109,13 @@ export class ProofEventEmitter {
     this.signingService = config.signingService;
     this.privateKey = config.privateKey;
     this.listeners = config.listeners ?? [];
-    this.shadowMode = config.shadowMode ?? "production";
+    this.shadowMode = config.shadowMode ?? 'production';
 
     // Validate signing configuration
     if (this.enableSignatures && !this.signingService && !this.privateKey) {
       console.warn(
-        "[ProofEventEmitter] Signatures enabled but no signingService or privateKey provided. " +
-          "Events will be emitted without signatures.",
+        '[ProofEventEmitter] Signatures enabled but no signingService or privateKey provided. ' +
+        'Events will be emitted without signatures.'
       );
     }
   }
@@ -132,17 +124,14 @@ export class ProofEventEmitter {
    * Check if signature generation is enabled and configured
    */
   isSigningEnabled(): boolean {
-    return (
-      this.enableSignatures &&
-      (this.signingService?.canSign() || !!this.privateKey)
-    );
+    return this.enableSignatures && (this.signingService?.canSign() || !!this.privateKey);
   }
 
   /**
    * Check if this emitter is in shadow mode
    */
   isShadowMode(): boolean {
-    return this.shadowMode !== "production";
+    return this.shadowMode !== 'production';
   }
 
   /**
@@ -169,7 +158,7 @@ export class ProofEventEmitter {
     eventType: ProofEventType,
     correlationId: string,
     payload: T,
-    agentId?: string,
+    agentId?: string
   ): Promise<EmitResult> {
     return this.emit({
       eventType,
@@ -186,7 +175,7 @@ export class ProofEventEmitter {
    */
   async emitBatch(
     requests: LogProofEventRequest[],
-    options?: BatchEmitOptions,
+    options?: BatchEmitOptions
   ): Promise<BatchEmitResult> {
     const events: ProofEvent[] = [];
     const errors: Array<{ index: number; error: Error }> = [];
@@ -241,15 +230,11 @@ export class ProofEventEmitter {
 
   // Private methods
 
-  private async serializedEmit(
-    request: LogProofEventRequest,
-  ): Promise<EmitResult> {
+  private async serializedEmit(request: LogProofEventRequest): Promise<EmitResult> {
     // Wait for any pending emit to complete
     const previousLock = this.emitLock;
     let resolve: () => void;
-    this.emitLock = new Promise((r) => {
-      resolve = r;
-    });
+    this.emitLock = new Promise(r => { resolve = r; });
 
     try {
       await previousLock;
@@ -259,25 +244,19 @@ export class ProofEventEmitter {
     }
   }
 
-  private async createAndStoreEvent(
-    request: LogProofEventRequest,
-  ): Promise<EmitResult> {
+  private async createAndStoreEvent(request: LogProofEventRequest): Promise<EmitResult> {
     const now = new Date();
     const eventId = uuidv4();
 
     // Get previous hash for chaining
-    const previousHash = (await this.store.getLatestHash()) ?? getGenesisHash();
+    const previousHash = await this.store.getLatestHash() ?? getGenesisHash();
     const isGenesis = previousHash === null;
 
     // Determine the signer identity
-    const signerIdentity =
-      request.signedBy ?? this.signedBy ?? this.signingService?.getServiceId();
+    const signerIdentity = request.signedBy ?? this.signedBy ?? this.signingService?.getServiceId();
 
     // Build event without hash and signature
-    const eventWithoutHashAndSig: Omit<
-      ProofEvent,
-      "eventHash" | "recordedAt" | "signature"
-    > = {
+    const eventWithoutHashAndSig: Omit<ProofEvent, 'eventHash' | 'recordedAt' | 'signature'> = {
       eventId,
       eventType: request.eventType,
       correlationId: request.correlationId,
@@ -287,8 +266,7 @@ export class ProofEventEmitter {
       occurredAt: request.occurredAt ?? now,
       signedBy: signerIdentity,
       // Tag with shadow mode for T0 sandbox/testnet events
-      shadowMode:
-        this.shadowMode !== "production" ? this.shadowMode : undefined,
+      shadowMode: this.shadowMode !== 'production' ? this.shadowMode : undefined,
     };
 
     // Generate signature if enabled
@@ -298,20 +276,16 @@ export class ProofEventEmitter {
         if (this.signingService?.canSign()) {
           signature = await this.signingService.sign(eventWithoutHashAndSig);
         } else if (this.privateKey) {
-          signature = await signEvent(
-            eventWithoutHashAndSig,
-            this.privateKey,
-            signerIdentity,
-          );
+          signature = await signEvent(eventWithoutHashAndSig, this.privateKey, signerIdentity);
         }
       } catch (error) {
-        console.error("[ProofEventEmitter] Failed to sign event:", error);
+        console.error('[ProofEventEmitter] Failed to sign event:', error);
         // Continue without signature - event is still valid for hash chain
       }
     }
 
     // Build event with signature (for hash computation)
-    const eventWithSig: Omit<ProofEvent, "eventHash" | "recordedAt"> = {
+    const eventWithSig: Omit<ProofEvent, 'eventHash' | 'recordedAt'> = {
       ...eventWithoutHashAndSig,
       signature,
     };
@@ -347,26 +321,26 @@ export class ProofEventEmitter {
   private validateEvent(event: ProofEvent): void {
     if (!event.eventId) {
       throw new EventStoreError(
-        "Event ID is required",
-        EventStoreErrorCode.INVALID_EVENT,
+        'Event ID is required',
+        EventStoreErrorCode.INVALID_EVENT
       );
     }
     if (!event.eventType) {
       throw new EventStoreError(
-        "Event type is required",
-        EventStoreErrorCode.INVALID_EVENT,
+        'Event type is required',
+        EventStoreErrorCode.INVALID_EVENT
       );
     }
     if (!event.correlationId) {
       throw new EventStoreError(
-        "Correlation ID is required",
-        EventStoreErrorCode.INVALID_EVENT,
+        'Correlation ID is required',
+        EventStoreErrorCode.INVALID_EVENT
       );
     }
     if (!event.payload) {
       throw new EventStoreError(
-        "Event payload is required",
-        EventStoreErrorCode.INVALID_EVENT,
+        'Event payload is required',
+        EventStoreErrorCode.INVALID_EVENT
       );
     }
   }
@@ -377,7 +351,7 @@ export class ProofEventEmitter {
         await listener(event);
       } catch (error) {
         // Log but don't throw - listeners shouldn't block event creation
-        console.error("Event listener error:", error);
+        console.error('Event listener error:', error);
       }
     }
   }
@@ -386,8 +360,6 @@ export class ProofEventEmitter {
 /**
  * Create a proof event emitter
  */
-export function createEventEmitter(
-  config: EventEmitterConfig,
-): ProofEventEmitter {
+export function createEventEmitter(config: EventEmitterConfig): ProofEventEmitter {
   return new ProofEventEmitter(config);
 }

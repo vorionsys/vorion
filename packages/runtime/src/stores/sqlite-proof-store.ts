@@ -6,17 +6,11 @@
  * @packageDocumentation
  */
 
-import Database from "better-sqlite3";
-import { createLogger } from "../common/logger.js";
-import type {
-  ProofStore,
-  ProofBatch,
-  ProofCommitment,
-  ProofEvent,
-  ProofEventType,
-} from "../proof-committer/types.js";
+import Database from 'better-sqlite3';
+import { createLogger } from '../common/logger.js';
+import type { ProofStore, ProofBatch, ProofCommitment, ProofEvent, ProofEventType } from '../proof-committer/types.js';
 
-const logger = createLogger({ component: "sqlite-proof-store" });
+const logger = createLogger({ component: 'sqlite-proof-store' });
 
 export interface SQLiteProofStoreConfig {
   /** Database file path (use ':memory:' for in-memory) */
@@ -51,16 +45,13 @@ export class SQLiteProofStore implements ProofStore {
 
     // Enable WAL mode for better write performance
     if (this.config.walMode) {
-      this.db.pragma("journal_mode = WAL");
+      this.db.pragma('journal_mode = WAL');
     }
 
     this.initializeSchema();
     this.prepareStatements();
 
-    logger.info(
-      { dbPath: this.config.dbPath },
-      "SQLite proof store initialized",
-    );
+    logger.info({ dbPath: this.config.dbPath }, 'SQLite proof store initialized');
   }
 
   private initializeSchema(): void {
@@ -97,7 +88,7 @@ export class SQLiteProofStore implements ProofStore {
       CREATE INDEX IF NOT EXISTS idx_commitments_timestamp ON proof_commitments(timestamp);
     `);
 
-    logger.debug("Database schema initialized");
+    logger.debug('Database schema initialized');
   }
 
   private prepareStatements(): void {
@@ -137,7 +128,7 @@ export class SQLiteProofStore implements ProofStore {
    * Write a batch to storage
    */
   async writeBatch(batch: ProofBatch): Promise<void> {
-    if (!this.stmts) throw new Error("Store not initialized");
+    if (!this.stmts) throw new Error('Store not initialized');
 
     const transaction = this.db.transaction(() => {
       // Insert batch
@@ -168,7 +159,7 @@ export class SQLiteProofStore implements ProofStore {
 
     logger.debug(
       { batchId: batch.batchId, commitmentCount: batch.commitments.length },
-      "Batch written to SQLite",
+      'Batch written to SQLite'
     );
   }
 
@@ -176,30 +167,24 @@ export class SQLiteProofStore implements ProofStore {
    * Get a batch by ID
    */
   async getBatch(batchId: string): Promise<ProofBatch | null> {
-    if (!this.stmts) throw new Error("Store not initialized");
+    if (!this.stmts) throw new Error('Store not initialized');
 
-    const row = this.stmts.getBatch.get(batchId) as
-      | {
-          batch_id: string;
-          merkle_root: string;
-          signature: string;
-          created_at: string;
-          event_count: number;
-        }
-      | undefined;
+    const row = this.stmts.getBatch.get(batchId) as {
+      batch_id: string;
+      merkle_root: string;
+      signature: string;
+      created_at: string;
+      event_count: number;
+    } | undefined;
 
     if (!row) return null;
 
     // Get all commitments for this batch
-    const commitmentRows = this.db
-      .prepare(
-        `
+    const commitmentRows = this.db.prepare(`
       SELECT id, hash, timestamp, event_type, entity_id, payload, correlation_id
       FROM proof_commitments
       WHERE batch_id = ?
-    `,
-      )
-      .all(batchId) as Array<{
+    `).all(batchId) as Array<{
       id: string;
       hash: string;
       timestamp: number;
@@ -236,19 +221,17 @@ export class SQLiteProofStore implements ProofStore {
    * Get commitment by ID
    */
   async getCommitment(commitmentId: string): Promise<ProofCommitment | null> {
-    if (!this.stmts) throw new Error("Store not initialized");
+    if (!this.stmts) throw new Error('Store not initialized');
 
-    const row = this.stmts.getCommitment.get(commitmentId) as
-      | {
-          id: string;
-          hash: string;
-          timestamp: number;
-          event_type: string;
-          entity_id: string;
-          payload: string;
-          correlation_id: string | null;
-        }
-      | undefined;
+    const row = this.stmts.getCommitment.get(commitmentId) as {
+      id: string;
+      hash: string;
+      timestamp: number;
+      event_type: string;
+      entity_id: string;
+      payload: string;
+      correlation_id: string | null;
+    } | undefined;
 
     if (!row) return null;
 
@@ -270,7 +253,7 @@ export class SQLiteProofStore implements ProofStore {
    * Get all commitments for an entity
    */
   async getCommitmentsForEntity(entityId: string): Promise<ProofCommitment[]> {
-    if (!this.stmts) throw new Error("Store not initialized");
+    if (!this.stmts) throw new Error('Store not initialized');
 
     const rows = this.stmts.getCommitmentsForEntity.all(entityId) as Array<{
       id: string;
@@ -300,12 +283,8 @@ export class SQLiteProofStore implements ProofStore {
    * Get statistics
    */
   getStats(): { batches: number; commitments: number } {
-    const batchCount = this.db
-      .prepare("SELECT COUNT(*) as count FROM proof_batches")
-      .get() as { count: number };
-    const commitmentCount = this.db
-      .prepare("SELECT COUNT(*) as count FROM proof_commitments")
-      .get() as { count: number };
+    const batchCount = this.db.prepare('SELECT COUNT(*) as count FROM proof_batches').get() as { count: number };
+    const commitmentCount = this.db.prepare('SELECT COUNT(*) as count FROM proof_commitments').get() as { count: number };
 
     return {
       batches: batchCount.count,
@@ -317,9 +296,9 @@ export class SQLiteProofStore implements ProofStore {
    * Clear all data (useful for testing)
    */
   clear(): void {
-    this.db.exec("DELETE FROM proof_commitments");
-    this.db.exec("DELETE FROM proof_batches");
-    logger.debug("All data cleared");
+    this.db.exec('DELETE FROM proof_commitments');
+    this.db.exec('DELETE FROM proof_batches');
+    logger.debug('All data cleared');
   }
 
   /**
@@ -327,15 +306,13 @@ export class SQLiteProofStore implements ProofStore {
    */
   close(): void {
     this.db.close();
-    logger.info("SQLite proof store closed");
+    logger.info('SQLite proof store closed');
   }
 }
 
 /**
  * Create a new SQLite proof store
  */
-export function createSQLiteProofStore(
-  config: SQLiteProofStoreConfig,
-): SQLiteProofStore {
+export function createSQLiteProofStore(config: SQLiteProofStoreConfig): SQLiteProofStore {
   return new SQLiteProofStore(config);
 }

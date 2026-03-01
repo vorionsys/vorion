@@ -13,8 +13,7 @@
  * @packageDocumentation
  */
 
-import { z } from "zod";
-import { createHash } from "crypto";
+import { z } from 'zod';
 
 // =============================================================================
 // COMMON ENUMS & CONSTANTS
@@ -24,20 +23,17 @@ import { createHash } from "crypto";
  * Trust tiers (0-7) with score ranges — canonical 8-tier model
  */
 export enum TrustTier {
-  T0 = "T0", // 0-199: Sandbox
-  T1 = "T1", // 200-349: Observed
-  T2 = "T2", // 350-499: Provisional
-  T3 = "T3", // 500-649: Monitored
-  T4 = "T4", // 650-799: Standard
-  T5 = "T5", // 800-875: Trusted
-  T6 = "T6", // 876-950: Certified
-  T7 = "T7", // 951-1000: Autonomous
+  T0 = 'T0', // 0-199: Sandbox
+  T1 = 'T1', // 200-349: Observed
+  T2 = 'T2', // 350-499: Provisional
+  T3 = 'T3', // 500-649: Monitored
+  T4 = 'T4', // 650-799: Standard
+  T5 = 'T5', // 800-875: Trusted
+  T6 = 'T6', // 876-950: Certified
+  T7 = 'T7', // 951-1000: Autonomous
 }
 
-export const TRUST_TIER_BOUNDARIES: Record<
-  TrustTier,
-  { min: number; max: number }
-> = {
+export const TRUST_TIER_BOUNDARIES: Record<TrustTier, { min: number; max: number }> = {
   [TrustTier.T0]: { min: 0, max: 199 },
   [TrustTier.T1]: { min: 200, max: 349 },
   [TrustTier.T2]: { min: 350, max: 499 },
@@ -52,24 +48,24 @@ export const TRUST_TIER_BOUNDARIES: Record<
  * Agent role levels (structural capability, not earned trust)
  */
 export enum AgentRole {
-  R_L0 = "R-L0", // Listener (observe only)
-  R_L1 = "R-L1", // Executor (simple tasks)
-  R_L2 = "R-L2", // Planner (multi-step)
-  R_L3 = "R-L3", // Orchestrator (coordinate agents)
-  R_L4 = "R-L4", // Architect (design systems)
-  R_L5 = "R-L5", // Leader (strategic decisions)
-  R_L6 = "R-L6", // Domain Authority
-  R_L7 = "R-L7", // Strategic
-  R_L8 = "R-L8", // Steward
+  R_L0 = 'R-L0', // Listener (observe only)
+  R_L1 = 'R-L1', // Executor (simple tasks)
+  R_L2 = 'R-L2', // Planner (multi-step)
+  R_L3 = 'R-L3', // Orchestrator (coordinate agents)
+  R_L4 = 'R-L4', // Architect (design systems)
+  R_L5 = 'R-L5', // Leader (strategic decisions)
+  R_L6 = 'R-L6', // Domain Authority
+  R_L7 = 'R-L7', // Strategic
+  R_L8 = 'R-L8', // Steward
 }
 
 /**
  * Context types with ceiling implications
  */
 export enum ContextType {
-  LOCAL = "local", // Development - ceiling 700
-  ENTERPRISE = "enterprise", // Production - ceiling 900
-  SOVEREIGN = "sovereign", // Government/Critical - ceiling 1000
+  LOCAL = 'local',           // Development - ceiling 700
+  ENTERPRISE = 'enterprise', // Production - ceiling 900
+  SOVEREIGN = 'sovereign',   // Government/Critical - ceiling 1000
 }
 
 export const CONTEXT_CEILINGS: Record<ContextType, number> = {
@@ -82,23 +78,23 @@ export const CONTEXT_CEILINGS: Record<ContextType, number> = {
  * Creation types for provenance tracking
  */
 export enum CreationType {
-  FRESH = "fresh", // New agent, no history
-  CLONED = "cloned", // Copy of existing agent
-  EVOLVED = "evolved", // Has verifiable history
-  PROMOTED = "promoted", // Earned advancement
-  IMPORTED = "imported", // External, unknown provenance
+  FRESH = 'fresh',       // New agent, no history
+  CLONED = 'cloned',     // Copy of existing agent
+  EVOLVED = 'evolved',   // Has verifiable history
+  PROMOTED = 'promoted', // Earned advancement
+  IMPORTED = 'imported', // External, unknown provenance
 }
 
 /**
  * Regulatory frameworks for compliance tracking
  */
 export enum RegulatoryFramework {
-  NONE = "none",
-  HIPAA = "hipaa",
-  GDPR = "gdpr",
-  EU_AI_ACT = "eu-ai-act",
-  SOC2 = "soc2",
-  ISO_42001 = "iso-42001",
+  NONE = 'none',
+  HIPAA = 'hipaa',
+  GDPR = 'gdpr',
+  EU_AI_ACT = 'eu-ai-act',
+  SOC2 = 'soc2',
+  ISO_42001 = 'iso-42001',
 }
 
 // =============================================================================
@@ -150,12 +146,8 @@ export interface OrganizationalConstraints {
   readonly maxTrustTier: TrustTier;
   readonly deniedDomains: readonly string[]; // CAR domain codes
   readonly requiredAttestations: readonly string[];
-  readonly dataClassification:
-    | "public"
-    | "internal"
-    | "confidential"
-    | "restricted";
-  readonly auditLevel: "minimal" | "standard" | "comprehensive" | "forensic";
+  readonly dataClassification: 'public' | 'internal' | 'confidential' | 'restricted';
+  readonly auditLevel: 'minimal' | 'standard' | 'comprehensive' | 'forensic';
 }
 
 export const organizationalContextSchema = z.object({
@@ -167,13 +159,8 @@ export const organizationalContextSchema = z.object({
     maxTrustTier: z.nativeEnum(TrustTier),
     deniedDomains: z.array(z.string()),
     requiredAttestations: z.array(z.string()),
-    dataClassification: z.enum([
-      "public",
-      "internal",
-      "confidential",
-      "restricted",
-    ]),
-    auditLevel: z.enum(["minimal", "standard", "comprehensive", "forensic"]),
+    dataClassification: z.enum(['public', 'internal', 'confidential', 'restricted']),
+    auditLevel: z.enum(['minimal', 'standard', 'comprehensive', 'forensic']),
   }),
   orgHash: z.string().min(64),
 });
@@ -231,7 +218,7 @@ export const operationContextSchema = z.object({
  */
 export interface ContextValidationResult {
   readonly valid: boolean;
-  readonly tier: "deployment" | "organizational" | "agent" | "operation";
+  readonly tier: 'deployment' | 'organizational' | 'agent' | 'operation';
   readonly reason?: string;
   readonly constraintViolations: readonly string[];
   readonly hashChainValid: boolean;
@@ -245,39 +232,29 @@ export interface ContextValidationResult {
 /**
  * Preset source tier
  */
-export type PresetSource = "basis" | "vorion" | "axiom";
+export type PresetSource = 'basis' | 'vorion' | 'axiom';
 
 /**
  * Trust dimension weights (sum to 1.0)
  */
 export interface TrustWeights {
-  readonly observability: number; // How much can we see?
-  readonly capability: number; // Technical ability
-  readonly behavior: number; // Historical reliability
-  readonly governance: number; // Policy compliance
-  readonly context: number; // Environmental fit
+  readonly observability: number;  // How much can we see?
+  readonly capability: number;     // Technical ability
+  readonly behavior: number;       // Historical reliability
+  readonly governance: number;     // Policy compliance
+  readonly context: number;        // Environmental fit
 }
 
-export const trustWeightsSchema = z
-  .object({
-    observability: z.number().min(0).max(1),
-    capability: z.number().min(0).max(1),
-    behavior: z.number().min(0).max(1),
-    governance: z.number().min(0).max(1),
-    context: z.number().min(0).max(1),
-  })
-  .refine(
-    (w) =>
-      Math.abs(
-        w.observability +
-          w.capability +
-          w.behavior +
-          w.governance +
-          w.context -
-          1.0,
-      ) < 0.001,
-    { message: "Weights must sum to 1.0" },
-  );
+export const trustWeightsSchema = z.object({
+  observability: z.number().min(0).max(1),
+  capability: z.number().min(0).max(1),
+  behavior: z.number().min(0).max(1),
+  governance: z.number().min(0).max(1),
+  context: z.number().min(0).max(1),
+}).refine(
+  (w) => Math.abs(w.observability + w.capability + w.behavior + w.governance + w.context - 1.0) < 0.001,
+  { message: 'Weights must sum to 1.0' }
+);
 
 /**
  * Trust preset with derivation chain
@@ -289,33 +266,31 @@ export interface TrustPreset {
   readonly source: PresetSource;
   readonly version: number;
   readonly weights: TrustWeights;
-  readonly parentPresetId?: string; // Link to CAR/Vorion preset
-  readonly parentHash?: string; // Cryptographic proof of parent
+  readonly parentPresetId?: string;      // Link to CAR/Vorion preset
+  readonly parentHash?: string;           // Cryptographic proof of parent
   readonly derivationDelta?: Partial<TrustWeights>; // What changed from parent
   readonly createdAt: Date;
   readonly createdBy: string;
-  readonly presetHash: string; // Immutable identifier
-  readonly comment?: string; // Derivation rationale
+  readonly presetHash: string;            // Immutable identifier
+  readonly comment?: string;              // Derivation rationale
 }
 
 export const trustPresetSchema = z.object({
   presetId: z.string().min(1),
   name: z.string().min(1),
   description: z.string(),
-  source: z.enum(["car", "vorion", "axiom"]),
+  source: z.enum(['car', 'vorion', 'axiom']),
   version: z.number().int().positive(),
   weights: trustWeightsSchema,
   parentPresetId: z.string().optional(),
   parentHash: z.string().min(64).optional(),
-  derivationDelta: z
-    .object({
-      observability: z.number().optional(),
-      capability: z.number().optional(),
-      behavior: z.number().optional(),
-      governance: z.number().optional(),
-      context: z.number().optional(),
-    })
-    .optional(),
+  derivationDelta: z.object({
+    observability: z.number().optional(),
+    capability: z.number().optional(),
+    behavior: z.number().optional(),
+    governance: z.number().optional(),
+    context: z.number().optional(),
+  }).optional(),
   createdAt: z.date(),
   createdBy: z.string().min(1),
   presetHash: z.string().min(64),
@@ -326,10 +301,10 @@ export const trustPresetSchema = z.object({
  * Preset lineage tracking (cryptographic chain of custody)
  */
 export interface PresetLineage {
-  readonly leafPresetId: string; // Axiom deployment preset
-  readonly chain: readonly string[]; // [aciPresetId, vorionPresetId, axiomPresetId]
-  readonly hashes: readonly string[]; // Cryptographic chain
-  readonly verified: boolean; // Regulator validated
+  readonly leafPresetId: string;          // Axiom deployment preset
+  readonly chain: readonly string[];       // [aciPresetId, vorionPresetId, axiomPresetId]
+  readonly hashes: readonly string[];      // Cryptographic chain
+  readonly verified: boolean;              // Regulator validated
   readonly verifiedAt?: Date;
   readonly verifiedBy?: string;
 }
@@ -399,16 +374,12 @@ export const creationModifierPolicySchema = z.object({
   version: z.number().int().positive(),
   creationType: z.nativeEnum(CreationType),
   baselineModifier: z.number().min(-200).max(200),
-  conditions: z
-    .object({
-      parentCreationType: z.nativeEnum(CreationType).optional(),
-      parentTrustScore: z
-        .object({ min: z.number(), max: z.number() })
-        .optional(),
-      trustedSources: z.array(z.string()).optional(),
-      requiredAttestations: z.array(z.string()).optional(),
-    })
-    .optional(),
+  conditions: z.object({
+    parentCreationType: z.nativeEnum(CreationType).optional(),
+    parentTrustScore: z.object({ min: z.number(), max: z.number() }).optional(),
+    trustedSources: z.array(z.string()).optional(),
+    requiredAttestations: z.array(z.string()).optional(),
+  }).optional(),
   effectiveFrom: z.date(),
   effectiveUntil: z.date().optional(),
   createdAt: z.date(),
@@ -451,7 +422,7 @@ export const modifierEvaluationRecordSchema = z.object({
 /**
  * Enforcement layer designation
  */
-export type EnforcementLayer = "kernel" | "policy" | "regulatory";
+export type EnforcementLayer = 'kernel' | 'policy' | 'regulatory';
 
 /**
  * Trust computation event with dual logging
@@ -462,8 +433,8 @@ export interface TrustComputationEvent {
   readonly timestamp: Date;
 
   // Dual logging (Q1 decision)
-  readonly rawScore: number; // Pre-ceiling (for analytics/gaming detection)
-  readonly clampedScore: number; // Post-ceiling (operational)
+  readonly rawScore: number;              // Pre-ceiling (for analytics/gaming detection)
+  readonly clampedScore: number;          // Post-ceiling (operational)
   readonly ceilingApplied: boolean;
   readonly ceilingSource?: CeilingSource;
 
@@ -484,7 +455,7 @@ export interface TrustComputationEvent {
 }
 
 export interface CeilingSource {
-  readonly type: "context" | "organizational" | "deployment" | "attestation";
+  readonly type: 'context' | 'organizational' | 'deployment' | 'attestation';
   readonly value: number;
   readonly constraint: string;
 }
@@ -496,14 +467,12 @@ export const trustComputationEventSchema = z.object({
   rawScore: z.number().min(0),
   clampedScore: z.number().min(0).max(1000),
   ceilingApplied: z.boolean(),
-  ceilingSource: z
-    .object({
-      type: z.enum(["context", "organizational", "deployment", "attestation"]),
-      value: z.number(),
-      constraint: z.string(),
-    })
-    .optional(),
-  enforcementLayer: z.enum(["kernel", "policy", "regulatory"]),
+  ceilingSource: z.object({
+    type: z.enum(['context', 'organizational', 'deployment', 'attestation']),
+    value: z.number(),
+    constraint: z.string(),
+  }).optional(),
+  enforcementLayer: z.enum(['kernel', 'policy', 'regulatory']),
   kernelValidated: z.boolean(),
   policyValidated: z.boolean(),
   regulatoryLogged: z.boolean(),
@@ -528,13 +497,13 @@ export interface RegulatoryAuditEntry {
   readonly variance: number; // rawScore - clampedScore
 
   // Gaming detection flags
-  readonly varianceAnomaly: boolean; // Unusual raw/clamped gap
-  readonly frequencyAnomaly: boolean; // Unusual score change rate
-  readonly patternAnomaly: boolean; // Suspicious score patterns
+  readonly varianceAnomaly: boolean;     // Unusual raw/clamped gap
+  readonly frequencyAnomaly: boolean;    // Unusual score change rate
+  readonly patternAnomaly: boolean;      // Suspicious score patterns
 
   // Compliance tracking
   readonly regulatoryFramework: RegulatoryFramework;
-  readonly complianceStatus: "compliant" | "warning" | "violation";
+  readonly complianceStatus: 'compliant' | 'warning' | 'violation';
   readonly retentionRequired: boolean;
   readonly retentionUntil?: Date;
 
@@ -555,7 +524,7 @@ export const regulatoryAuditEntrySchema = z.object({
   frequencyAnomaly: z.boolean(),
   patternAnomaly: z.boolean(),
   regulatoryFramework: z.nativeEnum(RegulatoryFramework),
-  complianceStatus: z.enum(["compliant", "warning", "violation"]),
+  complianceStatus: z.enum(['compliant', 'warning', 'violation']),
   retentionRequired: z.boolean(),
   retentionUntil: z.date().optional(),
   entryHash: z.string().min(64),
@@ -581,96 +550,15 @@ export interface RoleGateEntry {
  * Higher-capability roles require higher trust.
  */
 export const ROLE_GATE_MATRIX: Record<AgentRole, Record<TrustTier, boolean>> = {
-  [AgentRole.R_L0]: {
-    [TrustTier.T0]: true,
-    [TrustTier.T1]: true,
-    [TrustTier.T2]: true,
-    [TrustTier.T3]: true,
-    [TrustTier.T4]: true,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
-  [AgentRole.R_L1]: {
-    [TrustTier.T0]: true,
-    [TrustTier.T1]: true,
-    [TrustTier.T2]: true,
-    [TrustTier.T3]: true,
-    [TrustTier.T4]: true,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
-  [AgentRole.R_L2]: {
-    [TrustTier.T0]: false,
-    [TrustTier.T1]: true,
-    [TrustTier.T2]: true,
-    [TrustTier.T3]: true,
-    [TrustTier.T4]: true,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
-  [AgentRole.R_L3]: {
-    [TrustTier.T0]: false,
-    [TrustTier.T1]: false,
-    [TrustTier.T2]: true,
-    [TrustTier.T3]: true,
-    [TrustTier.T4]: true,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
-  [AgentRole.R_L4]: {
-    [TrustTier.T0]: false,
-    [TrustTier.T1]: false,
-    [TrustTier.T2]: false,
-    [TrustTier.T3]: true,
-    [TrustTier.T4]: true,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
-  [AgentRole.R_L5]: {
-    [TrustTier.T0]: false,
-    [TrustTier.T1]: false,
-    [TrustTier.T2]: false,
-    [TrustTier.T3]: false,
-    [TrustTier.T4]: true,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
-  [AgentRole.R_L6]: {
-    [TrustTier.T0]: false,
-    [TrustTier.T1]: false,
-    [TrustTier.T2]: false,
-    [TrustTier.T3]: false,
-    [TrustTier.T4]: false,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
-  [AgentRole.R_L7]: {
-    [TrustTier.T0]: false,
-    [TrustTier.T1]: false,
-    [TrustTier.T2]: false,
-    [TrustTier.T3]: false,
-    [TrustTier.T4]: false,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
-  [AgentRole.R_L8]: {
-    [TrustTier.T0]: false,
-    [TrustTier.T1]: false,
-    [TrustTier.T2]: false,
-    [TrustTier.T3]: false,
-    [TrustTier.T4]: false,
-    [TrustTier.T5]: true,
-    [TrustTier.T6]: true,
-    [TrustTier.T7]: true,
-  },
+  [AgentRole.R_L0]: { [TrustTier.T0]: true, [TrustTier.T1]: true, [TrustTier.T2]: true, [TrustTier.T3]: true, [TrustTier.T4]: true, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
+  [AgentRole.R_L1]: { [TrustTier.T0]: true, [TrustTier.T1]: true, [TrustTier.T2]: true, [TrustTier.T3]: true, [TrustTier.T4]: true, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
+  [AgentRole.R_L2]: { [TrustTier.T0]: false, [TrustTier.T1]: true, [TrustTier.T2]: true, [TrustTier.T3]: true, [TrustTier.T4]: true, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
+  [AgentRole.R_L3]: { [TrustTier.T0]: false, [TrustTier.T1]: false, [TrustTier.T2]: true, [TrustTier.T3]: true, [TrustTier.T4]: true, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
+  [AgentRole.R_L4]: { [TrustTier.T0]: false, [TrustTier.T1]: false, [TrustTier.T2]: false, [TrustTier.T3]: true, [TrustTier.T4]: true, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
+  [AgentRole.R_L5]: { [TrustTier.T0]: false, [TrustTier.T1]: false, [TrustTier.T2]: false, [TrustTier.T3]: false, [TrustTier.T4]: true, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
+  [AgentRole.R_L6]: { [TrustTier.T0]: false, [TrustTier.T1]: false, [TrustTier.T2]: false, [TrustTier.T3]: false, [TrustTier.T4]: false, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
+  [AgentRole.R_L7]: { [TrustTier.T0]: false, [TrustTier.T1]: false, [TrustTier.T2]: false, [TrustTier.T3]: false, [TrustTier.T4]: false, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
+  [AgentRole.R_L8]: { [TrustTier.T0]: false, [TrustTier.T1]: false, [TrustTier.T2]: false, [TrustTier.T3]: false, [TrustTier.T4]: false, [TrustTier.T5]: true, [TrustTier.T6]: true, [TrustTier.T7]: true },
 };
 
 /**
@@ -691,7 +579,7 @@ export interface RoleGatePolicyRule {
   readonly ruleId: string;
   readonly name: string;
   readonly condition: RoleGateCondition;
-  readonly action: "ALLOW" | "DENY" | "ESCALATE";
+  readonly action: 'ALLOW' | 'DENY' | 'ESCALATE';
   readonly priority: number;
   readonly reason: string;
 }
@@ -708,23 +596,21 @@ export interface RoleGateCondition {
 export const roleGatePolicySchema = z.object({
   policyId: z.string().min(1),
   version: z.number().int().positive(),
-  rules: z.array(
-    z.object({
-      ruleId: z.string().min(1),
-      name: z.string().min(1),
-      condition: z.object({
-        roles: z.array(z.nativeEnum(AgentRole)).optional(),
-        tiers: z.array(z.nativeEnum(TrustTier)).optional(),
-        contextTypes: z.array(z.nativeEnum(ContextType)).optional(),
-        domains: z.array(z.string()).optional(),
-        timeWindow: z.object({ start: z.string(), end: z.string() }).optional(),
-        requiresAttestation: z.array(z.string()).optional(),
-      }),
-      action: z.enum(["ALLOW", "DENY", "ESCALATE"]),
-      priority: z.number().int(),
-      reason: z.string(),
+  rules: z.array(z.object({
+    ruleId: z.string().min(1),
+    name: z.string().min(1),
+    condition: z.object({
+      roles: z.array(z.nativeEnum(AgentRole)).optional(),
+      tiers: z.array(z.nativeEnum(TrustTier)).optional(),
+      contextTypes: z.array(z.nativeEnum(ContextType)).optional(),
+      domains: z.array(z.string()).optional(),
+      timeWindow: z.object({ start: z.string(), end: z.string() }).optional(),
+      requiresAttestation: z.array(z.string()).optional(),
     }),
-  ),
+    action: z.enum(['ALLOW', 'DENY', 'ESCALATE']),
+    priority: z.number().int(),
+    reason: z.string(),
+  })),
   effectiveFrom: z.date(),
   effectiveUntil: z.date().optional(),
   createdAt: z.date(),
@@ -754,7 +640,7 @@ export interface RoleGateEvaluation {
     readonly valid: boolean;
     readonly appliedRuleId?: string;
     readonly appliedPolicyVersion?: number;
-    readonly action: "ALLOW" | "DENY" | "ESCALATE";
+    readonly action: 'ALLOW' | 'DENY' | 'ESCALATE';
     readonly reason: string;
   };
 
@@ -768,7 +654,7 @@ export interface RoleGateEvaluation {
   };
 
   // Final decision
-  readonly decision: "ALLOW" | "DENY" | "ESCALATE";
+  readonly decision: 'ALLOW' | 'DENY' | 'ESCALATE';
   readonly decidedAt: Date;
   readonly evaluationHash: string;
 }
@@ -788,7 +674,7 @@ export const roleGateEvaluationSchema = z.object({
     valid: z.boolean(),
     appliedRuleId: z.string().optional(),
     appliedPolicyVersion: z.number().optional(),
-    action: z.enum(["ALLOW", "DENY", "ESCALATE"]),
+    action: z.enum(['ALLOW', 'DENY', 'ESCALATE']),
     reason: z.string(),
   }),
   basisResult: z.object({
@@ -798,7 +684,7 @@ export const roleGateEvaluationSchema = z.object({
     contextConstraintsMet: z.boolean(),
     reason: z.string().optional(),
   }),
-  decision: z.enum(["ALLOW", "DENY", "ESCALATE"]),
+  decision: z.enum(['ALLOW', 'DENY', 'ESCALATE']),
   decidedAt: z.date(),
   evaluationHash: z.string().min(64),
 });
@@ -821,11 +707,11 @@ export interface TrustScoreConfig {
  * Trust metrics input
  */
 export interface TrustMetrics {
-  readonly observability: number; // 0-1: How much can we see?
-  readonly capability: number; // 0-1: Technical ability score
-  readonly behavior: number; // 0-1: Historical reliability
-  readonly governance: number; // 0-1: Policy compliance
-  readonly context: number; // 0-1: Environmental fit
+  readonly observability: number;  // 0-1: How much can we see?
+  readonly capability: number;     // 0-1: Technical ability score
+  readonly behavior: number;       // 0-1: Historical reliability
+  readonly governance: number;     // 0-1: Policy compliance
+  readonly context: number;        // 0-1: Environmental fit
 }
 
 export const trustMetricsSchema = z.object({
@@ -844,8 +730,8 @@ export interface TrustComputationResult {
   readonly computedAt: Date;
 
   // Scores
-  readonly rawScore: number; // Pre-ceiling
-  readonly finalScore: number; // Post-ceiling (clamped)
+  readonly rawScore: number;      // Pre-ceiling
+  readonly finalScore: number;    // Post-ceiling (clamped)
   readonly effectiveTier: TrustTier;
 
   // Ceiling
@@ -881,7 +767,7 @@ export const trustComputationResultSchema = z.object({
   ceilingApplied: z.boolean(),
   ceilingValue: z.number(),
   ceilingSource: z.object({
-    type: z.enum(["context", "organizational", "deployment", "attestation"]),
+    type: z.enum(['context', 'organizational', 'deployment', 'attestation']),
     value: z.number(),
     constraint: z.string(),
   }),
@@ -902,59 +788,56 @@ export const trustComputationResultSchema = z.object({
 // =============================================================================
 
 export const BASIS_CANONICAL_PRESETS: Record<string, TrustPreset> = {
-  "basis:preset:balanced": {
-    presetId: "basis:preset:balanced",
-    name: "Balanced",
-    description: "Equal weight across all trust dimensions",
-    source: "basis",
+  'basis:preset:balanced': {
+    presetId: 'basis:preset:balanced',
+    name: 'Balanced',
+    description: 'Equal weight across all trust dimensions',
+    source: 'basis',
     version: 1,
     weights: {
-      observability: 0.2,
-      capability: 0.2,
-      behavior: 0.2,
-      governance: 0.2,
-      context: 0.2,
+      observability: 0.20,
+      capability: 0.20,
+      behavior: 0.20,
+      governance: 0.20,
+      context: 0.20,
     },
-    createdAt: new Date("2025-01-01T00:00:00Z"),
-    createdBy: "@vorionsys/basis",
-    presetHash:
-      "basis:sha256:b2c4e6a8f0d2b4c6e8a0d2b4c6e8a0d2b4c6e8a0d2b4c6e8a0d2b4c6e8a0d2b4",
+    createdAt: new Date('2025-01-01T00:00:00Z'),
+    createdBy: '@vorionsys/basis',
+    presetHash: 'basis:sha256:b2c4e6a8f0d2b4c6e8a0d2b4c6e8a0d2b4c6e8a0d2b4c6e8a0d2b4c6e8a0d2b4',
   },
-  "basis:preset:conservative": {
-    presetId: "basis:preset:conservative",
-    name: "Conservative (High Governance)",
-    description: "Prioritizes governance compliance and observability",
-    source: "basis",
+  'basis:preset:conservative': {
+    presetId: 'basis:preset:conservative',
+    name: 'Conservative (High Governance)',
+    description: 'Prioritizes governance compliance and observability',
+    source: 'basis',
     version: 1,
     weights: {
-      observability: 0.3,
+      observability: 0.30,
       capability: 0.15,
-      behavior: 0.2,
+      behavior: 0.20,
       governance: 0.25,
-      context: 0.1,
+      context: 0.10,
     },
-    createdAt: new Date("2025-01-01T00:00:00Z"),
-    createdBy: "@vorionsys/basis",
-    presetHash:
-      "basis:sha256:c3d5e7a9f1d3b5c7e9a1d3b5c7e9a1d3b5c7e9a1d3b5c7e9a1d3b5c7e9a1d3b5",
+    createdAt: new Date('2025-01-01T00:00:00Z'),
+    createdBy: '@vorionsys/basis',
+    presetHash: 'basis:sha256:c3d5e7a9f1d3b5c7e9a1d3b5c7e9a1d3b5c7e9a1d3b5c7e9a1d3b5c7e9a1d3b5',
   },
-  "basis:preset:capability-focused": {
-    presetId: "basis:preset:capability-focused",
-    name: "Capability Focused",
-    description: "Prioritizes technical ability and behavior history",
-    source: "basis",
+  'basis:preset:capability-focused': {
+    presetId: 'basis:preset:capability-focused',
+    name: 'Capability Focused',
+    description: 'Prioritizes technical ability and behavior history',
+    source: 'basis',
     version: 1,
     weights: {
       observability: 0.15,
       capability: 0.35,
       behavior: 0.25,
       governance: 0.15,
-      context: 0.1,
+      context: 0.10,
     },
-    createdAt: new Date("2025-01-01T00:00:00Z"),
-    createdBy: "@vorionsys/basis",
-    presetHash:
-      "basis:sha256:d4e6f8a0b2d4c6e8f0a2b4d6c8e0f2a4b6d8c0e2f4a6b8d0c2e4f6a8b0d2c4e6",
+    createdAt: new Date('2025-01-01T00:00:00Z'),
+    createdBy: '@vorionsys/basis',
+    presetHash: 'basis:sha256:d4e6f8a0b2d4c6e8f0a2b4d6c8e0f2a4b6d8c0e2f4a6b8d0c2e4f6a8b0d2c4e6',
   },
 };
 
@@ -987,10 +870,7 @@ export function getCeilingForContext(contextType: ContextType): number {
 /**
  * Validate role+tier combination against kernel matrix
  */
-export function validateRoleGateKernel(
-  role: AgentRole,
-  tier: TrustTier,
-): boolean {
+export function validateRoleGateKernel(role: AgentRole, tier: TrustTier): boolean {
   return ROLE_GATE_MATRIX[role]?.[tier] ?? false;
 }
 
@@ -1002,8 +882,10 @@ export function clampToCeiling(score: number, ceiling: number): number {
 }
 
 /**
- * Generate SHA-256 hash
+ * Generate SHA-256 hash (placeholder - use crypto in implementation)
  */
 export function generateHash(data: string): string {
-  return `sha256:${createHash("sha256").update(data).digest("hex")}`;
+  // In real implementation, use crypto.subtle.digest or Node's crypto
+  // This is a placeholder that should be replaced
+  return `sha256:${Buffer.from(data).toString('base64').slice(0, 64)}`;
 }

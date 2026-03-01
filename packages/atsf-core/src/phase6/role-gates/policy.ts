@@ -10,7 +10,7 @@
  * - Version tracking on policy changes
  */
 
-import { AgentRole, TrustTier } from "./kernel.js";
+import { AgentRole, TrustTier } from './kernel.js';
 
 /**
  * Policy rule definition
@@ -42,7 +42,7 @@ export interface PolicyException {
 export interface PolicyDecision {
   allowed: boolean;
   reason: string;
-  source: "exception" | "rule" | "default";
+  source: 'exception' | 'rule' | 'default';
   appliedAt: Date;
 }
 
@@ -65,7 +65,7 @@ export class BasisPolicyEngine {
   private rules: Map<string, PolicyRule> = new Map();
   private exceptions: Map<string, PolicyException[]> = new Map();
   private auditLog: PolicyAuditEntry[] = [];
-  private policyVersion: string = "1.0.0";
+  private policyVersion: string = '1.0.0';
   private versionCounter: number = 0;
 
   /**
@@ -108,7 +108,7 @@ export class BasisPolicyEngine {
     const exceptions = this.exceptions.get(key);
     if (exceptions) {
       const index = exceptions.findIndex(
-        (e) => e.role === role && e.tier === tier,
+        (e) => e.role === role && e.tier === tier
       );
       if (index >= 0) {
         exceptions.splice(index, 1);
@@ -125,7 +125,7 @@ export class BasisPolicyEngine {
     agentId: string,
     role: AgentRole,
     tier: TrustTier,
-    domain?: string,
+    domain?: string
   ): PolicyDecision {
     const timestamp = new Date();
 
@@ -140,7 +140,7 @@ export class BasisPolicyEngine {
         const decision: PolicyDecision = {
           allowed: exception.allowed,
           reason: exception.reason,
-          source: "exception",
+          source: 'exception',
           appliedAt: timestamp,
         };
         this.logAudit({ timestamp, agentId, role, tier, domain, decision });
@@ -159,7 +159,7 @@ export class BasisPolicyEngine {
         const decision: PolicyDecision = {
           allowed: rule.allowed,
           reason: rule.reason,
-          source: "rule",
+          source: 'rule',
           appliedAt: timestamp,
         };
         this.logAudit({ timestamp, agentId, role, tier, domain, decision });
@@ -170,8 +170,8 @@ export class BasisPolicyEngine {
     // Default: allow
     const decision: PolicyDecision = {
       allowed: true,
-      reason: "No matching rule or exception (default allow)",
-      source: "default",
+      reason: 'No matching rule or exception (default allow)',
+      source: 'default',
       appliedAt: timestamp,
     };
     this.logAudit({ timestamp, agentId, role, tier, domain, decision });
@@ -221,7 +221,7 @@ export class BasisPolicyEngine {
    */
   private incrementVersion(): void {
     this.versionCounter++;
-    const [major, minor] = this.policyVersion.split(".").map(Number);
+    const [major, minor] = this.policyVersion.split('.').map(Number);
     this.policyVersion = `${major}.${minor + 1}`;
   }
 }

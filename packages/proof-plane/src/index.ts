@@ -11,7 +11,7 @@
  *
  * @example
  * ```typescript
- * import { createProofPlane } from '@vorion/proof-plane';
+ * import { createProofPlane } from '@vorionsys/proof-plane';
  *
  * const proofPlane = createProofPlane({ signedBy: 'my-service' });
  *
@@ -32,7 +32,7 @@ export {
   ProofPlane,
   createProofPlane,
   type ProofPlaneConfig,
-} from "./proof-plane/proof-plane.js";
+} from './proof-plane/proof-plane.js';
 
 export {
   ProofPlaneLoggerImpl,
@@ -40,7 +40,7 @@ export {
   noopProofPlaneLogger,
   type ProofPlaneLogger,
   type ProofPlaneLoggerConfig,
-} from "./proof-plane/logger.js";
+} from './proof-plane/logger.js';
 
 // Event store exports
 export {
@@ -50,12 +50,12 @@ export {
   type EventStats,
   EventStoreError,
   EventStoreErrorCode,
-} from "./events/event-store.js";
+} from './events/event-store.js';
 
 export {
   InMemoryEventStore,
   createInMemoryEventStore,
-} from "./events/memory-store.js";
+} from './events/memory-store.js';
 
 // Event emitter exports
 export {
@@ -66,7 +66,7 @@ export {
   type EmitResult,
   type BatchEmitOptions,
   type BatchEmitResult,
-} from "./events/event-emitter.js";
+} from './events/event-emitter.js';
 
 // Hash chain exports
 export {
@@ -81,7 +81,7 @@ export {
   verifyChainWithDetails,
   getGenesisHash,
   type ChainVerificationResult,
-} from "./events/hash-chain.js";
+} from './events/hash-chain.js';
 
 // Event signature exports
 export {
@@ -96,7 +96,13 @@ export {
   type SignatureVerificationResult,
   type SigningServiceConfig,
   type BatchVerificationResult,
-} from "./events/event-signatures.js";
+} from './events/event-signatures.js';
+
+// Merkle tree exports
+export {
+  MerkleTree,
+  type MerkleProof,
+} from './events/merkle-tree.js';
 
 // API route exports
 export {
@@ -104,4 +110,4 @@ export {
   registerProofRoutes,
   createProofExpressRouter,
   type ProofRoute,
-} from "./api/index.js";
+} from './api/index.js';

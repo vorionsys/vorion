@@ -3,8 +3,8 @@
  * Immutable hash-linked audit trail
  */
 
-import { createHash } from "crypto";
-import { AccountabilityRecord, DatabaseConfig } from "./types.js";
+import { createHash } from 'crypto';
+import { AccountabilityRecord, DatabaseConfig } from './types.js';
 
 export class AccountabilityChain {
   private records: Map<string, AccountabilityRecord[]>;
@@ -23,9 +23,7 @@ export class AccountabilityChain {
     const prevRecord = agentRecords[agentRecords.length - 1];
 
     // 2. Set previous hash
-    record.chainLink.prevHash = prevRecord
-      ? this.calculateHash(prevRecord)
-      : null;
+    record.chainLink.prevHash = prevRecord ? this.calculateHash(prevRecord) : null;
 
     // 3. Calculate hash for this record
     const hash = this.calculateHash(record);
@@ -80,29 +78,24 @@ export class AccountabilityChain {
   /**
    * Query records for agent
    */
-  async query(
-    agentDID: string,
-    options?: {
-      action?: string;
-      timeRange?: [number, number];
-      outcome?: "success" | "failure" | "denied";
-    },
-  ): Promise<AccountabilityRecord[]> {
+  async query(agentDID: string, options?: {
+    action?: string;
+    timeRange?: [number, number];
+    outcome?: 'success' | 'failure' | 'denied';
+  }): Promise<AccountabilityRecord[]> {
     let records = this.records.get(agentDID) || [];
 
     if (options?.action) {
-      records = records.filter((r) => r.action === options.action);
+      records = records.filter(r => r.action === options.action);
     }
 
     if (options?.timeRange) {
       const [start, end] = options.timeRange;
-      records = records.filter(
-        (r) => r.timestamp >= start && r.timestamp <= end,
-      );
+      records = records.filter(r => r.timestamp >= start && r.timestamp <= end);
     }
 
     if (options?.outcome) {
-      records = records.filter((r) => r.outcome === options.outcome);
+      records = records.filter(r => r.outcome === options.outcome);
     }
 
     return records;
@@ -122,7 +115,7 @@ export class AccountabilityChain {
       prevHash: record.chainLink.prevHash,
     });
 
-    return createHash("sha256").update(content).digest("hex");
+    return createHash('sha256').update(content).digest('hex');
   }
 
   /**
@@ -130,10 +123,10 @@ export class AccountabilityChain {
    */
   private async updateAccountabilityScore(
     agentDID: string,
-    outcome: "success" | "failure" | "denied",
+    outcome: 'success' | 'failure' | 'denied'
   ): Promise<void> {
     // Would update TSG trust score based on outcome
-    const impact = outcome === "success" ? 1 : outcome === "failure" ? -5 : -10;
+    const impact = outcome === 'success' ? 1 : outcome === 'failure' ? -5 : -10;
     // await tsg.updateTrustScore(agentDID, impact);
   }
 }

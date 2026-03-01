@@ -1,7 +1,7 @@
 /**
  * Governance → Proof Chain Bridge
  *
- * Wraps IGovernanceEngine.evaluate() to automatically create cryptographic
+ * Wraps GovernanceEngine.evaluate() to automatically create cryptographic
  * proof records for every governance decision. Maps GovernanceResult shapes
  * to Intent + Decision shapes required by the proof service.
  *
@@ -19,13 +19,9 @@ import type {
   EvaluationResult,
   Proof,
   ControlAction,
-} from "../common/types.js";
-import type { IGovernanceEngine } from "./types.js";
-import type {
-  GovernanceRequest,
-  GovernanceResult,
-  EvaluatedRule,
-} from "./types.js";
+} from '../common/types.js';
+import type { GovernanceEngine } from './index.js';
+import type { GovernanceRequest, GovernanceResult, EvaluatedRule } from './types.js';
 
 // =============================================================================
 // TYPES
@@ -69,7 +65,7 @@ export interface GovernanceProofResult {
  * Bridges governance decisions to the cryptographic proof chain.
  *
  * Every call to `evaluateWithProof()` will:
- * 1. Run `IGovernanceEngine.evaluate(request)`
+ * 1. Run `GovernanceEngine.evaluate(request)`
  * 2. Map the result to Intent + Decision shapes
  * 3. Create a signed proof record via `createProof()`
  * 4. Return both the governance result and the proof ID
@@ -86,11 +82,11 @@ export interface GovernanceProofResult {
  * ```
  */
 export class GovernanceProofBridge {
-  private readonly engine: IGovernanceEngine;
+  private readonly engine: GovernanceEngine;
   private readonly createProof: ProofCreateFn;
   private readonly tenantId: string;
 
-  constructor(engine: IGovernanceEngine, config: ProofBridgeConfig) {
+  constructor(engine: GovernanceEngine, config: ProofBridgeConfig) {
     this.engine = engine;
     this.createProof = config.createProof;
     this.tenantId = config.tenantId;
@@ -99,9 +95,7 @@ export class GovernanceProofBridge {
   /**
    * Evaluate governance request AND create a cryptographic proof record.
    */
-  async evaluateWithProof(
-    request: GovernanceRequest,
-  ): Promise<GovernanceProofResult> {
+  async evaluateWithProof(request: GovernanceRequest): Promise<GovernanceProofResult> {
     // Step 1: Run governance evaluation
     const result = await this.engine.evaluate(request);
 
@@ -145,10 +139,7 @@ export class GovernanceProofBridge {
   /**
    * Map a GovernanceRequest to an Intent for the proof chain.
    */
-  private mapToIntent(
-    request: GovernanceRequest,
-    result: GovernanceResult,
-  ): Intent {
+  private mapToIntent(request: GovernanceRequest, result: GovernanceResult): Intent {
     const now = result.evaluatedAt;
     return {
       id: request.requestId,
@@ -161,26 +152,23 @@ export class GovernanceProofBridge {
         resources: request.resources,
         authority: request.authority,
       },
-      status: "completed",
+      status: 'completed',
       createdAt: now,
       updatedAt: now,
       trustLevel: request.trustLevel,
-      source: "governance-bridge",
+      source: 'governance-bridge',
     };
   }
 
   /**
    * Map a GovernanceResult to a Decision for the proof chain.
    */
-  private mapToDecision(
-    request: GovernanceRequest,
-    result: GovernanceResult,
-  ): Decision {
+  private mapToDecision(request: GovernanceRequest, result: GovernanceResult): Decision {
     return {
       intentId: request.requestId,
       action: result.decision,
       constraintsEvaluated: result.rulesEvaluated.map((rule) =>
-        this.mapEvaluatedRuleToConstraintResult(rule),
+        this.mapEvaluatedRuleToConstraintResult(rule)
       ),
       trustScore: Math.round(result.confidence * 1000) as number,
       trustLevel: request.trustLevel,
@@ -191,13 +179,11 @@ export class GovernanceProofBridge {
   /**
    * Map an EvaluatedRule to an EvaluationResult for the Decision's constraintsEvaluated.
    */
-  private mapEvaluatedRuleToConstraintResult(
-    rule: EvaluatedRule,
-  ): EvaluationResult {
+  private mapEvaluatedRuleToConstraintResult(rule: EvaluatedRule): EvaluationResult {
     return {
       constraintId: rule.ruleId,
       passed: rule.matched,
-      action: (rule.effect?.action ?? "allow") as ControlAction,
+      action: (rule.effect?.action ?? 'allow') as ControlAction,
       reason: rule.matchReason,
       details: {
         ruleName: rule.ruleName,

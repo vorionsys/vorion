@@ -10,7 +10,7 @@
  * Trust must be earned through demonstrated success on low-risk actions first.
  */
 
-import type { ActionType, DataSensitivity, Reversibility } from "./enums.js";
+import type { ActionType, DataSensitivity, Reversibility } from './enums.js';
 
 /**
  * Risk levels for action classification
@@ -18,15 +18,15 @@ import type { ActionType, DataSensitivity, Reversibility } from "./enums.js";
  */
 export enum RiskLevel {
   /** Read-only operations - anyone can do */
-  READ = "READ",
+  READ = 'READ',
   /** Low-risk modifications */
-  LOW = "LOW",
+  LOW = 'LOW',
   /** Medium-risk operations */
-  MEDIUM = "MEDIUM",
+  MEDIUM = 'MEDIUM',
   /** High-risk operations - requires verification */
-  HIGH = "HIGH",
+  HIGH = 'HIGH',
   /** Critical operations - requires human approval */
-  CRITICAL = "CRITICAL",
+  CRITICAL = 'CRITICAL',
 }
 
 /**
@@ -34,11 +34,11 @@ export enum RiskLevel {
  * Per ATSF v2.0 Section 4.4
  */
 export const TRUST_THRESHOLDS: Record<RiskLevel, number> = {
-  [RiskLevel.READ]: 0.0, // Anyone can read
-  [RiskLevel.LOW]: 20, // Minimal trust required (0.2 * 100)
-  [RiskLevel.MEDIUM]: 40, // Moderate trust required (0.4 * 100)
-  [RiskLevel.HIGH]: 60, // Significant trust required (0.6 * 100)
-  [RiskLevel.CRITICAL]: 80, // Maximum trust + human approval (0.8 * 100)
+  [RiskLevel.READ]: 0.0,      // Anyone can read
+  [RiskLevel.LOW]: 20,        // Minimal trust required (0.2 * 100)
+  [RiskLevel.MEDIUM]: 40,     // Moderate trust required (0.4 * 100)
+  [RiskLevel.HIGH]: 60,       // Significant trust required (0.6 * 100)
+  [RiskLevel.CRITICAL]: 80,   // Maximum trust + human approval (0.8 * 100)
 };
 
 /**
@@ -46,13 +46,13 @@ export const TRUST_THRESHOLDS: Record<RiskLevel, number> = {
  */
 export enum GateStatus {
   /** Action approved - proceed with execution */
-  APPROVED = "APPROVED",
+  APPROVED = 'APPROVED',
   /** Action rejected - trust below threshold */
-  REJECTED = "REJECTED",
+  REJECTED = 'REJECTED',
   /** Action pending - requires additional verification */
-  PENDING_VERIFICATION = "PENDING_VERIFICATION",
+  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
   /** Action pending - requires human approval */
-  PENDING_HUMAN_APPROVAL = "PENDING_HUMAN_APPROVAL",
+  PENDING_HUMAN_APPROVAL = 'PENDING_HUMAN_APPROVAL',
 }
 
 /**
@@ -110,7 +110,7 @@ export interface GateVerificationResult {
  */
 export interface GateRequirement {
   /** Type of requirement */
-  type: "MULTI_PROVER_VERIFICATION" | "HUMAN_APPROVAL" | "ADDITIONAL_TRUST";
+  type: 'MULTI_PROVER_VERIFICATION' | 'HUMAN_APPROVAL' | 'ADDITIONAL_TRUST';
   /** Description of what's needed */
   description: string;
   /** Who needs to fulfill this */
@@ -189,7 +189,7 @@ export interface ActionRiskFactors {
  */
 export interface GateEvent {
   /** Event type */
-  type: "GATE_CHECK" | "GATE_APPROVED" | "GATE_REJECTED" | "GATE_PENDING";
+  type: 'GATE_CHECK' | 'GATE_APPROVED' | 'GATE_REJECTED' | 'GATE_PENDING';
   /** Agent involved */
   agentId: string;
   /** Action that was checked */

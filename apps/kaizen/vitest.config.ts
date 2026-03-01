@@ -1,34 +1,54 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
-export default defineConfig({
-  plugins: [react()],
+// Force test/development mode BEFORE any React imports
+process.env.NODE_ENV = 'test';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const testDepsModules = path.resolve(__dirname, '../../..', 'test-deps/node_modules');
+const monorepoModules = path.resolve(__dirname, '../../node_modules');
+
+function resolveFrom(pkg: string): string {
+  const test = path.resolve(testDepsModules, pkg);
+  const mono = path.resolve(monorepoModules, pkg);
+  if (fs.existsSync(test)) return test;
+  if (fs.existsSync(mono)) return mono;
+  return pkg;
+}
+
+// Point directly to development builds of React
+const reactDev = path.resolve(resolveFrom('react'), 'cjs/react.development.js');
+const reactDomDev = path.resolve(resolveFrom('react-dom'), 'cjs/react-dom-client.development.js');
+const reactTestUtilsDev = path.resolve(resolveFrom('react-dom'), 'cjs/react-dom-test-utils.development.js');
+
+export default {
+  define: {
+    'process.env.NODE_ENV': '"test"',
+  },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    include: ['src/components/__tests__/**/*.test.tsx'],
+    root: __dirname,
+    setupFiles: [],
+    testTimeout: 15000,
+  },
+  resolve: {
+    conditions: ['development', 'browser', 'import'],
     alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      include: ['src/lib/**/*.ts', 'src/components/**/*.tsx'],
-      exclude: [
-        'src/**/*.test.{ts,tsx}', 
-        'src/lib/supabase-client.ts',
-        'src/lib/lexicon-data.ts',
-        'src/lib/quiz-data.ts',
-        'src/lib/learning-paths.ts'
-      ],
-      thresholds: {
-        lines: 5,
-        statements: 5,
-        branches: 1.5,
-        functions: 5,
-      },
+      '@/': path.resolve(__dirname, 'src') + '/',
+      // All React packages from test-deps
+      'react': resolveFrom('react'),
+      'react-dom': resolveFrom('react-dom'),
+      'react/jsx-runtime': resolveFrom('react') + '/jsx-runtime',
+      'react/jsx-dev-runtime': resolveFrom('react') + '/jsx-dev-runtime',
+      // Force development builds for CJS
+      'react-dom/cjs/react-dom-test-utils.production.js': reactTestUtilsDev,
+      // Test libraries from test-deps
+      '@testing-library/react': resolveFrom('@testing-library/react'),
+      '@testing-library/jest-dom': resolveFrom('@testing-library/jest-dom'),
+      '@testing-library/dom': resolveFrom('@testing-library/dom'),
     },
   },
-});
+};

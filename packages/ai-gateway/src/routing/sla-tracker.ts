@@ -8,7 +8,7 @@
  * @packageDocumentation
  */
 
-import type { ProviderId } from "./health-checker.js";
+import type { ProviderId } from './health-checker.js';
 
 // =============================================================================
 // TYPES
@@ -18,13 +18,13 @@ import type { ProviderId } from "./health-checker.js";
  * SLA metric types
  */
 export type SlaMetricType =
-  | "latency_p50"
-  | "latency_p90"
-  | "latency_p95"
-  | "latency_p99"
-  | "availability"
-  | "error_rate"
-  | "throughput";
+  | 'latency_p50'
+  | 'latency_p90'
+  | 'latency_p95'
+  | 'latency_p99'
+  | 'availability'
+  | 'error_rate'
+  | 'throughput';
 
 /**
  * SLA target definition
@@ -74,9 +74,9 @@ export interface SlaMetricStatus {
   current: number;
   target: number;
   warningThreshold: number;
-  status: "healthy" | "warning" | "breached";
+  status: 'healthy' | 'warning' | 'breached';
   percentageOfTarget: number;
-  trend: "improving" | "stable" | "degrading";
+  trend: 'improving' | 'stable' | 'degrading';
   lastUpdated: Date;
 }
 
@@ -89,7 +89,7 @@ export interface SlaReport {
   tenantId?: string;
   period: { start: Date; end: Date };
   metrics: SlaMetricStatus[];
-  overallStatus: "healthy" | "warning" | "breached";
+  overallStatus: 'healthy' | 'warning' | 'breached';
   breachCount: number;
   uptimePercentage: number;
   totalRequests: number;
@@ -123,7 +123,7 @@ export interface SlaTrackerConfig {
 export interface SlaAlert {
   id: string;
   timestamp: Date;
-  severity: "warning" | "critical";
+  severity: 'warning' | 'critical';
   provider: ProviderId;
   model?: string;
   tenantId?: string;
@@ -139,31 +139,31 @@ export interface SlaAlert {
 
 const DEFAULT_SLA_TARGETS: SlaTarget[] = [
   {
-    metric: "latency_p50",
+    metric: 'latency_p50',
     target: 1000, // 1 second
     warningThreshold: 800,
     windowMs: 5 * 60 * 1000, // 5 minutes
   },
   {
-    metric: "latency_p95",
+    metric: 'latency_p95',
     target: 3000, // 3 seconds
     warningThreshold: 2500,
     windowMs: 5 * 60 * 1000,
   },
   {
-    metric: "latency_p99",
+    metric: 'latency_p99',
     target: 5000, // 5 seconds
     warningThreshold: 4000,
     windowMs: 5 * 60 * 1000,
   },
   {
-    metric: "availability",
+    metric: 'availability',
     target: 99.9, // 99.9%
     warningThreshold: 99.5,
     windowMs: 60 * 60 * 1000, // 1 hour
   },
   {
-    metric: "error_rate",
+    metric: 'error_rate',
     target: 0.1, // 0.1%
     warningThreshold: 0.5,
     windowMs: 5 * 60 * 1000,
@@ -172,84 +172,34 @@ const DEFAULT_SLA_TARGETS: SlaTarget[] = [
 
 const ENTERPRISE_SLA_TIERS: Record<string, SlaTier> = {
   standard: {
-    name: "Standard",
+    name: 'Standard',
     priority: 1,
     creditPercentage: 10,
     targets: [
-      {
-        metric: "latency_p95",
-        target: 5000,
-        warningThreshold: 4000,
-        windowMs: 5 * 60 * 1000,
-      },
-      {
-        metric: "availability",
-        target: 99.5,
-        warningThreshold: 99.0,
-        windowMs: 60 * 60 * 1000,
-      },
-      {
-        metric: "error_rate",
-        target: 1.0,
-        warningThreshold: 0.5,
-        windowMs: 5 * 60 * 1000,
-      },
+      { metric: 'latency_p95', target: 5000, warningThreshold: 4000, windowMs: 5 * 60 * 1000 },
+      { metric: 'availability', target: 99.5, warningThreshold: 99.0, windowMs: 60 * 60 * 1000 },
+      { metric: 'error_rate', target: 1.0, warningThreshold: 0.5, windowMs: 5 * 60 * 1000 },
     ],
   },
   professional: {
-    name: "Professional",
+    name: 'Professional',
     priority: 2,
     creditPercentage: 25,
     targets: [
-      {
-        metric: "latency_p95",
-        target: 3000,
-        warningThreshold: 2500,
-        windowMs: 5 * 60 * 1000,
-      },
-      {
-        metric: "availability",
-        target: 99.9,
-        warningThreshold: 99.5,
-        windowMs: 60 * 60 * 1000,
-      },
-      {
-        metric: "error_rate",
-        target: 0.5,
-        warningThreshold: 0.25,
-        windowMs: 5 * 60 * 1000,
-      },
+      { metric: 'latency_p95', target: 3000, warningThreshold: 2500, windowMs: 5 * 60 * 1000 },
+      { metric: 'availability', target: 99.9, warningThreshold: 99.5, windowMs: 60 * 60 * 1000 },
+      { metric: 'error_rate', target: 0.5, warningThreshold: 0.25, windowMs: 5 * 60 * 1000 },
     ],
   },
   enterprise: {
-    name: "Enterprise",
+    name: 'Enterprise',
     priority: 3,
     creditPercentage: 50,
     targets: [
-      {
-        metric: "latency_p95",
-        target: 2000,
-        warningThreshold: 1500,
-        windowMs: 5 * 60 * 1000,
-      },
-      {
-        metric: "latency_p99",
-        target: 3000,
-        warningThreshold: 2500,
-        windowMs: 5 * 60 * 1000,
-      },
-      {
-        metric: "availability",
-        target: 99.99,
-        warningThreshold: 99.95,
-        windowMs: 60 * 60 * 1000,
-      },
-      {
-        metric: "error_rate",
-        target: 0.1,
-        warningThreshold: 0.05,
-        windowMs: 5 * 60 * 1000,
-      },
+      { metric: 'latency_p95', target: 2000, warningThreshold: 1500, windowMs: 5 * 60 * 1000 },
+      { metric: 'latency_p99', target: 3000, warningThreshold: 2500, windowMs: 5 * 60 * 1000 },
+      { metric: 'availability', target: 99.99, warningThreshold: 99.95, windowMs: 60 * 60 * 1000 },
+      { metric: 'error_rate', target: 0.1, warningThreshold: 0.05, windowMs: 5 * 60 * 1000 },
     ],
   },
 };
@@ -298,11 +248,7 @@ export class SlaTracker {
     this.measurements.push(measurement);
 
     // Update aggregated metrics
-    const key = this.getMetricKey(
-      measurement.provider,
-      measurement.model,
-      measurement.tenantId,
-    );
+    const key = this.getMetricKey(measurement.provider, measurement.model, measurement.tenantId);
     let metrics = this.aggregatedMetrics.get(key);
 
     if (!metrics) {
@@ -332,11 +278,7 @@ export class SlaTracker {
 
     // Check SLA targets and generate alerts if needed
     if (this.config.enableAlerts) {
-      this.checkAlerts(
-        measurement.provider,
-        measurement.model,
-        measurement.tenantId,
-      );
+      this.checkAlerts(measurement.provider, measurement.model, measurement.tenantId);
     }
   }
 
@@ -350,15 +292,14 @@ export class SlaTracker {
       tenantId?: string;
       startTime?: Date;
       endTime?: Date;
-    },
+    }
   ): SlaReport {
     const key = this.getMetricKey(provider, options?.model, options?.tenantId);
     const metrics = this.aggregatedMetrics.get(key);
     const targets = this.getTargets(options?.tenantId);
 
     const now = new Date();
-    const startTime =
-      options?.startTime ?? new Date(now.getTime() - 60 * 60 * 1000);
+    const startTime = options?.startTime ?? new Date(now.getTime() - 60 * 60 * 1000);
     const endTime = options?.endTime ?? now;
 
     // Filter measurements by time range
@@ -368,13 +309,11 @@ export class SlaTracker {
         (options?.model === undefined || m.model === options.model) &&
         (options?.tenantId === undefined || m.tenantId === options.tenantId) &&
         m.timestamp >= startTime &&
-        m.timestamp <= endTime,
+        m.timestamp <= endTime
     );
 
     // Calculate percentiles
-    const latencies = relevantMeasurements
-      .map((m) => m.latencyMs)
-      .sort((a, b) => a - b);
+    const latencies = relevantMeasurements.map((m) => m.latencyMs).sort((a, b) => a - b);
     const p50 = this.percentile(latencies, 50);
     const p90 = this.percentile(latencies, 90);
     const p95 = this.percentile(latencies, 95);
@@ -386,20 +325,14 @@ export class SlaTracker {
 
     // Calculate availability and error rate
     const totalRequests = relevantMeasurements.length;
-    const successfulRequests = relevantMeasurements.filter(
-      (m) => m.success,
-    ).length;
-    const availability =
-      totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 100;
-    const errorRate =
-      totalRequests > 0
-        ? ((totalRequests - successfulRequests) / totalRequests) * 100
-        : 0;
+    const successfulRequests = relevantMeasurements.filter((m) => m.success).length;
+    const availability = totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 100;
+    const errorRate = totalRequests > 0 ? ((totalRequests - successfulRequests) / totalRequests) * 100 : 0;
 
     // Build metric statuses
     const metricStatuses: SlaMetricStatus[] = [];
     let breachCount = 0;
-    let overallStatus: "healthy" | "warning" | "breached" = "healthy";
+    let overallStatus: 'healthy' | 'warning' | 'breached' = 'healthy';
 
     for (const target of targets) {
       const current = this.getCurrentMetricValue(target.metric, {
@@ -409,8 +342,7 @@ export class SlaTracker {
         p99,
         availability,
         errorRate,
-        throughput:
-          totalRequests / ((endTime.getTime() - startTime.getTime()) / 1000),
+        throughput: totalRequests / ((endTime.getTime() - startTime.getTime()) / 1000),
       });
 
       const status = this.getMetricStatus(current, target);
@@ -420,11 +352,11 @@ export class SlaTracker {
 
       this.previousMetrics.set(previousKey, current);
 
-      if (status === "breached") {
+      if (status === 'breached') {
         breachCount++;
-        overallStatus = "breached";
-      } else if (status === "warning" && overallStatus !== "breached") {
-        overallStatus = "warning";
+        overallStatus = 'breached';
+      } else if (status === 'warning' && overallStatus !== 'breached') {
+        overallStatus = 'warning';
       }
 
       metricStatuses.push({
@@ -433,8 +365,7 @@ export class SlaTracker {
         target: target.target,
         warningThreshold: target.warningThreshold,
         status,
-        percentageOfTarget:
-          target.target > 0 ? (current / target.target) * 100 : 0,
+        percentageOfTarget: target.target > 0 ? (current / target.target) * 100 : 0,
         trend,
         lastUpdated: metrics?.lastUpdated ?? now,
       });
@@ -464,11 +395,8 @@ export class SlaTracker {
    */
   getStatus(
     provider: ProviderId,
-    model?: string,
-  ): {
-    status: "healthy" | "warning" | "breached";
-    metrics: Record<string, number>;
-  } {
+    model?: string
+  ): { status: 'healthy' | 'warning' | 'breached'; metrics: Record<string, number> } {
     const report = this.getReport(provider, { model });
     return {
       status: report.overallStatus,
@@ -487,7 +415,7 @@ export class SlaTracker {
    */
   getAlerts(filter?: {
     provider?: ProviderId;
-    severity?: "warning" | "critical";
+    severity?: 'warning' | 'critical';
     since?: Date;
   }): SlaAlert[] {
     return this.alerts.filter((alert) => {
@@ -524,19 +452,14 @@ export class SlaTracker {
     provider: ProviderId,
     tier: SlaTier,
     periodStart: Date,
-    periodEnd: Date,
+    periodEnd: Date
   ): { eligible: boolean; creditPercentage: number; breaches: string[] } {
-    const report = this.getReport(provider, {
-      startTime: periodStart,
-      endTime: periodEnd,
-    });
+    const report = this.getReport(provider, { startTime: periodStart, endTime: periodEnd });
 
-    if (report.overallStatus === "breached") {
+    if (report.overallStatus === 'breached') {
       const breaches = report.metrics
-        .filter((m) => m.status === "breached")
-        .map(
-          (m) => `${m.metric}: ${m.current.toFixed(2)} (target: ${m.target})`,
-        );
+        .filter((m) => m.status === 'breached')
+        .map((m) => `${m.metric}: ${m.current.toFixed(2)} (target: ${m.target})`);
 
       return {
         eligible: true,
@@ -558,7 +481,7 @@ export class SlaTracker {
   rankProviders(providers: ProviderId[]): Array<{
     provider: ProviderId;
     score: number;
-    status: "healthy" | "warning" | "breached";
+    status: 'healthy' | 'warning' | 'breached';
   }> {
     const rankings = providers.map((provider) => {
       const report = this.getReport(provider);
@@ -566,15 +489,10 @@ export class SlaTracker {
       // Calculate score (higher is better)
       // Weight: availability (40%), latency (40%), error rate (20%)
       const availabilityScore = report.uptimePercentage;
-      const latencyScore = Math.max(0, 100 - report.p95LatencyMs / 50); // Lower is better
-      const errorScore = Math.max(
-        0,
-        100 -
-          report.metrics.find((m) => m.metric === "error_rate")?.current! * 10,
-      );
+      const latencyScore = Math.max(0, 100 - (report.p95LatencyMs / 50)); // Lower is better
+      const errorScore = Math.max(0, 100 - report.metrics.find((m) => m.metric === 'error_rate')?.current! * 10);
 
-      const score =
-        availabilityScore * 0.4 + latencyScore * 0.4 + errorScore * 0.2;
+      const score = availabilityScore * 0.4 + latencyScore * 0.4 + errorScore * 0.2;
 
       return {
         provider,
@@ -590,12 +508,8 @@ export class SlaTracker {
   // PRIVATE METHODS
   // ===========================================================================
 
-  private getMetricKey(
-    provider: ProviderId,
-    model?: string,
-    tenantId?: string,
-  ): string {
-    return `${provider}:${model ?? "all"}:${tenantId ?? "global"}`;
+  private getMetricKey(provider: ProviderId, model?: string, tenantId?: string): string {
+    return `${provider}:${model ?? 'all'}:${tenantId ?? 'global'}`;
   }
 
   private createEmptyMetrics(): AggregatedMetrics {
@@ -631,102 +545,96 @@ export class SlaTracker {
       availability: number;
       errorRate: number;
       throughput: number;
-    },
+    }
   ): number {
     switch (metric) {
-      case "latency_p50":
+      case 'latency_p50':
         return values.p50;
-      case "latency_p90":
+      case 'latency_p90':
         return values.p90;
-      case "latency_p95":
+      case 'latency_p95':
         return values.p95;
-      case "latency_p99":
+      case 'latency_p99':
         return values.p99;
-      case "availability":
+      case 'availability':
         return values.availability;
-      case "error_rate":
+      case 'error_rate':
         return values.errorRate;
-      case "throughput":
+      case 'throughput':
         return values.throughput;
     }
   }
 
   private getMetricStatus(
     current: number,
-    target: SlaTarget,
-  ): "healthy" | "warning" | "breached" {
+    target: SlaTarget
+  ): 'healthy' | 'warning' | 'breached' {
     // For latency and error_rate, lower is better
     // For availability and throughput, higher is better
-    const isLowerBetter =
-      target.metric.startsWith("latency") || target.metric === "error_rate";
+    const isLowerBetter = target.metric.startsWith('latency') || target.metric === 'error_rate';
 
     if (isLowerBetter) {
-      if (current > target.target) return "breached";
-      if (current > target.warningThreshold) return "warning";
-      return "healthy";
+      if (current > target.target) return 'breached';
+      if (current > target.warningThreshold) return 'warning';
+      return 'healthy';
     } else {
-      if (current < target.target) return "breached";
-      if (current < target.warningThreshold) return "warning";
-      return "healthy";
+      if (current < target.target) return 'breached';
+      if (current < target.warningThreshold) return 'warning';
+      return 'healthy';
     }
   }
 
   private calculateTrend(
     current: number,
     previous: number | undefined,
-    metric: SlaMetricType,
-  ): "improving" | "stable" | "degrading" {
-    if (previous === undefined) return "stable";
+    metric: SlaMetricType
+  ): 'improving' | 'stable' | 'degrading' {
+    if (previous === undefined) return 'stable';
 
     const changePercent = ((current - previous) / (previous || 1)) * 100;
     const threshold = 5; // 5% change threshold
 
-    const isLowerBetter =
-      metric.startsWith("latency") || metric === "error_rate";
+    const isLowerBetter = metric.startsWith('latency') || metric === 'error_rate';
 
-    if (Math.abs(changePercent) < threshold) return "stable";
+    if (Math.abs(changePercent) < threshold) return 'stable';
 
     if (isLowerBetter) {
-      return changePercent < 0 ? "improving" : "degrading";
+      return changePercent < 0 ? 'improving' : 'degrading';
     } else {
-      return changePercent > 0 ? "improving" : "degrading";
+      return changePercent > 0 ? 'improving' : 'degrading';
     }
   }
 
   private checkAlerts(
     provider: ProviderId,
     model?: string,
-    tenantId?: string,
+    tenantId?: string
   ): void {
     const report = this.getReport(provider, { model, tenantId });
 
     for (const metric of report.metrics) {
-      if (metric.status === "breached" || metric.status === "warning") {
+      if (metric.status === 'breached' || metric.status === 'warning') {
         // Check if we already have a similar alert
         const existingAlert = this.alerts.find(
           (a) =>
             a.provider === provider &&
             a.model === model &&
             a.tenantId === tenantId &&
-            a.metric === metric.metric,
+            a.metric === metric.metric
         );
 
         if (!existingAlert) {
           const alert: SlaAlert = {
             id: `alert-${++this.alertIdCounter}`,
             timestamp: new Date(),
-            severity: metric.status === "breached" ? "critical" : "warning",
+            severity: metric.status === 'breached' ? 'critical' : 'warning',
             provider,
             model,
             tenantId,
             metric: metric.metric,
             current: metric.current,
-            threshold:
-              metric.status === "breached"
-                ? metric.target
-                : metric.warningThreshold,
-            message:
-              `SLA ${metric.status}: ${metric.metric} is ${metric.current.toFixed(2)} ` +
+            threshold: metric.status === 'breached' ? metric.target : metric.warningThreshold,
+            message: `SLA ${metric.status}: ${metric.metric} is ${metric.current.toFixed(2)} ` +
               `(target: ${metric.target})`,
           };
 
@@ -774,9 +682,7 @@ interface AggregatedMetrics {
 /**
  * Create SLA tracker instance
  */
-export function createSlaTracker(
-  config?: Partial<SlaTrackerConfig>,
-): SlaTracker {
+export function createSlaTracker(config?: Partial<SlaTrackerConfig>): SlaTracker {
   return new SlaTracker(config);
 }
 
@@ -792,62 +698,46 @@ export const slaTracker = new SlaTracker();
 /**
  * Export SLA metrics in Prometheus format
  */
-export function exportSlaMetrics(
-  tracker: SlaTracker,
-  providers: ProviderId[],
-): string {
+export function exportSlaMetrics(tracker: SlaTracker, providers: ProviderId[]): string {
   const lines: string[] = [
-    "# HELP ai_gateway_sla_availability Provider availability percentage",
-    "# TYPE ai_gateway_sla_availability gauge",
+    '# HELP ai_gateway_sla_availability Provider availability percentage',
+    '# TYPE ai_gateway_sla_availability gauge',
   ];
 
   for (const provider of providers) {
     const report = tracker.getReport(provider);
-    lines.push(
-      `ai_gateway_sla_availability{provider="${provider}"} ${report.uptimePercentage}`,
-    );
+    lines.push(`ai_gateway_sla_availability{provider="${provider}"} ${report.uptimePercentage}`);
   }
 
-  lines.push("");
-  lines.push("# HELP ai_gateway_sla_latency_p95 95th percentile latency in ms");
-  lines.push("# TYPE ai_gateway_sla_latency_p95 gauge");
+  lines.push('');
+  lines.push('# HELP ai_gateway_sla_latency_p95 95th percentile latency in ms');
+  lines.push('# TYPE ai_gateway_sla_latency_p95 gauge');
 
   for (const provider of providers) {
     const report = tracker.getReport(provider);
-    lines.push(
-      `ai_gateway_sla_latency_p95{provider="${provider}"} ${report.p95LatencyMs}`,
-    );
+    lines.push(`ai_gateway_sla_latency_p95{provider="${provider}"} ${report.p95LatencyMs}`);
   }
 
-  lines.push("");
-  lines.push("# HELP ai_gateway_sla_error_rate Error rate percentage");
-  lines.push("# TYPE ai_gateway_sla_error_rate gauge");
+  lines.push('');
+  lines.push('# HELP ai_gateway_sla_error_rate Error rate percentage');
+  lines.push('# TYPE ai_gateway_sla_error_rate gauge');
 
   for (const provider of providers) {
     const report = tracker.getReport(provider);
-    const errorRate =
-      report.totalRequests > 0
-        ? ((report.totalRequests - report.successfulRequests) /
-            report.totalRequests) *
-          100
-        : 0;
-    lines.push(
-      `ai_gateway_sla_error_rate{provider="${provider}"} ${errorRate}`,
-    );
+    const errorRate = report.totalRequests > 0
+      ? ((report.totalRequests - report.successfulRequests) / report.totalRequests) * 100
+      : 0;
+    lines.push(`ai_gateway_sla_error_rate{provider="${provider}"} ${errorRate}`);
   }
 
-  lines.push("");
-  lines.push(
-    "# HELP ai_gateway_sla_breaches_total Total number of SLA breaches",
-  );
-  lines.push("# TYPE ai_gateway_sla_breaches_total counter");
+  lines.push('');
+  lines.push('# HELP ai_gateway_sla_breaches_total Total number of SLA breaches');
+  lines.push('# TYPE ai_gateway_sla_breaches_total counter');
 
   for (const provider of providers) {
     const report = tracker.getReport(provider);
-    lines.push(
-      `ai_gateway_sla_breaches_total{provider="${provider}"} ${report.breachCount}`,
-    );
+    lines.push(`ai_gateway_sla_breaches_total{provider="${provider}"} ${report.breachCount}`);
   }
 
-  return lines.join("\n");
+  return lines.join('\n');
 }

@@ -87,7 +87,7 @@ export interface ExecutionResult {
   /** Action that was executed */
   actionId: string;
   /** Execution status */
-  status: "success" | "failure" | "partial";
+  status: 'success' | 'failure' | 'partial';
 
   /** Output data */
   output: Record<string, unknown>;
@@ -158,7 +158,7 @@ export interface RollbackResult {
   /** Was rollback successful? */
   success: boolean;
   /** Rollback status details */
-  status: "completed" | "partial" | "failed";
+  status: 'completed' | 'partial' | 'failed';
   /** Error if failed */
   error?: string;
   /** When rollback completed */

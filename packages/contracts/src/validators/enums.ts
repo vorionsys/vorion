@@ -2,7 +2,7 @@
  * Zod schemas for Vorion enums
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 import {
   TrustBand,
   ObservationTier,
@@ -13,7 +13,7 @@ import {
   ComponentType,
   ComponentStatus,
   ApprovalType,
-} from "../v2/enums.js";
+} from '../v2/enums.js';
 
 /** Trust band validator */
 export const trustBandSchema = z.nativeEnum(TrustBand);

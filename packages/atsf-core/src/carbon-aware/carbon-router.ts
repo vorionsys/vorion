@@ -7,13 +7,10 @@
  * @packageDocumentation
  */
 
-import { EventEmitter } from "events";
-import { createLogger } from "../common/logger.js";
-import {
-  CarbonIntensityClient,
-  createCarbonIntensityClient,
-} from "./carbon-intensity-client.js";
-import { CarbonMetrics, createCarbonMetrics } from "./carbon-metrics.js";
+import { EventEmitter } from 'events';
+import { createLogger } from '../common/logger.js';
+import { CarbonIntensityClient, createCarbonIntensityClient } from './carbon-intensity-client.js';
+import { CarbonMetrics, createCarbonMetrics } from './carbon-metrics.js';
 import type {
   CarbonRouterConfig,
   RoutingRequest,
@@ -26,15 +23,15 @@ import type {
   AlternativeRoute,
   RoutingReason,
   RequestRoutedEvent,
-} from "./types.js";
+} from './types.js';
 import {
   DEFAULT_PROVIDER_AVAILABILITY,
   DEFAULT_REGION_LATENCIES,
   DEFAULT_COST_MULTIPLIERS,
   ENERGY_PER_1000_TOKENS_KWH,
-} from "./types.js";
+} from './types.js';
 
-const logger = createLogger({ component: "carbon-router" });
+const logger = createLogger({ component: 'carbon-router' });
 
 /**
  * Default routing constraints
@@ -68,31 +65,17 @@ export class CarbonRouter extends EventEmitter {
       : createCarbonIntensityClient({ useMockData: true });
 
     this._metrics = createCarbonMetrics();
-    this._defaultConstraints = {
-      ...DEFAULT_CONSTRAINTS,
-      ...config.defaultConstraints,
-    };
+    this._defaultConstraints = { ...DEFAULT_CONSTRAINTS, ...config.defaultConstraints };
     this._enableMetrics = config.enableMetrics ?? true;
 
     // Initialize provider configuration
-    this._providerAvailability =
-      config.providerConfig?.availability ?? this.createDefaultAvailability();
-    this._regionLatencies =
-      config.providerConfig?.defaultLatencies ??
-      new Map(
-        Object.entries(DEFAULT_REGION_LATENCIES) as [CloudRegion, number][],
-      );
-    this._costMultipliers =
-      config.providerConfig?.costMultipliers ??
-      new Map(
-        Object.entries(DEFAULT_COST_MULTIPLIERS) as [CloudRegion, number][],
-      );
+    this._providerAvailability = config.providerConfig?.availability ?? this.createDefaultAvailability();
+    this._regionLatencies = config.providerConfig?.defaultLatencies ?? new Map(Object.entries(DEFAULT_REGION_LATENCIES) as [CloudRegion, number][]);
+    this._costMultipliers = config.providerConfig?.costMultipliers ?? new Map(Object.entries(DEFAULT_COST_MULTIPLIERS) as [CloudRegion, number][]);
 
     // Forward client events to metrics
     if (this._enableMetrics) {
-      this._client.on("carbon:*", (event) =>
-        this._metrics.emit(event.type, event),
-      );
+      this._client.on('carbon:*', (event) => this._metrics.emit(event.type, event));
     }
   }
 
@@ -117,10 +100,7 @@ export class CarbonRouter extends EventEmitter {
     const constraints = { ...this._defaultConstraints, ...request.constraints };
     const startTime = Date.now();
 
-    logger.debug(
-      { requestId: request.requestId, constraints },
-      "Routing request",
-    );
+    logger.debug({ requestId: request.requestId, constraints }, 'Routing request');
 
     // If required region is specified, use it directly
     if (constraints.requiredRegion) {
@@ -134,10 +114,7 @@ export class CarbonRouter extends EventEmitter {
     const eligibleRoutes = this.getEligibleRoutes(intensities, constraints);
 
     if (eligibleRoutes.length === 0) {
-      logger.warn(
-        { requestId: request.requestId },
-        "No eligible routes found, using fallback",
-      );
+      logger.warn({ requestId: request.requestId }, 'No eligible routes found, using fallback');
       return this.routeFallback(request, intensities);
     }
 
@@ -146,22 +123,12 @@ export class CarbonRouter extends EventEmitter {
 
     // Select the best route
     const bestRoute = eligibleRoutes[0]!;
-    const alternatives = eligibleRoutes
-      .slice(1, 4)
-      .map((r) => this.toAlternativeRoute(r));
+    const alternatives = eligibleRoutes.slice(1, 4).map(r => this.toAlternativeRoute(r));
 
     // Calculate CO2 savings
-    const highestIntensity = Math.max(
-      ...Array.from(intensities.values()).map((i) => i.intensity),
-    );
-    const estimatedCO2Grams = this.calculateCO2(
-      bestRoute.carbonIntensity,
-      request.estimatedTokens ?? 1000,
-    );
-    const baselineCO2Grams = this.calculateCO2(
-      highestIntensity,
-      request.estimatedTokens ?? 1000,
-    );
+    const highestIntensity = Math.max(...Array.from(intensities.values()).map(i => i.intensity));
+    const estimatedCO2Grams = this.calculateCO2(bestRoute.carbonIntensity, request.estimatedTokens ?? 1000);
+    const baselineCO2Grams = this.calculateCO2(highestIntensity, request.estimatedTokens ?? 1000);
     const savingsGrams = baselineCO2Grams - estimatedCO2Grams;
 
     const decision: RoutingDecision = {
@@ -193,7 +160,7 @@ export class CarbonRouter extends EventEmitter {
         savingsGrams: decision.estimatedCO2SavingsGrams,
         routingTimeMs,
       },
-      "Request routed",
+      'Request routed'
     );
 
     return decision;
@@ -204,7 +171,7 @@ export class CarbonRouter extends EventEmitter {
    */
   async getProviderForRegion(
     region: CloudRegion,
-    preferredProviders?: AIProvider[],
+    preferredProviders?: AIProvider[]
   ): Promise<AIProvider | undefined> {
     const availability = this._providerAvailability.get(region);
     if (!availability || availability.length === 0) {
@@ -212,7 +179,7 @@ export class CarbonRouter extends EventEmitter {
     }
 
     // Filter to available providers
-    const available = availability.filter((a) => a.available);
+    const available = availability.filter(a => a.available);
     if (available.length === 0) {
       return undefined;
     }
@@ -220,7 +187,7 @@ export class CarbonRouter extends EventEmitter {
     // If preferred providers specified, try them first
     if (preferredProviders && preferredProviders.length > 0) {
       for (const preferred of preferredProviders) {
-        const match = available.find((a) => a.provider === preferred);
+        const match = available.find(a => a.provider === preferred);
         if (match) {
           return match.provider;
         }
@@ -248,10 +215,7 @@ export class CarbonRouter extends EventEmitter {
   /**
    * Check if a region meets carbon constraints
    */
-  async isGreenRegion(
-    region: CloudRegion,
-    maxIntensity?: number,
-  ): Promise<boolean> {
+  async isGreenRegion(region: CloudRegion, maxIntensity?: number): Promise<boolean> {
     const intensity = await this._client.getIntensity(region);
     const threshold = maxIntensity ?? 150; // Default to "low" carbon threshold
     return intensity.intensity <= threshold;
@@ -260,20 +224,13 @@ export class CarbonRouter extends EventEmitter {
   /**
    * Update provider availability
    */
-  updateProviderAvailability(
-    region: CloudRegion,
-    provider: AIProvider,
-    available: boolean,
-  ): void {
+  updateProviderAvailability(region: CloudRegion, provider: AIProvider, available: boolean): void {
     const existing = this._providerAvailability.get(region);
     if (existing) {
-      const providerEntry = existing.find((p) => p.provider === provider);
+      const providerEntry = existing.find(p => p.provider === provider);
       if (providerEntry) {
         providerEntry.available = available;
-        logger.info(
-          { region, provider, available },
-          "Provider availability updated",
-        );
+        logger.info({ region, provider, available }, 'Provider availability updated');
       }
     }
   }
@@ -295,7 +252,7 @@ export class CarbonRouter extends EventEmitter {
     this._client.removeAllListeners();
     this._metrics.removeAllListeners();
     this.removeAllListeners();
-    logger.info("Carbon router closed");
+    logger.info('Carbon router closed');
   }
 
   /**
@@ -303,14 +260,11 @@ export class CarbonRouter extends EventEmitter {
    */
   private async routeToRequired(
     request: RoutingRequest,
-    constraints: RoutingConstraints,
+    constraints: RoutingConstraints
   ): Promise<RoutingDecision> {
     const region = constraints.requiredRegion!;
     const intensity = await this._client.getIntensity(region);
-    const provider = await this.getProviderForRegion(
-      region,
-      constraints.preferredProviders,
-    );
+    const provider = await this.getProviderForRegion(region, constraints.preferredProviders);
 
     if (!provider) {
       throw new Error(`No provider available in required region: ${region}`);
@@ -323,7 +277,7 @@ export class CarbonRouter extends EventEmitter {
       carbonIntensity: intensity,
       estimatedLatencyMs: this._regionLatencies.get(region) ?? 100,
       costMultiplier: this._costMultipliers.get(region) ?? 1.0,
-      reason: "required_region",
+      reason: 'required_region',
       alternatives: [],
       estimatedCO2SavingsGrams: 0,
       decidedAt: new Date().toISOString(),
@@ -342,15 +296,14 @@ export class CarbonRouter extends EventEmitter {
    */
   private async routeFallback(
     request: RoutingRequest,
-    intensities: Map<CloudRegion, CarbonIntensity>,
+    intensities: Map<CloudRegion, CarbonIntensity>
   ): Promise<RoutingDecision> {
     // Find any available region/provider combination
     const providerEntries = Array.from(this._providerAvailability.entries());
     for (const [region, availability] of providerEntries) {
-      const available = availability.find((a) => a.available);
+      const available = availability.find(a => a.available);
       if (available) {
-        const intensity =
-          intensities.get(region) ?? (await this._client.getIntensity(region));
+        const intensity = intensities.get(region) ?? await this._client.getIntensity(region);
 
         const decision: RoutingDecision = {
           id: `route-${Date.now()}-${Math.random().toString(36).substring(7)}`,
@@ -359,7 +312,7 @@ export class CarbonRouter extends EventEmitter {
           carbonIntensity: intensity,
           estimatedLatencyMs: this._regionLatencies.get(region) ?? 100,
           costMultiplier: this._costMultipliers.get(region) ?? 1.0,
-          reason: "fallback",
+          reason: 'fallback',
           alternatives: [],
           estimatedCO2SavingsGrams: 0,
           decidedAt: new Date().toISOString(),
@@ -367,17 +320,14 @@ export class CarbonRouter extends EventEmitter {
 
         if (this._enableMetrics) {
           this.emitRoutedEvent(request, decision);
-          this._metrics.recordRouting(
-            decision,
-            request.estimatedTokens ?? 1000,
-          );
+          this._metrics.recordRouting(decision, request.estimatedTokens ?? 1000);
         }
 
         return decision;
       }
     }
 
-    throw new Error("No providers available in any region");
+    throw new Error('No providers available in any region');
   }
 
   /**
@@ -385,28 +335,20 @@ export class CarbonRouter extends EventEmitter {
    */
   private getEligibleRoutes(
     intensities: Map<CloudRegion, CarbonIntensity>,
-    constraints: RoutingConstraints,
+    constraints: RoutingConstraints
   ): EligibleRoute[] {
     const routes: EligibleRoute[] = [];
     const intensityEntries = Array.from(intensities.entries());
 
     for (const [region, intensity] of intensityEntries) {
       // Check carbon intensity constraint
-      if (
-        constraints.maxCarbonIntensity &&
-        intensity.intensity > constraints.maxCarbonIntensity
-      ) {
+      if (constraints.maxCarbonIntensity && intensity.intensity > constraints.maxCarbonIntensity) {
         continue;
       }
 
       // Check renewable percentage constraint
-      if (
-        constraints.minRenewablePercentage &&
-        intensity.renewablePercentage !== undefined
-      ) {
-        if (
-          intensity.renewablePercentage < constraints.minRenewablePercentage
-        ) {
+      if (constraints.minRenewablePercentage && intensity.renewablePercentage !== undefined) {
+        if (intensity.renewablePercentage < constraints.minRenewablePercentage) {
           continue;
         }
       }
@@ -419,10 +361,7 @@ export class CarbonRouter extends EventEmitter {
 
       // Check cost constraint
       const cost = this._costMultipliers.get(region) ?? 1.0;
-      if (
-        constraints.maxCostMultiplier &&
-        cost > constraints.maxCostMultiplier
-      ) {
+      if (constraints.maxCostMultiplier && cost > constraints.maxCostMultiplier) {
         continue;
       }
 
@@ -430,19 +369,14 @@ export class CarbonRouter extends EventEmitter {
       const availability = this._providerAvailability.get(region);
       if (!availability) continue;
 
-      const availableProviders = availability.filter((a) => a.available);
+      const availableProviders = availability.filter(a => a.available);
       if (availableProviders.length === 0) continue;
 
       // Filter by preferred providers if specified
       let selectedProvider: ProviderAvailability | undefined;
-      if (
-        constraints.preferredProviders &&
-        constraints.preferredProviders.length > 0
-      ) {
+      if (constraints.preferredProviders && constraints.preferredProviders.length > 0) {
         for (const preferred of constraints.preferredProviders) {
-          selectedProvider = availableProviders.find(
-            (a) => a.provider === preferred,
-          );
+          selectedProvider = availableProviders.find(a => a.provider === preferred);
           if (selectedProvider) break;
         }
         // Skip this region if no preferred provider is available
@@ -472,36 +406,30 @@ export class CarbonRouter extends EventEmitter {
   /**
    * Determine routing reason
    */
-  private determineReason(
-    route: EligibleRoute,
-    constraints: RoutingConstraints,
-  ): RoutingReason {
+  private determineReason(route: EligibleRoute, constraints: RoutingConstraints): RoutingReason {
     // Check if this is the lowest carbon option
     if (route.carbonIntensity <= 50) {
-      return "lowest_carbon";
+      return 'lowest_carbon';
     }
 
     // Check if renewable preference was a factor
     if (constraints.minRenewablePercentage && route.renewablePercentage) {
       if (route.renewablePercentage >= constraints.minRenewablePercentage) {
-        return "renewable_preference";
+        return 'renewable_preference';
       }
     }
 
     // Check if latency was the primary factor
-    if (
-      constraints.maxLatencyMs &&
-      route.latencyMs <= constraints.maxLatencyMs * 0.5
-    ) {
-      return "latency_constraint";
+    if (constraints.maxLatencyMs && route.latencyMs <= constraints.maxLatencyMs * 0.5) {
+      return 'latency_constraint';
     }
 
     // Check if cost was the primary factor
     if (constraints.maxCostMultiplier && route.costMultiplier <= 1.0) {
-      return "cost_constraint";
+      return 'cost_constraint';
     }
 
-    return "lowest_carbon";
+    return 'lowest_carbon';
   }
 
   /**
@@ -520,24 +448,17 @@ export class CarbonRouter extends EventEmitter {
   /**
    * Create default provider availability map
    */
-  private createDefaultAvailability(): Map<
-    CloudRegion,
-    ProviderAvailability[]
-  > {
+  private createDefaultAvailability(): Map<CloudRegion, ProviderAvailability[]> {
     const map = new Map<CloudRegion, ProviderAvailability[]>();
 
-    for (const [region, providers] of Object.entries(
-      DEFAULT_PROVIDER_AVAILABILITY,
-    ) as [CloudRegion, AIProvider[]][]) {
-      const availability: ProviderAvailability[] = providers.map(
-        (provider) => ({
-          provider,
-          region,
-          available: true,
-          latencyMs: DEFAULT_REGION_LATENCIES[region] ?? 100,
-          costMultiplier: DEFAULT_COST_MULTIPLIERS[region] ?? 1.0,
-        }),
-      );
+    for (const [region, providers] of Object.entries(DEFAULT_PROVIDER_AVAILABILITY) as [CloudRegion, AIProvider[]][]) {
+      const availability: ProviderAvailability[] = providers.map(provider => ({
+        provider,
+        region,
+        available: true,
+        latencyMs: DEFAULT_REGION_LATENCIES[region] ?? 100,
+        costMultiplier: DEFAULT_COST_MULTIPLIERS[region] ?? 1.0,
+      }));
       map.set(region, availability);
     }
 
@@ -547,26 +468,20 @@ export class CarbonRouter extends EventEmitter {
   /**
    * Emit request routed event
    */
-  private emitRoutedEvent(
-    request: RoutingRequest,
-    decision: RoutingDecision,
-  ): void {
+  private emitRoutedEvent(request: RoutingRequest, decision: RoutingDecision): void {
     const event: RequestRoutedEvent = {
-      type: "carbon:request_routed",
+      type: 'carbon:request_routed',
       timestamp: new Date().toISOString(),
       requestId: request.requestId,
       selectedRegion: decision.region,
       selectedProvider: decision.provider,
       carbonIntensity: decision.carbonIntensity.intensity,
-      estimatedCO2Grams: this.calculateCO2(
-        decision.carbonIntensity.intensity,
-        request.estimatedTokens ?? 1000,
-      ),
+      estimatedCO2Grams: this.calculateCO2(decision.carbonIntensity.intensity, request.estimatedTokens ?? 1000),
       routingReason: decision.reason,
       latencyMs: decision.estimatedLatencyMs,
     };
     this.emit(event.type, event);
-    this.emit("carbon:*", event);
+    this.emit('carbon:*', event);
   }
 }
 

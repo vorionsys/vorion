@@ -15,7 +15,7 @@ export {
   getNormalizedWeight,
   getCanonicalWeightMetrics,
   type CanonicalWeightMetric,
-} from "./canonical.js";
+} from './canonical.js';
 
 export {
   AXIOM_DELTA_PRESETS,
@@ -27,7 +27,7 @@ export {
   type WeightDelta,
   type WeightAdjustmentDirection,
   type WeightMergeRecord,
-} from "./deltas.js";
+} from './deltas.js';
 
 export {
   mergeWeights,
@@ -39,4 +39,4 @@ export {
   type MergeStrategy,
   type MergedTrustWeights,
   type WeightComputationAudit,
-} from "./merger.js";
+} from './merger.js';

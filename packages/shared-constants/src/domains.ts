@@ -13,22 +13,22 @@
 
 export const VORION_DOMAINS = {
   /** Main Vorion organization site */
-  main: "https://vorion.org",
+  main: 'https://vorion.org',
 
   /** BASIS specification and documentation */
-  basis: "https://basis.vorion.org",
+  basis: 'https://basis.vorion.org',
 
   /** CAR ID specification */
-  carId: "https://carid.vorion.org",
+  carId: 'https://carid.vorion.org',
 
   /** ATSF (Agent Trust & Safety Framework) */
-  atsf: "https://atsf.vorion.org",
+  atsf: 'https://atsf.vorion.org',
 
   /** Learning and educational resources (primary) */
-  learn: "https://learn.vorion.org",
+  learn: 'https://learn.vorion.org',
 
   /** Kaizen - Interactive AI Learning Experience (mirrors learn) */
-  kaizen: "https://kaizen.vorion.org",
+  kaizen: 'https://kaizen.vorion.org',
 } as const;
 
 /**
@@ -36,28 +36,28 @@ export const VORION_DOMAINS = {
  * Used for domain detection and routing
  */
 export const DOMAIN_ALIASES = {
-  "kaizen.vorion.org": "learn.vorion.org",
+  'kaizen.vorion.org': 'learn.vorion.org',
 } as const;
 
 // =============================================================================
-// VORION COMMERCIAL
+// AGENT ANCHOR AI (COMMERCIAL)
 // =============================================================================
 
 export const AGENTANCHOR_DOMAINS = {
-  /** Main Vorion platform site */
-  main: "https://vorion.org",
+  /** Main Agent Anchor AI site */
+  main: 'https://agentanchorai.com',
 
-  /** Trust verification and certification */
-  trust: "https://trust.vorion.org",
+  /** Agent Anchor Trust - Trust verification and certification */
+  trust: 'https://trust.agentanchorai.com',
 
-  /** Policy engine and governance logic */
-  logic: "https://logic.vorion.org",
+  /** Agent Anchor Logic - Policy engine and governance logic */
+  logic: 'https://logic.agentanchorai.com',
 
   /** Status page */
-  status: "https://status.vorion.org",
+  status: 'https://status.agentanchorai.com',
 
   /** Agent trust verification portal */
-  verify: "https://verify.vorion.org",
+  verify: 'https://verify.agentanchorai.com',
 } as const;
 
 // =============================================================================
@@ -66,10 +66,10 @@ export const AGENTANCHOR_DOMAINS = {
 
 export const COGNIGATE_DOMAINS = {
   /** Cognigate main site and documentation */
-  main: "https://cognigate.dev",
+  main: 'https://cognigate.dev',
 
   /** Cognigate API documentation */
-  docs: "https://cognigate.dev/docs",
+  docs: 'https://cognigate.dev/docs',
 } as const;
 
 // =============================================================================
@@ -79,27 +79,27 @@ export const COGNIGATE_DOMAINS = {
 export const API_ENDPOINTS = {
   /** Cognigate Production API */
   cognigate: {
-    production: "https://cognigate.dev/v1",
-    staging: "https://staging.cognigate.dev/v1",
+    production: 'https://cognigate.dev/v1',
+    staging: 'https://staging.cognigate.dev/v1',
   },
 
-  /** Vorion Platform API */
+  /** Agent Anchor AI Production API */
   agentAnchor: {
-    production: "https://api.vorion.org/v1",
-    staging: "https://staging-api.vorion.org/v1",
-    sandbox: "https://sandbox.vorion.org/v1",
+    production: 'https://api.agentanchorai.com/v1',
+    staging: 'https://staging-api.agentanchorai.com/v1',
+    sandbox: 'https://sandbox.agentanchorai.com/v1',
   },
 
   /** Trust API */
   trust: {
-    production: "https://trust.vorion.org/v1",
-    staging: "https://staging.trust.vorion.org/v1",
+    production: 'https://trust.agentanchorai.com/v1',
+    staging: 'https://staging.trust.agentanchorai.com/v1',
   },
 
   /** Logic/Policy API */
   logic: {
-    production: "https://logic.vorion.org/v1",
-    staging: "https://staging.logic.vorion.org/v1",
+    production: 'https://logic.agentanchorai.com/v1',
+    staging: 'https://staging.logic.agentanchorai.com/v1',
   },
 } as const;
 
@@ -109,42 +109,42 @@ export const API_ENDPOINTS = {
 
 export const VORION_EMAILS = {
   /** General inquiries */
-  info: "info@vorion.org",
+  info: 'info@vorion.org',
 
   /** Security reports */
-  security: "security@vorion.org",
+  security: 'security@vorion.org',
 
   /** Legal inquiries */
-  legal: "legal@vorion.org",
+  legal: 'legal@vorion.org',
 
   /** Community and contributions */
-  community: "community@vorion.org",
+  community: 'community@vorion.org',
 
   /** Contributing */
-  contribute: "contribute@vorion.org",
+  contribute: 'contribute@vorion.org',
 } as const;
 
 export const AGENTANCHOR_EMAILS = {
   /** General support */
-  support: "support@vorion.org",
+  support: 'support@agentanchorai.com',
 
   /** Sales inquiries */
-  sales: "sales@vorion.org",
+  sales: 'sales@agentanchorai.com',
 
   /** Partner program */
-  partners: "partners@vorion.org",
+  partners: 'partners@agentanchorai.com',
 
   /** API support */
-  apiSupport: "api-support@vorion.org",
+  apiSupport: 'api-support@agentanchorai.com',
 
   /** Enterprise inquiries */
-  enterprise: "enterprise@vorion.org",
+  enterprise: 'enterprise@agentanchorai.com',
 
   /** Compliance */
-  compliance: "compliance@vorion.org",
+  compliance: 'compliance@agentanchorai.com',
 
   /** Team */
-  team: "team@vorion.org",
+  team: 'team@agentanchorai.com',
 } as const;
 
 // =============================================================================
@@ -152,15 +152,15 @@ export const AGENTANCHOR_EMAILS = {
 // =============================================================================
 
 export const GITHUB = {
-  /** Vorion organization (public) */
+  /** Vorion organization */
   vorion: {
-    org: "https://github.com/vorionsys",
-    mainRepo: "https://github.com/vorionsys/vorion",
+    org: 'https://github.com/vorionsys',
+    mainRepo: 'https://github.com/vorionsys/vorion',
   },
 
-  /** Vorion private (enterprise) */
+  /** Agent Anchor AI (if separate) */
   agentAnchor: {
-    org: "https://github.com/vorionsys",
+    org: 'https://github.com/agentanchorai',
   },
 } as const;
 
@@ -171,19 +171,19 @@ export const GITHUB = {
 export const NPM_PACKAGES = {
   /** Open source packages (@vorionsys) */
   vorion: {
-    basis: "@vorionsys/basis",
-    contracts: "@vorionsys/contracts",
-    carSpec: "@vorionsys/car-spec",
-    atsfCore: "@vorionsys/atsf-core",
-    cognigate: "@vorionsys/cognigate",
-    sharedConstants: "@vorionsys/shared-constants",
+    basis: '@vorionsys/basis',
+    contracts: '@vorionsys/contracts',
+    carSpec: '@vorionsys/car-spec',
+    atsfCore: '@vorionsys/atsf-core',
+    cognigate: '@vorionsys/cognigate',
+    sharedConstants: '@vorionsys/shared-constants',
   },
 
-  /** Enterprise packages (@vorionsys) */
+  /** Commercial packages (@agentanchor) */
   agentAnchor: {
-    sdk: "@vorionsys/sdk",
-    trust: "@vorionsys/trust",
-    logic: "@vorionsys/logic",
+    sdk: '@agentanchor/sdk',
+    trust: '@agentanchor/trust',
+    logic: '@agentanchor/logic',
   },
 } as const;
 

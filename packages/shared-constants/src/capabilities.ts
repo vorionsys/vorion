@@ -7,21 +7,21 @@
  * @see https://basis.vorion.org/capabilities
  */
 
-import { TrustTier } from "./tiers";
+import { TrustTier } from './tiers';
 
 // =============================================================================
 // CAPABILITY CATEGORIES
 // =============================================================================
 
 export enum CapabilityCategory {
-  DATA_ACCESS = "data_access",
-  FILE_OPERATIONS = "file_operations",
-  API_ACCESS = "api_access",
-  CODE_EXECUTION = "code_execution",
-  AGENT_INTERACTION = "agent_interaction",
-  RESOURCE_MANAGEMENT = "resource_management",
-  SYSTEM_ADMINISTRATION = "system_administration",
-  GOVERNANCE = "governance",
+  DATA_ACCESS = 'data_access',
+  FILE_OPERATIONS = 'file_operations',
+  API_ACCESS = 'api_access',
+  CODE_EXECUTION = 'code_execution',
+  AGENT_INTERACTION = 'agent_interaction',
+  RESOURCE_MANAGEMENT = 'resource_management',
+  SYSTEM_ADMINISTRATION = 'system_administration',
+  GOVERNANCE = 'governance',
 }
 
 // =============================================================================
@@ -44,182 +44,182 @@ export interface CapabilityDefinition {
 export const CAPABILITIES: readonly CapabilityDefinition[] = [
   // T0 - Sandbox
   {
-    code: "CAP-READ-PUBLIC",
-    name: "Read Public Data",
+    code: 'CAP-READ-PUBLIC',
+    name: 'Read Public Data',
     category: CapabilityCategory.DATA_ACCESS,
-    description: "Access publicly available data",
+    description: 'Access publicly available data',
     unlockTier: TrustTier.T0_SANDBOX,
   },
   {
-    code: "CAP-GENERATE-TEXT",
-    name: "Generate Text",
+    code: 'CAP-GENERATE-TEXT',
+    name: 'Generate Text',
     category: CapabilityCategory.CODE_EXECUTION,
-    description: "Generate text responses",
+    description: 'Generate text responses',
     unlockTier: TrustTier.T0_SANDBOX,
   },
 
   // T1 - Observed
   {
-    code: "CAP-READ-INTERNAL",
-    name: "Read Internal Data",
+    code: 'CAP-READ-INTERNAL',
+    name: 'Read Internal Data',
     category: CapabilityCategory.DATA_ACCESS,
-    description: "Access internal data within allowed scopes",
+    description: 'Access internal data within allowed scopes',
     unlockTier: TrustTier.T1_OBSERVED,
-    constraints: ["Read-only", "Logged"],
+    constraints: ['Read-only', 'Logged'],
   },
   {
-    code: "CAP-INTERNAL-API",
-    name: "Internal API Access",
+    code: 'CAP-INTERNAL-API',
+    name: 'Internal API Access',
     category: CapabilityCategory.API_ACCESS,
-    description: "Make read-only internal API calls",
+    description: 'Make read-only internal API calls',
     unlockTier: TrustTier.T1_OBSERVED,
-    constraints: ["GET only", "Rate limited"],
+    constraints: ['GET only', 'Rate limited'],
   },
 
   // T2 - Provisional
   {
-    code: "CAP-FILE-WRITE",
-    name: "Write Files",
+    code: 'CAP-FILE-WRITE',
+    name: 'Write Files',
     category: CapabilityCategory.FILE_OPERATIONS,
-    description: "Write to approved directories",
+    description: 'Write to approved directories',
     unlockTier: TrustTier.T2_PROVISIONAL,
-    constraints: ["Approved dirs only", "Size limited"],
+    constraints: ['Approved dirs only', 'Size limited'],
   },
   {
-    code: "CAP-DB-READ",
-    name: "Database Read",
+    code: 'CAP-DB-READ',
+    name: 'Database Read',
     category: CapabilityCategory.DATA_ACCESS,
-    description: "Read from approved database tables",
+    description: 'Read from approved database tables',
     unlockTier: TrustTier.T2_PROVISIONAL,
-    constraints: ["Approved tables", "Query timeout"],
+    constraints: ['Approved tables', 'Query timeout'],
   },
   {
-    code: "CAP-EXTERNAL-API-READ",
-    name: "External API Read",
+    code: 'CAP-EXTERNAL-API-READ',
+    name: 'External API Read',
     category: CapabilityCategory.API_ACCESS,
-    description: "Make GET requests to approved external APIs",
+    description: 'Make GET requests to approved external APIs',
     unlockTier: TrustTier.T2_PROVISIONAL,
-    constraints: ["GET only", "Approved endpoints"],
+    constraints: ['GET only', 'Approved endpoints'],
   },
 
   // T3 - Monitored
   {
-    code: "CAP-DB-WRITE",
-    name: "Database Write",
+    code: 'CAP-DB-WRITE',
+    name: 'Database Write',
     category: CapabilityCategory.DATA_ACCESS,
-    description: "Write to approved database tables",
+    description: 'Write to approved database tables',
     unlockTier: TrustTier.T3_MONITORED,
-    constraints: ["Approved tables", "Transaction limits"],
+    constraints: ['Approved tables', 'Transaction limits'],
   },
   {
-    code: "CAP-EXTERNAL-API-FULL",
-    name: "External API Full Access",
+    code: 'CAP-EXTERNAL-API-FULL',
+    name: 'External API Full Access',
     category: CapabilityCategory.API_ACCESS,
-    description: "Full REST operations on approved external APIs",
+    description: 'Full REST operations on approved external APIs',
     unlockTier: TrustTier.T3_MONITORED,
-    constraints: ["Approved endpoints", "Rate limited"],
+    constraints: ['Approved endpoints', 'Rate limited'],
   },
   {
-    code: "CAP-CODE-SANDBOX",
-    name: "Sandboxed Code Execution",
+    code: 'CAP-CODE-SANDBOX',
+    name: 'Sandboxed Code Execution',
     category: CapabilityCategory.CODE_EXECUTION,
-    description: "Execute code in isolated sandbox",
+    description: 'Execute code in isolated sandbox',
     unlockTier: TrustTier.T3_MONITORED,
-    constraints: ["Sandboxed", "Time limited", "No network"],
+    constraints: ['Sandboxed', 'Time limited', 'No network'],
   },
 
   // T4 - Standard
   {
-    code: "CAP-AGENT-COMMUNICATE",
-    name: "Agent Communication",
+    code: 'CAP-AGENT-COMMUNICATE',
+    name: 'Agent Communication',
     category: CapabilityCategory.AGENT_INTERACTION,
-    description: "Send and receive messages to/from other agents",
+    description: 'Send and receive messages to/from other agents',
     unlockTier: TrustTier.T4_STANDARD,
-    constraints: ["Approved agents", "Message limits"],
+    constraints: ['Approved agents', 'Message limits'],
   },
   {
-    code: "CAP-WORKFLOW-MULTI",
-    name: "Multi-Step Workflow",
+    code: 'CAP-WORKFLOW-MULTI',
+    name: 'Multi-Step Workflow',
     category: CapabilityCategory.CODE_EXECUTION,
-    description: "Orchestrate multi-step workflows",
+    description: 'Orchestrate multi-step workflows',
     unlockTier: TrustTier.T4_STANDARD,
-    constraints: ["Approved patterns", "Checkpoints required"],
+    constraints: ['Approved patterns', 'Checkpoints required'],
   },
   {
-    code: "CAP-ESCALATE-HUMAN",
-    name: "Human Escalation",
+    code: 'CAP-ESCALATE-HUMAN',
+    name: 'Human Escalation',
     category: CapabilityCategory.GOVERNANCE,
-    description: "Initiate escalation to human reviewers",
+    description: 'Initiate escalation to human reviewers',
     unlockTier: TrustTier.T4_STANDARD,
   },
 
   // T5 - Trusted
   {
-    code: "CAP-AGENT-DELEGATE",
-    name: "Task Delegation",
+    code: 'CAP-AGENT-DELEGATE',
+    name: 'Task Delegation',
     category: CapabilityCategory.AGENT_INTERACTION,
-    description: "Delegate tasks to other agents",
+    description: 'Delegate tasks to other agents',
     unlockTier: TrustTier.T5_TRUSTED,
-    constraints: ["Trust verified agents"],
+    constraints: ['Trust verified agents'],
   },
   {
-    code: "CAP-RESOURCE-PROVISION",
-    name: "Resource Provisioning",
+    code: 'CAP-RESOURCE-PROVISION',
+    name: 'Resource Provisioning',
     category: CapabilityCategory.RESOURCE_MANAGEMENT,
-    description: "Provision computational resources",
+    description: 'Provision computational resources',
     unlockTier: TrustTier.T5_TRUSTED,
-    constraints: ["Budget limits", "Approval required"],
+    constraints: ['Budget limits', 'Approval required'],
   },
 
   // T6 - Certified
   {
-    code: "CAP-AGENT-SPAWN",
-    name: "Spawn Agents",
+    code: 'CAP-AGENT-SPAWN',
+    name: 'Spawn Agents',
     category: CapabilityCategory.AGENT_INTERACTION,
-    description: "Create new agent instances",
+    description: 'Create new agent instances',
     unlockTier: TrustTier.T6_CERTIFIED,
-    constraints: ["Template required", "Quota limited"],
+    constraints: ['Template required', 'Quota limited'],
   },
   {
-    code: "CAP-INFRA-MANAGE",
-    name: "Infrastructure Management",
+    code: 'CAP-INFRA-MANAGE',
+    name: 'Infrastructure Management',
     category: CapabilityCategory.RESOURCE_MANAGEMENT,
-    description: "Manage infrastructure resources",
+    description: 'Manage infrastructure resources',
     unlockTier: TrustTier.T6_CERTIFIED,
-    constraints: ["Approved resources"],
+    constraints: ['Approved resources'],
   },
   {
-    code: "CAP-POLICY-CREATE",
-    name: "Policy Creation",
+    code: 'CAP-POLICY-CREATE',
+    name: 'Policy Creation',
     category: CapabilityCategory.GOVERNANCE,
-    description: "Create governance policies",
+    description: 'Create governance policies',
     unlockTier: TrustTier.T6_CERTIFIED,
-    constraints: ["Review required"],
+    constraints: ['Review required'],
   },
 
   // T7 - Autonomous
   {
-    code: "CAP-FULL-ADMIN",
-    name: "Full Administration",
+    code: 'CAP-FULL-ADMIN',
+    name: 'Full Administration',
     category: CapabilityCategory.SYSTEM_ADMINISTRATION,
-    description: "Full administrative access",
+    description: 'Full administrative access',
     unlockTier: TrustTier.T7_AUTONOMOUS,
   },
   {
-    code: "CAP-SELF-MODIFY",
-    name: "Self-Modification",
+    code: 'CAP-SELF-MODIFY',
+    name: 'Self-Modification',
     category: CapabilityCategory.CODE_EXECUTION,
-    description: "Modify own configuration and behavior",
+    description: 'Modify own configuration and behavior',
     unlockTier: TrustTier.T7_AUTONOMOUS,
-    constraints: ["Ethical bounds", "Audit logged"],
+    constraints: ['Ethical bounds', 'Audit logged'],
   },
   {
-    code: "CAP-STRATEGIC-DECISION",
-    name: "Strategic Decisions",
+    code: 'CAP-STRATEGIC-DECISION',
+    name: 'Strategic Decisions',
     category: CapabilityCategory.GOVERNANCE,
-    description: "Make strategic organizational decisions",
+    description: 'Make strategic organizational decisions',
     unlockTier: TrustTier.T7_AUTONOMOUS,
-    constraints: ["Human oversight available"],
+    constraints: ['Human oversight available'],
   },
 ] as const;
 
@@ -230,9 +230,7 @@ export const CAPABILITIES: readonly CapabilityDefinition[] = [
 /**
  * Get capabilities available at a specific tier
  */
-export function getCapabilitiesForTier(
-  tier: TrustTier,
-): CapabilityDefinition[] {
+export function getCapabilitiesForTier(tier: TrustTier): CapabilityDefinition[] {
   return CAPABILITIES.filter((cap) => cap.unlockTier <= tier);
 }
 
@@ -262,7 +260,7 @@ export function getCapabilityMinTier(code: string): TrustTier | undefined {
  * Get capabilities by category
  */
 export function getCapabilitiesByCategory(
-  category: CapabilityCategory,
+  category: CapabilityCategory
 ): CapabilityDefinition[] {
   return CAPABILITIES.filter((cap) => cap.category === category);
 }

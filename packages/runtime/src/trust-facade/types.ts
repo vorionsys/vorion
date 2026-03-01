@@ -13,7 +13,7 @@
 import {
   TIER_THRESHOLDS,
   scoreToTier as sharedScoreToTier,
-} from "@vorionsys/shared-constants";
+} from '@vorionsys/shared-constants';
 
 /**
  * Trust tier levels (T0-T7)
@@ -25,21 +25,15 @@ export type TrustTier = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
  * Derived from shared-constants TIER_THRESHOLDS (single source of truth)
  */
 export const TRUST_TIER_NAMES: Record<TrustTier, string> = Object.fromEntries(
-  Object.entries(TIER_THRESHOLDS).map(([k, v]) => [Number(k), v.name]),
+  Object.entries(TIER_THRESHOLDS).map(([k, v]) => [Number(k), v.name])
 ) as Record<TrustTier, string>;
 
 /**
  * Trust score ranges for each tier
  * Derived from shared-constants TIER_THRESHOLDS (single source of truth)
  */
-export const TRUST_TIER_RANGES: Record<
-  TrustTier,
-  { min: number; max: number }
-> = Object.fromEntries(
-  Object.entries(TIER_THRESHOLDS).map(([k, v]) => [
-    Number(k),
-    { min: v.min, max: v.max },
-  ]),
+export const TRUST_TIER_RANGES: Record<TrustTier, { min: number; max: number }> = Object.fromEntries(
+  Object.entries(TIER_THRESHOLDS).map(([k, v]) => [Number(k), { min: v.min, max: v.max }])
 ) as Record<TrustTier, { min: number; max: number }>;
 
 /**
@@ -50,12 +44,12 @@ export { sharedScoreToTier };
 /**
  * Decision tier for intent processing
  */
-export type DecisionTier = "GREEN" | "YELLOW" | "RED";
+export type DecisionTier = 'GREEN' | 'YELLOW' | 'RED';
 
 /**
  * Observation tier for agent visibility
  */
-export type ObservationTier = "BLACK_BOX" | "GRAY_BOX" | "WHITE_BOX";
+export type ObservationTier = 'BLACK_BOX' | 'GRAY_BOX' | 'WHITE_BOX';
 
 /**
  * Agent credentials for admission
@@ -180,7 +174,7 @@ export interface TrustSignal {
   /** Agent ID */
   agentId: string;
   /** Signal type */
-  type: "success" | "failure" | "violation" | "neutral";
+  type: 'success' | 'failure' | 'violation' | 'neutral';
   /** Signal weight (0-1) */
   weight: number;
   /** Signal source */
@@ -198,7 +192,7 @@ export interface TrustFacadeConfig {
   /** Use a3i for trust dynamics (asymmetric updates) */
   useA3iForDynamics: boolean;
   /** Primary source for trust scores */
-  primaryScoreSource: "atsf" | "a3i";
+  primaryScoreSource: 'atsf' | 'a3i';
   /** Cache TTL for gate trust results (ms) */
   gateTrustCacheTtlMs: number;
   /** Maximum authorization latency target (ms) */
@@ -211,7 +205,7 @@ export interface TrustFacadeConfig {
 export const DEFAULT_TRUST_FACADE_CONFIG: TrustFacadeConfig = {
   useAtsfForPersistence: true,
   useA3iForDynamics: true,
-  primaryScoreSource: "atsf",
+  primaryScoreSource: 'atsf',
   gateTrustCacheTtlMs: 3600000, // 1 hour
   maxAuthorizationLatencyMs: 50,
 };

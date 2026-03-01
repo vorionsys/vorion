@@ -21,15 +21,15 @@
  * @module @vorionsys/contracts/car/car-string
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 import {
   type DomainCode,
   domainCodeSchema,
   encodeDomains,
   formatDomainString,
   isDomainCode,
-} from "./domains.js";
-import { CapabilityLevel, isCapabilityLevel } from "./levels.js";
+} from './domains.js';
+import { CapabilityLevel, isCapabilityLevel } from './levels.js';
 
 // ============================================================================
 // CAR Regex Pattern
@@ -52,22 +52,19 @@ import { CapabilityLevel, isCapabilityLevel } from "./levels.js";
  * NOTE: Trust tier is NOT part of the CAR. Trust is computed at runtime
  * from attestations, behavioral signals, and deployment context.
  */
-export const CAR_REGEX =
-  /^([a-z0-9]+)\.([a-z0-9-]+)\.([a-z0-9-]+):([A-Z]+)-L([0-7])@(\d+\.\d+\.\d+)(?:#([a-z0-9,_-]+))?$/;
+export const CAR_REGEX = /^([a-z0-9]+)\.([a-z0-9-]+)\.([a-z0-9-]+):([A-Z]+)-L([0-7])@(\d+\.\d+\.\d+)(?:#([a-z0-9,_-]+))?$/;
 
 /**
  * Looser regex for partial CAR validation.
  */
-export const CAR_PARTIAL_REGEX =
-  /^([a-z0-9]+)\.([a-z0-9-]+)\.([a-z0-9-]+):([A-Z]+)-L([0-7])(@\d+\.\d+\.\d+)?(?:#([a-z0-9,_-]+))?$/;
+export const CAR_PARTIAL_REGEX = /^([a-z0-9]+)\.([a-z0-9-]+)\.([a-z0-9-]+):([A-Z]+)-L([0-7])(@\d+\.\d+\.\d+)?(?:#([a-z0-9,_-]+))?$/;
 
 /**
  * Legacy regex for parsing old-format CAR strings that include trust tier.
  * Used for migration/compatibility only.
  * @deprecated Use CAR_REGEX instead - trust tier should not be in the identifier
  */
-export const CAR_LEGACY_REGEX =
-  /^([a-z0-9]+)\.([a-z0-9-]+)\.([a-z0-9-]+):([A-Z]+)-L([0-7])-T([0-7])@(\d+\.\d+\.\d+)$/;
+export const CAR_LEGACY_REGEX = /^([a-z0-9]+)\.([a-z0-9-]+)\.([a-z0-9-]+):([A-Z]+)-L([0-7])-T([0-7])@(\d+\.\d+\.\d+)$/;
 
 // Legacy CAR ID aliases for backwards compatibility
 /** @deprecated Use CAR_REGEX instead */
@@ -149,18 +146,9 @@ export function getACIIdentity(parsed: ParsedCAR): CARIdentity {
  */
 export const parsedCARSchema = z.object({
   car: z.string().min(1),
-  registry: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9]+$/),
-  organization: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9-]+$/),
-  agentClass: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9-]+$/),
+  registry: z.string().min(1).regex(/^[a-z0-9]+$/),
+  organization: z.string().min(1).regex(/^[a-z0-9-]+$/),
+  agentClass: z.string().min(1).regex(/^[a-z0-9-]+$/),
   domains: z.array(domainCodeSchema).min(1),
   domainsBitmask: z.number().int().min(0),
   level: z.nativeEnum(CapabilityLevel),
@@ -184,13 +172,9 @@ export class CARParseError extends Error {
   /** Error code for programmatic handling */
   public readonly code: CARParseErrorCode;
 
-  constructor(
-    message: string,
-    car: string,
-    code: CARParseErrorCode = "INVALID_FORMAT",
-  ) {
+  constructor(message: string, car: string, code: CARParseErrorCode = 'INVALID_FORMAT') {
     super(message);
-    this.name = "CARParseError";
+    this.name = 'CARParseError';
     this.car = car;
     this.code = code;
   }
@@ -203,13 +187,9 @@ export class ACIParseError extends CARParseError {
   /** @deprecated Use car instead */
   public readonly carId: string;
 
-  constructor(
-    message: string,
-    carId: string,
-    code: CARParseErrorCode = "INVALID_FORMAT",
-  ) {
+  constructor(message: string, carId: string, code: CARParseErrorCode = 'INVALID_FORMAT') {
     super(message, carId, code);
-    this.name = "ACIParseError";
+    this.name = 'ACIParseError';
     this.carId = carId;
   }
 }
@@ -218,16 +198,16 @@ export class ACIParseError extends CARParseError {
  * Error codes for CAR parse errors.
  */
 export type CARParseErrorCode =
-  | "INVALID_FORMAT"
-  | "INVALID_REGISTRY"
-  | "INVALID_ORGANIZATION"
-  | "INVALID_AGENT_CLASS"
-  | "INVALID_DOMAINS"
-  | "NO_DOMAINS"
-  | "INVALID_LEVEL"
-  | "INVALID_VERSION"
-  | "INVALID_EXTENSIONS"
-  | "LEGACY_FORMAT";
+  | 'INVALID_FORMAT'
+  | 'INVALID_REGISTRY'
+  | 'INVALID_ORGANIZATION'
+  | 'INVALID_AGENT_CLASS'
+  | 'INVALID_DOMAINS'
+  | 'NO_DOMAINS'
+  | 'INVALID_LEVEL'
+  | 'INVALID_VERSION'
+  | 'INVALID_EXTENSIONS'
+  | 'LEGACY_FORMAT';
 
 /** @deprecated Use CARParseErrorCode instead */
 export type ACIParseErrorCode = CARParseErrorCode;
@@ -266,49 +246,33 @@ export function parseCAR(car: string): ParsedCAR {
       `Legacy CAR format detected with embedded trust tier. ` +
         `Trust should not be part of the identifier - use parseLegacyCAR() for migration.`,
       car,
-      "LEGACY_FORMAT",
+      'LEGACY_FORMAT'
     );
   }
 
   const match = car.match(CAR_REGEX);
 
   if (!match) {
-    throw new CARParseError(
-      `Invalid CAR format: ${car}`,
-      car,
-      "INVALID_FORMAT",
-    );
+    throw new CARParseError(`Invalid CAR format: ${car}`, car, 'INVALID_FORMAT');
   }
 
-  const [
-    ,
-    registry,
-    organization,
-    agentClass,
-    domainsStr,
-    levelStr,
-    version,
-    extensionsStr,
-  ] = match;
+  const [, registry, organization, agentClass, domainsStr, levelStr, version, extensionsStr] =
+    match;
 
   // Validate and parse domains
-  const domainChars = domainsStr!.split("");
+  const domainChars = domainsStr!.split('');
   const invalidDomains = domainChars.filter((d) => !isDomainCode(d));
 
   if (invalidDomains.length > 0) {
     throw new CARParseError(
-      `Invalid domain codes: ${invalidDomains.join(", ")}`,
+      `Invalid domain codes: ${invalidDomains.join(', ')}`,
       car,
-      "INVALID_DOMAINS",
+      'INVALID_DOMAINS'
     );
   }
 
   if (domainChars.length === 0) {
-    throw new CARParseError(
-      "CAR must have at least one domain",
-      car,
-      "NO_DOMAINS",
-    );
+    throw new CARParseError('CAR must have at least one domain', car, 'NO_DOMAINS');
   }
 
   const domains = domainChars as DomainCode[];
@@ -318,9 +282,7 @@ export function parseCAR(car: string): ParsedCAR {
   const level = parseInt(levelStr!, 10) as CapabilityLevel;
 
   // Parse optional extensions
-  const extensions = extensionsStr
-    ? extensionsStr.split(",").filter((e) => e.length > 0)
-    : [];
+  const extensions = extensionsStr ? extensionsStr.split(',').filter((e) => e.length > 0) : [];
 
   return {
     car,
@@ -351,40 +313,24 @@ export function parseACI(carId: string): ParsedCAR & { carId: string } {
  * @param car - Legacy CAR string with embedded tier
  * @returns Parsed CAR plus extracted tier
  */
-export function parseLegacyCAR(car: string): {
-  parsed: ParsedCAR;
-  legacyTier: number;
-} {
+export function parseLegacyCAR(car: string): { parsed: ParsedCAR; legacyTier: number } {
   const match = car.match(CAR_LEGACY_REGEX);
 
   if (!match) {
-    throw new CARParseError(
-      `Invalid legacy CAR format: ${car}`,
-      car,
-      "INVALID_FORMAT",
-    );
+    throw new CARParseError(`Invalid legacy CAR format: ${car}`, car, 'INVALID_FORMAT');
   }
 
-  const [
-    ,
-    registry,
-    organization,
-    agentClass,
-    domainsStr,
-    levelStr,
-    tierStr,
-    version,
-  ] = match;
+  const [, registry, organization, agentClass, domainsStr, levelStr, tierStr, version] = match;
 
   // Validate and parse domains
-  const domainChars = domainsStr!.split("");
+  const domainChars = domainsStr!.split('');
   const invalidDomains = domainChars.filter((d) => !isDomainCode(d));
 
   if (invalidDomains.length > 0) {
     throw new CARParseError(
-      `Invalid domain codes: ${invalidDomains.join(", ")}`,
+      `Invalid domain codes: ${invalidDomains.join(', ')}`,
       car,
-      "INVALID_DOMAINS",
+      'INVALID_DOMAINS'
     );
   }
 
@@ -415,10 +361,7 @@ export function parseLegacyCAR(car: string): {
 /**
  * @deprecated Use parseLegacyCAR instead
  */
-export function parseLegacyACI(carId: string): {
-  parsed: ParsedCAR & { carId: string };
-  legacyTier: number;
-} {
+export function parseLegacyACI(carId: string): { parsed: ParsedCAR & { carId: string }; legacyTier: number } {
   const result = parseLegacyCAR(carId);
   return {
     parsed: { ...result.parsed, carId: result.parsed.car },
@@ -443,9 +386,7 @@ export function tryParseCAR(car: string): ParsedCAR | null {
 /**
  * @deprecated Use tryParseCAR instead
  */
-export function tryParseACI(
-  carId: string,
-): (ParsedCAR & { carId: string }) | null {
+export function tryParseACI(carId: string): (ParsedCAR & { carId: string }) | null {
   try {
     return parseACI(carId);
   } catch {
@@ -460,10 +401,8 @@ export function tryParseACI(
  * @returns Result object with success flag and parsed CAR or error
  */
 export function safeParseCAR(
-  car: string,
-):
-  | { success: true; data: ParsedCAR }
-  | { success: false; error: CARParseError } {
+  car: string
+): { success: true; data: ParsedCAR } | { success: false; error: CARParseError } {
   try {
     return { success: true, data: parseCAR(car) };
   } catch (error) {
@@ -472,7 +411,7 @@ export function safeParseCAR(
     }
     return {
       success: false,
-      error: new CARParseError(String(error), car, "INVALID_FORMAT"),
+      error: new CARParseError(String(error), car, 'INVALID_FORMAT'),
     };
   }
 }
@@ -481,10 +420,8 @@ export function safeParseCAR(
  * @deprecated Use safeParseCAR instead
  */
 export function safeParseACI(
-  carId: string,
-):
-  | { success: true; data: ParsedCAR & { carId: string } }
-  | { success: false; error: CARParseError } {
+  carId: string
+): { success: true; data: ParsedCAR & { carId: string } } | { success: false; error: CARParseError } {
   try {
     return { success: true, data: parseACI(carId) };
   } catch (error) {
@@ -493,7 +430,7 @@ export function safeParseACI(
     }
     return {
       success: false,
-      error: new CARParseError(String(error), carId, "INVALID_FORMAT"),
+      error: new CARParseError(String(error), carId, 'INVALID_FORMAT'),
     };
   }
 }
@@ -560,42 +497,32 @@ export type GenerateACIOptions = GenerateCAROptions;
  * ```
  */
 export function generateCAR(options: GenerateCAROptions): string {
-  const {
-    registry,
-    organization,
-    agentClass,
-    domains,
-    level,
-    version,
-    extensions = [],
-  } = options;
+  const { registry, organization, agentClass, domains, level, version, extensions = [] } = options;
 
   // Validate components
   if (!/^[a-z0-9]+$/.test(registry)) {
-    throw new Error(
-      `Invalid registry: ${registry}. Must be lowercase alphanumeric.`,
-    );
+    throw new Error(`Invalid registry: ${registry}. Must be lowercase alphanumeric.`);
   }
 
   if (!/^[a-z0-9-]+$/.test(organization)) {
     throw new Error(
-      `Invalid organization: ${organization}. Must be lowercase alphanumeric with hyphens.`,
+      `Invalid organization: ${organization}. Must be lowercase alphanumeric with hyphens.`
     );
   }
 
   if (!/^[a-z0-9-]+$/.test(agentClass)) {
     throw new Error(
-      `Invalid agent class: ${agentClass}. Must be lowercase alphanumeric with hyphens.`,
+      `Invalid agent class: ${agentClass}. Must be lowercase alphanumeric with hyphens.`
     );
   }
 
   if (domains.length === 0) {
-    throw new Error("At least one domain is required.");
+    throw new Error('At least one domain is required.');
   }
 
   const invalidDomains = domains.filter((d) => !isDomainCode(d));
   if (invalidDomains.length > 0) {
-    throw new Error(`Invalid domain codes: ${invalidDomains.join(", ")}`);
+    throw new Error(`Invalid domain codes: ${invalidDomains.join(', ')}`);
   }
 
   if (!isCapabilityLevel(level)) {
@@ -603,19 +530,15 @@ export function generateCAR(options: GenerateCAROptions): string {
   }
 
   if (!/^\d+\.\d+\.\d+$/.test(version)) {
-    throw new Error(
-      `Invalid version: ${version}. Must be semantic version (e.g., 1.0.0).`,
-    );
+    throw new Error(`Invalid version: ${version}. Must be semantic version (e.g., 1.0.0).`);
   }
 
   // Validate extensions if provided
   if (extensions.length > 0) {
-    const invalidExtensions = extensions.filter(
-      (e) => !/^[a-z0-9_-]+$/.test(e),
-    );
+    const invalidExtensions = extensions.filter((e) => !/^[a-z0-9_-]+$/.test(e));
     if (invalidExtensions.length > 0) {
       throw new Error(
-        `Invalid extensions: ${invalidExtensions.join(", ")}. Must be lowercase alphanumeric with hyphens/underscores.`,
+        `Invalid extensions: ${invalidExtensions.join(', ')}. Must be lowercase alphanumeric with hyphens/underscores.`
       );
     }
   }
@@ -628,7 +551,7 @@ export function generateCAR(options: GenerateCAROptions): string {
 
   // Append extensions if present
   if (extensions.length > 0) {
-    car += `#${extensions.join(",")}`;
+    car += `#${extensions.join(',')}`;
   }
 
   return car;
@@ -660,7 +583,7 @@ export function generateCARString(
   domains: readonly DomainCode[],
   level: CapabilityLevel,
   version: string,
-  extensions?: readonly string[],
+  extensions?: readonly string[]
 ): string {
   return generateCAR({
     registry,
@@ -683,17 +606,9 @@ export function generateACIString(
   domains: readonly DomainCode[],
   level: CapabilityLevel,
   version: string,
-  extensions?: readonly string[],
+  extensions?: readonly string[]
 ): string {
-  return generateCARString(
-    registry,
-    organization,
-    agentClass,
-    domains,
-    level,
-    version,
-    extensions,
-  );
+  return generateCARString(registry, organization, agentClass, domains, level, version, extensions);
 }
 
 // ============================================================================
@@ -771,10 +686,10 @@ export function validateCAR(car: string): CARValidationResult {
   // Check for legacy format with embedded trust tier
   if (CAR_LEGACY_REGEX.test(car)) {
     warnings.push({
-      code: "LEGACY_FORMAT",
+      code: 'LEGACY_FORMAT',
       message:
-        "CAR contains embedded trust tier which is deprecated. " +
-        "Trust should be computed at runtime, not encoded in the identifier.",
+        'CAR contains embedded trust tier which is deprecated. ' +
+        'Trust should be computed at runtime, not encoded in the identifier.',
     });
   }
 
@@ -787,30 +702,30 @@ export function validateCAR(car: string): CARValidationResult {
     // L7 agents operate at maximum autonomy - should be rare
     if (parsed.level === CapabilityLevel.L7_AUTONOMOUS) {
       warnings.push({
-        code: "L7_AUTONOMOUS_LEVEL",
+        code: 'L7_AUTONOMOUS_LEVEL',
         message:
-          "L7 (Autonomous) level grants maximum autonomy. " +
-          "Ensure runtime trust policies are configured appropriately.",
+          'L7 (Autonomous) level grants maximum autonomy. ' +
+          'Ensure runtime trust policies are configured appropriately.',
       });
     }
 
     // Security domain agents require careful runtime trust
-    if (parsed.domains.includes("S")) {
+    if (parsed.domains.includes('S')) {
       warnings.push({
-        code: "SECURITY_DOMAIN",
+        code: 'SECURITY_DOMAIN',
         message:
-          "Security domain agent. Runtime attestations and behavioral scoring " +
-          "should be configured to enforce appropriate trust levels.",
+          'Security domain agent. Runtime attestations and behavioral scoring ' +
+          'should be configured to enforce appropriate trust levels.',
       });
     }
 
     // Finance domain agents require careful runtime trust
-    if (parsed.domains.includes("F")) {
+    if (parsed.domains.includes('F')) {
       warnings.push({
-        code: "FINANCE_DOMAIN",
+        code: 'FINANCE_DOMAIN',
         message:
-          "Finance domain agent. Runtime attestations and behavioral scoring " +
-          "should be configured to enforce appropriate trust levels.",
+          'Finance domain agent. Runtime attestations and behavioral scoring ' +
+          'should be configured to enforce appropriate trust levels.',
       });
     }
 
@@ -823,13 +738,13 @@ export function validateCAR(car: string): CARValidationResult {
   } catch (e) {
     if (e instanceof CARParseError) {
       // If it's a legacy format error, try parsing with legacy parser
-      if (e.code === "LEGACY_FORMAT") {
+      if (e.code === 'LEGACY_FORMAT') {
         try {
           const { parsed } = parseLegacyCAR(car);
           warnings.push({
-            code: "LEGACY_FORMAT_MIGRATED",
+            code: 'LEGACY_FORMAT_MIGRATED',
             message:
-              "Legacy CAR migrated to new format. Trust tier has been removed from identifier.",
+              'Legacy CAR migrated to new format. Trust tier has been removed from identifier.',
           });
           return {
             valid: true,
@@ -844,7 +759,7 @@ export function validateCAR(car: string): CARValidationResult {
         errors.push({ code: e.code, message: e.message });
       }
     } else {
-      errors.push({ code: "UNKNOWN_ERROR", message: String(e) });
+      errors.push({ code: 'UNKNOWN_ERROR', message: String(e) });
     }
 
     return { valid: false, errors, warnings };
@@ -882,7 +797,7 @@ export function isValidACI(carId: string): boolean {
  * @returns True if value is a valid CAR string
  */
 export function isCARString(value: unknown): value is string {
-  return typeof value === "string" && isValidCAR(value);
+  return typeof value === 'string' && isValidCAR(value);
 }
 
 /**
@@ -905,9 +820,7 @@ export function isACIString(value: unknown): value is string {
  */
 export function updateCAR(
   car: string,
-  updates: Partial<
-    Omit<GenerateCAROptions, "registry" | "organization" | "agentClass">
-  >,
+  updates: Partial<Omit<GenerateCAROptions, 'registry' | 'organization' | 'agentClass'>>
 ): string {
   const parsed = parseCAR(car);
 
@@ -927,9 +840,7 @@ export function updateCAR(
  */
 export function updateACI(
   carId: string,
-  updates: Partial<
-    Omit<GenerateCAROptions, "registry" | "organization" | "agentClass">
-  >,
+  updates: Partial<Omit<GenerateCAROptions, 'registry' | 'organization' | 'agentClass'>>
 ): string {
   return updateCAR(carId, updates);
 }
@@ -941,10 +852,7 @@ export function updateACI(
  * @param newExtensions - Extensions to add
  * @returns New CAR string with extensions added
  */
-export function addCARExtensions(
-  car: string,
-  newExtensions: readonly string[],
-): string {
+export function addCARExtensions(car: string, newExtensions: readonly string[]): string {
   const parsed = parseCAR(car);
   const allExtensions = [...new Set([...parsed.extensions, ...newExtensions])];
   return updateCAR(car, { extensions: allExtensions });
@@ -953,10 +861,7 @@ export function addCARExtensions(
 /**
  * @deprecated Use addCARExtensions instead
  */
-export function addACIExtensions(
-  carId: string,
-  newExtensions: readonly string[],
-): string {
+export function addACIExtensions(carId: string, newExtensions: readonly string[]): string {
   return addCARExtensions(carId, newExtensions);
 }
 
@@ -967,24 +872,16 @@ export function addACIExtensions(
  * @param extensionsToRemove - Extensions to remove
  * @returns New CAR string with extensions removed
  */
-export function removeCARExtensions(
-  car: string,
-  extensionsToRemove: readonly string[],
-): string {
+export function removeCARExtensions(car: string, extensionsToRemove: readonly string[]): string {
   const parsed = parseCAR(car);
-  const remaining = parsed.extensions.filter(
-    (e) => !extensionsToRemove.includes(e),
-  );
+  const remaining = parsed.extensions.filter((e) => !extensionsToRemove.includes(e));
   return updateCAR(car, { extensions: remaining });
 }
 
 /**
  * @deprecated Use removeCARExtensions instead
  */
-export function removeACIExtensions(
-  carId: string,
-  extensionsToRemove: readonly string[],
-): string {
+export function removeACIExtensions(carId: string, extensionsToRemove: readonly string[]): string {
   return removeCARExtensions(carId, extensionsToRemove);
 }
 
@@ -997,20 +894,20 @@ export function removeACIExtensions(
  */
 export function incrementCARVersion(
   car: string,
-  type: "major" | "minor" | "patch" = "patch",
+  type: 'major' | 'minor' | 'patch' = 'patch'
 ): string {
   const parsed = parseCAR(car);
-  const [major, minor, patch] = parsed.version.split(".").map(Number);
+  const [major, minor, patch] = parsed.version.split('.').map(Number);
 
   let newVersion: string;
   switch (type) {
-    case "major":
+    case 'major':
       newVersion = `${major! + 1}.0.0`;
       break;
-    case "minor":
+    case 'minor':
       newVersion = `${major}.${minor! + 1}.0`;
       break;
-    case "patch":
+    case 'patch':
     default:
       newVersion = `${major}.${minor}.${patch! + 1}`;
       break;
@@ -1024,7 +921,7 @@ export function incrementCARVersion(
  */
 export function incrementACIVersion(
   carId: string,
-  type: "major" | "minor" | "patch" = "patch",
+  type: 'major' | 'minor' | 'patch' = 'patch'
 ): string {
   return incrementCARVersion(carId, type);
 }
@@ -1037,8 +934,7 @@ export function incrementACIVersion(
  * Zod schema for CAR string validation.
  */
 export const carStringSchema = z.string().refine((val) => CAR_REGEX.test(val), {
-  message:
-    "Invalid CAR format. Expected: registry.org.class:DOMAINS-Ln@x.y.z[#extensions]",
+  message: 'Invalid CAR format. Expected: registry.org.class:DOMAINS-Ln@x.y.z[#extensions]',
 });
 
 /** @deprecated Use carStringSchema instead */
@@ -1056,18 +952,9 @@ export const aciSchema = carStringSchema.transform((carId) => parseACI(carId));
  * Zod schema for GenerateCAROptions.
  */
 export const generateCAROptionsSchema = z.object({
-  registry: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9]+$/),
-  organization: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9-]+$/),
-  agentClass: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9-]+$/),
+  registry: z.string().min(1).regex(/^[a-z0-9]+$/),
+  organization: z.string().min(1).regex(/^[a-z0-9-]+$/),
+  agentClass: z.string().min(1).regex(/^[a-z0-9-]+$/),
   domains: z.array(domainCodeSchema).min(1),
   level: z.nativeEnum(CapabilityLevel),
   version: z.string().regex(/^\d+\.\d+\.\d+$/),

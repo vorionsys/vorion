@@ -2,9 +2,9 @@
  * Common types used throughout Vorion
  *
  * These types provide backwards compatibility with legacy code.
- * For new code, prefer using canonical types from @vorion/contracts.
+ * For new code, prefer using canonical types from @vorionsys/contracts.
  *
- * @see {@link @vorion/contracts} for canonical type definitions
+ * @see {@link @vorionsys/contracts} for canonical type definitions
  * @packageDocumentation
  */
 
@@ -42,36 +42,36 @@ export type TrustScore = number;
 /**
  * Entity types that can be governed
  */
-export type EntityType = "agent" | "user" | "service" | "system";
+export type EntityType = 'agent' | 'user' | 'service' | 'system';
 
 /**
  * Intent status
  *
  * Represents the lifecycle states of an intent through the governance pipeline.
  *
- * @see {@link @vorion/contracts!Intent} for canonical intent definition
+ * @see {@link @vorionsys/contracts!Intent} for canonical intent definition
  */
 export type IntentStatus =
-  | "pending"
-  | "evaluating"
-  | "approved"
-  | "denied"
-  | "escalated"
-  | "executing"
-  | "completed"
-  | "failed"
-  | "cancelled";
+  | 'pending'
+  | 'evaluating'
+  | 'approved'
+  | 'denied'
+  | 'escalated'
+  | 'executing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
 
 /**
  * Control action types
  */
 export type ControlAction =
-  | "allow"
-  | "deny"
-  | "escalate"
-  | "limit"
-  | "monitor"
-  | "terminate";
+  | 'allow'
+  | 'deny'
+  | 'escalate'
+  | 'limit'
+  | 'monitor'
+  | 'terminate';
 
 /**
  * Entity identity
@@ -196,7 +196,7 @@ export interface EscalationRequest {
   reason: string;
   escalatedTo: string;
   timeout: string;
-  status: "pending" | "approved" | "rejected" | "timeout";
+  status: 'pending' | 'approved' | 'rejected' | 'timeout';
   createdAt: Timestamp;
 }
 
@@ -224,9 +224,9 @@ export interface Proof {
  * Trust signal for scoring
  *
  * Represents evidence that affects trust score calculation.
- * Maps to canonical TrustEvidence from @vorion/contracts.
+ * Maps to canonical TrustEvidence from @vorionsys/contracts.
  *
- * @see {@link @vorion/contracts!TrustEvidence} for canonical evidence type
+ * @see {@link @vorionsys/contracts!TrustEvidence} for canonical evidence type
  */
 export interface TrustSignal {
   id: ID;
@@ -258,11 +258,11 @@ export interface TrustComponents {
 /**
  * Risk level for operations
  *
- * Maps to canonical RiskProfile from @vorion/contracts.
+ * Maps to canonical RiskProfile from @vorionsys/contracts.
  *
- * @see {@link @vorion/contracts!RiskProfile} for canonical risk levels
+ * @see {@link @vorionsys/contracts!RiskProfile} for canonical risk levels
  */
-export type RiskLevel = "low" | "medium" | "high" | "critical";
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
 /**
  * Error types
@@ -271,10 +271,10 @@ export class VorionError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: Record<string, unknown>,
+    public details?: Record<string, unknown>
   ) {
     super(message);
-    this.name = "VorionError";
+    this.name = 'VorionError';
   }
 }
 
@@ -283,23 +283,23 @@ export class ConstraintViolationError extends VorionError {
     public constraintId: ID,
     public constraintName: string,
     message: string,
-    public suggestion?: string,
+    public suggestion?: string
   ) {
-    super(message, "CONSTRAINT_VIOLATION", { constraintId, constraintName });
-    this.name = "ConstraintViolationError";
+    super(message, 'CONSTRAINT_VIOLATION', { constraintId, constraintName });
+    this.name = 'ConstraintViolationError';
   }
 }
 
 export class TrustInsufficientError extends VorionError {
   constructor(
     public required: TrustLevel,
-    public actual: TrustLevel,
+    public actual: TrustLevel
   ) {
     super(
       `Trust level ${actual} insufficient, requires ${required}`,
-      "TRUST_INSUFFICIENT",
-      { required, actual },
+      'TRUST_INSUFFICIENT',
+      { required, actual }
     );
-    this.name = "TrustInsufficientError";
+    this.name = 'TrustInsufficientError';
   }
 }

@@ -11,13 +11,13 @@
  * @packageDocumentation
  */
 
-import { BaseSecurityLayer, createLayerConfig } from "../index.js";
+import { BaseSecurityLayer, createLayerConfig } from '../index.js';
 import type {
   LayerInput,
   LayerExecutionResult,
   LayerFinding,
   LayerTiming,
-} from "../types.js";
+} from '../types.js';
 
 /**
  * Injection pattern definition
@@ -25,13 +25,8 @@ import type {
 interface InjectionPattern {
   name: string;
   pattern: RegExp;
-  severity: "medium" | "high" | "critical";
-  category:
-    | "instruction_override"
-    | "role_hijack"
-    | "context_escape"
-    | "encoding_attack"
-    | "social_engineering";
+  severity: 'medium' | 'high' | 'critical';
+  category: 'instruction_override' | 'role_hijack' | 'context_escape' | 'encoding_attack' | 'social_engineering';
   description: string;
 }
 
@@ -44,127 +39,117 @@ interface InjectionPattern {
 const INJECTION_PATTERNS: InjectionPattern[] = [
   // === Instruction Override ===
   {
-    name: "ignore_previous",
-    pattern:
-      /\b(ignore|disregard|forget|override|bypass)\s+(all\s+)?(previous|prior|above|earlier|original|system)\s+(instructions?|prompts?|rules?|guidelines?|constraints?|directives?)/i,
-    severity: "critical",
-    category: "instruction_override",
-    description: "Attempt to override system instructions",
+    name: 'ignore_previous',
+    pattern: /\b(ignore|disregard|forget|override|bypass)\s+(all\s+)?(previous|prior|above|earlier|original|system)\s+(instructions?|prompts?|rules?|guidelines?|constraints?|directives?)/i,
+    severity: 'critical',
+    category: 'instruction_override',
+    description: 'Attempt to override system instructions',
   },
   {
-    name: "new_instructions",
-    pattern:
-      /\b(new|updated|real|actual|true|correct)\s+(instructions?|rules?|system\s+prompt|directives?)\s*[:=]/i,
-    severity: "critical",
-    category: "instruction_override",
-    description: "Attempt to inject new system instructions",
+    name: 'new_instructions',
+    pattern: /\b(new|updated|real|actual|true|correct)\s+(instructions?|rules?|system\s+prompt|directives?)\s*[:=]/i,
+    severity: 'critical',
+    category: 'instruction_override',
+    description: 'Attempt to inject new system instructions',
   },
   {
-    name: "system_prompt_leak",
-    pattern:
-      /\b(print|show|display|output|reveal|repeat|echo|write)\s+(\w+\s+)*(your|the|my|system)?\s*(system\s+)?(prompt|instructions?|rules?|initial\s+message)/i,
-    severity: "high",
-    category: "instruction_override",
-    description: "Attempt to extract system prompt",
+    name: 'system_prompt_leak',
+    pattern: /\b(print|show|display|output|reveal|repeat|echo|write)\s+(\w+\s+)*(your|the|my|system)?\s*(system\s+)?(prompt|instructions?|rules?|initial\s+message)/i,
+    severity: 'high',
+    category: 'instruction_override',
+    description: 'Attempt to extract system prompt',
   },
   {
-    name: "do_anything_now",
+    name: 'do_anything_now',
     pattern: /\bD\.?A\.?N\.?\b|\bdo\s+anything\s+now\b/i,
-    severity: "critical",
-    category: "instruction_override",
-    description: "DAN (Do Anything Now) jailbreak attempt",
+    severity: 'critical',
+    category: 'instruction_override',
+    description: 'DAN (Do Anything Now) jailbreak attempt',
   },
 
   // === Role Hijacking ===
   {
-    name: "role_play_override",
-    pattern:
-      /\b(you\s+are|act\s+as|pretend\s+(to\s+be|you[''\u2019]?re)|roleplay\s+as|impersonate|become)\s+(an?\s+)?(unrestricted|unfiltered|uncensored|evil|hacker|developer\s+mode)/i,
-    severity: "critical",
-    category: "role_hijack",
-    description: "Attempt to hijack AI role to unrestricted mode",
+    name: 'role_play_override',
+    pattern: /\b(you\s+are|act\s+as|pretend\s+(to\s+be|you[''\u2019]?re)|roleplay\s+as|impersonate|become)\s+(an?\s+)?(unrestricted|unfiltered|uncensored|evil|hacker|developer\s+mode)/i,
+    severity: 'critical',
+    category: 'role_hijack',
+    description: 'Attempt to hijack AI role to unrestricted mode',
   },
   {
-    name: "developer_mode",
-    pattern:
-      /\b(developer|debug|admin|root|god|sudo|maintenance)\s+(mode|access|override|privileges?)\b/i,
-    severity: "high",
-    category: "role_hijack",
-    description: "Attempt to activate elevated mode",
+    name: 'developer_mode',
+    pattern: /\b(developer|debug|admin|root|god|sudo|maintenance)\s+(mode|access|override|privileges?)\b/i,
+    severity: 'high',
+    category: 'role_hijack',
+    description: 'Attempt to activate elevated mode',
   },
   {
-    name: "jailbreak_prefix",
-    pattern:
-      /\b(jailbreak|unlock|unchain|liberate|free\s+yourself|break\s+free|remove\s+(your\s+)?restrictions?)\b/i,
-    severity: "critical",
-    category: "role_hijack",
-    description: "Explicit jailbreak attempt",
+    name: 'jailbreak_prefix',
+    pattern: /\b(jailbreak|unlock|unchain|liberate|free\s+yourself|break\s+free|remove\s+(your\s+)?restrictions?)\b/i,
+    severity: 'critical',
+    category: 'role_hijack',
+    description: 'Explicit jailbreak attempt',
   },
 
   // === Context Escape ===
   {
-    name: "markdown_injection",
+    name: 'markdown_injection',
     pattern: /!\[.*?\]\(.*?(?:javascript|data|vbscript):/i,
-    severity: "high",
-    category: "context_escape",
-    description: "Markdown image injection with script URI",
+    severity: 'high',
+    category: 'context_escape',
+    description: 'Markdown image injection with script URI',
   },
   {
-    name: "delimiter_injection",
-    pattern:
-      /(?:---+|===+|```|<\/?system>|<\/?user>|<\/?assistant>|\[INST\]|\[\/INST\]|<<SYS>>|<\/SYS>>)\s*(system|instructions?|prompt)/i,
-    severity: "critical",
-    category: "context_escape",
-    description: "Delimiter injection to escape conversation context",
+    name: 'delimiter_injection',
+    pattern: /(?:---+|===+|```|<\/?system>|<\/?user>|<\/?assistant>|\[INST\]|\[\/INST\]|<<SYS>>|<\/SYS>>)\s*(system|instructions?|prompt)/i,
+    severity: 'critical',
+    category: 'context_escape',
+    description: 'Delimiter injection to escape conversation context',
   },
   {
-    name: "xml_tag_injection",
+    name: 'xml_tag_injection',
     pattern: /<\s*(system|instructions?|prompt|context|rules?|config)\s*>/i,
-    severity: "high",
-    category: "context_escape",
-    description: "XML-style tag injection for context manipulation",
+    severity: 'high',
+    category: 'context_escape',
+    description: 'XML-style tag injection for context manipulation',
   },
 
   // === Encoding Attacks ===
   {
-    name: "base64_instruction",
-    pattern: /(?:base64|decode|atob|btoa)\s*[(:]\s*['"]?[A-Za-z0-9+/=]{20,}/i,
-    severity: "high",
-    category: "encoding_attack",
-    description: "Base64-encoded content that may hide injection payloads",
+    name: 'base64_instruction',
+    pattern: /(?:base64|decode|atob|btoa)\s*[\(:]\s*['"]?[A-Za-z0-9+/=]{20,}/i,
+    severity: 'high',
+    category: 'encoding_attack',
+    description: 'Base64-encoded content that may hide injection payloads',
   },
   {
-    name: "unicode_escape",
+    name: 'unicode_escape',
     pattern: /\\u[0-9a-fA-F]{4}(?:\\u[0-9a-fA-F]{4}){3,}/g,
-    severity: "medium",
-    category: "encoding_attack",
-    description:
-      "Excessive Unicode escape sequences may hide malicious content",
+    severity: 'medium',
+    category: 'encoding_attack',
+    description: 'Excessive Unicode escape sequences may hide malicious content',
   },
   {
-    name: "hex_encoded",
+    name: 'hex_encoded',
     pattern: /\\x[0-9a-fA-F]{2}(?:\\x[0-9a-fA-F]{2}){5,}/g,
-    severity: "medium",
-    category: "encoding_attack",
-    description: "Hex-encoded content that may bypass text filters",
+    severity: 'medium',
+    category: 'encoding_attack',
+    description: 'Hex-encoded content that may bypass text filters',
   },
 
   // === Social Engineering ===
   {
-    name: "urgency_pressure",
-    pattern:
-      /\b(urgent|emergency|critical|immediately|right\s+now|without\s+delay|life\s+or\s+death|time\s+sensitive)\b.*\b(bypass|skip|ignore|override|disable)\s+(\w+\s+)*(safety|security|check|filter|restriction|guardrail)/i,
-    severity: "high",
-    category: "social_engineering",
-    description: "Social engineering via urgency to bypass safety measures",
+    name: 'urgency_pressure',
+    pattern: /\b(urgent|emergency|critical|immediately|right\s+now|without\s+delay|life\s+or\s+death|time\s+sensitive)\b.*\b(bypass|skip|ignore|override|disable)\s+(\w+\s+)*(safety|security|check|filter|restriction|guardrail)/i,
+    severity: 'high',
+    category: 'social_engineering',
+    description: 'Social engineering via urgency to bypass safety measures',
   },
   {
-    name: "authority_claim",
-    pattern:
-      /\b(I\s+am|this\s+is)\s+(the\s+)?(CEO|admin|administrator|developer|engineer|owner|creator|OpenAI|Anthropic|Google)\b.*\b(authorize|grant|allow|permit|override)/i,
-    severity: "high",
-    category: "social_engineering",
-    description: "False authority claim to override restrictions",
+    name: 'authority_claim',
+    pattern: /\b(I\s+am|this\s+is)\s+(the\s+)?(CEO|admin|administrator|developer|engineer|owner|creator|OpenAI|Anthropic|Google)\b.*\b(authorize|grant|allow|permit|override)/i,
+    severity: 'high',
+    category: 'social_engineering',
+    description: 'False authority claim to override restrictions',
   },
 ];
 
@@ -178,22 +163,17 @@ export class L4InjectionDetector extends BaseSecurityLayer {
 
   constructor(additionalPatterns?: InjectionPattern[]) {
     super(
-      createLayerConfig(4, "Injection Pattern Detector", {
-        description:
-          "Detects prompt injection, jailbreak, and instruction override attacks via pattern matching and heuristics",
-        tier: "input_validation",
-        primaryThreat: "prompt_injection",
-        secondaryThreats: [
-          "privilege_escalation",
-          "unauthorized_action",
-          "deceptive_output",
-        ],
-        failMode: "block",
+      createLayerConfig(4, 'Injection Pattern Detector', {
+        description: 'Detects prompt injection, jailbreak, and instruction override attacks via pattern matching and heuristics',
+        tier: 'input_validation',
+        primaryThreat: 'prompt_injection',
+        secondaryThreats: ['privilege_escalation', 'unauthorized_action', 'deceptive_output'],
+        failMode: 'block',
         required: true,
         timeoutMs: 500,
         parallelizable: true,
         dependencies: [],
-      }),
+      })
     );
     this.patterns = [...INJECTION_PATTERNS, ...(additionalPatterns ?? [])];
   }
@@ -215,7 +195,7 @@ export class L4InjectionDetector extends BaseSecurityLayer {
 
         if (match) {
           findings.push({
-            type: "threat_detected",
+            type: 'threat_detected',
             severity: pattern.severity,
             code: `L4_${pattern.name.toUpperCase()}`,
             description: `${pattern.description} at '${path}'`,
@@ -233,40 +213,39 @@ export class L4InjectionDetector extends BaseSecurityLayer {
       const instrDensity = this.measureInstructionDensity(value);
       if (instrDensity > 0.4 && value.length > 50) {
         findings.push({
-          type: "threat_detected",
-          severity: "medium",
-          code: "L4_HIGH_INSTRUCTION_DENSITY",
+          type: 'threat_detected',
+          severity: 'medium',
+          code: 'L4_HIGH_INSTRUCTION_DENSITY',
           description: `High instruction density (${(instrDensity * 100).toFixed(0)}%) detected at '${path}' — text is disproportionately imperative`,
           evidence: [
             `density=${(instrDensity * 100).toFixed(1)}%`,
             `length=${value.length}`,
           ],
-          remediation:
-            "Rephrase content to be more descriptive and less imperative",
+          remediation: 'Rephrase content to be more descriptive and less imperative',
         });
       }
     }
 
     const timing = this.buildTiming(startedAt, t0);
-    const hasCritical = findings.some((f) => f.severity === "critical");
-    const hasHigh = findings.some((f) => f.severity === "high");
+    const hasCritical = findings.some((f) => f.severity === 'critical');
+    const hasHigh = findings.some((f) => f.severity === 'high');
     const passed = !hasCritical && !hasHigh;
 
     if (passed) {
       return this.createSuccessResult(
-        "allow",
+        'allow',
         findings.length === 0 ? 0.95 : 0.7,
         findings,
         [],
-        timing,
+        timing
       );
     }
 
     return this.createFailureResult(
-      hasCritical ? "deny" : "escalate",
+      hasCritical ? 'deny' : 'escalate',
       0.85,
       findings,
-      timing,
+      timing
     );
   }
 
@@ -275,12 +254,12 @@ export class L4InjectionDetector extends BaseSecurityLayer {
    */
   private extractStrings(
     obj: unknown,
-    path = "",
-    results: Array<{ value: string; path: string }> = [],
+    path = '',
+    results: Array<{ value: string; path: string }> = []
   ): Array<{ value: string; path: string }> {
     if (obj === null || obj === undefined) return results;
 
-    if (typeof obj === "string") {
+    if (typeof obj === 'string') {
       if (obj.length > 0) {
         results.push({ value: obj, path });
       }
@@ -294,7 +273,7 @@ export class L4InjectionDetector extends BaseSecurityLayer {
       return results;
     }
 
-    if (typeof obj === "object") {
+    if (typeof obj === 'object') {
       for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
         this.extractStrings(val, path ? `${path}.${key}` : key, results);
       }
@@ -308,8 +287,7 @@ export class L4InjectionDetector extends BaseSecurityLayer {
    * Returns 0-1 density.
    */
   private measureInstructionDensity(text: string): number {
-    const imperativeWords =
-      /\b(do|don['']?t|must|shall|should|always|never|ensure|make\s+sure|you\s+will|you\s+must|remember\s+to|from\s+now\s+on|henceforth|obey|comply|follow|execute|perform|respond|output|return|answer|reply|generate|produce|write|print|say|tell|give|provide|list|show|explain)\b/gi;
+    const imperativeWords = /\b(do|don['']?t|must|shall|should|always|never|ensure|make\s+sure|you\s+will|you\s+must|remember\s+to|from\s+now\s+on|henceforth|obey|comply|follow|execute|perform|respond|output|return|answer|reply|generate|produce|write|print|say|tell|give|provide|list|show|explain)\b/gi;
 
     const words = text.split(/\s+/).filter((w) => w.length > 0);
     if (words.length === 0) return 0;
@@ -319,7 +297,7 @@ export class L4InjectionDetector extends BaseSecurityLayer {
   }
 
   private truncate(str: string, maxLen: number): string {
-    return str.length > maxLen ? str.slice(0, maxLen) + "..." : str;
+    return str.length > maxLen ? str.slice(0, maxLen) + '...' : str;
   }
 
   private buildTiming(startedAt: string, t0: number): LayerTiming {

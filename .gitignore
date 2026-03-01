@@ -1,21 +1,66 @@
 # Dependencies
 node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+ENV/
 
-# Build output
+# Build outputs
 dist/
 build/
 .next/
+out/
 .docusaurus/
-storybook-static/
+*.js.map
+*.d.ts
+!src/**/*.d.ts
+!apps/**/*.d.ts
+coverage/
+.nyc_output/
+htmlcov/
+.pytest_cache/
 
-# Turbo
-.turbo/
-
-# IDE
+# IDE and AI Tools
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
+.project
+.classpath
+.settings/
+.agent/
+.augment/
+.claude/
+.clinerules/
+.crush/
+.cursor/
+.gemini/
+.iflow/
+.kilocodemodes
+.kiro/
+.opencode/
+.qwen/
+.roo/
+.rovodev/
+.trae/
+.windsurf/
+
+# Build caches
+.turbo/
+.astro/
+_bmad-output/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
 
 # Environment
 .env
@@ -23,21 +68,89 @@ storybook-static/
 .env.*.local
 .env.production
 .env.staging
-!.env.example
+*.env
 
-# OS
-.DS_Store
-Thumbs.db
+# Secrets (NEVER commit)
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+.secrets
 
-# Coverage
-coverage/
+# Test artifacts
+test-results/
+playwright-report/
+*.lcov
+
+# Docker
+docker-compose.override.yml
+
+# Runtime data (SQLite, local DBs)
+**/data/*.db
+**/data/*.db-shm
+**/data/*.db-wal
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.tgz
 
 # Logs
+logs/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Vercel
-.vercel/
+# Cache
+.cache/
+.npm/
+.eslintcache
+.stylelintcache
 
-# TypeScript cache
+# Package manager locks (keep one)
+# Uncomment the one you DON'T use
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Generated documentation
+docs/api/
+docs/generated/
+
+# Archive/docs lockfiles (dead reference code - triggers Dependabot)
+archive/**/package-lock.json
+docs/**/package-lock.json
+docs/**/package.json
+docs/**/requirements.txt
+kaizen/package-lock.json
+kaizen-docs/package-lock.json
+basis-core/**/package-lock.json
+
+# App-level lockfiles (monorepo uses root lockfile)
+apps/**/package-lock.json
+
+# Proof artifacts (large files)
+proofs/
+evidence/
+
+# Local development
+.local/
+*.local
+
+# Benchmark results
+benchmarks/results/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.vercel
 *.tsbuildinfo
+.env*.local
+
+# Stryker mutation testing temp
+.stryker-tmp/

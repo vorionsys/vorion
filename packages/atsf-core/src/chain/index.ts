@@ -7,25 +7,25 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
+import { createLogger } from '../common/logger.js';
 
-const logger = createLogger({ component: "chain" });
+const logger = createLogger({ component: 'chain' });
 
 /**
  * Polygon network configuration
  */
 export const POLYGON_NETWORKS = {
   mainnet: {
-    rpcUrl: "https://polygon-rpc.com",
+    rpcUrl: 'https://polygon-rpc.com',
     chainId: 137,
-    blockExplorer: "https://polygonscan.com",
-    name: "Polygon Mainnet",
+    blockExplorer: 'https://polygonscan.com',
+    name: 'Polygon Mainnet',
   },
   amoy: {
-    rpcUrl: "https://rpc-amoy.polygon.technology",
+    rpcUrl: 'https://rpc-amoy.polygon.technology',
     chainId: 80002,
-    blockExplorer: "https://amoy.polygonscan.com",
-    name: "Polygon Amoy Testnet",
+    blockExplorer: 'https://amoy.polygonscan.com',
+    name: 'Polygon Amoy Testnet',
   },
 } as const;
 
@@ -97,9 +97,9 @@ export interface VerificationResult {
 export async function sha256(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return "0x" + hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return '0x' + hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -117,7 +117,7 @@ export async function keccak256Concat(a: string, b: string): Promise<string> {
  */
 export async function computeMerkleRoot(hashes: string[]): Promise<string> {
   if (hashes.length === 0) {
-    throw new Error("Cannot compute Merkle root of empty list");
+    throw new Error('Cannot compute Merkle root of empty list');
   }
 
   if (hashes.length === 1) {
@@ -151,10 +151,10 @@ export async function computeMerkleRoot(hashes: string[]): Promise<string> {
  */
 export async function computeMerkleProof(
   hashes: string[],
-  targetIndex: number,
+  targetIndex: number
 ): Promise<string[]> {
   if (targetIndex < 0 || targetIndex >= hashes.length) {
-    throw new Error("Target index out of bounds");
+    throw new Error('Target index out of bounds');
   }
 
   const proof: string[] = [];
@@ -192,7 +192,7 @@ export async function computeMerkleProof(
 export async function verifyMerkleProof(
   leaf: string,
   proof: string[],
-  root: string,
+  root: string
 ): Promise<boolean> {
   let current = leaf;
 
@@ -211,18 +211,13 @@ export async function verifyMerkleProof(
 export class MockChainAnchorService {
   private config: ChainAnchorConfig;
   private batchCount = 0n;
-  private batches: Map<
-    bigint,
-    { merkleRoot: string; proofHashes: string[]; timestamp: Date }
-  > = new Map();
+  private batches: Map<bigint, { merkleRoot: string; proofHashes: string[]; timestamp: Date }> =
+    new Map();
   private proofToBatch: Map<string, bigint> = new Map();
 
   constructor(config: ChainAnchorConfig) {
     this.config = config;
-    logger.info(
-      { network: config.network },
-      "MockChainAnchorService initialized",
-    );
+    logger.info({ network: config.network }, 'MockChainAnchorService initialized');
   }
 
   /**
@@ -230,7 +225,7 @@ export class MockChainAnchorService {
    */
   async anchorBatch(proofs: ProofToAnchor[]): Promise<AnchorResult> {
     if (proofs.length === 0) {
-      throw new Error("Cannot anchor empty batch");
+      throw new Error('Cannot anchor empty batch');
     }
 
     const proofHashes = proofs.map((p) => p.proofHash);
@@ -250,7 +245,7 @@ export class MockChainAnchorService {
     }
 
     const networkConfig = POLYGON_NETWORKS[this.config.network];
-    const mockTxHash = `0x${Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString("hex")}`;
+    const mockTxHash = `0x${Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('hex')}`;
 
     logger.info(
       {
@@ -258,7 +253,7 @@ export class MockChainAnchorService {
         proofCount: proofs.length,
         merkleRoot,
       },
-      "Batch anchored (mock)",
+      'Batch anchored (mock)'
     );
 
     return {
@@ -277,7 +272,7 @@ export class MockChainAnchorService {
   async verifyProof(
     proofHash: string,
     merkleProof: string[],
-    batchId: bigint,
+    batchId: bigint
   ): Promise<boolean> {
     const batch = this.batches.get(batchId);
     if (!batch) {
@@ -334,8 +329,6 @@ export class MockChainAnchorService {
  * Create a chain anchor service
  * Returns mock service by default; use createRealChainAnchor for production
  */
-export function createChainAnchor(
-  config: ChainAnchorConfig,
-): MockChainAnchorService {
+export function createChainAnchor(config: ChainAnchorConfig): MockChainAnchorService {
   return new MockChainAnchorService(config);
 }

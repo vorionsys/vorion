@@ -426,10 +426,16 @@ import type {
 - TypeScript >= 5.0.0 (peer dependency)
 - Runtime dependency: `zod` >= 3.24
 
-## License
+## Documentation
 
-Apache-2.0
+Full platform documentation is available at [https://vorion.org/docs](https://vorion.org/docs).
 
 ## Repository
 
-[https://github.com/vorionsys/vorion](https://github.com/vorionsys/vorion)
+This package lives in the Vorion monorepo:
+
+[https://github.com/vorionsys/vorion/tree/master/packages/contracts](https://github.com/vorionsys/vorion/tree/master/packages/contracts)
+
+## License
+
+Apache-2.0 -- Copyright 2026 Vorion Systems

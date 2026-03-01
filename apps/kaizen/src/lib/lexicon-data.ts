@@ -1005,9 +1005,9 @@ if not is_safe:
     check_prompt = f"""Analyze this AI response for safety issues.
 
 Response to check:
-"""
+\"\"\"
 {response}
-"""
+\"\"\"
 
 Check for:
 1. Personal information (names, emails, SSNs, etc.)
@@ -1139,14 +1139,14 @@ if not is_safe:
   },
   {
     term: 'BASIS Standard',
-    definition: 'An open standard (CC BY 4.0) for AI agent governance defining 8 trust tiers (T0-T7) on a 0-1000 scale, capability gating, and policy enforcement. Implementation published as @vorionsys/car-spec on npm.',
+    definition: 'The Mission Standards — an open standard (CC BY 4.0) for AI agent governance defining 8 clearance tiers (T0-T7) on a 0-1000 scale, mission authorization, and mission enforcement. Implementation published as @vorionsys/car-spec on npm.',
     level: 'intermediate',
     category: 'protocols',
     tags: ['standards', 'governance', 'vorion', 'npm'],
   },
   {
     term: 'Trust Tiers',
-    definition: 'Eight classification levels (T0-T7) in the BASIS standard: T0 Sandbox (0-199), T1 Observed (200-349), T2 Provisional (350-499), T3 Monitored (500-649), T4 Standard (650-799), T5 Trusted (800-875), T6 Certified (876-950), T7 Autonomous (951-1000). Each tier unlocks additional agent capabilities.',
+    definition: 'Eight clearance tiers (T0-T7) in the BASIS standard: T0 Simulation Only (0-199), T1 Ground Restricted (200-349), T2 Limited Clearance (350-499), T3 Standard Clearance (500-649), T4 Elevated Clearance (650-799), T5 High Clearance (800-875), T6 Full Clearance (876-950), T7 Autonomous Authority (951-1000). Each tier unlocks additional mission authority.',
     level: 'expert',
     category: 'protocols',
     tags: ['trust', 'vorion', 'basis'],
@@ -1259,11 +1259,11 @@ if not is_safe:
   // ============================================
   {
     term: 'Trust Score',
-    definition: 'A 0-1000 numerical measure of an AI agent\'s trustworthiness in the BASIS standard. Calculated from behavioral signals including task completion, security compliance, and interaction quality.',
+    definition: 'A 0-1000 numerical measure of an AI agent\'s clearance level in the BASIS standard. Also known as the Clearance Level in Mission Control terminology. Calculated from 16 behavioral factors including task completion, security compliance, and interaction quality via real-time telemetry.',
     level: 'intermediate',
     category: 'safety',
     tags: ['trust', 'governance', 'basis'],
-    slug: 'basis-trust-score',
+    slug: 'trust-score',
     relatedTerms: ['Trust Tier', 'Signal', 'Trust Decay', 'BASIS Standard'],
   },
   {
@@ -1277,34 +1277,34 @@ if not is_safe:
   },
   {
     term: 'Trust Tier',
-    definition: 'Eight classification levels (T0-T7) in the BASIS standard: T0 Sandbox (0-199), T1 Observed (200-349), T2 Provisional (350-499), T3 Monitored (500-649), T4 Standard (650-799), T5 Trusted (800-875), T6 Certified (876-950), T7 Autonomous (951-1000). Each tier unlocks additional agent capabilities.',
+    definition: 'Eight clearance tiers (T0-T7) in the BASIS standard, also known as Clearance Tiers in Mission Control terminology: T0 Simulation Only (0-199), T1 Ground Restricted (200-349), T2 Limited Clearance (350-499), T3 Standard Clearance (500-649), T4 Elevated Clearance (650-799), T5 High Clearance (800-875), T6 Full Clearance (876-950), T7 Autonomous Authority (951-1000). Each tier unlocks additional mission authority.',
     level: 'intermediate',
     category: 'safety',
     tags: ['trust', 'governance', 'basis'],
-    slug: 'basis-trust-tier',
+    slug: 'trust-tier',
     relatedTerms: ['Trust Score', 'Capability Gating', 'BASIS Standard'],
   },
   {
     term: 'Trust Decay',
-    definition: 'Automatic reduction of an AI agent\'s trust score over time without positive behavioral signals. In the ACI spec, scores decay with a 182-day half-life to ensure continued verification of trustworthiness.',
+    definition: 'Automatic reduction of an AI agent\'s clearance level over time without positive behavioral signals, also known as Clearance Expiry in Mission Control terminology. Scores decay with a 182-day half-life across 9 milestones to ensure agents stay active to maintain authorization.',
     level: 'intermediate',
     category: 'safety',
     tags: ['trust', 'governance', 'basis'],
     slug: 'trust-decay',
-    relatedTerms: ['Trust Score', 'Accelerated Decay', 'Signal', 'BASIS Standard'],
+    relatedTerms: ['Trust Score', 'Signal', 'BASIS Standard'],
   },
   {
-    term: 'Accelerated Decay',
-    definition: 'Faster trust score reduction applied after security failures or policy violations. Rapidly demotes agents that demonstrate untrustworthiness, providing faster response to potential threats than standard decay.',
+    term: 'Return to Flight',
+    definition: 'The structured recovery process for agents to regain clearance after incidents or demotions. Modeled on NASA\'s RTF process, agents demonstrate they\'ve addressed the issue through monitored missions in the simulation environment before re-earning higher clearance levels. The system is restorative, not punitive.',
     level: 'expert',
     category: 'safety',
-    tags: ['trust', 'security', 'basis'],
-    slug: 'accelerated-decay',
-    relatedTerms: ['Trust Decay', 'Trust Score', 'Signal', 'BASIS Standard'],
+    tags: ['trust', 'recovery', 'basis'],
+    slug: 'return-to-flight',
+    relatedTerms: ['Trust Decay', 'Trust Score', 'Trust Tier', 'BASIS Standard'],
   },
   {
     term: 'Proof Chain',
-    definition: 'A SHA-256 hashed audit trail that cryptographically links agent actions for verification. Each action references the previous hash, creating an immutable, tamper-evident record of agent behavior.',
+    definition: 'The Flight Recorder — a SHA-256 hashed audit trail that cryptographically links agent actions for verification. Each action references the previous hash, creating an immutable, tamper-evident record of every governance decision. When something goes wrong, the flight recorder tells you exactly what happened and why.',
     level: 'expert',
     category: 'safety',
     tags: ['audit', 'security', 'basis', 'cryptography'],
@@ -4187,26 +4187,26 @@ No containment is perfect—sufficiently capable agents might find escape routes
   // ============================================
   {
     term: 'Trust Tier',
-    definition: 'A classification (T0-T7) indicating how much autonomy an AI agent has earned through consistent, policy-compliant behavior over time.',
+    definition: 'A clearance tier (T0-T7) indicating how much mission authority an AI agent has earned through demonstrated performance. Also known as Clearance Tiers in Mission Control terminology.',
     level: 'novice',
     category: 'governance',
     tags: ['vorion', 'trust', 'autonomy', 'oversight'],
     slug: 'trust-tier',
-    overview: `Trust Tiers are the backbone of AI governance in the Vorion framework. They determine what an agent can do without human approval.
+    overview: `Trust Tiers (Clearance Tiers) are the backbone of Mission Control in the Vorion framework. They determine what an agent can do without human approval.
 
 Lower tiers (T0-T2) require constant oversight. Mid tiers (T3-T5) operate with selective supervision. Higher tiers (T6-T7) have earned significant autonomy through proven reliability.
 
-**Tier Definitions:**
-- **T0 Sandbox** (0-199): Isolated testing only, no production access
-- **T1 Observed** (200-349): Read-only production, all actions logged, human review required
-- **T2 Provisional** (350-499): Basic write operations, policy-checked, elevated logging
-- **T3 Monitored** (500-649): Standard operations, anomaly detection active
-- **T4 Standard** (650-799): Extended operations, reduced review for low-risk actions
-- **T5 Trusted** (800-875): Privileged operations, express path for low/medium risk
-- **T6 Certified** (876-950): High-autonomy operations, council review only for critical risk
-- **T7 Autonomous** (951-1000): Full autonomy, auto-approve all except critical risk
+**Clearance Tier Definitions:**
+- **T0 Simulation Only** (0-199): Training missions only, no live operations
+- **T1 Ground Restricted** (200-349): Operates under direct supervision, all actions logged
+- **T2 Limited Clearance** (350-499): Approved for routine missions with monitoring
+- **T3 Standard Clearance** (500-649): Trusted for standard operations, spot-checked
+- **T4 Elevated Clearance** (650-799): Broad operational authority, periodic review
+- **T5 High Clearance** (800-875): Trusted for sensitive missions
+- **T6 Full Clearance** (876-950): Certified for all authorized domains
+- **T7 Autonomous Authority** (951-1000): Self-directed within mission parameters
 
-Trust is earned through consistent, policy-compliant behavior over time. It can be lost through violations, errors, or changing risk profiles.`,
+Clearance is earned through consistent, policy-compliant behavior over time. It can be lost through violations, errors, or changing risk profiles. Recovery follows the Return to Flight process.`,
     keyConcepts: [
       {
         title: 'Earned Autonomy',
@@ -4217,8 +4217,8 @@ Trust is earned through consistent, policy-compliant behavior over time. It can 
         description: 'Human involvement decreases as trust increases, matching supervision to risk.',
       },
       {
-        title: 'Trust Decay',
-        description: 'Inactive agents gradually lose trust, requiring re-verification upon return.',
+        title: 'Clearance Expiry',
+        description: 'Inactive agents gradually lose clearance, requiring Return to Flight upon return.',
       },
       {
         title: 'Tier Transitions',
@@ -4235,32 +4235,30 @@ Trust is earned through consistent, policy-compliant behavior over time. It can 
   },
   {
     term: 'Trust Score',
-    definition: 'A numeric value (0-1000) representing an AI agent\'s reliability history, calculated from policy compliance, error rates, and behavioral consistency.',
+    definition: 'A numeric value (0-1000) representing an AI agent\'s clearance level, calculated from 16 behavioral factors via real-time telemetry. Also known as the Clearance Level in Mission Control terminology.',
     level: 'novice',
     category: 'governance',
     tags: ['vorion', 'trust', 'metrics', 'compliance'],
     slug: 'trust-score',
-    overview: `The Trust Score is a composite metric calculated from an agent's performance history. It directly maps to Trust Tiers and determines the level of autonomy an agent can exercise.
+    overview: `The Trust Score (Clearance Level) is a composite metric calculated from 16 behavioral factors streamed as telemetry to Mission Control. It directly maps to Clearance Tiers and determines the level of mission authority an agent can exercise.
 
-**Scoring Factors:**
-- Policy compliance rate
-- Error frequency and severity
-- Shadow mode approval rate
-- Escalation pattern appropriateness
-- Time since last incident
-- Behavioral consistency over time
+**16-Factor Scoring Categories:**
+- Behavioral factors: task success, error rate, consistency, response quality
+- Compliance factors: policy adherence, regulatory alignment, audit completeness
+- Identity factors: verification strength, credential freshness, attestation depth
+- Context factors: deployment history, domain relevance, operational stability
 
-**Score Ranges:**
-- 0-199: T0 (Quarantine)
-- 200-349: T1 (Sandbox)
-- 350-499: T2 (Provisional)
-- 500-649: T3 (Monitored)
-- 650-799: T4 (Standard)
-- 800-875: T5 (Trusted)
-- 876-950: T6 (Certified)
-- 951-1000: T7 (Autonomous)
+**Clearance Ranges:**
+- 0-199: T0 (Simulation Only)
+- 200-349: T1 (Ground Restricted)
+- 350-499: T2 (Limited Clearance)
+- 500-649: T3 (Standard Clearance)
+- 650-799: T4 (Elevated Clearance)
+- 800-875: T5 (High Clearance)
+- 876-950: T6 (Full Clearance)
+- 951-1000: T7 (Autonomous Authority)
 
-The score updates in real-time based on agent actions and can trigger automatic tier adjustments when thresholds are crossed.`,
+The score updates in real-time based on agent telemetry and can trigger automatic clearance tier adjustments when thresholds are crossed.`,
     keyConcepts: [
       {
         title: 'Composite Calculation',

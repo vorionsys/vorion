@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 interface Task {
@@ -13,20 +13,26 @@ interface Task {
 }
 
 export default function VorionDevLog() {
-  const [tasks, setTasks] = useState<Task[]>(() => [
-    { id: '1', text: 'Integrate shared-constants across all packages', status: 'completed', solutionLink: 'github.com/vorionsys/vorion/commit/5b03b63', createdAt: { seconds: Date.now() / 1000 } },
-    { id: '2', text: 'Update GitHub READMEs with ecosystem info', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
-    { id: '3', text: 'Deploy Cognigate API to production', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
-    { id: '4', text: 'Implement @vorion/security package', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskInput, setNewTaskInput] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
   const [solutionLink, setSolutionLink] = useState('');
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // TODO: Replace with actual Firebase initialization
   // For now using local state - integrate with your Firebase config
+  useEffect(() => {
+    // Simulated initial data - replace with Firebase listener
+    const initialTasks: Task[] = [
+      { id: '1', text: 'Integrate shared-constants across all packages', status: 'completed', solutionLink: 'github.com/vorionsys/vorion/commit/5b03b63', createdAt: { seconds: Date.now() / 1000 } },
+      { id: '2', text: 'Update GitHub READMEs with ecosystem info', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
+      { id: '3', text: 'Deploy Cognigate API to production', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
+      { id: '4', text: 'Implement @vorionsys/security package', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
+    ];
+    setTasks(initialTasks);
+    setIsLoading(false);
+  }, []);
 
   const handleAddTask = () => {
     if (!newTaskInput.trim()) return;

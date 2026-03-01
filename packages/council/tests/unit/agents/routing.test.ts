@@ -1,55 +1,55 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { CouncilState } from "../../../src/types/index.js";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { CouncilState } from '../../../src/types/index.js';
 
 // Mock the ai-gateway module
-vi.mock("@vorionsys/ai-gateway", () => ({
+vi.mock('@vorionsys/ai-gateway', () => ({
   createGateway: () => ({
     chat: vi.fn().mockResolvedValue({
-      content: "Route to advisor",
-      model: "mock-model",
+      content: 'Route to advisor',
+      model: 'mock-model',
       usage: { totalCost: 0.001 },
       metadata: { latency: 50 },
     }),
   }),
 }));
 
-import { RoutingAgent } from "../../../src/agents/routing.js";
+import { RoutingAgent } from '../../../src/agents/routing.js';
 
 function createBaseState(overrides?: Partial<CouncilState>): CouncilState {
   return {
-    userRequest: "Help me with strategy",
-    userId: "user_test",
-    requestId: "req_test_001",
+    userRequest: 'Help me with strategy',
+    userId: 'user_test',
+    requestId: 'req_test_001',
     metadata: {
-      priority: "medium",
+      priority: 'medium',
     },
     plan: {
       steps: [
         {
-          id: "step_1",
-          description: "Get strategic advice",
-          assignTo: "advisor",
-          estimatedCost: 0.1,
+          id: 'step_1',
+          description: 'Get strategic advice',
+          assignTo: 'advisor',
+          estimatedCost: 0.10,
           estimatedTime: 120,
           dependencies: [],
-          status: "pending",
+          status: 'pending',
         },
         {
-          id: "step_2",
-          description: "Execute the plan",
-          assignTo: "workforce",
+          id: 'step_2',
+          description: 'Execute the plan',
+          assignTo: 'workforce',
           estimatedCost: 0.05,
           estimatedTime: 180,
-          dependencies: ["step_1"],
-          status: "pending",
+          dependencies: ['step_1'],
+          status: 'pending',
         },
       ],
       estimatedCost: 0.15,
       estimatedTime: 300,
-      complexity: "moderate",
-      createdBy: "master_planner",
+      complexity: 'moderate',
+      createdBy: 'master_planner',
     },
-    currentStep: "routing",
+    currentStep: 'routing',
     iterationCount: 0,
     errors: [],
     createdAt: new Date(),
@@ -58,36 +58,36 @@ function createBaseState(overrides?: Partial<CouncilState>): CouncilState {
   };
 }
 
-describe("RoutingAgent", () => {
+describe('RoutingAgent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("route", () => {
-    it("should route advisor steps to advisory council", async () => {
+  describe('route', () => {
+    it('should route advisor steps to advisory council', async () => {
       const router = new RoutingAgent();
       const state = createBaseState();
       const result = await router.route(state);
 
       expect(result.routing).toBeDefined();
       const advisorAgents = result.routing!.selectedAgents.filter(
-        (a) => a.agentType === "advisor",
+        (a) => a.agentType === 'advisor'
       );
       expect(advisorAgents.length).toBeGreaterThan(0);
     });
 
-    it("should route workforce steps to general workforce", async () => {
+    it('should route workforce steps to general workforce', async () => {
       const router = new RoutingAgent();
       const state = createBaseState();
       const result = await router.route(state);
 
       const teamAgents = result.routing!.selectedAgents.filter(
-        (a) => a.agentType === "team",
+        (a) => a.agentType === 'team'
       );
       expect(teamAgents.length).toBeGreaterThan(0);
     });
 
-    it("should select agents for each plan step", async () => {
+    it('should select agents for each plan step', async () => {
       const router = new RoutingAgent();
       const state = createBaseState();
       const result = await router.route(state);
@@ -95,31 +95,31 @@ describe("RoutingAgent", () => {
       expect(result.routing!.selectedAgents.length).toBe(2);
     });
 
-    it("should set currentStep to execution", async () => {
+    it('should set currentStep to execution', async () => {
       const router = new RoutingAgent();
       const state = createBaseState();
       const result = await router.route(state);
 
-      expect(result.currentStep).toBe("execution");
+      expect(result.currentStep).toBe('execution');
     });
 
-    it("should set routedBy identifier", async () => {
+    it('should set routedBy identifier', async () => {
       const router = new RoutingAgent();
       const state = createBaseState();
       const result = await router.route(state);
 
-      expect(result.routing!.routedBy).toBe("routing_1");
+      expect(result.routing!.routedBy).toBe('routing_1');
     });
 
-    it("should handle empty plan steps", async () => {
+    it('should handle empty plan steps', async () => {
       const router = new RoutingAgent();
       const state = createBaseState({
         plan: {
           steps: [],
           estimatedCost: 0,
           estimatedTime: 0,
-          complexity: "simple",
-          createdBy: "master_planner",
+          complexity: 'simple',
+          createdBy: 'master_planner',
         },
       });
       const result = await router.route(state);
@@ -127,7 +127,7 @@ describe("RoutingAgent", () => {
       expect(result.routing!.selectedAgents).toHaveLength(0);
     });
 
-    it("should handle missing plan", async () => {
+    it('should handle missing plan', async () => {
       const router = new RoutingAgent();
       const state = createBaseState();
       delete state.plan;
@@ -136,24 +136,24 @@ describe("RoutingAgent", () => {
       expect(result.routing!.selectedAgents).toHaveLength(0);
     });
 
-    it("should include reason for each selected agent", async () => {
+    it('should include reason for each selected agent', async () => {
       const router = new RoutingAgent();
       const state = createBaseState();
       const result = await router.route(state);
 
       for (const agent of result.routing!.selectedAgents) {
         expect(agent.reason).toBeTruthy();
-        expect(typeof agent.reason).toBe("string");
+        expect(typeof agent.reason).toBe('string');
       }
     });
   });
 
-  describe("getConfig", () => {
-    it("should return valid configuration", () => {
+  describe('getConfig', () => {
+    it('should return valid configuration', () => {
       const config = RoutingAgent.getConfig();
-      expect(config.id).toBe("routing_1");
-      expect(config.role).toBe("routing_dispatch");
-      expect(config.capabilities).toContain("Agent selection");
+      expect(config.id).toBe('routing_1');
+      expect(config.role).toBe('routing_dispatch');
+      expect(config.capabilities).toContain('Agent selection');
     });
   });
 });

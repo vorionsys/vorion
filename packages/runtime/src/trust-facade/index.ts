@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
+import { createLogger } from '../common/logger.js';
 import type {
   TrustGate,
   TrustFacadeConfig,
@@ -21,24 +21,24 @@ import type {
   DecisionTier,
   Constraints,
   ObservationTier,
-} from "./types.js";
+} from './types.js';
 import {
   DEFAULT_TRUST_FACADE_CONFIG,
   TRUST_TIER_NAMES,
   sharedScoreToTier,
-} from "./types.js";
+} from './types.js';
 
-export * from "./types.js";
+export * from './types.js';
 
-const logger = createLogger({ component: "trust-facade" });
+const logger = createLogger({ component: 'trust-facade' });
 
 /**
  * Observation tier ceilings - maximum trust based on visibility
  */
 const OBSERVATION_CEILINGS: Record<ObservationTier, number> = {
-  BLACK_BOX: 500, // Can only reach T3 Monitored
-  GRAY_BOX: 800, // Can reach T5 Trusted
-  WHITE_BOX: 1000, // Can reach T7 Autonomous
+  BLACK_BOX: 500,   // Can only reach T3 Monitored
+  GRAY_BOX: 800,    // Can reach T5 Trusted
+  WHITE_BOX: 1000,  // Can reach T7 Autonomous
 };
 
 /**
@@ -60,7 +60,7 @@ export class TrustFacade implements TrustGate {
 
   constructor(config?: Partial<TrustFacadeConfig>) {
     this.config = { ...DEFAULT_TRUST_FACADE_CONFIG, ...config };
-    logger.info({ config: this.config }, "TrustFacade initialized");
+    logger.info({ config: this.config }, 'TrustFacade initialized');
   }
 
   /**
@@ -71,10 +71,7 @@ export class TrustFacade implements TrustGate {
 
     // Check if revoked
     if (this.revokedAgents.has(agent.agentId)) {
-      logger.warn(
-        { agentId: agent.agentId },
-        "Admission denied: agent revoked",
-      );
+      logger.warn({ agentId: agent.agentId }, 'Admission denied: agent revoked');
       return {
         admitted: false,
         initialTier: 0,
@@ -82,17 +79,14 @@ export class TrustFacade implements TrustGate {
         observationCeiling: 0,
         capabilities: [],
         expiresAt: new Date(),
-        reason: "Agent has been revoked",
+        reason: 'Agent has been revoked',
       };
     }
 
     // Check cache
     const cached = this.gateTrustCache.get(agent.agentId);
-    if (
-      cached &&
-      Date.now() - cached.cachedAt < this.config.gateTrustCacheTtlMs
-    ) {
-      logger.debug({ agentId: agent.agentId }, "Returning cached admission");
+    if (cached && Date.now() - cached.cachedAt < this.config.gateTrustCacheTtlMs) {
+      logger.debug({ agentId: agent.agentId }, 'Returning cached admission');
       return cached.admission;
     }
 
@@ -136,7 +130,7 @@ export class TrustFacade implements TrustGate {
         observationCeiling,
         latencyMs,
       },
-      "Agent admitted",
+      'Agent admitted'
     );
 
     return admission;
@@ -145,45 +139,32 @@ export class TrustFacade implements TrustGate {
   /**
    * THE HANDSHAKE - Action authorization
    */
-  async authorize(
-    agentId: string,
-    action: Action,
-  ): Promise<AuthorizationResult> {
+  async authorize(agentId: string, action: Action): Promise<AuthorizationResult> {
     const startTime = performance.now();
 
     // Check if revoked
     if (this.revokedAgents.has(agentId)) {
-      return this.createDenialResult(
-        agentId,
-        "Agent has been revoked",
-        startTime,
-      );
+      return this.createDenialResult(agentId, 'Agent has been revoked', startTime);
     }
 
     // Check if admitted (has cached gate trust)
     const cached = this.gateTrustCache.get(agentId);
     if (!cached) {
-      return this.createDenialResult(agentId, "Agent not admitted", startTime);
+      return this.createDenialResult(agentId, 'Agent not admitted', startTime);
     }
 
     // Check if admission expired
     if (new Date() > cached.admission.expiresAt) {
       this.gateTrustCache.delete(agentId);
-      return this.createDenialResult(agentId, "Admission expired", startTime);
+      return this.createDenialResult(agentId, 'Admission expired', startTime);
     }
 
     // Get current trust score
-    const currentScore =
-      this.trustScores.get(agentId) ?? cached.admission.initialScore;
+    const currentScore = this.trustScores.get(agentId) ?? cached.admission.initialScore;
     const currentTier = this.scoreToTier(currentScore);
 
     // Evaluate the action against trust level
-    const decision = this.evaluateAction(
-      action,
-      currentTier,
-      currentScore,
-      cached.admission,
-    );
+    const decision = this.evaluateAction(action, currentTier, currentScore, cached.admission);
 
     const latencyMs = performance.now() - startTime;
 
@@ -191,7 +172,7 @@ export class TrustFacade implements TrustGate {
     if (latencyMs > this.config.maxAuthorizationLatencyMs) {
       logger.warn(
         { agentId, latencyMs, target: this.config.maxAuthorizationLatencyMs },
-        "Authorization exceeded latency target",
+        'Authorization exceeded latency target'
       );
     }
 
@@ -211,7 +192,7 @@ export class TrustFacade implements TrustGate {
         allowed: result.allowed,
         latencyMs,
       },
-      "Authorization complete",
+      'Authorization complete'
     );
 
     return result;
@@ -220,10 +201,7 @@ export class TrustFacade implements TrustGate {
   /**
    * Combined admission + authorization
    */
-  async fullCheck(
-    agent: AgentCredentials,
-    action: Action,
-  ): Promise<FullCheckResult> {
+  async fullCheck(agent: AgentCredentials, action: Action): Promise<FullCheckResult> {
     const admission = await this.admit(agent);
 
     if (!admission.admitted) {
@@ -241,10 +219,7 @@ export class TrustFacade implements TrustGate {
   async recordSignal(signal: TrustSignal): Promise<void> {
     const currentScore = this.trustScores.get(signal.agentId);
     if (currentScore === undefined) {
-      logger.warn(
-        { agentId: signal.agentId },
-        "Cannot record signal: agent not found",
-      );
+      logger.warn({ agentId: signal.agentId }, 'Cannot record signal: agent not found');
       return;
     }
 
@@ -255,19 +230,19 @@ export class TrustFacade implements TrustGate {
     // Apply asymmetric trust dynamics (10:1 loss:gain ratio)
     let delta: number;
     switch (signal.type) {
-      case "success":
+      case 'success':
         // Logarithmic gain: small increments
         delta = Math.log(1 + signal.weight * 10) * 2;
         break;
-      case "failure":
+      case 'failure':
         // Exponential loss: significant penalty
         delta = -(signal.weight * 50);
         break;
-      case "violation":
+      case 'violation':
         // Severe penalty for violations
         delta = -(signal.weight * 100);
         break;
-      case "neutral":
+      case 'neutral':
       default:
         delta = 0;
     }
@@ -289,7 +264,7 @@ export class TrustFacade implements TrustGate {
         newScore,
         tierChange: oldTier !== newTier ? `T${oldTier} -> T${newTier}` : null,
       },
-      "Trust signal recorded",
+      'Trust signal recorded'
     );
   }
 
@@ -317,7 +292,7 @@ export class TrustFacade implements TrustGate {
     this.gateTrustCache.delete(agentId);
     this.trustScores.delete(agentId);
 
-    logger.warn({ agentId, reason }, "Agent revoked");
+    logger.warn({ agentId, reason }, 'Agent revoked');
   }
 
   /**
@@ -328,15 +303,13 @@ export class TrustFacade implements TrustGate {
     this.gateTrustCache.delete(agentId);
     this.trustScores.delete(agentId);
 
-    logger.warn({ agentId, reason }, "Agent revoked");
+    logger.warn({ agentId, reason }, 'Agent revoked');
   }
 
   /**
    * Get combined trust info for an agent
    */
-  getAgentTrustInfo(
-    agentId: string,
-  ): { score: number; tier: TrustTier; ceiling: number } | null {
+  getAgentTrustInfo(agentId: string): { score: number; tier: TrustTier; ceiling: number } | null {
     const score = this.trustScores.get(agentId);
     if (score === undefined) return null;
 
@@ -359,17 +332,17 @@ export class TrustFacade implements TrustGate {
     if (!capabilities) {
       return [];
     }
-    return capabilities.filter((cap) => !cap.includes("admin"));
+    return capabilities.filter((cap) => !cap.includes('admin'));
   }
 
   private calculateInitialScore(agent: AgentCredentials): number {
     // Initial score based on observation tier
     switch (agent.observationTier) {
-      case "WHITE_BOX":
+      case 'WHITE_BOX':
         return 300; // Start at T1
-      case "GRAY_BOX":
+      case 'GRAY_BOX':
         return 200; // Start at T1
-      case "BLACK_BOX":
+      case 'BLACK_BOX':
       default:
         return 100; // Start at T0
     }
@@ -383,19 +356,18 @@ export class TrustFacade implements TrustGate {
     action: Action,
     tier: TrustTier,
     score: number,
-    admission: AdmissionResult,
-  ): Omit<AuthorizationResult, "currentScore" | "currentTier" | "latencyMs"> {
+    admission: AdmissionResult
+  ): Omit<AuthorizationResult, 'currentScore' | 'currentTier' | 'latencyMs'> {
     // Check capability
-    const requiredCapability = `${action.type}:${action.resource.split("/")[0]}`;
+    const requiredCapability = `${action.type}:${action.resource.split('/')[0]}`;
     const hasCapability = admission.capabilities.some(
-      (cap) =>
-        cap === requiredCapability || cap === `${action.type}:*` || cap === "*",
+      (cap) => cap === requiredCapability || cap === `${action.type}:*` || cap === '*'
     );
 
     if (!hasCapability) {
       return {
         allowed: false,
-        tier: "RED",
+        tier: 'RED',
         reason: `Missing capability: ${requiredCapability}`,
       };
     }
@@ -406,32 +378,32 @@ export class TrustFacade implements TrustGate {
     // Determine decision tier based on action risk
     const actionRisk = this.assessActionRisk(action);
 
-    if (actionRisk === "high" && tier < 4) {
+    if (actionRisk === 'high' && tier < 4) {
       // High-risk action requires T4+
       return {
         allowed: false,
-        tier: "RED",
+        tier: 'RED',
         reason: `High-risk action requires T4 (Standard) or higher. Current: T${tier} (${TRUST_TIER_NAMES[tier]})`,
       };
     }
 
-    if (actionRisk === "medium" && tier < 2) {
+    if (actionRisk === 'medium' && tier < 2) {
       // Medium-risk needs refinement for low-trust agents
       return {
         allowed: true,
-        tier: "YELLOW",
+        tier: 'YELLOW',
         constraints,
-        reason: "Action requires additional constraints at current trust level",
+        reason: 'Action requires additional constraints at current trust level',
         refinements: [
           {
-            id: "add-timeout",
-            description: "Execute with shorter timeout",
+            id: 'add-timeout',
+            description: 'Execute with shorter timeout',
             modifiedAction: action,
             constraints: { ...constraints, timeoutMs: 30000 },
           },
           {
-            id: "add-approval",
-            description: "Request human approval",
+            id: 'add-approval',
+            description: 'Request human approval',
             modifiedAction: action,
             constraints: { ...constraints },
           },
@@ -442,7 +414,7 @@ export class TrustFacade implements TrustGate {
     // GREEN - allowed with constraints
     return {
       allowed: true,
-      tier: "GREEN",
+      tier: 'GREEN',
       constraints,
       reason: `Authorized at T${tier} (${TRUST_TIER_NAMES[tier]})`,
     };
@@ -509,23 +481,23 @@ export class TrustFacade implements TrustGate {
     }
   }
 
-  private assessActionRisk(action: Action): "low" | "medium" | "high" {
-    const highRiskActions = ["delete", "execute", "admin"];
-    const mediumRiskActions = ["write", "update", "create"];
+  private assessActionRisk(action: Action): 'low' | 'medium' | 'high' {
+    const highRiskActions = ['delete', 'execute', 'admin'];
+    const mediumRiskActions = ['write', 'update', 'create'];
 
-    if (highRiskActions.includes(action.type)) return "high";
-    if (mediumRiskActions.includes(action.type)) return "medium";
-    return "low";
+    if (highRiskActions.includes(action.type)) return 'high';
+    if (mediumRiskActions.includes(action.type)) return 'medium';
+    return 'low';
   }
 
   private createDenialResult(
     agentId: string,
     reason: string,
-    startTime: number,
+    startTime: number
   ): AuthorizationResult {
     return {
       allowed: false,
-      tier: "RED",
+      tier: 'RED',
       currentScore: 0,
       currentTier: 0,
       reason,
@@ -537,8 +509,6 @@ export class TrustFacade implements TrustGate {
 /**
  * Create a new TrustFacade instance
  */
-export function createTrustFacade(
-  config?: Partial<TrustFacadeConfig>,
-): TrustFacade {
+export function createTrustFacade(config?: Partial<TrustFacadeConfig>): TrustFacade {
   return new TrustFacade(config);
 }

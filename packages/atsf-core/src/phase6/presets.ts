@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
+import { createLogger } from '../common/logger.js';
 import {
   type TrustPreset,
   type TrustWeights,
@@ -25,9 +25,9 @@ import {
   trustPresetSchema,
   presetLineageSchema,
   trustWeightsSchema,
-} from "./types.js";
+} from './types.js';
 
-const logger = createLogger({ component: "phase6:presets" });
+const logger = createLogger({ component: 'phase6:presets' });
 
 // =============================================================================
 // HASH UTILITIES
@@ -39,17 +39,15 @@ const logger = createLogger({ component: "phase6:presets" });
 async function calculateHash(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
  * Hash preset data deterministically
  */
-async function hashPresetData(
-  preset: Omit<TrustPreset, "presetHash">,
-): Promise<string> {
+async function hashPresetData(preset: Omit<TrustPreset, 'presetHash'>): Promise<string> {
   const data = {
     presetId: preset.presetId,
     name: preset.name,
@@ -71,12 +69,7 @@ async function hashPresetData(
  * Normalize weights to sum to 1.0
  */
 export function normalizeWeights(weights: TrustWeights): TrustWeights {
-  const sum =
-    weights.observability +
-    weights.capability +
-    weights.behavior +
-    weights.governance +
-    weights.context;
+  const sum = weights.observability + weights.capability + weights.behavior + weights.governance + weights.context;
 
   if (Math.abs(sum - 1.0) < 0.001) {
     return weights; // Already normalized
@@ -94,10 +87,7 @@ export function normalizeWeights(weights: TrustWeights): TrustWeights {
 /**
  * Validate weights sum to 1.0
  */
-export function validateWeights(weights: TrustWeights): {
-  valid: boolean;
-  reason?: string;
-} {
+export function validateWeights(weights: TrustWeights): { valid: boolean; reason?: string } {
   const result = trustWeightsSchema.safeParse(weights);
   if (!result.success) {
     return { valid: false, reason: result.error.message };
@@ -110,7 +100,7 @@ export function validateWeights(weights: TrustWeights): {
  */
 export function calculateWeightsDelta(
   parent: TrustWeights,
-  child: TrustWeights,
+  child: TrustWeights
 ): Partial<TrustWeights> {
   const delta = {} as Record<string, number>;
 
@@ -138,7 +128,7 @@ export function calculateWeightsDelta(
  */
 export function applyWeightsDelta(
   base: TrustWeights,
-  delta: Partial<TrustWeights>,
+  delta: Partial<TrustWeights>
 ): TrustWeights {
   return normalizeWeights({
     observability: base.observability + (delta.observability ?? 0),
@@ -198,9 +188,7 @@ export interface DerivePresetInput {
  * Derive a new preset from a parent
  * Maintains cryptographic link to parent for lineage tracking.
  */
-export async function derivePreset(
-  input: DerivePresetInput,
-): Promise<TrustPreset> {
+export async function derivePreset(input: DerivePresetInput): Promise<TrustPreset> {
   const { parentPreset, weightOverrides, ...rest } = input;
 
   // Calculate new weights
@@ -210,8 +198,7 @@ export async function derivePreset(
   if (weightOverrides) {
     // Apply overrides and normalize
     newWeights = normalizeWeights({
-      observability:
-        weightOverrides.observability ?? parentPreset.weights.observability,
+      observability: weightOverrides.observability ?? parentPreset.weights.observability,
       capability: weightOverrides.capability ?? parentPreset.weights.capability,
       behavior: weightOverrides.behavior ?? parentPreset.weights.behavior,
       governance: weightOverrides.governance ?? parentPreset.weights.governance,
@@ -230,19 +217,19 @@ export async function derivePreset(
   }
 
   // Validate source hierarchy
-  const sourceOrder: PresetSource[] = ["basis", "vorion", "axiom"];
+  const sourceOrder: PresetSource[] = ['basis', 'vorion', 'axiom'];
   const parentSourceIdx = sourceOrder.indexOf(parentPreset.source);
   const childSourceIdx = sourceOrder.indexOf(input.source);
 
   if (childSourceIdx < parentSourceIdx) {
     throw new Error(
-      `Cannot derive ${input.source} preset from ${parentPreset.source} - must be same level or lower in hierarchy`,
+      `Cannot derive ${input.source} preset from ${parentPreset.source} - must be same level or lower in hierarchy`
     );
   }
 
   const now = new Date();
 
-  const presetData: Omit<TrustPreset, "presetHash"> = {
+  const presetData: Omit<TrustPreset, 'presetHash'> = {
     presetId: rest.presetId,
     name: rest.name,
     description: rest.description,
@@ -276,7 +263,7 @@ export async function derivePreset(
       source: preset.source,
       parentPresetId: parentPreset.presetId,
     },
-    "Preset derived",
+    'Preset derived'
   );
 
   return Object.freeze(preset);
@@ -292,7 +279,7 @@ export async function createVorionPreset(
   basisPresetId: string,
   weightOverrides: Partial<TrustWeights> | undefined,
   comment: string,
-  createdBy: string,
+  createdBy: string
 ): Promise<TrustPreset> {
   const basisPreset = getBASISPreset(basisPresetId);
   if (!basisPreset) {
@@ -303,7 +290,7 @@ export async function createVorionPreset(
     presetId,
     name,
     description,
-    source: "vorion",
+    source: 'vorion',
     parentPreset: basisPreset,
     weightOverrides,
     comment,
@@ -321,19 +308,17 @@ export async function createAxiomPreset(
   vorionPreset: TrustPreset,
   weightOverrides: Partial<TrustWeights> | undefined,
   comment: string,
-  createdBy: string,
+  createdBy: string
 ): Promise<TrustPreset> {
-  if (vorionPreset.source !== "vorion" && vorionPreset.source !== "basis") {
-    throw new Error(
-      `Axiom preset must derive from Vorion or BASIS preset, got ${vorionPreset.source}`,
-    );
+  if (vorionPreset.source !== 'vorion' && vorionPreset.source !== 'basis') {
+    throw new Error(`Axiom preset must derive from Vorion or BASIS preset, got ${vorionPreset.source}`);
   }
 
   return derivePreset({
     presetId,
     name,
     description,
-    source: "axiom",
+    source: 'axiom',
     parentPreset: vorionPreset,
     weightOverrides,
     comment,
@@ -350,7 +335,7 @@ export async function createAxiomPreset(
  */
 export async function buildPresetLineage(
   preset: TrustPreset,
-  presetRegistry: Map<string, TrustPreset>,
+  presetRegistry: Map<string, TrustPreset>
 ): Promise<PresetLineage> {
   const chain: string[] = [];
   const hashes: string[] = [];
@@ -363,9 +348,7 @@ export async function buildPresetLineage(
 
     if (current.parentPresetId) {
       // Check BASIS presets first
-      current =
-        BASIS_CANONICAL_PRESETS[current.parentPresetId] ??
-        presetRegistry.get(current.parentPresetId);
+      current = BASIS_CANONICAL_PRESETS[current.parentPresetId] ?? presetRegistry.get(current.parentPresetId);
     } else {
       current = undefined;
     }
@@ -392,12 +375,12 @@ export async function buildPresetLineage(
  */
 export async function verifyPresetLineage(
   lineage: PresetLineage,
-  presetRegistry: Map<string, TrustPreset>,
+  presetRegistry: Map<string, TrustPreset>
 ): Promise<{ valid: boolean; issues: string[] }> {
   const issues: string[] = [];
 
   if (lineage.chain.length !== lineage.hashes.length) {
-    issues.push("Chain and hash lengths mismatch");
+    issues.push('Chain and hash lengths mismatch');
     return { valid: false, issues };
   }
 
@@ -407,8 +390,7 @@ export async function verifyPresetLineage(
     const expectedHash = lineage.hashes[i];
 
     // Find preset
-    const preset =
-      BASIS_CANONICAL_PRESETS[presetId] ?? presetRegistry.get(presetId);
+    const preset = BASIS_CANONICAL_PRESETS[presetId] ?? presetRegistry.get(presetId);
 
     if (!preset) {
       issues.push(`Preset ${presetId} not found in registry`);
@@ -416,18 +398,14 @@ export async function verifyPresetLineage(
     }
 
     if (preset.presetHash !== expectedHash) {
-      issues.push(
-        `Hash mismatch for ${presetId} - expected ${expectedHash}, got ${preset.presetHash}`,
-      );
+      issues.push(`Hash mismatch for ${presetId} - expected ${expectedHash}, got ${preset.presetHash}`);
     }
 
     // Verify parent link (except for root)
     if (i > 0) {
       const expectedParentId = lineage.chain[i - 1];
       if (preset.parentPresetId !== expectedParentId) {
-        issues.push(
-          `Parent link broken: ${presetId} should reference ${expectedParentId}, references ${preset.parentPresetId}`,
-        );
+        issues.push(`Parent link broken: ${presetId} should reference ${expectedParentId}, references ${preset.parentPresetId}`);
       }
 
       const expectedParentHash = lineage.hashes[i - 1];
@@ -448,7 +426,7 @@ export async function verifyPresetLineage(
  */
 export function markLineageVerified(
   lineage: PresetLineage,
-  verifiedBy: string,
+  verifiedBy: string
 ): PresetLineage {
   return {
     ...lineage,
@@ -515,7 +493,7 @@ export class PresetService {
     basisPresetId: string,
     weightOverrides?: Partial<TrustWeights>,
     comment?: string,
-    createdBy: string = "system",
+    createdBy: string = 'system'
   ): Promise<TrustPreset> {
     const preset = await createVorionPreset(
       presetId,
@@ -523,8 +501,8 @@ export class PresetService {
       description,
       basisPresetId,
       weightOverrides,
-      comment ?? "",
-      createdBy,
+      comment ?? '',
+      createdBy
     );
 
     this.vorionPresets.set(presetId, preset);
@@ -546,7 +524,7 @@ export class PresetService {
     parentPresetId: string,
     weightOverrides?: Partial<TrustWeights>,
     comment?: string,
-    createdBy: string = "system",
+    createdBy: string = 'system'
   ): Promise<TrustPreset> {
     const parentPreset = this.getPreset(parentPresetId);
     if (!parentPreset) {
@@ -559,8 +537,8 @@ export class PresetService {
       description,
       parentPreset,
       weightOverrides,
-      comment ?? "",
-      createdBy,
+      comment ?? '',
+      createdBy
     );
 
     this.axiomPresets.set(presetId, preset);
@@ -582,12 +560,10 @@ export class PresetService {
   /**
    * Verify a preset's lineage
    */
-  async verifyLineage(
-    presetId: string,
-  ): Promise<{ valid: boolean; issues: string[] }> {
+  async verifyLineage(presetId: string): Promise<{ valid: boolean; issues: string[] }> {
     const lineage = this.lineages.get(presetId);
     if (!lineage) {
-      return { valid: false, issues: ["Lineage not found"] };
+      return { valid: false, issues: ['Lineage not found'] };
     }
 
     return verifyPresetLineage(lineage, this.getAllPresets());
@@ -603,7 +579,7 @@ export class PresetService {
     }
 
     this.lineages.set(presetId, markLineageVerified(lineage, verifiedBy));
-    logger.info({ presetId, verifiedBy }, "Lineage marked as verified");
+    logger.info({ presetId, verifiedBy }, 'Lineage marked as verified');
   }
 
   /**
@@ -615,9 +591,7 @@ export class PresetService {
     axiomPresets: number;
     verifiedLineages: number;
   } {
-    const verifiedCount = Array.from(this.lineages.values()).filter(
-      (l) => l.verified,
-    ).length;
+    const verifiedCount = Array.from(this.lineages.values()).filter((l) => l.verified).length;
 
     return {
       basisPresets: Object.keys(BASIS_CANONICAL_PRESETS).length,
@@ -643,55 +617,53 @@ export function createPresetService(): PresetService {
  * Initialize Vorion reference presets
  * These are the platform defaults derived from BASIS canonical.
  */
-export async function initializeVorionPresets(
-  service: PresetService,
-): Promise<void> {
+export async function initializeVorionPresets(service: PresetService): Promise<void> {
   // High-security preset (emphasizes observability + governance)
   await service.createVorionPreset(
-    "vorion:preset:high-security",
-    "High Security",
-    "For high-risk operations requiring maximum visibility",
-    "basis:preset:conservative",
+    'vorion:preset:high-security',
+    'High Security',
+    'For high-risk operations requiring maximum visibility',
+    'basis:preset:conservative',
     {
       observability: 0.35,
-      governance: 0.3,
-      behavior: 0.2,
-      capability: 0.1,
+      governance: 0.30,
+      behavior: 0.20,
+      capability: 0.10,
       context: 0.05,
     },
-    "Vorion platform default for T4+ agents in regulated environments",
-    "@vorion/platform",
+    'Vorion platform default for T4+ agents in regulated environments',
+    '@vorionsys/platform'
   );
 
   // Balanced autonomy preset (for general use)
   await service.createVorionPreset(
-    "vorion:preset:balanced-autonomy",
-    "Balanced Autonomy",
-    "Default preset for most agents",
-    "basis:preset:balanced",
+    'vorion:preset:balanced-autonomy',
+    'Balanced Autonomy',
+    'Default preset for most agents',
+    'basis:preset:balanced',
     undefined, // Use BASIS balanced weights exactly
-    "Vorion platform default for general-purpose agents",
-    "@vorion/platform",
+    'Vorion platform default for general-purpose agents',
+    '@vorionsys/platform'
   );
 
   // Performance-focused preset (emphasizes capability)
   await service.createVorionPreset(
-    "vorion:preset:performance",
-    "Performance Focused",
-    "For agents where capability is primary concern",
-    "basis:preset:capability-focused",
+    'vorion:preset:performance',
+    'Performance Focused',
+    'For agents where capability is primary concern',
+    'basis:preset:capability-focused',
     {
-      capability: 0.4,
+      capability: 0.40,
       behavior: 0.25,
       observability: 0.15,
-      governance: 0.1,
-      context: 0.1,
+      governance: 0.10,
+      context: 0.10,
     },
-    "Vorion platform default for compute-intensive agents",
-    "@vorion/platform",
+    'Vorion platform default for compute-intensive agents',
+    '@vorionsys/platform'
   );
 
-  logger.info("Vorion reference presets initialized");
+  logger.info('Vorion reference presets initialized');
 }
 
 // =============================================================================
@@ -704,4 +676,4 @@ export {
   type PresetLineage,
   type PresetSource,
   BASIS_CANONICAL_PRESETS,
-} from "./types.js";
+} from './types.js';

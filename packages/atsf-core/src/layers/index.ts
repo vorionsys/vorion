@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
-import type { ID, ControlAction } from "../common/types.js";
+import { createLogger } from '../common/logger.js';
+import type { ID, ControlAction } from '../common/types.js';
 import type {
   SecurityLayer,
   SecurityLayerConfig,
@@ -27,11 +27,11 @@ import type {
   ThreatClass,
   LayerHealthStatus,
   ValidationResult,
-} from "./types.js";
+} from './types.js';
 
-export * from "./types.js";
+export * from './types.js';
 
-const logger = createLogger({ component: "security-layers" });
+const logger = createLogger({ component: 'security-layers' });
 
 /**
  * Default pipeline configuration
@@ -60,33 +60,16 @@ export abstract class BaseSecurityLayer implements SecurityLayer {
   abstract execute(input: LayerInput): Promise<LayerExecutionResult>;
 
   validateInput(input: LayerInput): ValidationResult {
-    const errors: Array<{
-      field: string;
-      rule: string;
-      message: string;
-      value?: unknown;
-    }> = [];
+    const errors: Array<{ field: string; rule: string; message: string; value?: unknown }> = [];
 
     if (!input.requestId) {
-      errors.push({
-        field: "requestId",
-        rule: "required",
-        message: "Request ID is required",
-      });
+      errors.push({ field: 'requestId', rule: 'required', message: 'Request ID is required' });
     }
     if (!input.entityId) {
-      errors.push({
-        field: "entityId",
-        rule: "required",
-        message: "Entity ID is required",
-      });
+      errors.push({ field: 'entityId', rule: 'required', message: 'Entity ID is required' });
     }
     if (!input.payload) {
-      errors.push({
-        field: "payload",
-        rule: "required",
-        message: "Payload is required",
-      });
+      errors.push({ field: 'payload', rule: 'required', message: 'Payload is required' });
     }
 
     return { valid: errors.length === 0, errors };
@@ -117,7 +100,7 @@ export abstract class BaseSecurityLayer implements SecurityLayer {
     confidence: number,
     findings: LayerFinding[] = [],
     modifications: LayerModification[] = [],
-    timing: LayerTiming,
+    timing: LayerTiming
   ): LayerExecutionResult {
     return {
       layerId: this.config.layerId,
@@ -140,7 +123,7 @@ export abstract class BaseSecurityLayer implements SecurityLayer {
     confidence: number,
     findings: LayerFinding[],
     timing: LayerTiming,
-    error?: LayerError,
+    error?: LayerError
   ): LayerExecutionResult {
     return {
       layerId: this.config.layerId,
@@ -159,13 +142,11 @@ export abstract class BaseSecurityLayer implements SecurityLayer {
   /**
    * Determine risk level from findings
    */
-  private determineRiskLevel(
-    findings: LayerFinding[],
-  ): "low" | "medium" | "high" | "critical" {
-    if (findings.some((f) => f.severity === "critical")) return "critical";
-    if (findings.some((f) => f.severity === "high")) return "high";
-    if (findings.some((f) => f.severity === "medium")) return "medium";
-    return "low";
+  private determineRiskLevel(findings: LayerFinding[]): 'low' | 'medium' | 'high' | 'critical' {
+    if (findings.some((f) => f.severity === 'critical')) return 'critical';
+    if (findings.some((f) => f.severity === 'high')) return 'high';
+    if (findings.some((f) => f.severity === 'medium')) return 'medium';
+    return 'low';
   }
 }
 
@@ -187,10 +168,7 @@ export class SecurityPipeline {
   registerLayer(layer: SecurityLayer): void {
     const layerConfig = layer.getConfig();
     this.layers.set(layerConfig.layerId, layer);
-    logger.debug(
-      { layerId: layerConfig.layerId, name: layerConfig.name },
-      "Layer registered",
-    );
+    logger.debug({ layerId: layerConfig.layerId, name: layerConfig.name }, 'Layer registered');
   }
 
   /**
@@ -198,7 +176,7 @@ export class SecurityPipeline {
    */
   unregisterLayer(layerId: number): void {
     this.layers.delete(layerId);
-    logger.debug({ layerId }, "Layer unregistered");
+    logger.debug({ layerId }, 'Layer unregistered');
   }
 
   /**
@@ -237,7 +215,7 @@ export class SecurityPipeline {
       try {
         listener(event);
       } catch (error) {
-        logger.error({ error }, "Error in pipeline event listener");
+        logger.error({ error }, 'Error in pipeline event listener');
       }
     }
   }
@@ -250,7 +228,7 @@ export class SecurityPipeline {
     const startTime = Date.now();
     const now = new Date().toISOString();
 
-    this.emit({ type: "pipeline_started", executionId, timestamp: now });
+    this.emit({ type: 'pipeline_started', executionId, timestamp: now });
 
     const layerResults: LayerExecutionResult[] = [];
     const layersPassed: number[] = [];
@@ -273,24 +251,22 @@ export class SecurityPipeline {
       if (this.shouldSkipLayer(layerId)) {
         layersSkipped.push(layerId);
         this.emit({
-          type: "layer_skipped",
+          type: 'layer_skipped',
           layerId,
-          reason: "disabled",
+          reason: 'disabled',
           timestamp: new Date().toISOString(),
         });
         continue;
       }
 
       // Check dependencies
-      const missingDeps = layerConfig.dependencies.filter(
-        (dep) => !completedLayers.has(dep),
-      );
+      const missingDeps = layerConfig.dependencies.filter((dep) => !completedLayers.has(dep));
       if (missingDeps.length > 0) {
         layersSkipped.push(layerId);
         this.emit({
-          type: "layer_skipped",
+          type: 'layer_skipped',
           layerId,
-          reason: `missing dependencies: ${missingDeps.join(", ")}`,
+          reason: `missing dependencies: ${missingDeps.join(', ')}`,
           timestamp: new Date().toISOString(),
         });
         continue;
@@ -301,20 +277,16 @@ export class SecurityPipeline {
       if (elapsed >= this.config.maxTotalTimeMs) {
         layersSkipped.push(layerId);
         this.emit({
-          type: "layer_skipped",
+          type: 'layer_skipped',
           layerId,
-          reason: "timeout",
+          reason: 'timeout',
           timestamp: new Date().toISOString(),
         });
         continue;
       }
 
       // Execute layer
-      this.emit({
-        type: "layer_started",
-        layerId,
-        timestamp: new Date().toISOString(),
-      });
+      this.emit({ type: 'layer_started', layerId, timestamp: new Date().toISOString() });
 
       try {
         const layerInput: LayerInput = {
@@ -322,11 +294,7 @@ export class SecurityPipeline {
           priorResults: layerResults,
         };
 
-        const result = await this.executeWithTimeout(
-          layer,
-          layerInput,
-          layerConfig.timeoutMs,
-        );
+        const result = await this.executeWithTimeout(layer, layerInput, layerConfig.timeoutMs);
 
         layerResults.push(result);
         allModifications.push(...result.modifications);
@@ -341,29 +309,22 @@ export class SecurityPipeline {
         completedLayers.add(layerId);
 
         this.emit({
-          type: "layer_completed",
+          type: 'layer_completed',
           layerId,
           result,
           timestamp: new Date().toISOString(),
         });
 
         // Check if we should stop
-        if (
-          !result.passed &&
-          this.config.stopOnFirstFailure &&
-          layerConfig.required
-        ) {
-          logger.info(
-            { layerId },
-            "Stopping pipeline due to required layer failure",
-          );
+        if (!result.passed && this.config.stopOnFirstFailure && layerConfig.required) {
+          logger.info({ layerId }, 'Stopping pipeline due to required layer failure');
           break;
         }
       } catch (error) {
         const layerError = this.createLayerError(error);
 
         this.emit({
-          type: "layer_failed",
+          type: 'layer_failed',
           layerId,
           error: layerError,
           timestamp: new Date().toISOString(),
@@ -371,17 +332,12 @@ export class SecurityPipeline {
 
         // Handle based on fail mode
         const failMode = this.getFailMode(layerId, layerConfig.failMode);
-        const failResult = this.handleLayerFailure(
-          layer,
-          failMode,
-          layerError,
-          startTime,
-        );
+        const failResult = this.handleLayerFailure(layer, failMode, layerError, startTime);
 
         layerResults.push(failResult);
         layersFailed.push(layerId);
 
-        if (failMode === "block" && layerConfig.required) {
+        if (failMode === 'block' && layerConfig.required) {
           break;
         }
       }
@@ -396,11 +352,11 @@ export class SecurityPipeline {
       layersSkipped,
       allModifications,
       allFindings,
-      startTime,
+      startTime
     );
 
     this.emit({
-      type: "pipeline_completed",
+      type: 'pipeline_completed',
       result: pipelineResult,
       timestamp: new Date().toISOString(),
     });
@@ -415,7 +371,7 @@ export class SecurityPipeline {
         layersSkipped: layersSkipped.length,
         durationMs: pipelineResult.totalDurationMs,
       },
-      "Pipeline execution completed",
+      'Pipeline execution completed'
     );
 
     return pipelineResult;
@@ -434,9 +390,7 @@ export class SecurityPipeline {
       const config = layer.getConfig();
       if (visited.has(config.layerId)) return;
       if (visiting.has(config.layerId)) {
-        throw new Error(
-          `Circular dependency detected at layer ${config.layerId}`,
-        );
+        throw new Error(`Circular dependency detected at layer ${config.layerId}`);
       }
 
       visiting.add(config.layerId);
@@ -470,10 +424,7 @@ export class SecurityPipeline {
     if (this.config.disabledLayers?.includes(layerId)) {
       return true;
     }
-    if (
-      this.config.enabledLayers &&
-      !this.config.enabledLayers.includes(layerId)
-    ) {
+    if (this.config.enabledLayers && !this.config.enabledLayers.includes(layerId)) {
       return true;
     }
     return false;
@@ -492,15 +443,12 @@ export class SecurityPipeline {
   private async executeWithTimeout(
     layer: SecurityLayer,
     input: LayerInput,
-    timeoutMs: number,
+    timeoutMs: number
   ): Promise<LayerExecutionResult> {
     return Promise.race([
       layer.execute(input),
       new Promise<never>((_, reject) => {
-        setTimeout(
-          () => reject(new Error("Layer execution timeout")),
-          timeoutMs,
-        );
+        setTimeout(() => reject(new Error('Layer execution timeout')), timeoutMs);
       }),
     ]);
   }
@@ -511,15 +459,15 @@ export class SecurityPipeline {
   private createLayerError(error: unknown): LayerError {
     if (error instanceof Error) {
       return {
-        code: "LAYER_ERROR",
+        code: 'LAYER_ERROR',
         message: error.message,
-        retryable: error.message.includes("timeout"),
+        retryable: error.message.includes('timeout'),
         stack: error.stack,
         cause: error.cause,
       };
     }
     return {
-      code: "UNKNOWN_ERROR",
+      code: 'UNKNOWN_ERROR',
       message: String(error),
       retryable: false,
     };
@@ -532,7 +480,7 @@ export class SecurityPipeline {
     layer: SecurityLayer,
     failMode: FailMode,
     error: LayerError,
-    _pipelineStartTime: number,
+    _pipelineStartTime: number
   ): LayerExecutionResult {
     const config = layer.getConfig();
     const now = new Date().toISOString();
@@ -545,29 +493,29 @@ export class SecurityPipeline {
     };
 
     const action: ControlAction =
-      failMode === "block"
-        ? "deny"
-        : failMode === "escalate"
-          ? "escalate"
-          : failMode === "degrade"
-            ? "limit"
-            : "monitor";
+      failMode === 'block'
+        ? 'deny'
+        : failMode === 'escalate'
+          ? 'escalate'
+          : failMode === 'degrade'
+            ? 'limit'
+            : 'monitor';
 
     return {
       layerId: config.layerId,
       layerName: config.name,
-      passed: failMode === "log_only" || failMode === "warn",
+      passed: failMode === 'log_only' || failMode === 'warn',
       action,
       confidence: 0,
-      riskLevel: failMode === "block" ? "critical" : "high",
+      riskLevel: failMode === 'block' ? 'critical' : 'high',
       findings: [
         {
-          type: "warning",
-          severity: failMode === "block" ? "critical" : "high",
+          type: 'warning',
+          severity: failMode === 'block' ? 'critical' : 'high',
           code: `LAYER_${config.layerId}_FAILURE`,
           description: `Layer ${config.name} failed: ${error.message}`,
           evidence: [error.stack ?? error.message],
-          remediation: error.retryable ? "Retry the operation" : undefined,
+          remediation: error.retryable ? 'Retry the operation' : undefined,
         },
       ],
       modifications: [],
@@ -587,14 +535,13 @@ export class SecurityPipeline {
     layersSkipped: number[],
     modifications: LayerModification[],
     findings: LayerFinding[],
-    startTime: number,
+    startTime: number
   ): PipelineResult {
     const totalDurationMs = Date.now() - startTime;
     const now = new Date().toISOString();
 
     // Determine overall decision
-    const { decision, confidence, explanation } =
-      this.determineDecision(layerResults);
+    const { decision, confidence, explanation } = this.determineDecision(layerResults);
 
     // Determine overall risk level
     const riskLevel = this.determineOverallRiskLevel(findings);
@@ -626,23 +573,16 @@ export class SecurityPipeline {
   } {
     if (results.length === 0) {
       return {
-        decision: "deny",
+        decision: 'deny',
         confidence: 0,
-        explanation: "No security layers executed - defaulting to deny",
+        explanation: 'No security layers executed - defaulting to deny',
       };
     }
 
     // Priority order for actions (most restrictive first)
-    const actionPriority: ControlAction[] = [
-      "terminate",
-      "deny",
-      "escalate",
-      "limit",
-      "monitor",
-      "allow",
-    ];
+    const actionPriority: ControlAction[] = ['terminate', 'deny', 'escalate', 'limit', 'monitor', 'allow'];
 
-    let finalAction: ControlAction = "allow";
+    let finalAction: ControlAction = 'allow';
     let totalConfidence = 0;
     let decisionReasons: string[] = [];
 
@@ -650,10 +590,7 @@ export class SecurityPipeline {
       totalConfidence += result.confidence;
 
       // Take the most restrictive action
-      if (
-        actionPriority.indexOf(result.action) <
-        actionPriority.indexOf(finalAction)
-      ) {
+      if (actionPriority.indexOf(result.action) < actionPriority.indexOf(finalAction)) {
         finalAction = result.action;
         decisionReasons.push(`Layer ${result.layerName}: ${result.action}`);
       }
@@ -663,33 +600,26 @@ export class SecurityPipeline {
     const avgConfidence = totalConfidence / results.length;
 
     // Check minimum confidence threshold
-    if (
-      avgConfidence < this.config.minConfidenceThreshold &&
-      finalAction === "allow"
-    ) {
-      finalAction = "escalate";
-      decisionReasons.push(
-        `Low confidence (${avgConfidence.toFixed(2)}) requires escalation`,
-      );
+    if (avgConfidence < this.config.minConfidenceThreshold && finalAction === 'allow') {
+      finalAction = 'escalate';
+      decisionReasons.push(`Low confidence (${avgConfidence.toFixed(2)}) requires escalation`);
     }
 
     return {
       decision: finalAction,
       confidence: avgConfidence,
-      explanation: decisionReasons.join("; ") || "All layers passed",
+      explanation: decisionReasons.join('; ') || 'All layers passed',
     };
   }
 
   /**
    * Determine overall risk level from findings
    */
-  private determineOverallRiskLevel(
-    findings: LayerFinding[],
-  ): "low" | "medium" | "high" | "critical" {
-    if (findings.some((f) => f.severity === "critical")) return "critical";
-    if (findings.some((f) => f.severity === "high")) return "high";
-    if (findings.some((f) => f.severity === "medium")) return "medium";
-    return "low";
+  private determineOverallRiskLevel(findings: LayerFinding[]): 'low' | 'medium' | 'high' | 'critical' {
+    if (findings.some((f) => f.severity === 'critical')) return 'critical';
+    if (findings.some((f) => f.severity === 'high')) return 'high';
+    if (findings.some((f) => f.severity === 'medium')) return 'medium';
+    return 'low';
   }
 
   /**
@@ -697,19 +627,9 @@ export class SecurityPipeline {
    */
   async getHealth(): Promise<{
     healthy: boolean;
-    layers: Array<{
-      layerId: number;
-      name: string;
-      healthy: boolean;
-      issues: string[];
-    }>;
+    layers: Array<{ layerId: number; name: string; healthy: boolean; issues: string[] }>;
   }> {
-    const layerHealth: Array<{
-      layerId: number;
-      name: string;
-      healthy: boolean;
-      issues: string[];
-    }> = [];
+    const layerHealth: Array<{ layerId: number; name: string; healthy: boolean; issues: string[] }> = [];
 
     for (const layer of this.layers.values()) {
       const config = layer.getConfig();
@@ -726,7 +646,7 @@ export class SecurityPipeline {
           layerId: config.layerId,
           name: config.name,
           healthy: false,
-          issues: [error instanceof Error ? error.message : "Unknown error"],
+          issues: [error instanceof Error ? error.message : 'Unknown error'],
         });
       }
     }
@@ -750,9 +670,7 @@ export class SecurityPipeline {
 /**
  * Create a new security pipeline
  */
-export function createSecurityPipeline(
-  config?: Partial<PipelineConfig>,
-): SecurityPipeline {
+export function createSecurityPipeline(config?: Partial<PipelineConfig>): SecurityPipeline {
   return new SecurityPipeline(config);
 }
 
@@ -772,7 +690,7 @@ export function createLayerConfig(
     timeoutMs?: number;
     parallelizable?: boolean;
     dependencies?: number[];
-  },
+  }
 ): SecurityLayerConfig {
   return {
     layerId,
@@ -783,19 +701,19 @@ export function createLayerConfig(
     secondaryThreats: options.secondaryThreats ?? [],
     inputSchema: {
       schemaId: `layer-${layerId}-input`,
-      definition: "LayerInput",
-      required: ["requestId", "entityId", "payload"],
-      optional: ["metadata", "priorResults"],
+      definition: 'LayerInput',
+      required: ['requestId', 'entityId', 'payload'],
+      optional: ['metadata', 'priorResults'],
       validations: [],
     },
     outputSchema: {
       schemaId: `layer-${layerId}-output`,
-      definition: "LayerExecutionResult",
-      required: ["layerId", "passed", "action", "confidence"],
-      optional: ["findings", "modifications", "error"],
+      definition: 'LayerExecutionResult',
+      required: ['layerId', 'passed', 'action', 'confidence'],
+      optional: ['findings', 'modifications', 'error'],
       validations: [],
     },
-    failMode: options.failMode ?? "block",
+    failMode: options.failMode ?? 'block',
     required: options.required ?? false,
     timeoutMs: options.timeoutMs ?? 1000,
     parallelizable: options.parallelizable ?? false,

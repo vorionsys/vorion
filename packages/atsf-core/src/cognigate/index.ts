@@ -7,11 +7,11 @@
  * @packageDocumentation
  */
 
-import { Worker, isMainThread } from "node:worker_threads";
-import { createLogger } from "../common/logger.js";
-import type { Intent, Decision, ID } from "../common/types.js";
+import { Worker, isMainThread } from 'node:worker_threads';
+import { createLogger } from '../common/logger.js';
+import type { Intent, Decision, ID } from '../common/types.js';
 
-const logger = createLogger({ component: "cognigate" });
+const logger = createLogger({ component: 'cognigate' });
 
 /**
  * Execution context for running an intent
@@ -62,7 +62,7 @@ export interface ResourceUsage {
  */
 export type ExecutionHandler = (
   intent: Intent,
-  context: Record<string, unknown>,
+  context: Record<string, unknown>
 ) => Promise<Record<string, unknown>>;
 
 /**
@@ -83,10 +83,7 @@ export class CognigateGateway {
   private defaultLimits: ResourceLimits;
   private useSandbox: boolean;
 
-  constructor(
-    defaultLimits?: Partial<ResourceLimits>,
-    options?: { useSandbox?: boolean },
-  ) {
+  constructor(defaultLimits?: Partial<ResourceLimits>, options?: { useSandbox?: boolean }) {
     this.defaultLimits = {
       maxMemoryMb: 512,
       maxCpuPercent: 50,
@@ -104,7 +101,7 @@ export class CognigateGateway {
    */
   registerHandler(intentType: string, handler: ExecutionHandler): void {
     this.handlers.set(intentType, handler);
-    logger.info({ intentType }, "Handler registered");
+    logger.info({ intentType }, 'Handler registered');
   }
 
   /**
@@ -115,10 +112,10 @@ export class CognigateGateway {
     const startedAt = new Date().toISOString();
 
     // Verify decision allows execution
-    if (decision.action !== "allow") {
+    if (decision.action !== 'allow') {
       logger.warn(
         { intentId: intent.id, action: decision.action },
-        "Execution blocked by decision",
+        'Execution blocked by decision'
       );
 
       return {
@@ -133,11 +130,11 @@ export class CognigateGateway {
     }
 
     // Get handler
-    const intentType = (intent.context["type"] as string) ?? "default";
+    const intentType = (intent.context['type'] as string) ?? 'default';
     const handler = this.handlers.get(intentType);
 
     if (!handler) {
-      logger.warn({ intentId: intent.id, intentType }, "No handler found");
+      logger.warn({ intentId: intent.id, intentType }, 'No handler found');
 
       return {
         intentId: intent.id,
@@ -172,16 +169,16 @@ export class CognigateGateway {
           handler,
           intent,
           limits,
-          abortController.signal,
+          abortController.signal
         );
         outputs = result.outputs;
         resourceUsage = result.resourceUsage;
       } else {
         // Direct execution (for testing or when already in worker)
-        outputs = (await Promise.race([
+        outputs = await Promise.race([
           handler(intent, intent.context),
           this.timeout(limits.timeoutMs, abortController.signal),
-        ])) as Record<string, unknown>;
+        ]) as Record<string, unknown>;
 
         const execEnd = performance.now();
         resourceUsage = {
@@ -196,12 +193,8 @@ export class CognigateGateway {
       const execEnd = performance.now();
 
       logger.info(
-        {
-          intentId: intent.id,
-          durationMs: execEnd - execStart,
-          memoryMb: resourceUsage.memoryPeakMb,
-        },
-        "Execution completed",
+        { intentId: intent.id, durationMs: execEnd - execStart, memoryMb: resourceUsage.memoryPeakMb },
+        'Execution completed'
       );
 
       return {
@@ -214,21 +207,15 @@ export class CognigateGateway {
       };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+        error instanceof Error ? error.message : 'Unknown error';
 
-      const isTimeout = errorMessage === "Execution timeout";
-      const isTerminated = errorMessage === "Execution terminated";
-      const isMemoryLimit = errorMessage.includes("memory limit");
+      const isTimeout = errorMessage === 'Execution timeout';
+      const isTerminated = errorMessage === 'Execution terminated';
+      const isMemoryLimit = errorMessage.includes('memory limit');
 
       logger.error(
-        {
-          intentId: intent.id,
-          error: errorMessage,
-          isTimeout,
-          isTerminated,
-          isMemoryLimit,
-        },
-        "Execution failed",
+        { intentId: intent.id, error: errorMessage, isTimeout, isTerminated, isMemoryLimit },
+        'Execution failed'
       );
 
       return {
@@ -253,11 +240,8 @@ export class CognigateGateway {
     handler: ExecutionHandler,
     intent: Intent,
     limits: ResourceLimits,
-    signal: AbortSignal,
-  ): Promise<{
-    outputs: Record<string, unknown>;
-    resourceUsage: ResourceUsage;
-  }> {
+    signal: AbortSignal
+  ): Promise<{ outputs: Record<string, unknown>; resourceUsage: ResourceUsage }> {
     return new Promise((resolve, reject) => {
       const execStart = performance.now();
 
@@ -267,9 +251,7 @@ export class CognigateGateway {
 
       // Create worker with memory limits
       const worker = new Worker(
-        new URL(
-          "data:text/javascript," +
-            encodeURIComponent(`
+        new URL('data:text/javascript,' + encodeURIComponent(`
           import { parentPort, workerData } from 'node:worker_threads';
 
           const { handlerCode, intent, context } = workerData;
@@ -295,8 +277,7 @@ export class CognigateGateway {
               error: error.message || 'Unknown error'
             });
           }
-        `),
-        ),
+        `)),
         {
           workerData: {
             handlerCode,
@@ -308,7 +289,7 @@ export class CognigateGateway {
             maxYoungGenerationSizeMb: Math.floor(limits.maxMemoryMb / 4),
             stackSizeMb: 4,
           },
-        },
+        }
       );
 
       // Track worker for termination
@@ -320,20 +301,20 @@ export class CognigateGateway {
       // Handle abort signal
       const abortHandler = () => {
         worker.terminate();
-        reject(new Error("Execution terminated"));
+        reject(new Error('Execution terminated'));
       };
-      signal.addEventListener("abort", abortHandler, { once: true });
+      signal.addEventListener('abort', abortHandler, { once: true });
 
       // Set timeout
       const timeoutId = setTimeout(() => {
         worker.terminate();
-        reject(new Error("Execution timeout"));
+        reject(new Error('Execution timeout'));
       }, limits.timeoutMs);
 
       // Handle worker messages
-      worker.on("message", (msg) => {
+      worker.on('message', (msg) => {
         clearTimeout(timeoutId);
-        signal.removeEventListener("abort", abortHandler);
+        signal.removeEventListener('abort', abortHandler);
 
         const execEnd = performance.now();
 
@@ -354,22 +335,18 @@ export class CognigateGateway {
       });
 
       // Handle worker errors (including memory limit exceeded)
-      worker.on("error", (error) => {
+      worker.on('error', (error) => {
         clearTimeout(timeoutId);
-        signal.removeEventListener("abort", abortHandler);
-        reject(new Error(error.message || "Worker error"));
+        signal.removeEventListener('abort', abortHandler);
+        reject(new Error(error.message || 'Worker error'));
       });
 
       // Handle worker exit
-      worker.on("exit", (code) => {
+      worker.on('exit', (code) => {
         if (code !== 0) {
           clearTimeout(timeoutId);
-          signal.removeEventListener("abort", abortHandler);
-          reject(
-            new Error(
-              `Worker exited with code ${code} (may have exceeded memory limit)`,
-            ),
-          );
+          signal.removeEventListener('abort', abortHandler);
+          reject(new Error(`Worker exited with code ${code} (may have exceeded memory limit)`));
         }
       });
     });
@@ -388,20 +365,13 @@ export class CognigateGateway {
    */
   private timeout(ms: number, signal?: AbortSignal): Promise<never> {
     return new Promise((_, reject) => {
-      const timeoutId = setTimeout(
-        () => reject(new Error("Execution timeout")),
-        ms,
-      );
+      const timeoutId = setTimeout(() => reject(new Error('Execution timeout')), ms);
 
       if (signal) {
-        signal.addEventListener(
-          "abort",
-          () => {
-            clearTimeout(timeoutId);
-            reject(new Error("Execution terminated"));
-          },
-          { once: true },
-        );
+        signal.addEventListener('abort', () => {
+          clearTimeout(timeoutId);
+          reject(new Error('Execution terminated'));
+        }, { once: true });
       }
     });
   }
@@ -427,17 +397,11 @@ export class CognigateGateway {
     const execution = this.activeExecutions.get(intentId);
 
     if (!execution) {
-      logger.warn(
-        { intentId },
-        "Terminate requested but no active execution found",
-      );
+      logger.warn({ intentId }, 'Terminate requested but no active execution found');
       return false;
     }
 
-    logger.warn(
-      { intentId, runningFor: performance.now() - execution.startTime },
-      "Terminating execution",
-    );
+    logger.warn({ intentId, runningFor: performance.now() - execution.startTime }, 'Terminating execution');
 
     // Abort via signal (for direct execution)
     execution.abortController.abort();
@@ -450,7 +414,7 @@ export class CognigateGateway {
     // Clean up
     this.activeExecutions.delete(intentId);
 
-    logger.info({ intentId }, "Execution terminated successfully");
+    logger.info({ intentId }, 'Execution terminated successfully');
     return true;
   }
 
@@ -482,7 +446,7 @@ export interface GatewayOptions {
  */
 export function createGateway(
   defaultLimits?: Partial<ResourceLimits>,
-  options?: GatewayOptions,
+  options?: GatewayOptions
 ): CognigateGateway {
   return new CognigateGateway(defaultLimits, options);
 }

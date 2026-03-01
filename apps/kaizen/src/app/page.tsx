@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Navbar, HeroSection, NexusChat } from '@/components/nexus';
 import { Button } from '@/components/ui/button';
-import { BookOpen, FileCode, Cpu, Shield, Zap, GraduationCap, Award, Map, ArrowRight, Sparkles, Target, Users } from 'lucide-react';
+import { BookOpen, Layers, FileCode, Cpu, Shield, Zap, GraduationCap, Award, Map, ArrowRight, Sparkles, Target, Users } from 'lucide-react';
 import Link from 'next/link';
 
 // Learning journey steps for beginners
@@ -77,15 +77,15 @@ const ecosystemLinks = [
   },
   {
     icon: Zap,
-    title: 'Cognigate',
-    description: 'AI governance runtime with trust scoring and policy enforcement',
-    href: 'https://cognigate.dev',
+    title: 'Vorion Platform',
+    description: 'Enterprise AI governance platform with trust scoring and certification',
+    href: 'https://vorion.org',
   },
   {
     icon: Cpu,
-    title: 'Vorion Systems',
-    description: 'Organization building the future of AI governance infrastructure',
-    href: 'https://vorion.org',
+    title: 'Cognigate',
+    description: 'Reference implementation of the BASIS governance runtime',
+    href: 'https://cognigate.dev',
   },
 ];
 

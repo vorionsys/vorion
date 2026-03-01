@@ -1,6 +1,6 @@
 /**
  * Phase 6 Q5: Creation Modifiers - Type & Migration Layer
- *
+ * 
  * Core responsibility: Track agent creation type immutably
  * - Type set at instantiation, never changes
  * - Modifiers applied to initial trust score
@@ -13,11 +13,11 @@
  * These determine initial trust score adjustments
  */
 export enum CreationType {
-  FRESH = "fresh", // +0 modifier: New agent, baseline
-  CLONED = "cloned", // -50 modifier: Cloned from existing (uncertainty)
-  EVOLVED = "evolved", // +25 modifier: Evolved from existing (proven)
-  PROMOTED = "promoted", // +50 modifier: Promoted from lower tier
-  IMPORTED = "imported", // -100 modifier: Imported from external (untrusted)
+  FRESH = 'fresh',       // +0 modifier: New agent, baseline
+  CLONED = 'cloned',     // -50 modifier: Cloned from existing (uncertainty)
+  EVOLVED = 'evolved',   // +25 modifier: Evolved from existing (proven)
+  PROMOTED = 'promoted', // +50 modifier: Promoted from lower tier
+  IMPORTED = 'imported', // -100 modifier: Imported from external (untrusted)
 }
 
 /**
@@ -25,10 +25,10 @@ export enum CreationType {
  * These adjust the initial trust score
  */
 export const CREATION_MODIFIERS: Record<CreationType, number> = {
-  [CreationType.FRESH]: 0, // Start at baseline
-  [CreationType.CLONED]: -50, // Discount for uncertainty
-  [CreationType.EVOLVED]: 25, // Bonus for proven evolution
-  [CreationType.PROMOTED]: 50, // Bonus for promotion
+  [CreationType.FRESH]: 0,       // Start at baseline
+  [CreationType.CLONED]: -50,    // Discount for uncertainty
+  [CreationType.EVOLVED]: 25,    // Bonus for proven evolution
+  [CreationType.PROMOTED]: 50,   // Bonus for promotion
   [CreationType.IMPORTED]: -100, // Heavy discount for external origin
 };
 
@@ -80,9 +80,9 @@ export function computeCreationHash(
   creationType: CreationType,
   parentAgentId: string | undefined,
   createdAt: Date,
-  createdBy: string,
+  createdBy: string
 ): string {
-  const data = `${creationType}|${parentAgentId || "none"}|${createdAt.toISOString()}|${createdBy}`;
+  const data = `${creationType}|${parentAgentId || 'none'}|${createdAt.toISOString()}|${createdBy}`;
   let hash = 0;
   for (let i = 0; i < data.length; i++) {
     const char = data.charCodeAt(i);
@@ -99,7 +99,7 @@ export function computeCreationHash(
 export function createCreationInfo(
   creationType: CreationType,
   parentAgentId: string | undefined,
-  createdBy: string,
+  createdBy: string
 ): CreationInfo {
   if (!validateCreationType(creationType)) {
     throw new Error(`Invalid creation type: ${creationType}`);
@@ -110,7 +110,7 @@ export function createCreationInfo(
     creationType,
     parentAgentId,
     createdAt,
-    createdBy,
+    createdBy
   );
 
   return Object.freeze({
@@ -130,7 +130,7 @@ export function verifyCreationIntegrity(creation: CreationInfo): boolean {
     creation.creationType,
     creation.parentAgentId,
     creation.createdAt,
-    creation.createdBy,
+    creation.createdBy
   );
   return creation.creationHash === expectedHash;
 }
@@ -141,7 +141,7 @@ export function verifyCreationIntegrity(creation: CreationInfo): boolean {
  */
 export function applyCreationModifier(
   baseScore: number,
-  creationType: CreationType,
+  creationType: CreationType
 ): number {
   const modifier = getCreationModifier(creationType);
   const adjusted = baseScore + modifier;
@@ -155,7 +155,7 @@ export function applyCreationModifier(
  */
 export function computeInitialTrustScore(
   creationType: CreationType,
-  baselineScore: number = 250, // T1 (monitored) baseline
+  baselineScore: number = 250 // T1 (monitored) baseline
 ): number {
   return applyCreationModifier(baselineScore, creationType);
 }
@@ -175,7 +175,7 @@ export class CreationMigrationTracker {
     fromType: CreationType,
     toType: CreationType,
     reason: string,
-    approvedBy: string,
+    approvedBy: string
   ): CreationMigrationEvent {
     const event: CreationMigrationEvent = {
       timestamp: new Date(),
@@ -188,7 +188,7 @@ export class CreationMigrationTracker {
         agentId,
         fromType,
         toType,
-        reason,
+        reason
       ),
     };
 
@@ -218,7 +218,7 @@ export class CreationMigrationTracker {
       event.agentId,
       event.fromType,
       event.toType,
-      event.reason,
+      event.reason
     );
     return event.migrationHash === expectedHash;
   }
@@ -227,7 +227,7 @@ export class CreationMigrationTracker {
     agentId: string,
     fromType: CreationType,
     toType: CreationType,
-    reason: string,
+    reason: string
   ): string {
     const data = `${agentId}|${fromType}→${toType}|${reason}`;
     let hash = 0;

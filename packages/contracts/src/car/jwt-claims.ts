@@ -8,20 +8,11 @@
  * @module @vorionsys/contracts/car/jwt-claims
  */
 
-import { z } from "zod";
-import {
-  type DomainCode,
-  domainCodeArraySchema,
-  CAPABILITY_DOMAINS,
-} from "./domains.js";
-import { CapabilityLevel, capabilityLevelSchema } from "./levels.js";
-import {
-  CertificationTier,
-  certificationTierSchema,
-  RuntimeTier,
-  runtimeTierSchema,
-} from "./tiers.js";
-import { type ParsedCAR } from "./car-string.js";
+import { z } from 'zod';
+import { type DomainCode, domainCodeArraySchema, CAPABILITY_DOMAINS } from './domains.js';
+import { CapabilityLevel, capabilityLevelSchema } from './levels.js';
+import { CertificationTier, certificationTierSchema, RuntimeTier, runtimeTierSchema } from './tiers.js';
+import { type ParsedCAR } from './car-string.js';
 
 // ============================================================================
 // Standard JWT Claims
@@ -234,10 +225,7 @@ export const carJWTClaimsSchema = standardJWTClaimsSchema.extend({
   car_class: z.string().min(1),
   carId_class: z.string().min(1).optional(),
   car_version: z.string().regex(/^\d+\.\d+\.\d+$/),
-  carId_version: z
-    .string()
-    .regex(/^\d+\.\d+\.\d+$/)
-    .optional(),
+  carId_version: z.string().regex(/^\d+\.\d+\.\d+$/).optional(),
   car_did: z.string().optional(),
   carId_did: z.string().optional(),
   car_runtime_tier: runtimeTierSchema.optional(),
@@ -297,9 +285,7 @@ export interface GenerateJWTClaimsOptions {
  * });
  * ```
  */
-export function generateJWTClaims(
-  options: GenerateJWTClaimsOptions,
-): CARJWTClaims {
+export function generateJWTClaims(options: GenerateJWTClaimsOptions): CARJWTClaims {
   const {
     parsed,
     did,
@@ -334,14 +320,12 @@ export function generateJWTClaims(
     car_level: parsed.level,
     carId_level: parsed.level, // backwards compat
     // NOTE: car_trust is derived from attestations, not the CAR
-    car_trust:
-      attestations && attestations.length > 0
-        ? (Math.max(...attestations.map((a) => a.tier)) as CertificationTier)
-        : undefined,
-    carId_trust:
-      attestations && attestations.length > 0
-        ? (Math.max(...attestations.map((a) => a.tier)) as CertificationTier)
-        : undefined, // backwards compat
+    car_trust: attestations && attestations.length > 0
+      ? (Math.max(...attestations.map((a) => a.tier)) as CertificationTier)
+      : undefined,
+    carId_trust: attestations && attestations.length > 0
+      ? (Math.max(...attestations.map((a) => a.tier)) as CertificationTier)
+      : undefined, // backwards compat
     car_registry: parsed.registry,
     carId_registry: parsed.registry, // backwards compat
     car_org: parsed.organization,
@@ -373,10 +357,7 @@ export function generateJWTClaims(
  * @param did - Optional agent DID
  * @returns Minimal CAR JWT claims (without trust tier)
  */
-export function generateMinimalJWTClaims(
-  parsed: ParsedCAR,
-  did?: string,
-): CARJWTClaims {
+export function generateMinimalJWTClaims(parsed: ParsedCAR, did?: string): CARJWTClaims {
   const now = Math.floor(Date.now() / 1000);
 
   return {
@@ -423,15 +404,15 @@ export interface JWTClaimsValidationError {
  * Error codes for JWT claims validation.
  */
 export type JWTClaimsErrorCode =
-  | "MISSING_CAR"
-  | "INVALID_CAR"
-  | "EXPIRED"
-  | "NOT_YET_VALID"
-  | "INVALID_DOMAINS"
-  | "INVALID_LEVEL"
-  | "INVALID_TIER"
-  | "DOMAINS_MISMATCH"
-  | "INVALID_FORMAT";
+  | 'MISSING_CAR'
+  | 'INVALID_CAR'
+  | 'EXPIRED'
+  | 'NOT_YET_VALID'
+  | 'INVALID_DOMAINS'
+  | 'INVALID_LEVEL'
+  | 'INVALID_TIER'
+  | 'DOMAINS_MISMATCH'
+  | 'INVALID_FORMAT';
 
 /**
  * Result of JWT claims validation.
@@ -465,7 +446,7 @@ export function validateJWTClaims(
   options: {
     checkExpiry?: boolean;
     validateDomainsMismatch?: boolean;
-  } = {},
+  } = {}
 ): JWTClaimsValidationResult {
   const errors: JWTClaimsValidationError[] = [];
   const { checkExpiry = true, validateDomainsMismatch = true } = options;
@@ -477,9 +458,9 @@ export function validateJWTClaims(
     return {
       valid: false,
       errors: parseResult.error.issues.map((issue) => ({
-        code: "INVALID_FORMAT" as const,
+        code: 'INVALID_FORMAT' as const,
         message: issue.message,
-        path: issue.path.join("."),
+        path: issue.path.join('.'),
       })),
     };
   }
@@ -491,14 +472,14 @@ export function validateJWTClaims(
   if (checkExpiry) {
     if (parsed.exp && parsed.exp < now) {
       errors.push({
-        code: "EXPIRED",
+        code: 'EXPIRED',
         message: `Token expired at ${new Date(parsed.exp * 1000).toISOString()}`,
       });
     }
 
     if (parsed.nbf && parsed.nbf > now) {
       errors.push({
-        code: "NOT_YET_VALID",
+        code: 'NOT_YET_VALID',
         message: `Token not valid until ${new Date(parsed.nbf * 1000).toISOString()}`,
       });
     }
@@ -507,7 +488,7 @@ export function validateJWTClaims(
   // Validate domains bitmask matches domains list
   if (validateDomainsMismatch) {
     const bits = Object.fromEntries(
-      Object.entries(CAPABILITY_DOMAINS).map(([code, def]) => [code, def.bit]),
+      Object.entries(CAPABILITY_DOMAINS).map(([code, def]) => [code, def.bit])
     ) as Record<DomainCode, number>;
     const expectedBitmask = parsed.car_domains_list.reduce((mask, code) => {
       return mask | bits[code];
@@ -515,7 +496,7 @@ export function validateJWTClaims(
 
     if (expectedBitmask !== parsed.car_domains) {
       errors.push({
-        code: "DOMAINS_MISMATCH",
+        code: 'DOMAINS_MISMATCH',
         message: `Domain bitmask ${parsed.car_domains} does not match domains list (expected ${expectedBitmask})`,
       });
     }
@@ -588,10 +569,7 @@ export function extractIdentityFromClaims(claims: CARJWTClaims): {
  * @param domain - Domain to check
  * @returns True if the domain is present
  */
-export function claimsHaveDomain(
-  claims: CARJWTClaims,
-  domain: DomainCode,
-): boolean {
+export function claimsHaveDomain(claims: CARJWTClaims, domain: DomainCode): boolean {
   return (claims.car_domains & CAPABILITY_DOMAINS[domain].bit) !== 0;
 }
 
@@ -609,7 +587,7 @@ export function claimsMeetRequirements(
     minLevel?: CapabilityLevel;
     minCertificationTier?: CertificationTier;
     minRuntimeTier?: RuntimeTier;
-  },
+  }
 ): boolean {
   // Check domains
   if (requirements.domains) {
@@ -621,10 +599,7 @@ export function claimsMeetRequirements(
   }
 
   // Check level
-  if (
-    requirements.minLevel !== undefined &&
-    claims.car_level < requirements.minLevel
-  ) {
+  if (requirements.minLevel !== undefined && claims.car_level < requirements.minLevel) {
     return false;
   }
 
@@ -666,15 +641,15 @@ export const jwtClaimsValidationOptionsSchema = z.object({
  */
 export const jwtClaimsValidationErrorSchema = z.object({
   code: z.enum([
-    "MISSING_CAR",
-    "INVALID_CAR",
-    "EXPIRED",
-    "NOT_YET_VALID",
-    "INVALID_DOMAINS",
-    "INVALID_LEVEL",
-    "INVALID_TIER",
-    "DOMAINS_MISMATCH",
-    "INVALID_FORMAT",
+    'MISSING_CAR',
+    'INVALID_CAR',
+    'EXPIRED',
+    'NOT_YET_VALID',
+    'INVALID_DOMAINS',
+    'INVALID_LEVEL',
+    'INVALID_TIER',
+    'DOMAINS_MISMATCH',
+    'INVALID_FORMAT',
   ]),
   message: z.string(),
   path: z.string().optional(),

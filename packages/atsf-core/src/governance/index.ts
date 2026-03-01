@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
-import type { ID, TrustLevel, ControlAction } from "../common/types.js";
+import { createLogger } from '../common/logger.js';
+import type { ID, TrustLevel, ControlAction } from '../common/types.js';
 import type {
   GovernanceRule,
   RuleCategory,
@@ -24,31 +24,31 @@ import type {
   GovernanceConfig,
   RuleQuery,
   ClarificationRequirement,
-} from "./types.js";
+} from './types.js';
 
-export * from "./types.js";
-export * from "./fluid-workflow.js";
-export { GovernanceProofBridge } from "./proof-bridge.js";
+export * from './types.js';
+export * from './fluid-workflow.js';
+export { GovernanceProofBridge } from './proof-bridge.js';
 export type {
   ProofCreateFn,
   ProofBridgeProofRequest,
   ProofBridgeConfig,
   GovernanceProofResult,
-} from "./proof-bridge.js";
+} from './proof-bridge.js';
 
-const logger = createLogger({ component: "governance" });
+const logger = createLogger({ component: 'governance' });
 
 /**
  * Default governance configuration
  */
 const DEFAULT_CONFIG: GovernanceConfig = {
-  defaultAction: "deny",
+  defaultAction: 'deny',
   strictMode: false,
   maxRulesPerRequest: 100,
   evaluationTimeoutMs: 5000,
   enableCaching: true,
   cacheTtlMs: 60000,
-  enabledNamespaces: ["*"],
+  enabledNamespaces: ['*'],
 };
 
 /**
@@ -72,10 +72,7 @@ export class GovernanceEngine {
   private rules: Map<ID, GovernanceRule> = new Map();
   private rulesByNamespace: Map<string, ID[]> = new Map();
   private authorities: Map<ID, Authority> = new Map();
-  private evaluationCache: Map<
-    string,
-    { result: GovernanceResult; expiresAt: number }
-  > = new Map();
+  private evaluationCache: Map<string, { result: GovernanceResult; expiresAt: number }> = new Map();
 
   constructor(config: Partial<GovernanceConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -102,7 +99,7 @@ export class GovernanceEngine {
         category: rule.category,
         namespace: rule.namespace,
       },
-      "Rule registered",
+      'Rule registered'
     );
   }
 
@@ -135,7 +132,7 @@ export class GovernanceEngine {
         name: authority.name,
         type: authority.type,
       },
-      "Authority registered",
+      'Authority registered'
     );
   }
 
@@ -153,7 +150,7 @@ export class GovernanceEngine {
         action: request.action,
         trustLevel: request.trustLevel,
       },
-      "Evaluating governance request",
+      'Evaluating governance request'
     );
 
     // Check cache
@@ -161,10 +158,7 @@ export class GovernanceEngine {
     if (this.config.enableCaching) {
       const cached = this.evaluationCache.get(cacheKey);
       if (cached && cached.expiresAt > Date.now()) {
-        logger.debug(
-          { requestId: request.requestId },
-          "Returning cached result",
-        );
+        logger.debug({ requestId: request.requestId }, 'Returning cached result');
         return { ...cached.result, resultId };
       }
     }
@@ -178,7 +172,7 @@ export class GovernanceEngine {
           request,
           [],
           `Authority check failed: ${authorityCheck.reason}`,
-          startTime,
+          startTime
         );
       }
     }
@@ -196,10 +190,7 @@ export class GovernanceEngine {
 
     for (const rule of applicableRules) {
       if (evaluatedRules.length >= this.config.maxRulesPerRequest) {
-        logger.warn(
-          { requestId: request.requestId },
-          "Max rules limit reached",
-        );
+        logger.warn({ requestId: request.requestId }, 'Max rules limit reached');
         break;
       }
 
@@ -213,9 +204,7 @@ export class GovernanceEngine {
         category: rule.category,
         matched,
         effect: matched ? rule.effect : undefined,
-        matchReason: matched
-          ? "Condition satisfied"
-          : "Condition not satisfied",
+        matchReason: matched ? 'Condition satisfied' : 'Condition not satisfied',
         evaluationMs: evalDuration,
       };
 
@@ -238,20 +227,13 @@ export class GovernanceEngine {
         }
 
         // Hard disqualifiers and regulatory mandates always decide
-        if (
-          rule.category === "hard_disqualifier" ||
-          rule.category === "regulatory_mandate"
-        ) {
+        if (rule.category === 'hard_disqualifier' || rule.category === 'regulatory_mandate') {
           decidingRule = evaluated;
           break; // Stop evaluation
         }
 
         // First security_critical or policy_enforcement rule sets the decision
-        if (
-          !decidingRule &&
-          (rule.category === "security_critical" ||
-            rule.category === "policy_enforcement")
-        ) {
+        if (!decidingRule && (rule.category === 'security_critical' || rule.category === 'policy_enforcement')) {
           decidingRule = evaluated;
         }
       }
@@ -264,10 +246,7 @@ export class GovernanceEngine {
 
     // Determine final decision
     const decision = decidingRule?.effect?.action ?? this.config.defaultAction;
-    const confidence = this.calculateConfidence(
-      matchedRules,
-      evaluatedRules.length,
-    );
+    const confidence = this.calculateConfidence(matchedRules, evaluatedRules.length);
 
     const result: GovernanceResult = {
       resultId,
@@ -277,21 +256,17 @@ export class GovernanceEngine {
       rulesEvaluated: evaluatedRules,
       rulesMatched: matchedRules,
       decidingRule: decidingRule ?? {
-        ruleId: "default",
-        ruleName: "Default Rule",
-        category: "policy_enforcement",
+        ruleId: 'default',
+        ruleName: 'Default Rule',
+        category: 'policy_enforcement',
         matched: false,
-        matchReason: "No rules matched, using default action",
+        matchReason: 'No rules matched, using default action',
         evaluationMs: 0,
       },
       modifications: allModifications,
       constraints: allConstraints,
       clarificationNeeded,
-      explanation: this.generateExplanation(
-        decidingRule,
-        matchedRules,
-        decision,
-      ),
+      explanation: this.generateExplanation(decidingRule, matchedRules, decision),
       evaluatedAt: new Date().toISOString(),
       durationMs: Date.now() - startTime,
     };
@@ -314,7 +289,7 @@ export class GovernanceEngine {
         rulesMatched: matchedRules.length,
         durationMs: result.durationMs,
       },
-      "Governance evaluation completed",
+      'Governance evaluation completed'
     );
 
     return result;
@@ -324,10 +299,10 @@ export class GovernanceEngine {
    * Validate a rule
    */
   private validateRule(rule: GovernanceRule): void {
-    if (!rule.ruleId) throw new Error("Rule must have an ID");
-    if (!rule.name) throw new Error("Rule must have a name");
-    if (!rule.condition) throw new Error("Rule must have a condition");
-    if (!rule.effect) throw new Error("Rule must have an effect");
+    if (!rule.ruleId) throw new Error('Rule must have an ID');
+    if (!rule.name) throw new Error('Rule must have a name');
+    if (!rule.condition) throw new Error('Rule must have a condition');
+    if (!rule.effect) throw new Error('Rule must have an effect');
   }
 
   /**
@@ -340,22 +315,19 @@ export class GovernanceEngine {
   /**
    * Check if an authority is valid for a request
    */
-  private checkAuthority(request: GovernanceRequest): {
-    valid: boolean;
-    reason: string;
-  } {
+  private checkAuthority(request: GovernanceRequest): { valid: boolean; reason: string } {
     const authority = this.authorities.get(request.authority!);
 
     if (!authority) {
-      return { valid: false, reason: "Authority not found" };
+      return { valid: false, reason: 'Authority not found' };
     }
 
     if (!authority.active) {
-      return { valid: false, reason: "Authority is not active" };
+      return { valid: false, reason: 'Authority is not active' };
     }
 
     if (authority.expiresAt && new Date(authority.expiresAt) < new Date()) {
-      return { valid: false, reason: "Authority has expired" };
+      return { valid: false, reason: 'Authority has expired' };
     }
 
     // Check trust level requirement
@@ -363,15 +335,15 @@ export class GovernanceEngine {
     const requiredValue = this.getTrustLevelValue(authority.requiredTrustLevel);
 
     if (trustLevelValue < requiredValue) {
-      return { valid: false, reason: "Insufficient trust level for authority" };
+      return { valid: false, reason: 'Insufficient trust level for authority' };
     }
 
     // Check scope
     if (!this.isInScope(request, authority.scope)) {
-      return { valid: false, reason: "Request is outside authority scope" };
+      return { valid: false, reason: 'Request is outside authority scope' };
     }
 
-    return { valid: true, reason: "Authority valid" };
+    return { valid: true, reason: 'Authority valid' };
   }
 
   /**
@@ -385,27 +357,24 @@ export class GovernanceEngine {
   /**
    * Check if request is within authority scope
    */
-  private isInScope(
-    request: GovernanceRequest,
-    scope: Authority["scope"],
-  ): boolean {
+  private isInScope(request: GovernanceRequest, scope: Authority['scope']): boolean {
     // Check namespaces
-    if (scope.namespaces.length > 0 && !scope.namespaces.includes("*")) {
+    if (scope.namespaces.length > 0 && !scope.namespaces.includes('*')) {
       // Would check against request namespace
     }
 
     // Check resources
-    if (scope.resources.length > 0 && !scope.resources.includes("*")) {
+    if (scope.resources.length > 0 && !scope.resources.includes('*')) {
       const hasResource = request.resources.some((r) =>
-        scope.resources.some((sr) => sr === "*" || sr === r),
+        scope.resources.some((sr) => sr === '*' || sr === r)
       );
       if (!hasResource) return false;
     }
 
     // Check capabilities
-    if (scope.capabilities.length > 0 && !scope.capabilities.includes("*")) {
+    if (scope.capabilities.length > 0 && !scope.capabilities.includes('*')) {
       const hasCapability = request.capabilities.every((c) =>
-        scope.capabilities.some((sc) => sc === "*" || sc === c),
+        scope.capabilities.some((sc) => sc === '*' || sc === c)
       );
       if (!hasCapability) return false;
     }
@@ -426,7 +395,7 @@ export class GovernanceEngine {
       // Check namespace
       if (
         this.config.enabledNamespaces.length > 0 &&
-        !this.config.enabledNamespaces.includes("*") &&
+        !this.config.enabledNamespaces.includes('*') &&
         !this.config.enabledNamespaces.includes(rule.namespace)
       ) {
         continue;
@@ -461,12 +430,12 @@ export class GovernanceEngine {
   /**
    * Check if current time is within schedule
    */
-  private isInSchedule(schedule: GovernanceRule["schedule"]): boolean {
+  private isInSchedule(schedule: GovernanceRule['schedule']): boolean {
     if (!schedule) return true;
 
     const now = new Date();
     const dayOfWeek = now.getDay();
-    const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
     // Check blackouts first
     for (const blackout of schedule.blackouts) {
@@ -499,9 +468,9 @@ export class GovernanceEngine {
    */
   private async evaluateCondition(
     condition: RuleCondition,
-    request: GovernanceRequest,
+    request: GovernanceRequest
   ): Promise<boolean> {
-    if (condition.type === "composite" && condition.children) {
+    if (condition.type === 'composite' && condition.children) {
       return this.evaluateCompositeCondition(condition, request);
     }
 
@@ -514,7 +483,7 @@ export class GovernanceEngine {
    */
   private async evaluateCompositeCondition(
     condition: RuleCondition,
-    request: GovernanceRequest,
+    request: GovernanceRequest
   ): Promise<boolean> {
     const children = condition.children ?? [];
     const results: boolean[] = [];
@@ -524,11 +493,11 @@ export class GovernanceEngine {
     }
 
     switch (condition.logicalOperator) {
-      case "AND":
+      case 'AND':
         return results.every((r) => r);
-      case "OR":
+      case 'OR':
         return results.some((r) => r);
-      case "NOT":
+      case 'NOT':
         return results.length > 0 && !results[0];
       default:
         return results.every((r) => r);
@@ -539,11 +508,11 @@ export class GovernanceEngine {
    * Get field value from request
    */
   private getFieldValue(field: string, request: GovernanceRequest): unknown {
-    const parts = field.split(".");
+    const parts = field.split('.');
     let value: unknown = request;
 
     for (const part of parts) {
-      if (value && typeof value === "object") {
+      if (value && typeof value === 'object') {
         value = (value as Record<string, unknown>)[part];
       } else {
         return undefined;
@@ -559,40 +528,40 @@ export class GovernanceEngine {
   private compareValues(
     actual: unknown,
     operator: ConditionOperator,
-    expected: unknown,
+    expected: unknown
   ): boolean {
     switch (operator) {
-      case "equals":
+      case 'equals':
         return actual === expected;
-      case "not_equals":
+      case 'not_equals':
         return actual !== expected;
-      case "greater_than":
+      case 'greater_than':
         return Number(actual) > Number(expected);
-      case "less_than":
+      case 'less_than':
         return Number(actual) < Number(expected);
-      case "greater_or_equal":
+      case 'greater_or_equal':
         return Number(actual) >= Number(expected);
-      case "less_or_equal":
+      case 'less_or_equal':
         return Number(actual) <= Number(expected);
-      case "contains":
+      case 'contains':
         if (Array.isArray(actual)) {
           return actual.includes(expected);
         }
         return String(actual).includes(String(expected));
-      case "not_contains":
+      case 'not_contains':
         if (Array.isArray(actual)) {
           return !actual.includes(expected);
         }
         return !String(actual).includes(String(expected));
-      case "matches":
+      case 'matches':
         return new RegExp(String(expected)).test(String(actual));
-      case "in":
+      case 'in':
         return Array.isArray(expected) && expected.includes(actual);
-      case "not_in":
+      case 'not_in':
         return Array.isArray(expected) && !expected.includes(actual);
-      case "exists":
+      case 'exists':
         return actual !== undefined && actual !== null;
-      case "not_exists":
+      case 'not_exists':
         return actual === undefined || actual === null;
       default:
         return false;
@@ -602,19 +571,14 @@ export class GovernanceEngine {
   /**
    * Calculate confidence in decision
    */
-  private calculateConfidence(
-    matchedRules: EvaluatedRule[],
-    _totalEvaluated: number,
-  ): number {
+  private calculateConfidence(matchedRules: EvaluatedRule[], _totalEvaluated: number): number {
     if (matchedRules.length === 0) {
       return 0.5; // Default confidence when no rules match
     }
 
     // Higher confidence for hard disqualifiers and regulatory mandates
     const highPriorityMatches = matchedRules.filter(
-      (r) =>
-        r.category === "hard_disqualifier" ||
-        r.category === "regulatory_mandate",
+      (r) => r.category === 'hard_disqualifier' || r.category === 'regulatory_mandate'
     );
 
     if (highPriorityMatches.length > 0) {
@@ -641,17 +605,15 @@ export class GovernanceEngine {
   private generateExplanation(
     decidingRule: EvaluatedRule | null,
     matchedRules: EvaluatedRule[],
-    decision: ControlAction,
+    decision: ControlAction
   ): string {
     if (!decidingRule) {
       return `No rules matched. Default action: ${decision}`;
     }
 
-    const ruleNames = matchedRules.map((r) => r.ruleName).join(", ");
-    return (
-      `Decision based on rule "${decidingRule.ruleName}" (${decidingRule.category}). ` +
-      `${matchedRules.length} rules matched: ${ruleNames}. Final action: ${decision}`
-    );
+    const ruleNames = matchedRules.map((r) => r.ruleName).join(', ');
+    return `Decision based on rule "${decidingRule.ruleName}" (${decidingRule.category}). ` +
+      `${matchedRules.length} rules matched: ${ruleNames}. Final action: ${decision}`;
   }
 
   /**
@@ -662,19 +624,19 @@ export class GovernanceEngine {
     request: GovernanceRequest,
     evaluatedRules: EvaluatedRule[],
     reason: string,
-    startTime: number,
+    startTime: number
   ): GovernanceResult {
     return {
       resultId,
       requestId: request.requestId,
-      decision: "deny",
+      decision: 'deny',
       confidence: 1.0,
       rulesEvaluated: evaluatedRules,
       rulesMatched: [],
       decidingRule: {
-        ruleId: "authority_check",
-        ruleName: "Authority Check",
-        category: "hard_disqualifier",
+        ruleId: 'authority_check',
+        ruleName: 'Authority Check',
+        category: 'hard_disqualifier',
         matched: true,
         matchReason: reason,
         evaluationMs: 0,
@@ -707,16 +669,12 @@ export class GovernanceEngine {
 
     if (query.trustLevel) {
       results = results.filter(
-        (r) =>
-          r.applicableTrustLevels.length === 0 ||
-          r.applicableTrustLevels.includes(query.trustLevel!),
+        (r) => r.applicableTrustLevels.length === 0 || r.applicableTrustLevels.includes(query.trustLevel!)
       );
     }
 
     // Sort by priority
-    results.sort(
-      (a, b) => CATEGORY_PRIORITY[a.category] - CATEGORY_PRIORITY[b.category],
-    );
+    results.sort((a, b) => CATEGORY_PRIORITY[a.category] - CATEGORY_PRIORITY[b.category]);
 
     // Apply pagination
     const offset = query.offset ?? 0;
@@ -765,16 +723,14 @@ export class GovernanceEngine {
    */
   clearCache(): void {
     this.evaluationCache.clear();
-    logger.debug("Evaluation cache cleared");
+    logger.debug('Evaluation cache cleared');
   }
 }
 
 /**
  * Create a new governance engine
  */
-export function createGovernanceEngine(
-  config?: Partial<GovernanceConfig>,
-): GovernanceEngine {
+export function createGovernanceEngine(config?: Partial<GovernanceConfig>): GovernanceEngine {
   return new GovernanceEngine(config);
 }
 
@@ -786,7 +742,7 @@ export function createGovernanceRule(
   category: RuleCategory,
   condition: RuleCondition,
   effect: RuleEffect,
-  options: Partial<GovernanceRule> = {},
+  options: Partial<GovernanceRule> = {}
 ): GovernanceRule {
   const now = new Date().toISOString();
 
@@ -795,8 +751,8 @@ export function createGovernanceRule(
     name,
     description: options.description ?? `Rule: ${name}`,
     category,
-    namespace: options.namespace ?? "default",
-    version: options.version ?? "1.0.0",
+    namespace: options.namespace ?? 'default',
+    version: options.version ?? '1.0.0',
     condition,
     effect,
     exceptions: options.exceptions ?? [],
@@ -805,9 +761,9 @@ export function createGovernanceRule(
     enabled: options.enabled ?? true,
     audit: {
       createdAt: now,
-      createdBy: "system",
+      createdBy: 'system',
       updatedAt: now,
-      updatedBy: "system",
+      updatedBy: 'system',
       changeHistory: [],
     },
   };
@@ -819,10 +775,10 @@ export function createGovernanceRule(
 export function createFieldCondition(
   field: string,
   operator: ConditionOperator,
-  value: unknown,
+  value: unknown
 ): RuleCondition {
   return {
-    type: "field_match",
+    type: 'field_match',
     field,
     operator,
     value,
@@ -833,13 +789,13 @@ export function createFieldCondition(
  * Helper to create a composite condition
  */
 export function createCompositeCondition(
-  logicalOperator: "AND" | "OR" | "NOT",
-  children: RuleCondition[],
+  logicalOperator: 'AND' | 'OR' | 'NOT',
+  children: RuleCondition[]
 ): RuleCondition {
   return {
-    type: "composite",
-    field: "",
-    operator: "equals",
+    type: 'composite',
+    field: '',
+    operator: 'equals',
     value: null,
     children,
     logicalOperator,
@@ -852,7 +808,7 @@ export function createCompositeCondition(
 export function createRuleEffect(
   action: ControlAction,
   reason: string,
-  options: Partial<RuleEffect> = {},
+  options: Partial<RuleEffect> = {}
 ): RuleEffect {
   return {
     action,

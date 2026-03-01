@@ -5,8 +5,8 @@
  * schemas from the validators module.
  */
 
-import { describe, it, expect } from "vitest";
-import { describeSchema } from "./helpers/schema-descriptor";
+import { describe, it, expect } from 'vitest';
+import { describeSchema } from './helpers/schema-descriptor';
 
 import {
   trustBandSchema,
@@ -18,7 +18,7 @@ import {
   componentTypeSchema,
   componentStatusSchema,
   approvalTypeSchema,
-} from "../src/validators/enums";
+} from '../src/validators/enums';
 
 import {
   rateLimitSchema,
@@ -26,29 +26,29 @@ import {
   decisionConstraintsSchema,
   decisionSchema,
   authorizationRequestSchema,
-} from "../src/validators/decision";
+} from '../src/validators/decision';
 
 import {
   intentContextSchema,
   intentSchema as validatorIntentSchema,
   createIntentRequestSchema as validatorCreateIntentRequestSchema,
-} from "../src/validators/intent";
+} from '../src/validators/intent';
 
 import {
   trustFactorScoresSchema,
   trustEvidenceSchema,
   trustProfileSchema,
   trustCalculationRequestSchema,
-} from "../src/validators/trust-profile";
+} from '../src/validators/trust-profile';
 
 import {
   proofEventPayloadSchema,
   proofEventSchema,
   proofEventFilterSchema,
   logProofEventRequestSchema,
-} from "../src/validators/proof-event";
+} from '../src/validators/proof-event';
 
-describe("Validator Enum Schemas", () => {
+describe('Validator Enum Schemas', () => {
   const schemas = {
     trustBandSchema,
     observationTierSchema,
@@ -67,32 +67,26 @@ describe("Validator Enum Schemas", () => {
     });
   }
 
-  it("trustBandSchema accepts all bands", () => {
+  it('trustBandSchema accepts all bands', () => {
     for (const band of [0, 1, 2, 3, 4, 5, 6, 7]) {
       expect(trustBandSchema.safeParse(band).success).toBe(true);
     }
   });
 
-  it("observationTierSchema accepts valid tiers", () => {
-    for (const tier of [
-      "BLACK_BOX",
-      "GRAY_BOX",
-      "WHITE_BOX",
-      "ATTESTED_BOX",
-      "VERIFIED_BOX",
-    ]) {
+  it('observationTierSchema accepts valid tiers', () => {
+    for (const tier of ['BLACK_BOX', 'GRAY_BOX', 'WHITE_BOX', 'ATTESTED_BOX', 'VERIFIED_BOX']) {
       expect(observationTierSchema.safeParse(tier).success).toBe(true);
     }
   });
 
-  it("componentStatusSchema accepts valid statuses", () => {
-    for (const s of ["active", "deprecated", "retired"]) {
+  it('componentStatusSchema accepts valid statuses', () => {
+    for (const s of ['active', 'deprecated', 'retired']) {
       expect(componentStatusSchema.safeParse(s).success).toBe(true);
     }
   });
 });
 
-describe("Validator Decision Schemas", () => {
+describe('Validator Decision Schemas', () => {
   const schemas = {
     rateLimitSchema,
     approvalRequirementSchema,
@@ -108,7 +102,7 @@ describe("Validator Decision Schemas", () => {
   }
 });
 
-describe("Validator Intent Schemas", () => {
+describe('Validator Intent Schemas', () => {
   const schemas = {
     intentContextSchema,
     validatorIntentSchema,
@@ -122,7 +116,7 @@ describe("Validator Intent Schemas", () => {
   }
 });
 
-describe("Validator Trust Profile Schemas", () => {
+describe('Validator Trust Profile Schemas', () => {
   const schemas = {
     trustFactorScoresSchema,
     trustEvidenceSchema,
@@ -137,7 +131,7 @@ describe("Validator Trust Profile Schemas", () => {
   }
 });
 
-describe("Validator Proof Event Schemas", () => {
+describe('Validator Proof Event Schemas', () => {
   const schemas = {
     proofEventPayloadSchema,
     proofEventSchema,

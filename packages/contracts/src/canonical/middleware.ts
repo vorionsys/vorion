@@ -6,10 +6,10 @@
  * These types unify various implementations across the codebase into a single
  * source of truth.
  *
- * @module @vorion/contracts/canonical/middleware
+ * @module @vorionsys/contracts/canonical/middleware
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 // ============================================================================
 // Rate Limiting
@@ -88,13 +88,13 @@ export const rateLimitResultSchema = z.object({
  */
 export interface RateLimitHeaders {
   /** Maximum requests allowed in the window */
-  readonly "X-RateLimit-Limit": string;
+  readonly 'X-RateLimit-Limit': string;
   /** Remaining requests in the window */
-  readonly "X-RateLimit-Remaining": string;
+  readonly 'X-RateLimit-Remaining': string;
   /** When the window resets (Unix timestamp) */
-  readonly "X-RateLimit-Reset": string;
+  readonly 'X-RateLimit-Reset': string;
   /** Seconds until retry is allowed (when rate limited) */
-  readonly "Retry-After"?: string;
+  readonly 'Retry-After'?: string;
 }
 
 /**
@@ -202,31 +202,31 @@ export const errorResponseSchema = z.object({
  * Error category for classification.
  */
 export type ErrorCategory =
-  | "validation" // Input validation errors
-  | "authentication" // Auth failures
-  | "authorization" // Permission errors
-  | "not_found" // Resource not found
-  | "conflict" // State conflicts
-  | "rate_limit" // Rate limit exceeded
-  | "internal" // Internal server errors
-  | "external" // External service errors
-  | "timeout" // Request timeout
-  | "unavailable"; // Service unavailable
+  | 'validation'     // Input validation errors
+  | 'authentication' // Auth failures
+  | 'authorization'  // Permission errors
+  | 'not_found'      // Resource not found
+  | 'conflict'       // State conflicts
+  | 'rate_limit'     // Rate limit exceeded
+  | 'internal'       // Internal server errors
+  | 'external'       // External service errors
+  | 'timeout'        // Request timeout
+  | 'unavailable';   // Service unavailable
 
 /**
  * Zod schema for ErrorCategory validation.
  */
 export const errorCategorySchema = z.enum([
-  "validation",
-  "authentication",
-  "authorization",
-  "not_found",
-  "conflict",
-  "rate_limit",
-  "internal",
-  "external",
-  "timeout",
-  "unavailable",
+  'validation',
+  'authentication',
+  'authorization',
+  'not_found',
+  'conflict',
+  'rate_limit',
+  'internal',
+  'external',
+  'timeout',
+  'unavailable',
 ]);
 
 // ============================================================================
@@ -345,7 +345,7 @@ export interface RequestLoggingConfig {
   /** Maximum body size to log (bytes) */
   readonly maxBodySize?: number;
   /** Log level */
-  readonly level?: "debug" | "info" | "warn" | "error";
+  readonly level?: 'debug' | 'info' | 'warn' | 'error';
 }
 
 /**
@@ -357,7 +357,7 @@ export const requestLoggingConfigSchema = z.object({
   logHeaders: z.boolean().optional(),
   redactHeaders: z.array(z.string()).readonly().optional(),
   maxBodySize: z.number().int().positive().optional(),
-  level: z.enum(["debug", "info", "warn", "error"]).optional(),
+  level: z.enum(['debug', 'info', 'warn', 'error']).optional(),
 });
 
 // ============================================================================
@@ -411,7 +411,7 @@ export function createErrorResponse(
     details?: Record<string, unknown>;
     requestId?: string;
     path?: string;
-  },
+  }
 ): ErrorResponse {
   return {
     error: {
@@ -433,16 +433,16 @@ export const DEFAULT_RATE_LIMIT_CONFIG: RateLimitConfig = {
   windowMs: 60 * 1000, // 1 minute
   headers: true,
   statusCode: 429,
-  message: "Too many requests, please try again later.",
+  message: 'Too many requests, please try again later.',
 };
 
 /**
  * Default CORS configuration.
  */
 export const DEFAULT_CORS_CONFIG: CorsConfig = {
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  headers: ["Content-Type", "Authorization", "X-API-Key", "X-Request-ID"],
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  headers: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Request-ID'],
   credentials: false,
   maxAge: 86400, // 24 hours
   optionsSuccessStatus: 204,
@@ -452,8 +452,8 @@ export const DEFAULT_CORS_CONFIG: CorsConfig = {
  * Default security headers configuration.
  */
 export const DEFAULT_SECURITY_HEADERS_CONFIG: SecurityHeadersConfig = {
-  contentTypeOptions: "nosniff",
-  frameOptions: "DENY",
-  xssProtection: "1; mode=block",
-  referrerPolicy: "strict-origin-when-cross-origin",
+  contentTypeOptions: 'nosniff',
+  frameOptions: 'DENY',
+  xssProtection: '1; mode=block',
+  referrerPolicy: 'strict-origin-when-cross-origin',
 };

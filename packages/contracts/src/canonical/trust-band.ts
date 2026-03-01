@@ -11,7 +11,7 @@
  * @module @vorionsys/contracts/canonical/trust-band
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Trust bands representing agent autonomy levels.
@@ -71,57 +71,54 @@ export interface TrustBandThreshold {
  *
  * @constant
  */
-export const TRUST_BAND_THRESHOLDS: Readonly<
-  Record<TrustBand, TrustBandThreshold>
-> = {
+export const TRUST_BAND_THRESHOLDS: Readonly<Record<TrustBand, TrustBandThreshold>> = {
   [TrustBand.T0_SANDBOX]: {
     min: 0,
     max: 199,
-    label: "Sandbox",
-    description: "Isolated testing environment - no real operations allowed",
+    label: 'Sandbox',
+    description: 'Isolated testing environment - no real operations allowed',
   },
   [TrustBand.T1_OBSERVED]: {
     min: 200,
     max: 349,
-    label: "Observed",
-    description: "Under active observation - actions are supervised",
+    label: 'Observed',
+    description: 'Under active observation - actions are supervised',
   },
   [TrustBand.T2_PROVISIONAL]: {
     min: 350,
     max: 499,
-    label: "Provisional",
-    description: "Limited operations - strict constraints and guardrails",
+    label: 'Provisional',
+    description: 'Limited operations - strict constraints and guardrails',
   },
   [TrustBand.T3_MONITORED]: {
     min: 500,
     max: 649,
-    label: "Monitored",
-    description: "Continuous monitoring - expanding operational freedom",
+    label: 'Monitored',
+    description: 'Continuous monitoring - expanding operational freedom',
   },
   [TrustBand.T4_STANDARD]: {
     min: 650,
     max: 799,
-    label: "Standard",
-    description: "Standard autonomy - trusted for routine operations",
+    label: 'Standard',
+    description: 'Standard autonomy - trusted for routine operations',
   },
   [TrustBand.T5_TRUSTED]: {
     min: 800,
     max: 875,
-    label: "Trusted",
-    description: "Expanded capabilities - minimal oversight required",
+    label: 'Trusted',
+    description: 'Expanded capabilities - minimal oversight required',
   },
   [TrustBand.T6_CERTIFIED]: {
     min: 876,
     max: 950,
-    label: "Certified",
-    description: "Independent operation - comprehensive audit trail",
+    label: 'Certified',
+    description: 'Independent operation - comprehensive audit trail',
   },
   [TrustBand.T7_AUTONOMOUS]: {
     min: 951,
     max: 1000,
-    label: "Autonomous",
-    description:
-      "Full autonomy - mission-critical with autonomous decision-making",
+    label: 'Autonomous',
+    description: 'Full autonomy - mission-critical with autonomous decision-making',
   },
 } as const;
 
@@ -263,10 +260,7 @@ export function getTrustBandDescription(band: TrustBand): string {
  * isTrustBandHigher(TrustBand.T1_OBSERVED, TrustBand.T4_STANDARD); // false
  * ```
  */
-export function isTrustBandHigher(
-  band: TrustBand,
-  otherBand: TrustBand,
-): boolean {
+export function isTrustBandHigher(band: TrustBand, otherBand: TrustBand): boolean {
   return band > otherBand;
 }
 
@@ -283,10 +277,7 @@ export function isTrustBandHigher(
  * meetsMinimumTrustBand(TrustBand.T2_PROVISIONAL, TrustBand.T4_STANDARD); // false
  * ```
  */
-export function meetsMinimumTrustBand(
-  band: TrustBand,
-  requiredBand: TrustBand,
-): boolean {
+export function meetsMinimumTrustBand(band: TrustBand, requiredBand: TrustBand): boolean {
   return band >= requiredBand;
 }
 
@@ -310,22 +301,21 @@ export function meetsMinimumTrustBand(
  * ```
  */
 export const trustBandSchema = z.nativeEnum(TrustBand, {
-  errorMap: () => ({ message: "Invalid trust band. Must be T0-T7 (0-7)." }),
+  errorMap: () => ({ message: 'Invalid trust band. Must be T0-T7 (0-7).' }),
 });
 
 /**
  * Zod schema for TrustBandThreshold validation.
  */
-export const trustBandThresholdSchema = z
-  .object({
-    min: z.number().int().min(0).max(1000),
-    max: z.number().int().min(0).max(1000),
-    label: z.string().min(1),
-    description: z.string().min(1),
-  })
-  .refine((data) => data.min <= data.max, {
-    message: "min must be less than or equal to max",
-  });
+export const trustBandThresholdSchema = z.object({
+  min: z.number().int().min(0).max(1000),
+  max: z.number().int().min(0).max(1000),
+  label: z.string().min(1),
+  description: z.string().min(1),
+}).refine(
+  (data) => data.min <= data.max,
+  { message: 'min must be less than or equal to max' }
+);
 
 /**
  * Zod schema for validating band comparison requests.

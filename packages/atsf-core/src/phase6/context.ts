@@ -16,7 +16,7 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
+import { createLogger } from '../common/logger.js';
 import {
   type DeploymentContext,
   type OrganizationalContext,
@@ -32,9 +32,9 @@ import {
   organizationalContextSchema,
   agentContextSchema,
   operationContextSchema,
-} from "./types.js";
+} from './types.js';
 
-const logger = createLogger({ component: "phase6:context" });
+const logger = createLogger({ component: 'phase6:context' });
 
 // =============================================================================
 // HASH UTILITIES
@@ -46,9 +46,9 @@ const logger = createLogger({ component: "phase6:context" });
 async function calculateHash(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -84,7 +84,7 @@ export interface CreateDeploymentContextInput {
  * Once created, this cannot be modified without redeployment.
  */
 export async function createDeploymentContext(
-  input: CreateDeploymentContextInput,
+  input: CreateDeploymentContextInput
 ): Promise<DeploymentContext> {
   const now = new Date();
 
@@ -114,7 +114,7 @@ export async function createDeploymentContext(
   // Validate with Zod
   const parsed = deploymentContextSchema.safeParse(context);
   if (!parsed.success) {
-    logger.error({ errors: parsed.error.errors }, "Invalid deployment context");
+    logger.error({ errors: parsed.error.errors }, 'Invalid deployment context');
     throw new Error(`Invalid deployment context: ${parsed.error.message}`);
   }
 
@@ -124,7 +124,7 @@ export async function createDeploymentContext(
       framework: context.regulatoryFramework,
       maxTier: context.maxAllowedTier,
     },
-    "Deployment context created",
+    'Deployment context created'
   );
 
   return Object.freeze(context);
@@ -134,7 +134,7 @@ export async function createDeploymentContext(
  * Verify deployment context integrity
  */
 export async function verifyDeploymentContext(
-  context: DeploymentContext,
+  context: DeploymentContext
 ): Promise<{ valid: boolean; reason?: string }> {
   // Recalculate hash
   const configData = {
@@ -149,15 +149,12 @@ export async function verifyDeploymentContext(
   const expectedHash = await hashContextData(configData);
 
   if (context.deploymentHash !== expectedHash) {
-    return {
-      valid: false,
-      reason: "Deployment hash mismatch - possible tampering",
-    };
+    return { valid: false, reason: 'Deployment hash mismatch - possible tampering' };
   }
 
   // Validate immutability marker
   if (context.immutable !== true) {
-    return { valid: false, reason: "Immutability marker missing" };
+    return { valid: false, reason: 'Immutability marker missing' };
   }
 
   return { valid: true };
@@ -174,7 +171,7 @@ export interface CreateOrganizationalContextInput {
   orgId: string;
   tenantId: string;
   parentDeployment: DeploymentContext;
-  constraints: Omit<OrganizationalConstraints, "maxTrustTier"> & {
+  constraints: Omit<OrganizationalConstraints, 'maxTrustTier'> & {
     maxTrustTier?: TrustTier;
   };
 }
@@ -190,7 +187,7 @@ export class OrganizationalContextBuilder {
   constructor(input: CreateOrganizationalContextInput) {
     // Validate parent deployment first
     if (!input.parentDeployment.immutable) {
-      throw new Error("Parent deployment context must be immutable");
+      throw new Error('Parent deployment context must be immutable');
     }
 
     // Ensure max trust tier doesn't exceed parent
@@ -198,19 +195,11 @@ export class OrganizationalContextBuilder {
     const requestedMaxTier = input.constraints.maxTrustTier ?? parentMaxTier;
 
     // Tier comparison (T0 < T1 < ... < T5)
-    const tierOrder = [
-      TrustTier.T0,
-      TrustTier.T1,
-      TrustTier.T2,
-      TrustTier.T3,
-      TrustTier.T4,
-      TrustTier.T5,
-    ];
+    const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
     const parentTierIdx = tierOrder.indexOf(parentMaxTier);
     const requestedTierIdx = tierOrder.indexOf(requestedMaxTier);
 
-    const effectiveMaxTier =
-      requestedTierIdx <= parentTierIdx ? requestedMaxTier : parentMaxTier;
+    const effectiveMaxTier = requestedTierIdx <= parentTierIdx ? requestedMaxTier : parentMaxTier;
 
     const constraints: OrganizationalConstraints = {
       maxTrustTier: effectiveMaxTier,
@@ -233,29 +222,18 @@ export class OrganizationalContextBuilder {
    */
   updateConstraints(updates: Partial<OrganizationalConstraints>): this {
     if (this.locked) {
-      throw new Error(
-        "Organizational context is locked - cannot modify constraints",
-      );
+      throw new Error('Organizational context is locked - cannot modify constraints');
     }
 
     // Ensure updates don't exceed parent deployment ceiling
     if (updates.maxTrustTier !== undefined) {
       const parentMaxTier = this.context.parentDeployment!.maxAllowedTier;
-      const tierOrder = [
-        TrustTier.T0,
-        TrustTier.T1,
-        TrustTier.T2,
-        TrustTier.T3,
-        TrustTier.T4,
-        TrustTier.T5,
-      ];
+      const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
       const parentTierIdx = tierOrder.indexOf(parentMaxTier);
       const requestedTierIdx = tierOrder.indexOf(updates.maxTrustTier);
 
       if (requestedTierIdx > parentTierIdx) {
-        throw new Error(
-          `Cannot set maxTrustTier to ${updates.maxTrustTier} - parent deployment limits to ${parentMaxTier}`,
-        );
+        throw new Error(`Cannot set maxTrustTier to ${updates.maxTrustTier} - parent deployment limits to ${parentMaxTier}`);
       }
     }
 
@@ -271,9 +249,7 @@ export class OrganizationalContextBuilder {
    */
   addDeniedDomain(domain: string): this {
     if (this.locked) {
-      throw new Error(
-        "Organizational context is locked - cannot add denied domains",
-      );
+      throw new Error('Organizational context is locked - cannot add denied domains');
     }
     (this.context as { constraints: OrganizationalConstraints }).constraints = {
       ...this.context.constraints!,
@@ -287,16 +263,11 @@ export class OrganizationalContextBuilder {
    */
   addRequiredAttestation(attestation: string): this {
     if (this.locked) {
-      throw new Error(
-        "Organizational context is locked - cannot add attestations",
-      );
+      throw new Error('Organizational context is locked - cannot add attestations');
     }
     (this.context as { constraints: OrganizationalConstraints }).constraints = {
       ...this.context.constraints!,
-      requiredAttestations: [
-        ...this.context.constraints!.requiredAttestations,
-        attestation,
-      ],
+      requiredAttestations: [...this.context.constraints!.requiredAttestations, attestation],
     };
     return this;
   }
@@ -306,7 +277,7 @@ export class OrganizationalContextBuilder {
    */
   async lock(): Promise<OrganizationalContext> {
     if (this.locked) {
-      throw new Error("Organizational context is already locked");
+      throw new Error('Organizational context is already locked');
     }
 
     const now = new Date();
@@ -334,9 +305,7 @@ export class OrganizationalContextBuilder {
     // Validate with Zod
     const parsed = organizationalContextSchema.safeParse(lockedContext);
     if (!parsed.success) {
-      throw new Error(
-        `Invalid organizational context: ${parsed.error.message}`,
-      );
+      throw new Error(`Invalid organizational context: ${parsed.error.message}`);
     }
 
     this.locked = true;
@@ -347,7 +316,7 @@ export class OrganizationalContextBuilder {
         tenantId: lockedContext.tenantId,
         maxTier: lockedContext.constraints.maxTrustTier,
       },
-      "Organizational context locked",
+      'Organizational context locked'
     );
 
     return Object.freeze(lockedContext);
@@ -365,7 +334,7 @@ export class OrganizationalContextBuilder {
  * Create and immediately lock organizational context
  */
 export async function createOrganizationalContext(
-  input: CreateOrganizationalContextInput,
+  input: CreateOrganizationalContextInput
 ): Promise<OrganizationalContext> {
   const builder = new OrganizationalContextBuilder(input);
   return builder.lock();
@@ -375,20 +344,17 @@ export async function createOrganizationalContext(
  * Verify organizational context integrity
  */
 export async function verifyOrganizationalContext(
-  context: OrganizationalContext,
+  context: OrganizationalContext
 ): Promise<{ valid: boolean; reason?: string }> {
   // Verify parent first
   const parentResult = await verifyDeploymentContext(context.parentDeployment);
   if (!parentResult.valid) {
-    return {
-      valid: false,
-      reason: `Parent deployment invalid: ${parentResult.reason}`,
-    };
+    return { valid: false, reason: `Parent deployment invalid: ${parentResult.reason}` };
   }
 
   // Verify org is locked
   if (!context.lockedAt) {
-    return { valid: false, reason: "Organizational context not locked" };
+    return { valid: false, reason: 'Organizational context not locked' };
   }
 
   // Recalculate hash
@@ -403,24 +369,12 @@ export async function verifyOrganizationalContext(
   const expectedHash = await hashContextData(hashData);
 
   if (context.orgHash !== expectedHash) {
-    return {
-      valid: false,
-      reason: "Organizational hash mismatch - possible tampering",
-    };
+    return { valid: false, reason: 'Organizational hash mismatch - possible tampering' };
   }
 
   // Verify constraints don't exceed parent
-  const tierOrder = [
-    TrustTier.T0,
-    TrustTier.T1,
-    TrustTier.T2,
-    TrustTier.T3,
-    TrustTier.T4,
-    TrustTier.T5,
-  ];
-  const parentTierIdx = tierOrder.indexOf(
-    context.parentDeployment.maxAllowedTier,
-  );
+  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
+  const parentTierIdx = tierOrder.indexOf(context.parentDeployment.maxAllowedTier);
   const orgTierIdx = tierOrder.indexOf(context.constraints.maxTrustTier);
 
   if (orgTierIdx > parentTierIdx) {
@@ -452,23 +406,17 @@ export interface CreateAgentContextInput {
  * Once created, this cannot be modified for the lifetime of the agent.
  */
 export async function createAgentContext(
-  input: CreateAgentContextInput,
+  input: CreateAgentContextInput
 ): Promise<AgentContext> {
   // Verify parent is locked
   if (!input.parentOrg.lockedAt) {
-    throw new Error(
-      "Parent organizational context must be locked before creating agent context",
-    );
+    throw new Error('Parent organizational context must be locked before creating agent context');
   }
 
   // Verify context type is allowed by deployment
-  if (
-    !input.parentOrg.parentDeployment.allowedContextTypes.includes(
-      input.contextType,
-    )
-  ) {
+  if (!input.parentOrg.parentDeployment.allowedContextTypes.includes(input.contextType)) {
     throw new Error(
-      `Context type ${input.contextType} not allowed by deployment - allowed: ${input.parentOrg.parentDeployment.allowedContextTypes.join(", ")}`,
+      `Context type ${input.contextType} not allowed by deployment - allowed: ${input.parentOrg.parentDeployment.allowedContextTypes.join(', ')}`
     );
   }
 
@@ -506,7 +454,7 @@ export async function createAgentContext(
       contextType: context.contextType,
       parentOrgId: input.parentOrg.orgId,
     },
-    "Agent context created (frozen)",
+    'Agent context created (frozen)'
   );
 
   return Object.freeze(context);
@@ -516,23 +464,16 @@ export async function createAgentContext(
  * Verify agent context integrity
  */
 export async function verifyAgentContext(
-  context: AgentContext,
+  context: AgentContext
 ): Promise<{ valid: boolean; reason?: string }> {
   // Verify parent chain
   const orgResult = await verifyOrganizationalContext(context.parentOrg);
   if (!orgResult.valid) {
-    return {
-      valid: false,
-      reason: `Parent organization invalid: ${orgResult.reason}`,
-    };
+    return { valid: false, reason: `Parent organization invalid: ${orgResult.reason}` };
   }
 
   // Verify context type is still allowed
-  if (
-    !context.parentOrg.parentDeployment.allowedContextTypes.includes(
-      context.contextType,
-    )
-  ) {
+  if (!context.parentOrg.parentDeployment.allowedContextTypes.includes(context.contextType)) {
     return {
       valid: false,
       reason: `Context type ${context.contextType} no longer allowed by deployment`,
@@ -551,10 +492,7 @@ export async function verifyAgentContext(
   const expectedHash = await hashContextData(hashData);
 
   if (context.contextHash !== expectedHash) {
-    return {
-      valid: false,
-      reason: "Agent context hash mismatch - possible tampering",
-    };
+    return { valid: false, reason: 'Agent context hash mismatch - possible tampering' };
   }
 
   return { valid: true };
@@ -569,24 +507,13 @@ export function getAgentContextCeiling(context: AgentContext): number {
   const contextCeiling = CONTEXT_CEILINGS[context.contextType];
 
   // Org constraint ceiling (convert tier to score)
-  const tierOrder = [
-    TrustTier.T0,
-    TrustTier.T1,
-    TrustTier.T2,
-    TrustTier.T3,
-    TrustTier.T4,
-    TrustTier.T5,
-  ];
+  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
   const tierScores = [99, 299, 499, 699, 899, 1000];
-  const orgTierIdx = tierOrder.indexOf(
-    context.parentOrg.constraints.maxTrustTier,
-  );
+  const orgTierIdx = tierOrder.indexOf(context.parentOrg.constraints.maxTrustTier);
   const orgCeiling = tierScores[orgTierIdx];
 
   // Deployment ceiling
-  const deploymentTierIdx = tierOrder.indexOf(
-    context.parentOrg.parentDeployment.maxAllowedTier,
-  );
+  const deploymentTierIdx = tierOrder.indexOf(context.parentOrg.parentDeployment.maxAllowedTier);
   const deploymentCeiling = tierScores[deploymentTierIdx];
 
   // Return minimum of all ceilings
@@ -611,7 +538,7 @@ export interface CreateOperationContextInput {
  * Automatically expires after TTL.
  */
 export async function createOperationContext(
-  input: CreateOperationContextInput,
+  input: CreateOperationContextInput
 ): Promise<OperationContext> {
   // Verify parent agent context
   const agentResult = await verifyAgentContext(input.parentAgent);
@@ -645,7 +572,7 @@ export async function createOperationContext(
       agentId: input.parentAgent.agentId,
       ttlMs,
     },
-    "Operation context created (ephemeral)",
+    'Operation context created (ephemeral)'
   );
 
   return context; // Not frozen - can be modified during operation
@@ -674,24 +601,20 @@ export function getOperationCeiling(context: OperationContext): number {
  * Validate entire context hierarchy from operation to deployment
  */
 export async function validateContextChain(
-  context:
-    | OperationContext
-    | AgentContext
-    | OrganizationalContext
-    | DeploymentContext,
+  context: OperationContext | AgentContext | OrganizationalContext | DeploymentContext
 ): Promise<ContextValidationResult> {
   const violations: string[] = [];
   let hashChainValid = true;
-  let tier: ContextValidationResult["tier"];
+  let tier: ContextValidationResult['tier'];
 
   // Determine context tier and validate
-  if ("ephemeral" in context && context.ephemeral === true) {
+  if ('ephemeral' in context && context.ephemeral === true) {
     // Operation context
-    tier = "operation";
+    tier = 'operation';
     const opContext = context as OperationContext;
 
     if (isOperationExpired(opContext)) {
-      violations.push("Operation context has expired");
+      violations.push('Operation context has expired');
     }
 
     // Validate parent chain
@@ -700,9 +623,9 @@ export async function validateContextChain(
       violations.push(`Agent context invalid: ${agentResult.reason}`);
       hashChainValid = false;
     }
-  } else if ("contextHash" in context) {
+  } else if ('contextHash' in context) {
     // Agent context
-    tier = "agent";
+    tier = 'agent';
     const agentContext = context as AgentContext;
 
     const result = await verifyAgentContext(agentContext);
@@ -710,9 +633,9 @@ export async function validateContextChain(
       violations.push(result.reason!);
       hashChainValid = false;
     }
-  } else if ("orgHash" in context) {
+  } else if ('orgHash' in context) {
     // Organizational context
-    tier = "organizational";
+    tier = 'organizational';
     const orgContext = context as OrganizationalContext;
 
     const result = await verifyOrganizationalContext(orgContext);
@@ -722,7 +645,7 @@ export async function validateContextChain(
     }
   } else {
     // Deployment context
-    tier = "deployment";
+    tier = 'deployment';
     const deployContext = context as DeploymentContext;
 
     const result = await verifyDeploymentContext(deployContext);
@@ -735,7 +658,7 @@ export async function validateContextChain(
   return {
     valid: violations.length === 0,
     tier,
-    reason: violations.length > 0 ? violations.join("; ") : undefined,
+    reason: violations.length > 0 ? violations.join('; ') : undefined,
     constraintViolations: violations,
     hashChainValid,
     validatedAt: new Date(),
@@ -763,10 +686,7 @@ export class ContextService {
       throw new Error(`Deployment ${context.deploymentId} already registered`);
     }
     this.deployments.set(context.deploymentId, context);
-    logger.info(
-      { deploymentId: context.deploymentId },
-      "Deployment registered",
-    );
+    logger.info({ deploymentId: context.deploymentId }, 'Deployment registered');
   }
 
   /**
@@ -774,16 +694,13 @@ export class ContextService {
    */
   registerOrganization(context: OrganizationalContext): void {
     if (!context.lockedAt) {
-      throw new Error("Cannot register unlocked organizational context");
+      throw new Error('Cannot register unlocked organizational context');
     }
     if (this.organizations.has(context.orgId)) {
       throw new Error(`Organization ${context.orgId} already registered`);
     }
     this.organizations.set(context.orgId, context);
-    logger.info(
-      { orgId: context.orgId, tenantId: context.tenantId },
-      "Organization registered",
-    );
+    logger.info({ orgId: context.orgId, tenantId: context.tenantId }, 'Organization registered');
   }
 
   /**
@@ -794,15 +711,13 @@ export class ContextService {
       throw new Error(`Agent ${context.agentId} already registered`);
     }
     this.agents.set(context.agentId, context);
-    logger.info({ agentId: context.agentId }, "Agent registered");
+    logger.info({ agentId: context.agentId }, 'Agent registered');
   }
 
   /**
    * Create and register an operation context
    */
-  async createOperation(
-    input: CreateOperationContextInput,
-  ): Promise<OperationContext> {
+  async createOperation(input: CreateOperationContextInput): Promise<OperationContext> {
     const context = await createOperationContext(input);
     this.activeOperations.set(context.operationId, context);
     return context;
@@ -813,7 +728,7 @@ export class ContextService {
    */
   completeOperation(operationId: string): void {
     this.activeOperations.delete(operationId);
-    logger.debug({ operationId }, "Operation completed");
+    logger.debug({ operationId }, 'Operation completed');
   }
 
   /**
@@ -856,7 +771,7 @@ export class ContextService {
       }
     }
     if (cleaned > 0) {
-      logger.debug({ cleaned }, "Cleaned up expired operations");
+      logger.debug({ cleaned }, 'Cleaned up expired operations');
     }
     return cleaned;
   }
@@ -901,4 +816,4 @@ export {
   TrustTier,
   RegulatoryFramework,
   CONTEXT_CEILINGS,
-} from "./types.js";
+} from './types.js';

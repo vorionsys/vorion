@@ -14,7 +14,7 @@
 /**
  * Request priority levels
  */
-export type Priority = "critical" | "high" | "medium" | "low" | "background";
+export type Priority = 'critical' | 'high' | 'medium' | 'low' | 'background';
 
 /**
  * Priority weights for scheduling
@@ -146,13 +146,7 @@ export class RequestQueue<T = unknown> {
     this.config = { ...DEFAULT_CONFIG, ...config };
 
     // Initialize queues for each priority
-    const priorities: Priority[] = [
-      "critical",
-      "high",
-      "medium",
-      "low",
-      "background",
-    ];
+    const priorities: Priority[] = ['critical', 'high', 'medium', 'low', 'background'];
     for (const priority of priorities) {
       this.queues.set(priority, []);
       this.tenantRoundRobin.set(priority, []);
@@ -178,13 +172,13 @@ export class RequestQueue<T = unknown> {
       estimatedTokens?: number;
       maxWaitMs?: number;
       tags?: string[];
-    },
+    }
   ): Promise<unknown> {
     // Check queue limits
     if (!this.canEnqueue(priority, tenantId)) {
       this.stats.droppedCount++;
       throw new Error(
-        `Queue limit exceeded for priority ${priority} or tenant ${tenantId}`,
+        `Queue limit exceeded for priority ${priority} or tenant ${tenantId}`
       );
     }
 
@@ -224,7 +218,7 @@ export class RequestQueue<T = unknown> {
       }
 
       console.log(
-        `[QUEUE] Enqueued: ${id} (priority: ${priority}, tenant: ${tenantId}, queue size: ${queue.length})`,
+        `[QUEUE] Enqueued: ${id} (priority: ${priority}, tenant: ${tenantId}, queue size: ${queue.length})`
       );
     });
   }
@@ -258,13 +252,7 @@ export class RequestQueue<T = unknown> {
     }
 
     // Try to dequeue by priority (with aging)
-    const priorities: Priority[] = [
-      "critical",
-      "high",
-      "medium",
-      "low",
-      "background",
-    ];
+    const priorities: Priority[] = ['critical', 'high', 'medium', 'low', 'background'];
 
     for (const priority of priorities) {
       const result = this.dequeueFromPriority(priority);
@@ -348,7 +336,7 @@ export class RequestQueue<T = unknown> {
    */
   private selectFairRequest(
     priority: Priority,
-    queue: QueuedRequest<T>[],
+    queue: QueuedRequest<T>[]
   ): { request: QueuedRequest<T> | null; index: number } {
     const tenants = this.tenantRoundRobin.get(priority)!;
     if (tenants.length === 0) {
@@ -394,14 +382,13 @@ export class RequestQueue<T = unknown> {
   private findAlternativeRequest(
     priority: Priority,
     queue: QueuedRequest<T>[],
-    excludeTenantId: string,
+    excludeTenantId: string
   ): DequeueResult<T> | null {
     for (let i = 0; i < queue.length; i++) {
       const request = queue[i]!;
       if (request.tenantId === excludeTenantId) continue;
 
-      const tenantProcessing =
-        this.processing.get(request.tenantId) ?? new Set();
+      const tenantProcessing = this.processing.get(request.tenantId) ?? new Set();
       if (tenantProcessing.size < this.config.maxConcurrentPerTenant) {
         // Remove and return this request
         queue.splice(i, 1);
@@ -433,13 +420,7 @@ export class RequestQueue<T = unknown> {
    * Boost priority for aged requests
    */
   private boostPriority(current: Priority): Priority {
-    const order: Priority[] = [
-      "background",
-      "low",
-      "medium",
-      "high",
-      "critical",
-    ];
+    const order: Priority[] = ['background', 'low', 'medium', 'high', 'critical'];
     const currentIndex = order.indexOf(current);
     if (currentIndex < order.length - 1) {
       return order[currentIndex + 1]!;
@@ -491,13 +472,11 @@ export class RequestQueue<T = unknown> {
     this.stats.timeoutCount++;
 
     request.reject(
-      new Error(
-        `Request ${request.id} timed out after ${request.metadata.maxWaitMs}ms`,
-      ),
+      new Error(`Request ${request.id} timed out after ${request.metadata.maxWaitMs}ms`)
     );
 
     console.log(
-      `[QUEUE] Timeout: ${request.id} (priority: ${request.priority}, tenant: ${request.tenantId})`,
+      `[QUEUE] Timeout: ${request.id} (priority: ${request.priority}, tenant: ${request.tenantId})`
     );
   }
 
@@ -580,25 +559,19 @@ export class RequestQueue<T = unknown> {
         if (request.timeout) {
           clearTimeout(request.timeout);
         }
-        request.reject(new Error("Queue cleared"));
+        request.reject(new Error('Queue cleared'));
       }
       queue.length = 0;
     }
 
-    console.log("[QUEUE] All queues cleared");
+    console.log('[QUEUE] All queues cleared');
   }
 
   /**
    * Peek at next request without dequeuing
    */
   peek(): QueuedRequest<T> | null {
-    const priorities: Priority[] = [
-      "critical",
-      "high",
-      "medium",
-      "low",
-      "background",
-    ];
+    const priorities: Priority[] = ['critical', 'high', 'medium', 'low', 'background'];
 
     for (const priority of priorities) {
       const queue = this.queues.get(priority)!;
@@ -615,7 +588,7 @@ export class RequestQueue<T = unknown> {
  * Create request queue instance
  */
 export function createRequestQueue<T = unknown>(
-  config?: Partial<QueueConfig>,
+  config?: Partial<QueueConfig>
 ): RequestQueue<T> {
   return new RequestQueue<T>(config);
 }

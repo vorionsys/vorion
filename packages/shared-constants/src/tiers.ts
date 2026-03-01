@@ -43,66 +43,66 @@ export const TIER_THRESHOLDS: Readonly<Record<TrustTier, TierThreshold>> = {
   [TrustTier.T0_SANDBOX]: {
     min: 0,
     max: 199,
-    name: "Sandbox",
-    description: "Isolated, no external access, observation only",
-    color: "#78716c",
-    textColor: "#ffffff",
+    name: 'Sandbox',
+    description: 'Isolated, no external access, observation only',
+    color: '#78716c',
+    textColor: '#ffffff',
   },
   [TrustTier.T1_OBSERVED]: {
     min: 200,
     max: 349,
-    name: "Observed",
-    description: "Read-only, sandboxed execution, monitored",
-    color: "#ef4444",
-    textColor: "#ffffff",
+    name: 'Observed',
+    description: 'Read-only, sandboxed execution, monitored',
+    color: '#ef4444',
+    textColor: '#ffffff',
   },
   [TrustTier.T2_PROVISIONAL]: {
     min: 350,
     max: 499,
-    name: "Provisional",
-    description: "Basic operations, heavy supervision",
-    color: "#f97316",
-    textColor: "#ffffff",
+    name: 'Provisional',
+    description: 'Basic operations, heavy supervision',
+    color: '#f97316',
+    textColor: '#ffffff',
   },
   [TrustTier.T3_MONITORED]: {
     min: 500,
     max: 649,
-    name: "Monitored",
-    description: "Standard operations with continuous monitoring",
-    color: "#eab308",
-    textColor: "#000000",
+    name: 'Monitored',
+    description: 'Standard operations with continuous monitoring',
+    color: '#eab308',
+    textColor: '#000000',
   },
   [TrustTier.T4_STANDARD]: {
     min: 650,
     max: 799,
-    name: "Standard",
-    description: "External API access, policy-governed",
-    color: "#22c55e",
-    textColor: "#ffffff",
+    name: 'Standard',
+    description: 'External API access, policy-governed',
+    color: '#22c55e',
+    textColor: '#ffffff',
   },
   [TrustTier.T5_TRUSTED]: {
     min: 800,
     max: 875,
-    name: "Trusted",
-    description: "Cross-agent communication, delegated tasks",
-    color: "#3b82f6",
-    textColor: "#ffffff",
+    name: 'Trusted',
+    description: 'Cross-agent communication, delegated tasks',
+    color: '#3b82f6',
+    textColor: '#ffffff',
   },
   [TrustTier.T6_CERTIFIED]: {
     min: 876,
     max: 950,
-    name: "Certified",
-    description: "Admin tasks, agent spawning, minimal oversight",
-    color: "#8b5cf6",
-    textColor: "#ffffff",
+    name: 'Certified',
+    description: 'Admin tasks, agent spawning, minimal oversight',
+    color: '#8b5cf6',
+    textColor: '#ffffff',
   },
   [TrustTier.T7_AUTONOMOUS]: {
     min: 951,
     max: 1000,
-    name: "Autonomous",
-    description: "Full autonomy, self-governance, strategic only",
-    color: "#06b6d4",
-    textColor: "#ffffff",
+    name: 'Autonomous',
+    description: 'Full autonomy, self-governance, strategic only',
+    color: '#06b6d4',
+    textColor: '#ffffff',
   },
 } as const;
 
@@ -166,10 +166,7 @@ export function getTierMaxScore(tier: TrustTier): number {
 /**
  * Check if a score meets the minimum tier requirement
  */
-export function meetsTierRequirement(
-  score: number,
-  minTier: TrustTier,
-): boolean {
+export function meetsTierRequirement(score: number, minTier: TrustTier): boolean {
   const actualTier = scoreToTier(score);
   return actualTier >= minTier;
 }
@@ -230,21 +227,13 @@ export const ALL_TIERS: readonly TrustTier[] = [
 // =============================================================================
 
 export type TrustTierName =
-  | "Sandbox"
-  | "Observed"
-  | "Provisional"
-  | "Monitored"
-  | "Standard"
-  | "Trusted"
-  | "Certified"
-  | "Autonomous";
+  | 'Sandbox'
+  | 'Observed'
+  | 'Provisional'
+  | 'Monitored'
+  | 'Standard'
+  | 'Trusted'
+  | 'Certified'
+  | 'Autonomous';
 
-export type TrustTierCode =
-  | "T0"
-  | "T1"
-  | "T2"
-  | "T3"
-  | "T4"
-  | "T5"
-  | "T6"
-  | "T7";
+export type TrustTierCode = 'T0' | 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6' | 'T7';

@@ -8,44 +8,44 @@
  * @packageDocumentation
  */
 
-import { trace, SpanStatusCode, type Span } from "@opentelemetry/api";
+import { trace, SpanStatusCode, type Span } from '@opentelemetry/api';
 import {
   HealthChecker,
   createHealthChecker,
   type ProviderId,
   type HealthStatus,
-} from "./health-checker.js";
+} from './health-checker.js';
 import {
   CircuitBreaker,
   createCircuitBreaker,
   type CircuitState,
-} from "./circuit-breaker.js";
+} from './circuit-breaker.js';
 import {
   RequestQueue,
   createRequestQueue,
   type Priority,
   type QueuedRequest,
-} from "./request-queue.js";
+} from './request-queue.js';
 import {
   RetryHandler,
   createRetryHandler,
   type RetryDecision,
   type RetryConfig,
-} from "./retry-handler.js";
+} from './retry-handler.js';
 import {
   QuotaManager,
   createQuotaManager,
   type QuotaCheckResult,
   type UsageRecord,
-} from "./quota-manager.js";
+} from './quota-manager.js';
 import {
   SlaTracker,
   createSlaTracker,
   type SlaMeasurement,
   type SlaReport,
-} from "./sla-tracker.js";
+} from './sla-tracker.js';
 
-const tracer = trace.getTracer("ai-gateway-orchestrator");
+const tracer = trace.getTracer('ai-gateway-orchestrator');
 
 // =============================================================================
 // TYPES
@@ -170,7 +170,7 @@ export interface OrchestratorStatus {
 export type ProviderExecutor<T> = (
   provider: ProviderId,
   model: string,
-  context: RequestContext,
+  context: RequestContext
 ) => Promise<T>;
 
 // =============================================================================
@@ -179,30 +179,12 @@ export type ProviderExecutor<T> = (
 
 const DEFAULT_CONFIG: OrchestratorConfig = {
   providers: [
-    {
-      id: "anthropic",
-      models: ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"],
-      priority: 1,
-      weight: 1,
-      enabled: true,
-    },
-    {
-      id: "openai",
-      models: ["gpt-4-turbo", "gpt-4o", "gpt-3.5-turbo"],
-      priority: 2,
-      weight: 1,
-      enabled: true,
-    },
-    {
-      id: "google",
-      models: ["gemini-1.5-pro", "gemini-1.5-flash"],
-      priority: 3,
-      weight: 1,
-      enabled: true,
-    },
+    { id: 'anthropic', models: ['claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'], priority: 1, weight: 1, enabled: true },
+    { id: 'openai', models: ['gpt-4-turbo', 'gpt-4o', 'gpt-3.5-turbo'], priority: 2, weight: 1, enabled: true },
+    { id: 'google', models: ['gemini-1.5-pro', 'gemini-1.5-flash'], priority: 3, weight: 1, enabled: true },
   ],
-  defaultProvider: "anthropic",
-  defaultModel: "claude-3-sonnet",
+  defaultProvider: 'anthropic',
+  defaultModel: 'claude-3-sonnet',
   enableQueue: true,
   enableRetry: true,
   enableQuota: true,
@@ -277,7 +259,7 @@ export class GatewayOrchestrator {
     this.startQueueProcessor();
 
     this.running = true;
-    console.log("[ORCHESTRATOR] Started");
+    console.log('[ORCHESTRATOR] Started');
   }
 
   /**
@@ -289,7 +271,7 @@ export class GatewayOrchestrator {
     this.running = false;
     this.healthChecker.stop();
 
-    console.log("[ORCHESTRATOR] Stopped");
+    console.log('[ORCHESTRATOR] Stopped');
   }
 
   /**
@@ -297,136 +279,121 @@ export class GatewayOrchestrator {
    */
   async execute<T>(
     context: RequestContext,
-    executor: ProviderExecutor<T>,
+    executor: ProviderExecutor<T>
   ): Promise<RequestResult<T>> {
-    return tracer.startActiveSpan(
-      "orchestrator.execute",
-      async (span): Promise<RequestResult<T>> => {
-        const startTime = Date.now();
-        let queueTime = 0;
+    return tracer.startActiveSpan('orchestrator.execute', async (span): Promise<RequestResult<T>> => {
+      const startTime = Date.now();
+      let queueTime = 0;
 
-        span.setAttributes({
-          "request.id": context.requestId,
-          "request.tenant_id": context.tenantId,
-          "request.priority": context.priority ?? "medium",
-        });
+      span.setAttributes({
+        'request.id': context.requestId,
+        'request.tenant_id': context.tenantId,
+        'request.priority': context.priority ?? 'medium',
+      });
 
-        try {
-          // Step 1: Check quota
-          if (this.config.enableQuota) {
-            const quotaResult = await this.checkQuota(context, span);
-            if (!quotaResult.allowed) {
-              return this.buildErrorResult(
-                "QUOTA_EXCEEDED",
-                `Quota exceeded: ${quotaResult.exceededQuotas.map((q) => q.type).join(", ")}`,
-                false,
-                {
-                  latencyMs: Date.now() - startTime,
-                  provider: context.provider ?? this.config.defaultProvider,
-                  model: context.model ?? this.config.defaultModel,
-                  retryCount: 0,
-                  queueTimeMs: 0,
-                },
-              );
-            }
-          }
-
-          // Step 2: Select provider and model
-          const routing = await this.selectProvider(context, span);
-          if (!routing) {
+      try {
+        // Step 1: Check quota
+        if (this.config.enableQuota) {
+          const quotaResult = await this.checkQuota(context, span);
+          if (!quotaResult.allowed) {
             return this.buildErrorResult(
-              "NO_AVAILABLE_PROVIDER",
-              "No healthy provider available",
-              true,
-              {
-                latencyMs: Date.now() - startTime,
-                provider: context.provider ?? this.config.defaultProvider,
-                model: context.model ?? this.config.defaultModel,
-                retryCount: 0,
-                queueTimeMs: 0,
-              },
+              'QUOTA_EXCEEDED',
+              `Quota exceeded: ${quotaResult.exceededQuotas.map((q) => q.type).join(', ')}`,
+              false,
+              { latencyMs: Date.now() - startTime, provider: context.provider ?? this.config.defaultProvider, model: context.model ?? this.config.defaultModel, retryCount: 0, queueTimeMs: 0 }
             );
           }
-
-          span.setAttributes({
-            "routing.provider": routing.provider,
-            "routing.model": routing.model,
-            "routing.reason": routing.reason,
-          });
-
-          // Step 3: Queue request if enabled
-          if (this.config.enableQueue) {
-            const queueStart = Date.now();
-            await this.enqueueRequest(context, routing, span);
-            queueTime = Date.now() - queueStart;
-            span.setAttribute("queue.time_ms", queueTime);
-          }
-
-          // Step 4: Execute with retry
-          const result = await this.executeWithRetry(
-            context,
-            routing,
-            executor,
-            span,
-          );
-
-          // Step 5: Record metrics
-          const latencyMs = Date.now() - startTime;
-          await this.recordSuccess(context, routing, latencyMs, result);
-
-          return {
-            success: true,
-            data: result,
-            metrics: {
-              latencyMs,
-              provider: routing.provider,
-              model: routing.model,
-              retryCount: 0, // Updated by retry handler
-              queueTimeMs: queueTime,
-            },
-          };
-        } catch (error) {
-          const latencyMs = Date.now() - startTime;
-          const err = error as Error;
-
-          span.recordException(err);
-          span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
-
-          // Record failure
-          await this.recordFailure(
-            context,
-            context.provider ?? this.config.defaultProvider,
-            context.model ?? this.config.defaultModel,
-            latencyMs,
-            err,
-          );
-
-          const errorType = this.retryHandler.classifyError(
-            context.provider ?? this.config.defaultProvider,
-            err,
-          );
-          const retryable = this.retryHandler.isTransientError(
-            context.provider ?? this.config.defaultProvider,
-            err,
-          );
-
-          return this.buildErrorResult(
-            errorType.toUpperCase(),
-            err.message,
-            retryable,
-            {
-              latencyMs,
-              provider: context.provider ?? this.config.defaultProvider,
-              model: context.model ?? this.config.defaultModel,
-              retryCount: 0,
-              queueTimeMs: queueTime,
-            },
-          );
-        } finally {
-          span.end();
         }
-      },
-    );
+
+        // Step 2: Select provider and model
+        const routing = await this.selectProvider(context, span);
+        if (!routing) {
+          return this.buildErrorResult(
+            'NO_AVAILABLE_PROVIDER',
+            'No healthy provider available',
+            true,
+            { latencyMs: Date.now() - startTime, provider: context.provider ?? this.config.defaultProvider, model: context.model ?? this.config.defaultModel, retryCount: 0, queueTimeMs: 0 }
+          );
+        }
+
+        span.setAttributes({
+          'routing.provider': routing.provider,
+          'routing.model': routing.model,
+          'routing.reason': routing.reason,
+        });
+
+        // Step 3: Queue request if enabled
+        if (this.config.enableQueue) {
+          const queueStart = Date.now();
+          await this.enqueueRequest(context, routing, span);
+          queueTime = Date.now() - queueStart;
+          span.setAttribute('queue.time_ms', queueTime);
+        }
+
+        // Step 4: Execute with retry
+        const result = await this.executeWithRetry(
+          context,
+          routing,
+          executor,
+          span
+        );
+
+        // Step 5: Record metrics
+        const latencyMs = Date.now() - startTime;
+        await this.recordSuccess(context, routing, latencyMs, result);
+
+        return {
+          success: true,
+          data: result,
+          metrics: {
+            latencyMs,
+            provider: routing.provider,
+            model: routing.model,
+            retryCount: 0, // Updated by retry handler
+            queueTimeMs: queueTime,
+          },
+        };
+      } catch (error) {
+        const latencyMs = Date.now() - startTime;
+        const err = error as Error;
+
+        span.recordException(err);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
+
+        // Record failure
+        await this.recordFailure(
+          context,
+          context.provider ?? this.config.defaultProvider,
+          context.model ?? this.config.defaultModel,
+          latencyMs,
+          err
+        );
+
+        const errorType = this.retryHandler.classifyError(
+          context.provider ?? this.config.defaultProvider,
+          err
+        );
+        const retryable = this.retryHandler.isTransientError(
+          context.provider ?? this.config.defaultProvider,
+          err
+        );
+
+        return this.buildErrorResult(
+          errorType.toUpperCase(),
+          err.message,
+          retryable,
+          {
+            latencyMs,
+            provider: context.provider ?? this.config.defaultProvider,
+            model: context.model ?? this.config.defaultModel,
+            retryCount: 0,
+            queueTimeMs: queueTime,
+          }
+        );
+      } finally {
+        span.end();
+      }
+    });
   }
 
   /**
@@ -507,7 +474,7 @@ export class GatewayOrchestrator {
 
   private async checkQuota(
     context: RequestContext,
-    span: Span,
+    span: Span
   ): Promise<QuotaCheckResult> {
     const result = await this.quotaManager.checkQuota(context.tenantId, {
       provider: context.provider,
@@ -515,12 +482,12 @@ export class GatewayOrchestrator {
     });
 
     span.setAttributes({
-      "quota.allowed": result.allowed,
-      "quota.warnings": result.warnings.length,
+      'quota.allowed': result.allowed,
+      'quota.warnings': result.warnings.length,
     });
 
     if (result.warnings.length > 0) {
-      span.addEvent("quota_warning", { warnings: result.warnings.join("; ") });
+      span.addEvent('quota_warning', { warnings: result.warnings.join('; ') });
     }
 
     return result;
@@ -528,16 +495,13 @@ export class GatewayOrchestrator {
 
   private async selectProvider(
     context: RequestContext,
-    span: Span,
+    span: Span
   ): Promise<RoutingDecision | null> {
     // If provider is explicitly specified
     if (context.provider) {
       const providerHealth = this.healthChecker.getHealth(context.provider);
-      const healthStatus: HealthStatus = providerHealth?.status ?? "unknown";
-      const circuitState = this.circuitBreaker.getState(
-        context.provider,
-        context.model,
-      );
+      const healthStatus: HealthStatus = providerHealth?.status ?? 'unknown';
+      const circuitState = this.circuitBreaker.getState(context.provider, context.model);
 
       if (
         this.healthChecker.isAvailable(context.provider) &&
@@ -545,17 +509,10 @@ export class GatewayOrchestrator {
       ) {
         return {
           provider: context.provider,
-          model:
-            context.model ?? this.getDefaultModelForProvider(context.provider),
-          reason: "Explicitly requested provider",
+          model: context.model ?? this.getDefaultModelForProvider(context.provider),
+          reason: 'Explicitly requested provider',
           alternatives: [],
-          quotaResult: {
-            allowed: true,
-            tenantId: context.tenantId,
-            quotas: [],
-            exceededQuotas: [],
-            warnings: [],
-          },
+          quotaResult: { allowed: true, tenantId: context.tenantId, quotas: [], exceededQuotas: [], warnings: [] },
           healthStatus,
           circuitState,
         };
@@ -574,21 +531,16 @@ export class GatewayOrchestrator {
       .sort((a, b) => a.priority - b.priority);
 
     if (availableProviders.length === 0) {
-      span.addEvent("no_available_providers");
+      span.addEvent('no_available_providers');
       return null;
     }
 
     // Use SLA-based ranking for final selection
-    const ranked = this.slaTracker.rankProviders(
-      availableProviders.map((p) => p.id),
-    );
+    const ranked = this.slaTracker.rankProviders(availableProviders.map((p) => p.id));
     const bestProvider = ranked[0]!;
 
-    const providerConfig = availableProviders.find(
-      (p) => p.id === bestProvider.provider,
-    )!;
-    const model =
-      context.model ?? providerConfig.models[0] ?? this.config.defaultModel;
+    const providerConfig = availableProviders.find((p) => p.id === bestProvider.provider)!;
+    const model = context.model ?? providerConfig.models[0] ?? this.config.defaultModel;
 
     // Build alternatives
     const alternatives = ranked.slice(1, 4).map((r) => {
@@ -605,16 +557,8 @@ export class GatewayOrchestrator {
       model,
       reason: `Best SLA score: ${bestProvider.score.toFixed(2)}`,
       alternatives,
-      quotaResult: {
-        allowed: true,
-        tenantId: context.tenantId,
-        quotas: [],
-        exceededQuotas: [],
-        warnings: [],
-      },
-      healthStatus:
-        this.healthChecker.getHealth(bestProvider.provider)?.status ??
-        "unknown",
+      quotaResult: { allowed: true, tenantId: context.tenantId, quotas: [], exceededQuotas: [], warnings: [] },
+      healthStatus: this.healthChecker.getHealth(bestProvider.provider)?.status ?? 'unknown',
       circuitState: this.circuitBreaker.getState(bestProvider.provider),
     };
   }
@@ -627,24 +571,24 @@ export class GatewayOrchestrator {
   private async enqueueRequest(
     context: RequestContext,
     routing: RoutingDecision,
-    span: Span,
+    span: Span
   ): Promise<void> {
     // For simplicity, we just track the request rather than full queuing
     // In production, this would integrate with the full request queue
-    const priority = context.priority ?? "medium";
-    span.setAttribute("queue.priority", priority);
+    const priority = context.priority ?? 'medium';
+    span.setAttribute('queue.priority', priority);
   }
 
   private async executeWithRetry<T>(
     context: RequestContext,
     routing: RoutingDecision,
     executor: ProviderExecutor<T>,
-    span: Span,
+    span: Span
   ): Promise<T> {
     // Increment active requests
     this.activeRequests.set(
       routing.provider,
-      (this.activeRequests.get(routing.provider) ?? 0) + 1,
+      (this.activeRequests.get(routing.provider) ?? 0) + 1
     );
 
     try {
@@ -655,7 +599,7 @@ export class GatewayOrchestrator {
           {
             model: routing.model,
             onRetry: (decision: RetryDecision) => {
-              span.addEvent("retry", {
+              span.addEvent('retry', {
                 attempt: decision.attempt,
                 delay_ms: decision.delayMs,
                 reason: decision.reason,
@@ -668,7 +612,7 @@ export class GatewayOrchestrator {
                 error: decision.reason,
               });
             },
-          },
+          }
         );
       } else {
         return await executor(routing.provider, routing.model, context);
@@ -677,7 +621,7 @@ export class GatewayOrchestrator {
       // Decrement active requests
       this.activeRequests.set(
         routing.provider,
-        Math.max(0, (this.activeRequests.get(routing.provider) ?? 1) - 1),
+        Math.max(0, (this.activeRequests.get(routing.provider) ?? 1) - 1)
       );
     }
   }
@@ -686,19 +630,14 @@ export class GatewayOrchestrator {
     context: RequestContext,
     routing: RoutingDecision,
     latencyMs: number,
-    _result: T,
+    _result: T
   ): Promise<void> {
     this.metrics.totalRequests++;
     this.metrics.successfulRequests++;
     this.metrics.totalLatencyMs += latencyMs;
 
     // Record health
-    this.healthChecker.recordRequest(
-      routing.provider,
-      routing.model,
-      true,
-      latencyMs,
-    );
+    this.healthChecker.recordRequest(routing.provider, routing.model, true, latencyMs);
 
     // Record circuit breaker success
     this.circuitBreaker.recordResult(routing.provider, {
@@ -727,11 +666,7 @@ export class GatewayOrchestrator {
       inputTokens: estimatedTokens * 0.3,
       outputTokens: estimatedTokens * 0.7,
       totalTokens: estimatedTokens,
-      cost: this.quotaManager.estimateCost(
-        routing.model,
-        estimatedTokens * 0.3,
-        estimatedTokens * 0.7,
-      ),
+      cost: this.quotaManager.estimateCost(routing.model, estimatedTokens * 0.3, estimatedTokens * 0.7),
       latencyMs,
       success: true,
     });
@@ -742,20 +677,14 @@ export class GatewayOrchestrator {
     provider: ProviderId,
     model: string,
     latencyMs: number,
-    error: Error,
+    error: Error
   ): Promise<void> {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     this.metrics.totalLatencyMs += latencyMs;
 
     // Record health
-    this.healthChecker.recordRequest(
-      provider,
-      model,
-      false,
-      latencyMs,
-      error.message,
-    );
+    this.healthChecker.recordRequest(provider, model, false, latencyMs, error.message);
 
     // Record circuit breaker failure
     this.circuitBreaker.recordResult(provider, {
@@ -780,7 +709,7 @@ export class GatewayOrchestrator {
     code: string,
     message: string,
     retryable: boolean,
-    metrics: RequestResult<T>["metrics"],
+    metrics: RequestResult<T>['metrics']
   ): RequestResult<T> {
     return {
       success: false,
@@ -803,7 +732,7 @@ export class GatewayOrchestrator {
  * Create gateway orchestrator instance
  */
 export function createOrchestrator(
-  config?: Partial<OrchestratorConfig>,
+  config?: Partial<OrchestratorConfig>
 ): GatewayOrchestrator {
   return new GatewayOrchestrator(config);
 }
@@ -817,7 +746,7 @@ let orchestratorInstance: GatewayOrchestrator | null = null;
  * Get or create orchestrator instance
  */
 export function getOrchestrator(
-  config?: Partial<OrchestratorConfig>,
+  config?: Partial<OrchestratorConfig>
 ): GatewayOrchestrator {
   if (!orchestratorInstance) {
     orchestratorInstance = new GatewayOrchestrator(config);

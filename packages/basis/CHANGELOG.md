@@ -5,6 +5,18 @@ All notable changes to `@vorionsys/basis` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-02-25
+
+### Changed
+- Standardized LICENSE copyright to Vorion Systems
+- Added documentation link to README
+- Polished README for npm publish readiness
+
+## [1.0.3] - 2026-02-20
+
+### Changed
+- Migrated all references from vorionsys to vorionsys scope
+
 ## [1.0.2] - 2026-02-17
 
 ### Changed
@@ -38,3 +50,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `KYA` orchestrator class for complete 4-step verification flow
 - Full TypeScript type definitions for all interfaces and enums
 - Sub-path export `@vorionsys/basis/kya` for direct KYA module access
+
+[1.0.4]: https://github.com/vorionsys/vorion/compare/basis-v1.0.3...basis-v1.0.4
+[1.0.3]: https://github.com/vorionsys/vorion/compare/basis-v1.0.2...basis-v1.0.3
+[1.0.2]: https://github.com/vorionsys/vorion/compare/basis-v1.0.1...basis-v1.0.2
+[1.0.1]: https://github.com/vorionsys/vorion/compare/basis-v1.0.0...basis-v1.0.1
+[1.0.0]: https://github.com/vorionsys/vorion/releases/tag/basis-v1.0.0

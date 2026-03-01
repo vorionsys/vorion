@@ -44,14 +44,12 @@ export function useProgress() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load progress on mount - hydrating from localStorage requires post-mount setState
-  /* eslint-disable react-hooks/set-state-in-effect */
+  // Load progress on mount
   useEffect(() => {
     const loaded = loadProgress();
     setProgress(loaded);
     setIsLoaded(true);
   }, []);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Save progress whenever it changes
   useEffect(() => {

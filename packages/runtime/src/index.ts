@@ -30,7 +30,7 @@ export {
   DEFAULT_TRUST_FACADE_CONFIG,
   TRUST_TIER_NAMES,
   TRUST_TIER_RANGES,
-} from "./trust-facade/index.js";
+} from './trust-facade/index.js';
 
 // ProofCommitter - Zero-latency proof system
 export {
@@ -46,7 +46,7 @@ export {
   type ProofStore,
   // Constants
   DEFAULT_PROOF_COMMITTER_CONFIG,
-} from "./proof-committer/index.js";
+} from './proof-committer/index.js';
 
 // IntentPipeline - Orchestrated intent processing
 export {
@@ -60,14 +60,14 @@ export {
   type ExecutionHandler,
   // Constants
   DEFAULT_INTENT_PIPELINE_CONFIG,
-} from "./intent-pipeline/index.js";
+} from './intent-pipeline/index.js';
 
 // Persistent stores
 export {
   SQLiteProofStore,
   createSQLiteProofStore,
   type SQLiteProofStoreConfig,
-} from "./stores/sqlite-proof-store.js";
+} from './stores/sqlite-proof-store.js';
 
 export {
   SQLiteTrustStore,
@@ -76,7 +76,7 @@ export {
   type TrustStore,
   type AgentTrustRecord,
   type TrustSignalRecord,
-} from "./stores/sqlite-trust-store.js";
+} from './stores/sqlite-trust-store.js';
 
 // Re-export logger for consumers
-export { createLogger, type LoggerOptions } from "./common/logger.js";
+export { createLogger, type LoggerOptions } from './common/logger.js';

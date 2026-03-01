@@ -2,11 +2,7 @@
  * Component types - for the Vorion component registry
  */
 
-import type {
-  ComponentStatus,
-  ComponentType,
-  ObservationTier,
-} from "./enums.js";
+import type { ComponentStatus, ComponentType, ObservationTier } from './enums.js';
 
 /**
  * Component dependency
@@ -90,7 +86,7 @@ export interface RegisterComponentRequest {
   owner: string;
   description: string;
   repository?: string;
-  dependencies?: Omit<Dependency, "name">[];
+  dependencies?: Omit<Dependency, 'name'>[];
   observationTier?: ObservationTier;
   capabilities?: string[];
   configSchema?: Record<string, unknown>;
@@ -105,7 +101,7 @@ export interface UpdateComponentRequest {
   status?: ComponentStatus;
   description?: string;
   repository?: string;
-  dependencies?: Omit<Dependency, "name">[];
+  dependencies?: Omit<Dependency, 'name'>[];
   observationTier?: ObservationTier;
   capabilities?: string[];
   configSchema?: Record<string, unknown>;

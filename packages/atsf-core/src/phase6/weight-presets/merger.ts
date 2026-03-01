@@ -13,17 +13,13 @@ import {
   CANONICAL_TRUST_WEIGHTS,
   TOTAL_TRUST_WEIGHT,
   getCanonicalWeightMetrics,
-} from "./canonical.js";
-import {
-  applyDeltas,
-  validateDeltaAdjustments,
-  type WeightDelta,
-} from "./deltas.js";
+} from './canonical.js';
+import { applyDeltas, validateDeltaAdjustments, type WeightDelta } from './deltas.js';
 
 /**
  * Merge strategy determines how weights are combined
  */
-export type MergeStrategy = "canonical" | "deltaOverride" | "blended";
+export type MergeStrategy = 'canonical' | 'deltaOverride' | 'blended';
 
 /**
  * Final merged weights result
@@ -56,63 +52,61 @@ export interface WeightComputationAudit {
  */
 export function mergeWeights(
   deltas: WeightDelta[] = [],
-  strategy: MergeStrategy = "deltaOverride",
+  strategy: MergeStrategy = 'deltaOverride'
 ): MergedTrustWeights {
   const canonical = CANONICAL_TRUST_WEIGHTS;
 
   switch (strategy) {
-    case "canonical":
+    case 'canonical':
       // Ignore deltas, return canonical
       return { ...canonical };
 
-    case "deltaOverride": { // Apply deltas directly as overrides
-      const adjusted = { ...canonical };
-      for (const delta of deltas) {
-        // Check expiration
-        if (delta.expiresAt && new Date() > delta.expiresAt) {
-          continue;
+    case 'deltaOverride':
+      // Apply deltas directly as overrides
+      {
+        const adjusted = { ...canonical };
+        for (const delta of deltas) {
+          // Check expiration
+          if (delta.expiresAt && new Date() > delta.expiresAt) {
+            continue;
+          }
+          const metric = delta.metric as keyof MergedTrustWeights;
+          (adjusted as Record<string, number>)[metric] = Math.max(0, adjusted[metric] + delta.adjustment);
         }
-        const metric = delta.metric as keyof MergedTrustWeights;
-        (adjusted as Record<string, number>)[metric] = Math.max(
-          0,
-          adjusted[metric] + delta.adjustment,
-        );
-      }
-      return adjusted;
-    }
-
-    case "blended": { // Blend canonical and deltas proportionally
-      const adjusted = { ...canonical };
-      const validDeltas = deltas.filter(
-        (d) => !d.expiresAt || new Date() <= d.expiresAt,
-      );
-
-      if (validDeltas.length === 0) {
         return adjusted;
       }
 
-      // Average the adjustments across all deltas
-      const deltaMap: Record<string, number[]> = {};
-      for (const delta of validDeltas) {
-        const metric = delta.metric as keyof MergedTrustWeights;
-        if (!deltaMap[metric]) {
-          deltaMap[metric] = [];
+    case 'blended':
+      // Blend canonical and deltas proportionally
+      {
+        const adjusted = { ...canonical };
+        const validDeltas = deltas.filter((d) => !d.expiresAt || new Date() <= d.expiresAt);
+
+        if (validDeltas.length === 0) {
+          return adjusted;
         }
-        deltaMap[metric].push(delta.adjustment);
-      }
 
-      // Apply averaged adjustments
-      for (const [metric, adjustments] of Object.entries(deltaMap)) {
-        const avgAdjustment =
-          adjustments.reduce((a, b) => a + b, 0) / adjustments.length;
-        (adjusted as Record<string, number>)[metric] = Math.max(
-          0,
-          adjusted[metric as keyof MergedTrustWeights] + avgAdjustment,
-        );
-      }
+        // Average the adjustments across all deltas
+        const deltaMap: Record<string, number[]> = {};
+        for (const delta of validDeltas) {
+          const metric = delta.metric as keyof MergedTrustWeights;
+          if (!deltaMap[metric]) {
+            deltaMap[metric] = [];
+          }
+          deltaMap[metric].push(delta.adjustment);
+        }
 
-      return adjusted;
-    }
+        // Apply averaged adjustments
+        for (const [metric, adjustments] of Object.entries(deltaMap)) {
+          const avgAdjustment = adjustments.reduce((a, b) => a + b, 0) / adjustments.length;
+          (adjusted as Record<string, number>)[metric] = Math.max(
+            0,
+            adjusted[metric as keyof MergedTrustWeights] + avgAdjustment
+          );
+        }
+
+        return adjusted;
+      }
 
     default:
       throw new Error(`Unknown merge strategy: ${strategy}`);
@@ -124,7 +118,7 @@ export function mergeWeights(
  */
 export function mergeAndValidateWeights(
   deltas: WeightDelta[] = [],
-  strategy: MergeStrategy = "deltaOverride",
+  strategy: MergeStrategy = 'deltaOverride'
 ): {
   weights: MergedTrustWeights;
   valid: boolean;
@@ -169,14 +163,11 @@ export function createWeightAuditRecord(
   canonicalWeights: MergedTrustWeights,
   appliedDeltas: WeightDelta[],
   finalWeights: MergedTrustWeights,
-  strategy: MergeStrategy = "deltaOverride",
+  strategy: MergeStrategy = 'deltaOverride',
   agentId?: string,
-  domain?: string,
+  domain?: string
 ): WeightComputationAudit {
-  const totalWeight = Object.values(finalWeights).reduce(
-    (sum, w) => sum + w,
-    0,
-  );
+  const totalWeight = Object.values(finalWeights).reduce((sum, w) => sum + w, 0);
 
   return {
     timestamp: new Date(),
@@ -196,11 +187,8 @@ export function createWeightAuditRecord(
  */
 export function compareWeights(
   finalWeights: MergedTrustWeights,
-  canonicalWeights: MergedTrustWeights = CANONICAL_TRUST_WEIGHTS,
-): Record<
-  string,
-  { canonical: number; final: number; delta: number; percentChange: number }
-> {
+  canonicalWeights: MergedTrustWeights = CANONICAL_TRUST_WEIGHTS
+): Record<string, { canonical: number; final: number; delta: number; percentChange: number }> {
   const comparison: Record<
     string,
     { canonical: number; final: number; delta: number; percentChange: number }
@@ -229,26 +217,21 @@ export function compareWeights(
  */
 export function formatWeightsForDisplay(weights: MergedTrustWeights): string {
   const metrics = getCanonicalWeightMetrics();
-  const lines = ["Trust Weight Distribution:", ""];
+  const lines = ['Trust Weight Distribution:', ''];
 
   for (const metric of metrics) {
-    const value =
-      weights[
-        metric.name.toLowerCase().replace(/ /g, "") as keyof MergedTrustWeights
-      ];
+    const value = weights[metric.name.toLowerCase().replace(/ /g, '') as keyof MergedTrustWeights];
     if (value !== undefined) {
       const percentage = ((value / TOTAL_TRUST_WEIGHT) * 100).toFixed(1);
-      lines.push(
-        `${metric.name.padEnd(25)} ${value.toString().padEnd(4)} pts (${percentage}%)`,
-      );
+      lines.push(`${metric.name.padEnd(25)} ${value.toString().padEnd(4)} pts (${percentage}%)`);
     }
   }
 
   const total = Object.values(weights).reduce((sum, w) => sum + w, 0);
-  lines.push("");
+  lines.push('');
   lines.push(`Total: ${total} points`);
 
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
 /**
@@ -262,7 +245,7 @@ export function computeTrustScore(
     cascadePrevention: number; // 0-1
     executionEfficiency: number; // 0-1
     behaviorStability: number; // 0-1
-  },
+  }
 ): number {
   const score =
     metrics.successRatio * weights.successRatio +

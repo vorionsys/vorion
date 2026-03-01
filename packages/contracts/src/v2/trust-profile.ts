@@ -2,7 +2,7 @@
  * Trust Profile types - represents an agent's current trust state
  */
 
-import type { ObservationTier, TrustBand } from "./enums.js";
+import type { ObservationTier, TrustBand } from './enums.js';
 
 /**
  * Trust factor scores for an agent
@@ -27,13 +27,13 @@ export type TrustFactorScores = Record<string, number>;
  * - This allows agents to graduate faster with human oversight
  */
 export type EvidenceType =
-  | "automated" // Standard system observations (1x weight)
-  | "hitl_approval" // Human-in-the-loop approval (5x weight)
-  | "hitl_rejection" // Human rejection/correction (5x weight)
-  | "examination" // Formal examination result (3x weight)
-  | "audit" // Third-party audit finding (3x weight)
-  | "sandbox_test" // Shadow/testnet observation (0.5x weight)
-  | "peer_review"; // Cross-agent endorsement (2x weight)
+  | 'automated'      // Standard system observations (1x weight)
+  | 'hitl_approval'  // Human-in-the-loop approval (5x weight)
+  | 'hitl_rejection' // Human rejection/correction (5x weight)
+  | 'examination'    // Formal examination result (3x weight)
+  | 'audit'          // Third-party audit finding (3x weight)
+  | 'sandbox_test'   // Shadow/testnet observation (0.5x weight)
+  | 'peer_review';   // Cross-agent endorsement (2x weight)
 
 /**
  * Default evidence type multipliers
@@ -43,12 +43,12 @@ export type EvidenceType =
  */
 export const EVIDENCE_TYPE_MULTIPLIERS: Record<EvidenceType, number> = {
   automated: 1.0,
-  hitl_approval: 5.0, // HITL approval = 5 automated observations
-  hitl_rejection: 5.0, // HITL rejection impact is also amplified
-  examination: 3.0, // Formal exams count more
-  audit: 3.0, // Audits are authoritative
-  sandbox_test: 0.5, // Sandbox/testnet observations count less (unverified)
-  peer_review: 2.0, // Cross-agent reviews have moderate weight
+  hitl_approval: 5.0,    // HITL approval = 5 automated observations
+  hitl_rejection: 5.0,   // HITL rejection impact is also amplified
+  examination: 3.0,      // Formal exams count more
+  audit: 3.0,            // Audits are authoritative
+  sandbox_test: 0.5,     // Sandbox/testnet observations count less (unverified)
+  peer_review: 2.0,      // Cross-agent reviews have moderate weight
 };
 
 /**
@@ -184,7 +184,12 @@ export interface BandingConfig {
   thresholds: BandThresholds;
   /** Points buffer to prevent oscillation */
   hysteresis: number;
-  /** Daily decay rate for stale evidence */
+  /**
+   * Daily decay rate for stale evidence freshness weighting (0.0 to 1.0).
+   * Reduces the influence of older evidence in banding calculations.
+   * NOTE: This is NOT inactivity decay. For inactivity decay, see
+   * DECAY_MILESTONES (stepped milestones: 7/14/28/42/56/84/112/140/182 days).
+   */
   decayRate: number;
   /** Minimum days at current band before promotion */
   promotionDelay: number;
@@ -205,24 +210,24 @@ export const DEFAULT_BANDING_CONFIG: BandingConfig = {
  */
 export enum RiskProfile {
   /** 5 minutes - computations, queries */
-  IMMEDIATE = "IMMEDIATE",
+  IMMEDIATE = 'IMMEDIATE',
   /** 4 hours - API calls */
-  SHORT_TERM = "SHORT_TERM",
+  SHORT_TERM = 'SHORT_TERM',
   /** 3 days - simple transactions */
-  MEDIUM_TERM = "MEDIUM_TERM",
+  MEDIUM_TERM = 'MEDIUM_TERM',
   /** 30 days - financial trades */
-  LONG_TERM = "LONG_TERM",
+  LONG_TERM = 'LONG_TERM',
   /** 90 days - investments */
-  EXTENDED = "EXTENDED",
+  EXTENDED = 'EXTENDED',
 }
 
 /** Outcome windows in milliseconds for each risk profile */
 export const RISK_PROFILE_WINDOWS: Record<RiskProfile, number> = {
-  [RiskProfile.IMMEDIATE]: 5 * 60 * 1000, // 5 minutes
-  [RiskProfile.SHORT_TERM]: 4 * 60 * 60 * 1000, // 4 hours
+  [RiskProfile.IMMEDIATE]: 5 * 60 * 1000,           // 5 minutes
+  [RiskProfile.SHORT_TERM]: 4 * 60 * 60 * 1000,     // 4 hours
   [RiskProfile.MEDIUM_TERM]: 3 * 24 * 60 * 60 * 1000, // 3 days
-  [RiskProfile.LONG_TERM]: 30 * 24 * 60 * 60 * 1000, // 30 days
-  [RiskProfile.EXTENDED]: 90 * 24 * 60 * 60 * 1000, // 90 days
+  [RiskProfile.LONG_TERM]: 30 * 24 * 60 * 60 * 1000,  // 30 days
+  [RiskProfile.EXTENDED]: 90 * 24 * 60 * 60 * 1000,   // 90 days
 };
 
 /**
@@ -280,13 +285,13 @@ export interface TrustDynamicsConfig {
 
 /** Default trust dynamics configuration per ATSF v2.0 */
 export const DEFAULT_TRUST_DYNAMICS: TrustDynamicsConfig = {
-  gainRate: 0.01, // Logarithmic gain (slow)
-  lossRate: 0.1, // Exponential loss (10x faster)
-  cooldownHours: 168, // 7 days after any drop
-  oscillationThreshold: 3, // 3 direction changes triggers alert
-  oscillationWindowHours: 24, // Within 24 hours
-  reversalPenaltyMultiplier: 2.0, // 2x penalty for reversals
-  circuitBreakerThreshold: 100, // Trust < 100 (on 0-1000 scale) triggers circuit breaker
+  gainRate: 0.01,                    // Logarithmic gain (slow)
+  lossRate: 0.10,                    // Exponential loss (10x faster)
+  cooldownHours: 168,                // 7 days after any drop
+  oscillationThreshold: 3,           // 3 direction changes triggers alert
+  oscillationWindowHours: 24,        // Within 24 hours
+  reversalPenaltyMultiplier: 2.0,    // 2x penalty for reversals
+  circuitBreakerThreshold: 100,      // Trust < 100 (on 0-1000 scale) triggers circuit breaker
 };
 
 /**
@@ -310,9 +315,9 @@ export interface DirectionChange {
   /** Timestamp of the direction change */
   timestamp: Date;
   /** Previous direction: 'gain' or 'loss' */
-  from: "gain" | "loss";
+  from: 'gain' | 'loss';
   /** New direction: 'gain' or 'loss' */
-  to: "gain" | "loss";
+  to: 'gain' | 'loss';
   /** Trust score at time of change (0-1000) */
   scoreAtChange: number;
 }
@@ -328,7 +333,7 @@ export interface TrustDynamicsState {
   /** Recent direction changes for oscillation detection */
   directionChanges: DirectionChange[];
   /** Last trust update direction */
-  lastDirection: "gain" | "loss" | "none";
+  lastDirection: 'gain' | 'loss' | 'none';
   /** Whether circuit breaker is tripped */
   circuitBreakerTripped: boolean;
   /** Reason for circuit breaker if tripped */

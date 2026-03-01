@@ -128,10 +128,10 @@ import {
 } from '@vorionsys/shared-constants';
 
 VORION_DOMAINS.basis;                  // "https://basis.vorion.org"
-AGENTANCHOR_DOMAINS.trust;             // "https://trust.vorion.org"
+AGENTANCHOR_DOMAINS.trust;             // "https://trust.agentanchorai.com"
 COGNIGATE_DOMAINS.main;                // "https://cognigate.dev"
 API_ENDPOINTS.cognigate.production;    // "https://cognigate.dev/v1"
-API_ENDPOINTS.agentAnchor.sandbox;     // "https://sandbox.vorion.org/v1"
+API_ENDPOINTS.agentAnchor.sandbox;     // "https://sandbox.agentanchorai.com/v1"
 VORION_EMAILS.security;               // "security@vorion.org"
 GITHUB.vorion.mainRepo;               // "https://github.com/vorionsys/vorion"
 NPM_PACKAGES.vorion.sharedConstants;   // "@vorionsys/shared-constants"
@@ -337,13 +337,13 @@ const cssVars = themeToCssVars('midnight_cyan');
 | `COGNIGATE_DOMAINS` | const | Cognigate URLs (main, docs) |
 | `API_ENDPOINTS` | const | Production/staging/sandbox API base URLs |
 | `VORION_EMAILS` | const | Vorion contact email addresses |
-| `AGENTANCHOR_EMAILS` | const | Vorion platform contact email addresses |
+| `AGENTANCHOR_EMAILS` | const | Agent Anchor contact email addresses |
 | `GITHUB` | const | GitHub organization and repo URLs |
 | `NPM_PACKAGES` | const | npm package names for all published packages |
 | `ALL_DOMAINS` | const | Combined object containing all domain groups |
 | `DOMAIN_ALIASES` | const | Map of alternate domains to their primary |
 | `VorionDomain` | type | Key union for `VORION_DOMAINS` |
-| `AgentAnchorDomain` | type | Key union for `AGENTANCHOR_DOMAINS` (legacy name) |
+| `AgentAnchorDomain` | type | Key union for `AGENTANCHOR_DOMAINS` |
 | `CognigateDomain` | type | Key union for `COGNIGATE_DOMAINS` |
 
 ### Capabilities (`@vorionsys/shared-constants/capabilities`)
@@ -367,7 +367,7 @@ const cssVars = themeToCssVars('midnight_cyan');
 | `ProductCategory` | enum | Product categories (OPEN_SOURCE, COMMERCIAL, DEVELOPER_TOOLS, EDUCATION) |
 | `ProductStatus` | enum | Product lifecycle status (DEVELOPMENT through EOL) |
 | `VORION_PRODUCTS` | const | Vorion open-source product definitions |
-| `AGENTANCHOR_PRODUCTS` | const | Vorion commercial product definitions (legacy name) |
+| `AGENTANCHOR_PRODUCTS` | const | Agent Anchor commercial product definitions |
 | `ALL_PRODUCTS` | const | Combined product catalog |
 | `getProduct(id)` | function | Look up a product by ID |
 | `getProductsByCategory(category)` | function | Filter products by category |
@@ -492,6 +492,10 @@ import type {
 - Node.js >= 18
 - TypeScript >= 5.7 (for type-only imports)
 
+## Documentation
+
+Full platform documentation is available at [https://vorion.org/docs](https://vorion.org/docs).
+
 ## Repository
 
 This package lives in the Vorion monorepo:
@@ -500,4 +504,4 @@ This package lives in the Vorion monorepo:
 
 ## License
 
-Apache-2.0
+Apache-2.0 -- Copyright 2026 Vorion Systems

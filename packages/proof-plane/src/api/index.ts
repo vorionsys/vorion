@@ -11,4 +11,4 @@ export {
   registerProofRoutes,
   createProofExpressRouter,
   type ProofRoute,
-} from "./routes.js";
+} from './routes.js';

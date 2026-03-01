@@ -4,11 +4,11 @@
  * Parses YAML/JSON rule definitions into executable rules.
  */
 
-import { z } from "zod";
-import { createLogger } from "../common/logger.js";
-import type { RuleNamespace, Rule } from "./types.js";
+import { z } from 'zod';
+import { createLogger } from '../common/logger.js';
+import type { RuleNamespace, Rule } from './types.js';
 
-const logger = createLogger({ component: "basis-parser" });
+const logger = createLogger({ component: 'basis-parser' });
 
 /**
  * Schema for rule condition
@@ -16,19 +16,19 @@ const logger = createLogger({ component: "basis-parser" });
 const conditionSchema = z.object({
   field: z.string(),
   operator: z.enum([
-    "equals",
-    "not_equals",
-    "greater_than",
-    "less_than",
-    "greater_than_or_equal",
-    "less_than_or_equal",
-    "in",
-    "not_in",
-    "contains",
-    "not_contains",
-    "matches",
-    "exists",
-    "not_exists",
+    'equals',
+    'not_equals',
+    'greater_than',
+    'less_than',
+    'greater_than_or_equal',
+    'less_than_or_equal',
+    'in',
+    'not_in',
+    'contains',
+    'not_contains',
+    'matches',
+    'exists',
+    'not_exists',
   ]),
   value: z.unknown(),
 });
@@ -57,14 +57,7 @@ const escalationSchema = z.object({
  */
 const evaluationSchema = z.object({
   condition: z.string(),
-  result: z.enum([
-    "allow",
-    "deny",
-    "escalate",
-    "limit",
-    "monitor",
-    "terminate",
-  ]),
+  result: z.enum(['allow', 'deny', 'escalate', 'limit', 'monitor', 'terminate']),
   reason: z.string().optional(),
   escalation: escalationSchema.optional(),
 });
@@ -75,7 +68,7 @@ const evaluationSchema = z.object({
 const ruleSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string().default(""),
+  description: z.string().default(''),
   priority: z.number().default(100),
   enabled: z.boolean().default(true),
   when: whenSchema,
@@ -88,8 +81,8 @@ const ruleSchema = z.object({
  */
 const namespaceSchema = z.object({
   namespace: z.string(),
-  description: z.string().default(""),
-  version: z.string().default("1.0.0"),
+  description: z.string().default(''),
+  version: z.string().default('1.0.0'),
   rules: z.array(ruleSchema),
 });
 
@@ -124,7 +117,7 @@ export function parseNamespace(definition: unknown): RuleNamespace {
 
   logger.info(
     { namespace: parsed.namespace, ruleCount: rules.length },
-    "Namespace parsed",
+    'Namespace parsed'
   );
 
   return {
@@ -152,10 +145,10 @@ export function validateRule(definition: unknown): {
     if (error instanceof z.ZodError) {
       return {
         valid: false,
-        errors: error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
+        errors: error.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
       };
     }
-    return { valid: false, errors: ["Unknown validation error"] };
+    return { valid: false, errors: ['Unknown validation error'] };
   }
 }
 
@@ -173,9 +166,9 @@ export function validateNamespace(definition: unknown): {
     if (error instanceof z.ZodError) {
       return {
         valid: false,
-        errors: error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
+        errors: error.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
       };
     }
-    return { valid: false, errors: ["Unknown validation error"] };
+    return { valid: false, errors: ['Unknown validation error'] };
   }
 }

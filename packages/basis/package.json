@@ -1,6 +1,6 @@
 {
   "name": "@vorionsys/basis",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "Baseline Authority for Safe & Interoperable Systems (BASIS) - Open standard for AI agent governance with trust tiers, capabilities, validation gate, and KYA verification",
   "license": "Apache-2.0",
@@ -30,8 +30,7 @@
     "build": "tsc",
     "test": "vitest run",
     "test:trust": "vitest run src/trust-1000-agents.test.ts",
-    "test:trust:watch": "vitest src/trust-1000-agents.test.ts",
-    "test:coverage": "vitest run --coverage"
+    "test:trust:watch": "vitest src/trust-1000-agents.test.ts"
   },
   "dependencies": {
     "@noble/ed25519": "^2.0.0",

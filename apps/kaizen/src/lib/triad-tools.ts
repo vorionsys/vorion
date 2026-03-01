@@ -60,7 +60,7 @@ export const searchLexiconTool = tool({
           category: t.category,
         })),
       };
-    } catch (_error) {
+    } catch (error) {
       return { success: false, error: 'Failed to search lexicon' };
     }
   },
@@ -88,7 +88,7 @@ export const getTermTool = tool({
       }
 
       return { success: true, term: data.term };
-    } catch (_error) {
+    } catch (error) {
       return { success: false, error: 'Failed to get term' };
     }
   },
@@ -130,7 +130,7 @@ export const createTermTool = tool({
         id: data.id,
         message: data.message,
       };
-    } catch (_error) {
+    } catch (error) {
       return { success: false, error: 'Failed to create term' };
     }
   },
@@ -167,7 +167,7 @@ export const updateTermTool = tool({
       }
 
       return { success: true, message: data.message };
-    } catch (_error) {
+    } catch (error) {
       return { success: false, error: 'Failed to update term' };
     }
   },
@@ -197,7 +197,7 @@ export const deleteTermTool = tool({
       }
 
       return { success: true, message: data.message };
-    } catch (_error) {
+    } catch (error) {
       return { success: false, error: 'Failed to delete term' };
     }
   },

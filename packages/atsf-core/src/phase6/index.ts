@@ -38,7 +38,7 @@
 // TYPES
 // =============================================================================
 
-export * from "./types.js";
+export * from './types.js';
 
 // =============================================================================
 // Q2: HIERARCHICAL CONTEXT
@@ -74,7 +74,7 @@ export {
   type CreateOrganizationalContextInput,
   type CreateAgentContextInput,
   type CreateOperationContextInput,
-} from "./context.js";
+} from './context.js';
 
 // =============================================================================
 // Q4: FEDERATED WEIGHT PRESETS
@@ -109,7 +109,7 @@ export {
 
   // Input types
   type DerivePresetInput,
-} from "./presets.js";
+} from './presets.js';
 
 // =============================================================================
 // Q5: PROVENANCE + POLICY MODIFIERS
@@ -137,7 +137,7 @@ export {
   type CreateProvenanceInput,
   type CreateModifierPolicyInput,
   type ModifierEvaluationContext,
-} from "./provenance.js";
+} from './provenance.js';
 
 // =============================================================================
 // Q1: CEILING ENFORCEMENT
@@ -169,7 +169,7 @@ export {
   type KernelValidationResult,
   type PolicyContext,
   type PolicyValidationResult,
-} from "./ceiling.js";
+} from './ceiling.js';
 
 // =============================================================================
 // Q3: STRATIFIED ROLE GATES
@@ -202,29 +202,18 @@ export {
   type PolicyEvaluationContext,
   type BasisLayerContext,
   type OverrideRequest,
-} from "./role-gates.js";
+} from './role-gates.js';
 
 // =============================================================================
 // CONVENIENCE FACTORY
 // =============================================================================
 
-import { ContextService, createContextService } from "./context.js";
-import {
-  PresetService,
-  createPresetService,
-  initializeVorionPresets,
-} from "./presets.js";
-import {
-  ProvenanceService,
-  createProvenanceService,
-  initializeDefaultPolicies,
-} from "./provenance.js";
-import {
-  CeilingEnforcementService,
-  createCeilingEnforcementService,
-} from "./ceiling.js";
-import { RoleGateService, createRoleGateService } from "./role-gates.js";
-import { RegulatoryFramework } from "./types.js";
+import { ContextService, createContextService } from './context.js';
+import { PresetService, createPresetService, initializeVorionPresets } from './presets.js';
+import { ProvenanceService, createProvenanceService, initializeDefaultPolicies } from './provenance.js';
+import { CeilingEnforcementService, createCeilingEnforcementService } from './ceiling.js';
+import { RoleGateService, createRoleGateService } from './role-gates.js';
+import { RegulatoryFramework } from './types.js';
 
 /**
  * Phase 6 Trust Engine - unified access to all services
@@ -249,7 +238,7 @@ export interface Phase6Config {
  * Create a fully initialized Phase 6 Trust Engine
  */
 export async function createPhase6TrustEngine(
-  config: Phase6Config = {},
+  config: Phase6Config = {}
 ): Promise<Phase6TrustEngine> {
   const {
     regulatoryFramework = RegulatoryFramework.NONE,
@@ -267,7 +256,7 @@ export async function createPhase6TrustEngine(
   if (initializeDefaults) {
     await initializeVorionPresets(presets);
     await initializeDefaultPolicies(provenance);
-    await roleGates.initialize("system");
+    await roleGates.initialize('system');
   }
 
   return {
@@ -286,6 +275,6 @@ export const PHASE6_VERSION = {
   major: 1,
   minor: 0,
   patch: 0,
-  label: "phase6-trust-engine",
-  decisions: ["Q1", "Q2", "Q3", "Q4", "Q5"],
+  label: 'phase6-trust-engine',
+  decisions: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'],
 };

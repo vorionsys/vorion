@@ -3,14 +3,14 @@
  * W3C DID resolution + Ed25519 signature verification
  */
 
-import * as ed from "@noble/ed25519";
-import { Resolver } from "did-resolver";
+import * as ed from '@noble/ed25519';
+import { Resolver } from 'did-resolver';
 import {
   DIDDocument,
   DIDResolverConfig,
   IdentityProof,
   VerificationMethod,
-} from "./types.js";
+} from './types.js';
 
 export class IdentityVerifier {
   private resolver: Resolver;
@@ -38,37 +38,30 @@ export class IdentityVerifier {
 
       // 2. Extract verification method
       const verificationMethod = didDoc.verificationMethod?.find(
-        (vm: VerificationMethod) => vm.type === "Ed25519VerificationKey2020",
+        (vm: VerificationMethod) => vm.type === 'Ed25519VerificationKey2020'
       );
 
       if (!verificationMethod) {
-        throw new Error("No Ed25519 verification method found");
+        throw new Error('No Ed25519 verification method found');
       }
 
       // 3. Verify signature
       const message = `${proof.challenge}:${proof.timestamp}`;
       const messageBytes = new TextEncoder().encode(message);
       const signatureBytes = this.hexToBytes(proof.signature);
-      const publicKeyBytes = this.multibaseToBytes(
-        verificationMethod.publicKeyMultibase,
-      );
+      const publicKeyBytes = this.multibaseToBytes(verificationMethod.publicKeyMultibase);
 
-      const isValid = await ed.verify(
-        signatureBytes,
-        messageBytes,
-        publicKeyBytes,
-      );
+      const isValid = await ed.verify(signatureBytes, messageBytes, publicKeyBytes);
 
       // 4. Check timestamp freshness (prevent replay attacks)
       const age = Date.now() - proof.timestamp;
-      if (age > 60000) {
-        // 1 minute max
-        throw new Error("Proof too old (replay attack prevention)");
+      if (age > 60000) { // 1 minute max
+        throw new Error('Proof too old (replay attack prevention)');
       }
 
       return isValid;
     } catch (error) {
-      console.error("Identity verification failed:", error);
+      console.error('Identity verification failed:', error);
       return false;
     }
   }
@@ -103,28 +96,28 @@ export class IdentityVerifier {
    */
   private async resolveVorionDID(did: string): Promise<any> {
     // Parse DID
-    const parts = did.split(":");
+    const parts = did.split(':');
     if (parts.length < 4) {
-      throw new Error("Invalid Vorion DID format");
+      throw new Error('Invalid Vorion DID format');
     }
 
-    const method = parts[2]; // e.g., 'ed25519'
-    const identifier = parts[3]; // e.g., '5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk'
+    const method = parts[2];  // e.g., 'ed25519'
+    const identifier = parts[3];  // e.g., '5Z8K3q2YvU8pVzNxF9sT7bQw6JhR1XmDcL4nVk'
 
     // Fetch from Vorion DID registry (would be actual API call)
     // For now, return mock structure
     return {
       didDocument: {
-        "@context": [
-          "https://www.w3.org/ns/did/v1",
-          "https://vorion.org/ns/kya/v1",
+        '@context': [
+          'https://www.w3.org/ns/did/v1',
+          'https://vorion.org/ns/kya/v1',
         ],
         id: did,
         controller: did,
         verificationMethod: [
           {
             id: `${did}#keys-1`,
-            type: "Ed25519VerificationKey2020",
+            type: 'Ed25519VerificationKey2020',
             controller: did,
             publicKeyMultibase: `z${identifier}`,
           },
@@ -134,13 +127,13 @@ export class IdentityVerifier {
         service: [
           {
             id: `${did}#agentcard`,
-            type: "AgentCard",
-            serviceEndpoint: `https://vorion.org/cards/${identifier}`,
+            type: 'AgentCard',
+            serviceEndpoint: `https://agentanchorai.com/cards/${identifier}`,
           },
         ],
         kya: {
           trustScore: 0,
-          tier: "T0" as const,
+          tier: 'T0' as const,
           certified: false,
           capabilities: [],
           restrictions: [],
@@ -161,10 +154,7 @@ export class IdentityVerifier {
   /**
    * Sign challenge with private key (for agents to use)
    */
-  async signChallenge(
-    challenge: string,
-    privateKey: Uint8Array,
-  ): Promise<string> {
+  async signChallenge(challenge: string, privateKey: Uint8Array): Promise<string> {
     const timestamp = Date.now();
     const message = `${challenge}:${timestamp}`;
     const messageBytes = new TextEncoder().encode(message);
@@ -188,8 +178,8 @@ export class IdentityVerifier {
 
   private bytesToHex(bytes: Uint8Array): string {
     return Array.from(bytes)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
   }
 
   private multibaseToBytes(multibase: string): Uint8Array {

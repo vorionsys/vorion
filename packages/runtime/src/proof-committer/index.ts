@@ -7,20 +7,20 @@
  * @packageDocumentation
  */
 
-import * as crypto from "node:crypto";
-import { createLogger } from "../common/logger.js";
+import * as crypto from 'node:crypto';
+import { createLogger } from '../common/logger.js';
 import type {
   ProofEvent,
   ProofCommitment,
   ProofBatch,
   ProofCommitterConfig,
   ProofStore,
-} from "./types.js";
-import { DEFAULT_PROOF_COMMITTER_CONFIG, InMemoryProofStore } from "./types.js";
+} from './types.js';
+import { DEFAULT_PROOF_COMMITTER_CONFIG, InMemoryProofStore } from './types.js';
 
-export * from "./types.js";
+export * from './types.js';
 
-const logger = createLogger({ component: "proof-committer" });
+const logger = createLogger({ component: 'proof-committer' });
 
 /**
  * ProofCommitter - Fast synchronous commitment with async persistence
@@ -47,21 +47,21 @@ export class ProofCommitter {
     if (this.config.enableSigning && this.config.privateKey) {
       try {
         this.privateKey = crypto.createPrivateKey({
-          key: Buffer.from(this.config.privateKey, "base64"),
-          format: "der",
-          type: "pkcs8",
+          key: Buffer.from(this.config.privateKey, 'base64'),
+          format: 'der',
+          type: 'pkcs8',
         });
-        logger.info("Signing key loaded");
+        logger.info('Signing key loaded');
       } catch (error) {
-        logger.error({ error }, "Failed to load signing key");
-        throw new Error("Invalid signing key");
+        logger.error({ error }, 'Failed to load signing key');
+        throw new Error('Invalid signing key');
       }
     }
 
     // Start flush timer
     this.startFlushTimer();
 
-    logger.info({ config: this.config }, "ProofCommitter initialized");
+    logger.info({ config: this.config }, 'ProofCommitter initialized');
   }
 
   /**
@@ -91,10 +91,7 @@ export class ProofCommitter {
 
     // Warn if we exceeded 1ms
     if (latencyMs > 1) {
-      logger.warn(
-        { latencyMs, commitmentId: commitment.id },
-        "Commitment exceeded 1ms target",
-      );
+      logger.warn({ latencyMs, commitmentId: commitment.id }, 'Commitment exceeded 1ms target');
     }
 
     return commitment.id;
@@ -104,9 +101,9 @@ export class ProofCommitter {
    * Fast hash - SHA-256, no signing, ~0.1ms
    */
   private fastHash(event: ProofEvent): string {
-    const hash = crypto.createHash("sha256");
+    const hash = crypto.createHash('sha256');
     hash.update(JSON.stringify(event));
-    return hash.digest("hex");
+    return hash.digest('hex');
   }
 
   /**
@@ -157,18 +154,15 @@ export class ProofCommitter {
           {
             batchId: proofBatch.batchId,
             eventCount: batch.length,
-            merkleRoot: merkleRoot.substring(0, 16) + "...",
+            merkleRoot: merkleRoot.substring(0, 16) + '...',
             flushTimeMs,
           },
-          "Batch flushed",
+          'Batch flushed'
         );
       } catch (error) {
         // On error, put events back in buffer (don't lose them)
         this.buffer.unshift(...batch);
-        logger.error(
-          { error, eventCount: batch.length },
-          "Flush failed, events returned to buffer",
-        );
+        logger.error({ error, eventCount: batch.length }, 'Flush failed, events returned to buffer');
         throw error;
       } finally {
         this.isFlushing = false;
@@ -184,7 +178,7 @@ export class ProofCommitter {
    */
   private buildMerkleRoot(hashes: string[]): string {
     if (hashes.length === 0) {
-      return "0".repeat(64);
+      return '0'.repeat(64);
     }
 
     if (hashes.length === 1) {
@@ -203,10 +197,7 @@ export class ProofCommitter {
       for (let i = 0; i < leaves.length; i += 2) {
         const left = leaves[i]!;
         const right = leaves[i + 1] ?? left;
-        const combined = crypto
-          .createHash("sha256")
-          .update(left + right)
-          .digest("hex");
+        const combined = crypto.createHash('sha256').update(left + right).digest('hex');
         newLevel.push(combined);
       }
       leaves.length = 0;
@@ -221,11 +212,11 @@ export class ProofCommitter {
    */
   private sign(data: string): string {
     if (!this.privateKey) {
-      return "";
+      return '';
     }
 
     const signature = crypto.sign(null, Buffer.from(data), this.privateKey);
-    return signature.toString("base64");
+    return signature.toString('base64');
   }
 
   /**
@@ -235,7 +226,7 @@ export class ProofCommitter {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0) {
         this.flush().catch((error) => {
-          logger.error({ error }, "Periodic flush failed");
+          logger.error({ error }, 'Periodic flush failed');
         });
       }
     }, this.config.flushIntervalMs);
@@ -260,10 +251,9 @@ export class ProofCommitter {
       {
         totalCommitments: this.totalCommitments,
         totalBatches: this.totalBatches,
-        avgFlushTimeMs:
-          this.totalBatches > 0 ? this.totalFlushTimeMs / this.totalBatches : 0,
+        avgFlushTimeMs: this.totalBatches > 0 ? this.totalFlushTimeMs / this.totalBatches : 0,
       },
-      "ProofCommitter stopped",
+      'ProofCommitter stopped'
     );
   }
 
@@ -286,8 +276,7 @@ export class ProofCommitter {
     return {
       totalCommitments: this.totalCommitments,
       totalBatches: this.totalBatches,
-      avgFlushTimeMs:
-        this.totalBatches > 0 ? this.totalFlushTimeMs / this.totalBatches : 0,
+      avgFlushTimeMs: this.totalBatches > 0 ? this.totalFlushTimeMs / this.totalBatches : 0,
       bufferSize: this.buffer.length,
     };
   }
@@ -320,7 +309,7 @@ export class ProofCommitter {
  */
 export function createProofCommitter(
   config?: Partial<ProofCommitterConfig>,
-  store?: ProofStore,
+  store?: ProofStore
 ): ProofCommitter {
   return new ProofCommitter(config, store);
 }

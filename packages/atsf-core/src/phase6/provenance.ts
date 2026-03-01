@@ -14,7 +14,7 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
+import { createLogger } from '../common/logger.js';
 import {
   type AgentProvenance,
   type CreationModifierPolicy,
@@ -24,9 +24,9 @@ import {
   agentProvenanceSchema,
   creationModifierPolicySchema,
   modifierEvaluationRecordSchema,
-} from "./types.js";
+} from './types.js';
 
-const logger = createLogger({ component: "phase6:provenance" });
+const logger = createLogger({ component: 'phase6:provenance' });
 
 // =============================================================================
 // HASH UTILITIES
@@ -38,9 +38,9 @@ const logger = createLogger({ component: "phase6:provenance" });
 async function calculateHash(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 // =============================================================================
@@ -63,17 +63,15 @@ export interface CreateProvenanceInput {
  * This captures the origin story of an agent and cannot be modified.
  */
 export async function createProvenance(
-  input: CreateProvenanceInput,
+  input: CreateProvenanceInput
 ): Promise<AgentProvenance> {
   // Validate parent chain for cloned/evolved/promoted
-  if (
-    input.creationType === CreationType.CLONED ||
-    input.creationType === CreationType.EVOLVED ||
-    input.creationType === CreationType.PROMOTED
-  ) {
+  if (input.creationType === CreationType.CLONED ||
+      input.creationType === CreationType.EVOLVED ||
+      input.creationType === CreationType.PROMOTED) {
     if (!input.parentAgentId || !input.parentProvenance) {
       throw new Error(
-        `${input.creationType} agents must have parent provenance`,
+        `${input.creationType} agents must have parent provenance`
       );
     }
   }
@@ -114,7 +112,7 @@ export async function createProvenance(
       creationType: provenance.creationType,
       parentAgentId: input.parentAgentId,
     },
-    "Provenance created (immutable)",
+    'Provenance created (immutable)'
   );
 
   return Object.freeze(provenance);
@@ -124,7 +122,7 @@ export async function createProvenance(
  * Verify provenance integrity
  */
 export async function verifyProvenance(
-  provenance: AgentProvenance,
+  provenance: AgentProvenance
 ): Promise<{ valid: boolean; reason?: string }> {
   // Recalculate hash
   const hashData = {
@@ -139,10 +137,7 @@ export async function verifyProvenance(
   const expectedHash = await calculateHash(JSON.stringify(hashData));
 
   if (provenance.provenanceHash !== expectedHash) {
-    return {
-      valid: false,
-      reason: "Provenance hash mismatch - possible tampering",
-    };
+    return { valid: false, reason: 'Provenance hash mismatch - possible tampering' };
   }
 
   return { valid: true };
@@ -156,10 +151,10 @@ export async function verifyProvenance(
  * Default modifiers per creation type
  */
 export const DEFAULT_CREATION_MODIFIERS: Record<CreationType, number> = {
-  [CreationType.FRESH]: 0, // No modifier - baseline trust
-  [CreationType.CLONED]: -50, // Clone inherits parent concerns
-  [CreationType.EVOLVED]: 100, // Has verifiable history
-  [CreationType.PROMOTED]: 150, // Earned advancement
+  [CreationType.FRESH]: 0,       // No modifier - baseline trust
+  [CreationType.CLONED]: -50,    // Clone inherits parent concerns
+  [CreationType.EVOLVED]: 100,   // Has verifiable history
+  [CreationType.PROMOTED]: 150,  // Earned advancement
   [CreationType.IMPORTED]: -100, // Unknown external provenance
 };
 
@@ -181,11 +176,10 @@ export interface CreateModifierPolicyInput {
  * Create a new creation modifier policy
  */
 export async function createModifierPolicy(
-  input: CreateModifierPolicyInput,
+  input: CreateModifierPolicyInput
 ): Promise<CreationModifierPolicy> {
   const now = new Date();
-  const baselineModifier =
-    input.baselineModifier ?? DEFAULT_CREATION_MODIFIERS[input.creationType];
+  const baselineModifier = input.baselineModifier ?? DEFAULT_CREATION_MODIFIERS[input.creationType];
 
   const policyData = {
     policyId: input.policyId,
@@ -226,7 +220,7 @@ export async function createModifierPolicy(
       creationType: policy.creationType,
       baselineModifier,
     },
-    "Modifier policy created",
+    'Modifier policy created'
   );
 
   return policy;
@@ -237,10 +231,8 @@ export async function createModifierPolicy(
  */
 export async function updateModifierPolicy(
   existingPolicy: CreationModifierPolicy,
-  updates: Partial<
-    Omit<CreateModifierPolicyInput, "policyId" | "creationType" | "createdBy">
-  >,
-  updatedBy: string,
+  updates: Partial<Omit<CreateModifierPolicyInput, 'policyId' | 'creationType' | 'createdBy'>>,
+  updatedBy: string
 ): Promise<CreationModifierPolicy> {
   const now = new Date();
 
@@ -248,8 +240,7 @@ export async function updateModifierPolicy(
     policyId: existingPolicy.policyId,
     version: existingPolicy.version + 1,
     creationType: existingPolicy.creationType,
-    baselineModifier:
-      updates.baselineModifier ?? existingPolicy.baselineModifier,
+    baselineModifier: updates.baselineModifier ?? existingPolicy.baselineModifier,
     conditions: updates.conditions ?? existingPolicy.conditions,
     effectiveFrom: updates.effectiveFrom ?? now,
     effectiveUntil: updates.effectiveUntil,
@@ -277,7 +268,7 @@ export async function updateModifierPolicy(
       version: newPolicy.version,
       supersedes: existingPolicy.policyHash,
     },
-    "Modifier policy updated",
+    'Modifier policy updated'
   );
 
   return newPolicy;
@@ -303,22 +294,18 @@ export interface ModifierEvaluationContext {
  */
 function evaluateConditions(
   conditions: CreationModifierConditions | undefined,
-  context: ModifierEvaluationContext,
+  context: ModifierEvaluationContext
 ): { matches: boolean; matchedConditions: string[] } {
   if (!conditions) {
-    return { matches: true, matchedConditions: ["baseline"] };
+    return { matches: true, matchedConditions: ['baseline'] };
   }
 
   const matchedConditions: string[] = [];
 
   // Check parent creation type
   if (conditions.parentCreationType !== undefined) {
-    if (
-      context.parentProvenance?.creationType === conditions.parentCreationType
-    ) {
-      matchedConditions.push(
-        `parentCreationType:${conditions.parentCreationType}`,
-      );
+    if (context.parentProvenance?.creationType === conditions.parentCreationType) {
+      matchedConditions.push(`parentCreationType:${conditions.parentCreationType}`);
     } else {
       return { matches: false, matchedConditions };
     }
@@ -331,9 +318,7 @@ function evaluateConditions(
         context.parentTrustScore >= conditions.parentTrustScore.min &&
         context.parentTrustScore <= conditions.parentTrustScore.max
       ) {
-        matchedConditions.push(
-          `parentTrustScore:${conditions.parentTrustScore.min}-${conditions.parentTrustScore.max}`,
-        );
+        matchedConditions.push(`parentTrustScore:${conditions.parentTrustScore.min}-${conditions.parentTrustScore.max}`);
       } else {
         return { matches: false, matchedConditions };
       }
@@ -343,14 +328,8 @@ function evaluateConditions(
   }
 
   // Check trusted sources
-  if (
-    conditions.trustedSources !== undefined &&
-    conditions.trustedSources.length > 0
-  ) {
-    if (
-      context.organizationId &&
-      conditions.trustedSources.includes(context.organizationId)
-    ) {
+  if (conditions.trustedSources !== undefined && conditions.trustedSources.length > 0) {
+    if (context.organizationId && conditions.trustedSources.includes(context.organizationId)) {
       matchedConditions.push(`trustedSource:${context.organizationId}`);
     } else {
       return { matches: false, matchedConditions };
@@ -358,17 +337,12 @@ function evaluateConditions(
   }
 
   // Check required attestations
-  if (
-    conditions.requiredAttestations !== undefined &&
-    conditions.requiredAttestations.length > 0
-  ) {
-    const hasAll = conditions.requiredAttestations.every((required) =>
-      context.attestations?.includes(required),
+  if (conditions.requiredAttestations !== undefined && conditions.requiredAttestations.length > 0) {
+    const hasAll = conditions.requiredAttestations.every(
+      (required) => context.attestations?.includes(required)
     );
     if (hasAll) {
-      matchedConditions.push(
-        `attestations:${conditions.requiredAttestations.join(",")}`,
-      );
+      matchedConditions.push(`attestations:${conditions.requiredAttestations.join(',')}`);
     } else {
       return { matches: false, matchedConditions };
     }
@@ -382,7 +356,7 @@ function evaluateConditions(
  */
 export async function evaluateModifier(
   context: ModifierEvaluationContext,
-  policies: CreationModifierPolicy[],
+  policies: CreationModifierPolicy[]
 ): Promise<ModifierEvaluationRecord> {
   // Find applicable policy (matching creation type, currently effective)
   const now = new Date();
@@ -394,8 +368,7 @@ export async function evaluateModifier(
 
   if (applicablePolicies.length === 0) {
     // Fall back to default modifier
-    const defaultModifier =
-      DEFAULT_CREATION_MODIFIERS[context.provenance.creationType];
+    const defaultModifier = DEFAULT_CREATION_MODIFIERS[context.provenance.creationType];
 
     const hashData = {
       agentId: context.provenance.agentId,
@@ -408,10 +381,10 @@ export async function evaluateModifier(
       evaluationId: crypto.randomUUID(),
       agentId: context.provenance.agentId,
       provenanceHash: context.provenance.provenanceHash,
-      policyId: "default",
+      policyId: 'default',
       policyVersion: 0,
       computedModifier: defaultModifier,
-      conditionsMatched: ["default"],
+      conditionsMatched: ['default'],
       evaluatedAt: now,
       evaluationHash: await calculateHash(JSON.stringify(hashData)),
     };
@@ -421,10 +394,7 @@ export async function evaluateModifier(
 
   // Use first matching policy
   const policy = applicablePolicies[0];
-  const { matches, matchedConditions } = evaluateConditions(
-    policy.conditions,
-    context,
-  );
+  const { matches, matchedConditions } = evaluateConditions(policy.conditions, context);
 
   const computedModifier = matches ? policy.baselineModifier : 0;
 
@@ -462,7 +432,7 @@ export async function evaluateModifier(
       policyId: record.policyId,
       modifier: record.computedModifier,
     },
-    "Modifier evaluated",
+    'Modifier evaluated'
   );
 
   return record;
@@ -483,9 +453,7 @@ export class ProvenanceService {
   /**
    * Create and register provenance for an agent
    */
-  async createProvenance(
-    input: CreateProvenanceInput,
-  ): Promise<AgentProvenance> {
+  async createProvenance(input: CreateProvenanceInput): Promise<AgentProvenance> {
     // Validate parent if specified
     if (input.parentAgentId) {
       const parentProvenance = this.provenances.get(input.parentAgentId);
@@ -510,9 +478,7 @@ export class ProvenanceService {
   /**
    * Create a new modifier policy
    */
-  async createPolicy(
-    input: CreateModifierPolicyInput,
-  ): Promise<CreationModifierPolicy> {
+  async createPolicy(input: CreateModifierPolicyInput): Promise<CreationModifierPolicy> {
     const policy = await createModifierPolicy(input);
 
     const versions = this.policies.get(input.policyId) ?? [];
@@ -527,10 +493,8 @@ export class ProvenanceService {
    */
   async updatePolicy(
     policyId: string,
-    updates: Partial<
-      Omit<CreateModifierPolicyInput, "policyId" | "creationType" | "createdBy">
-    >,
-    updatedBy: string,
+    updates: Partial<Omit<CreateModifierPolicyInput, 'policyId' | 'creationType' | 'createdBy'>>,
+    updatedBy: string
   ): Promise<CreationModifierPolicy> {
     const versions = this.policies.get(policyId);
     if (!versions || versions.length === 0) {
@@ -538,11 +502,7 @@ export class ProvenanceService {
     }
 
     const currentPolicy = versions[versions.length - 1];
-    const newPolicy = await updateModifierPolicy(
-      currentPolicy,
-      updates,
-      updatedBy,
-    );
+    const newPolicy = await updateModifierPolicy(currentPolicy, updates, updatedBy);
 
     versions.push(newPolicy);
     return newPolicy;
@@ -572,10 +532,7 @@ export class ProvenanceService {
 
     for (const versions of this.policies.values()) {
       const current = versions[versions.length - 1];
-      if (
-        current.effectiveFrom <= now &&
-        (!current.effectiveUntil || current.effectiveUntil > now)
-      ) {
+      if (current.effectiveFrom <= now && (!current.effectiveUntil || current.effectiveUntil > now)) {
         active.push(current);
       }
     }
@@ -702,75 +659,73 @@ export function createProvenanceService(): ProvenanceService {
 /**
  * Initialize default modifier policies
  */
-export async function initializeDefaultPolicies(
-  service: ProvenanceService,
-): Promise<void> {
+export async function initializeDefaultPolicies(service: ProvenanceService): Promise<void> {
   // Fresh agents - no modifier
   await service.createPolicy({
-    policyId: "default:fresh",
+    policyId: 'default:fresh',
     creationType: CreationType.FRESH,
     baselineModifier: 0,
-    createdBy: "system",
+    createdBy: 'system',
   });
 
   // Cloned agents - penalty for unknown inheritance
   await service.createPolicy({
-    policyId: "default:cloned",
+    policyId: 'default:cloned',
     creationType: CreationType.CLONED,
     baselineModifier: -50,
     conditions: {
       parentTrustScore: { min: 0, max: 500 },
     },
-    createdBy: "system",
+    createdBy: 'system',
   });
 
   // Cloned from trusted parent - reduced penalty
   await service.createPolicy({
-    policyId: "trusted:cloned",
+    policyId: 'trusted:cloned',
     creationType: CreationType.CLONED,
     baselineModifier: -20,
     conditions: {
       parentTrustScore: { min: 500, max: 1000 },
     },
-    createdBy: "system",
+    createdBy: 'system',
   });
 
   // Evolved agents - bonus for verifiable history
   await service.createPolicy({
-    policyId: "default:evolved",
+    policyId: 'default:evolved',
     creationType: CreationType.EVOLVED,
     baselineModifier: 100,
-    createdBy: "system",
+    createdBy: 'system',
   });
 
   // Promoted agents - significant bonus
   await service.createPolicy({
-    policyId: "default:promoted",
+    policyId: 'default:promoted',
     creationType: CreationType.PROMOTED,
     baselineModifier: 150,
-    createdBy: "system",
+    createdBy: 'system',
   });
 
   // Imported agents - penalty for unknown origin
   await service.createPolicy({
-    policyId: "default:imported",
+    policyId: 'default:imported',
     creationType: CreationType.IMPORTED,
     baselineModifier: -100,
-    createdBy: "system",
+    createdBy: 'system',
   });
 
   // Imported from trusted source - reduced penalty
   await service.createPolicy({
-    policyId: "trusted:imported",
+    policyId: 'trusted:imported',
     creationType: CreationType.IMPORTED,
     baselineModifier: -30,
     conditions: {
-      trustedSources: ["org:verified-partner", "org:internal"],
+      trustedSources: ['org:verified-partner', 'org:internal'],
     },
-    createdBy: "system",
+    createdBy: 'system',
   });
 
-  logger.info("Default modifier policies initialized");
+  logger.info('Default modifier policies initialized');
 }
 
 // =============================================================================
@@ -783,4 +738,4 @@ export {
   type CreationModifierConditions,
   type ModifierEvaluationRecord,
   CreationType,
-} from "./types.js";
+} from './types.js';

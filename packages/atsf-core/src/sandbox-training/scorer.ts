@@ -7,9 +7,9 @@
  * @packageDocumentation
  */
 
-import type { ChallengeResult } from "./types.js";
-import { FACTOR_TO_SIGNAL, DIFFICULTY_WEIGHTS } from "./types.js";
-import type { TrustSignal } from "../common/types.js";
+import type { ChallengeResult } from './types.js';
+import { FACTOR_TO_SIGNAL, DIFFICULTY_WEIGHTS } from './types.js';
+import type { TrustSignal } from '../common/types.js';
 
 // =============================================================================
 // TRUST SIGNAL GENERATION
@@ -29,7 +29,7 @@ export function challengeToTrustSignal(result: ChallengeResult): TrustSignal {
     entityId: result.agentId,
     type: `${signalPrefix}.${result.difficulty}`,
     value: result.score,
-    source: "sandbox-training",
+    source: 'sandbox-training',
     timestamp: result.completedAt,
     metadata: {
       challengeId: result.challengeId,
@@ -48,8 +48,8 @@ export function challengeToTrustSignal(result: ChallengeResult): TrustSignal {
 /** Attestation record shape (compatible with agent registry's NewAttestation) */
 export interface BootCampAttestation {
   agentId: string;
-  type: "BEHAVIORAL";
-  outcome: "success" | "failure" | "warning";
+  type: 'BEHAVIORAL';
+  outcome: 'success' | 'failure' | 'warning';
   action: string;
   evidence: Record<string, unknown>;
   source: string;
@@ -60,12 +60,12 @@ export interface BootCampAttestation {
  * for the agent registry.
  */
 export function challengeToAttestation(
-  result: ChallengeResult,
+  result: ChallengeResult
 ): BootCampAttestation {
   return {
     agentId: result.agentId,
-    type: "BEHAVIORAL",
-    outcome: result.passed ? "success" : "failure",
+    type: 'BEHAVIORAL',
+    outcome: result.passed ? 'success' : 'failure',
     action: `bootcamp.${result.factor}.${result.difficulty}`,
     evidence: {
       challengeId: result.challengeId,
@@ -75,7 +75,7 @@ export function challengeToAttestation(
       notes: result.notes,
       weight: DIFFICULTY_WEIGHTS[result.difficulty],
     },
-    source: "sandbox-training",
+    source: 'sandbox-training',
   };
 }
 
@@ -90,7 +90,7 @@ export function calculateWeightedScore(result: ChallengeResult): number {
  * Calculate the total weighted score for a set of challenge results.
  */
 export function calculateTotalWeightedScore(
-  results: ChallengeResult[],
+  results: ChallengeResult[]
 ): number {
   if (results.length === 0) return 0;
 

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo } from "react";
-import { useParams, useSearchParams, notFound } from "next/navigation";
-import Link from "next/link";
-import { Navbar } from "@/components/nexus";
-import { Quiz } from "@/components/quiz";
+import { useState, useEffect } from 'react';
+import { useParams, useSearchParams, notFound } from 'next/navigation';
+import Link from 'next/link';
+import { Navbar } from '@/components/nexus';
+import { Quiz } from '@/components/quiz';
 import {
   ArrowLeft,
   BookOpen,
@@ -21,11 +21,11 @@ import {
   FileCode,
   Award,
   Trophy,
-} from "lucide-react";
-import { getPathBySlug, getPathTerms } from "@/lib/learning-paths";
-import { generateModuleQuiz, generatePathQuiz } from "@/lib/quiz-data";
-import { useProgressContext } from "@/contexts";
-import type { QuizAttempt, PathDifficulty } from "@/types";
+} from 'lucide-react';
+import { getPathBySlug, getPathTerms } from '@/lib/learning-paths';
+import { generateModuleQuiz, generatePathQuiz, getQuizStats } from '@/lib/quiz-data';
+import { useProgressContext } from '@/contexts';
+import type { Quiz as QuizType, QuizAttempt, PathDifficulty } from '@/types';
 
 // Icon mapping
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -43,71 +43,56 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const iconColorMap: Record<string, string> = {
-  cyan: "text-cyan-400",
-  purple: "text-purple-400",
-  green: "text-green-400",
-  orange: "text-orange-400",
-  blue: "text-blue-400",
-  red: "text-red-400",
-  emerald: "text-emerald-400",
-  yellow: "text-yellow-400",
-  pink: "text-pink-400",
-  indigo: "text-indigo-400",
-  teal: "text-teal-400",
+  cyan: 'text-cyan-400',
+  purple: 'text-purple-400',
+  green: 'text-green-400',
+  orange: 'text-orange-400',
+  blue: 'text-blue-400',
+  red: 'text-red-400',
+  emerald: 'text-emerald-400',
+  yellow: 'text-yellow-400',
+  pink: 'text-pink-400',
+  indigo: 'text-indigo-400',
+  teal: 'text-teal-400',
 };
 
-const difficultyBadge: Record<
-  PathDifficulty,
-  { label: string; class: string }
-> = {
-  beginner: {
-    label: "Beginner",
-    class: "bg-green-500/20 text-green-400 border-green-500/30",
-  },
-  intermediate: {
-    label: "Intermediate",
-    class: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  },
-  advanced: {
-    label: "Advanced",
-    class: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  },
-  expert: {
-    label: "Expert",
-    class: "bg-red-500/20 text-red-400 border-red-500/30",
-  },
+const difficultyBadge: Record<PathDifficulty, { label: string; class: string }> = {
+  beginner: { label: 'Beginner', class: 'bg-green-500/20 text-green-400 border-green-500/30' },
+  intermediate: { label: 'Intermediate', class: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+  advanced: { label: 'Advanced', class: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+  expert: { label: 'Expert', class: 'bg-red-500/20 text-red-400 border-red-500/30' },
 };
 
 export default function PathQuizPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const slug = params.slug as string;
-  const moduleId = searchParams.get("module");
+  const moduleId = searchParams.get('module');
 
+  const [quiz, setQuiz] = useState<QuizType | null>(null);
   const [quizKey, setQuizKey] = useState(0);
 
   const path = getPathBySlug(slug);
-  const { submitModuleQuiz, submitPathQuiz, beginPath, tryAwardCertificate } =
-    useProgressContext();
-  const [awardedCert, setAwardedCert] = useState<{ level: string } | null>(
-    null,
-  );
+  const { submitModuleQuiz, submitPathQuiz, beginPath, tryAwardCertificate } = useProgressContext();
+  const [awardedCert, setAwardedCert] = useState<{ level: string } | null>(null);
 
   useEffect(() => {
     if (!path) return;
+
     // Mark path as started when viewing quiz
     beginPath(slug);
-  }, [slug, path, beginPath]);
 
-  const quiz = useMemo(() => {
-    if (!path) return null;
+    // Generate the appropriate quiz
+    let generatedQuiz: QuizType | null = null;
+
     if (moduleId) {
-      return generateModuleQuiz(slug, moduleId);
+      generatedQuiz = generateModuleQuiz(slug, moduleId);
+    } else {
+      generatedQuiz = generatePathQuiz(slug, 15);
     }
-    return generatePathQuiz(slug, 15);
-    // quizKey intentionally triggers re-generation on retry
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, slug, moduleId, quizKey]);
+
+    setQuiz(generatedQuiz);
+  }, [slug, moduleId, path, beginPath]);
 
   if (!path) {
     notFound();
@@ -118,14 +103,14 @@ export default function PathQuizPage() {
   const badge = difficultyBadge[path.difficulty];
 
   const moduleName = moduleId
-    ? path.modules.find((m) => m.id === moduleId)?.title
+    ? path.modules.find(m => m.id === moduleId)?.title
     : null;
 
   // Get terms for the quiz (for mastery tracking)
   const getQuizTerms = (): string[] => {
     if (moduleId) {
-      const moduleEntry = path.modules.find((m) => m.id === moduleId);
-      return moduleEntry?.terms ?? [];
+      const module = path.modules.find(m => m.id === moduleId);
+      return module?.terms ?? [];
     }
     return getPathTerms(path);
   };
@@ -140,16 +125,10 @@ export default function PathQuizPage() {
 
       // Try to award a certificate for path quizzes
       if (attempt.passed && path) {
-        const cert = tryAwardCertificate(
-          slug,
-          attempt.score,
-          path.modules.length,
-        );
+        const cert = tryAwardCertificate(slug, attempt.score, path.modules.length);
         if (cert) {
           // Certificate was awarded - show notification
-          setAwardedCert({
-            level: cert.certificateId.split("-").pop() || "foundation",
-          });
+          setAwardedCert({ level: cert.certificateId.split('-').pop() || 'foundation' });
         }
       }
     }
@@ -157,7 +136,14 @@ export default function PathQuizPage() {
 
   const handleRetry = () => {
     // Regenerate quiz on retry
-    setQuizKey((prev) => prev + 1);
+    let generatedQuiz: QuizType | null = null;
+    if (moduleId) {
+      generatedQuiz = generateModuleQuiz(slug, moduleId);
+    } else {
+      generatedQuiz = generatePathQuiz(slug, 15);
+    }
+    setQuiz(generatedQuiz);
+    setQuizKey(prev => prev + 1);
   };
 
   return (
@@ -180,9 +166,7 @@ export default function PathQuizPage() {
             <div className={`p-2 rounded-lg bg-gray-800/50 ${iconClass}`}>
               <Icon className="w-5 h-5" />
             </div>
-            <span
-              className={`text-xs px-2 py-1 rounded-full border ${badge.class}`}
-            >
+            <span className={`text-xs px-2 py-1 rounded-full border ${badge.class}`}>
               {badge.label}
             </span>
           </div>
@@ -193,7 +177,8 @@ export default function PathQuizPage() {
           <p className="text-gray-400">
             {moduleName
               ? `Test your knowledge of concepts from the "${moduleName}" module.`
-              : `Comprehensive quiz covering all topics in "${path.title}".`}
+              : `Comprehensive quiz covering all topics in "${path.title}".`
+            }
           </p>
         </div>
 
@@ -202,16 +187,10 @@ export default function PathQuizPage() {
           <div className="mb-6 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-xl p-6 text-center">
             <div className="flex items-center justify-center gap-3 mb-3">
               <Trophy className="w-8 h-8 text-yellow-400" />
-              <h2 className="text-xl font-bold text-white">
-                Certificate Earned!
-              </h2>
+              <h2 className="text-xl font-bold text-white">Certificate Earned!</h2>
             </div>
             <p className="text-gray-300 mb-4">
-              Congratulations! You&apos;ve earned a{" "}
-              <span className="text-yellow-400 font-semibold capitalize">
-                {awardedCert.level}
-              </span>{" "}
-              certificate for this path.
+              Congratulations! You&apos;ve earned a <span className="text-yellow-400 font-semibold capitalize">{awardedCert.level}</span> certificate for this path.
             </p>
             <Link
               href="/certificates"
@@ -225,25 +204,19 @@ export default function PathQuizPage() {
 
         {/* Quiz or No Questions Message */}
         {quiz && quiz.questions.length > 0 ? (
-          <Quiz
-            key={quizKey}
-            quiz={quiz}
-            onComplete={handleQuizComplete}
-            onRetry={handleRetry}
-          />
+          <Quiz key={quizKey} quiz={quiz} onComplete={handleQuizComplete} onRetry={handleRetry} />
         ) : (
           <div className="max-w-2xl mx-auto text-center">
             <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-8">
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
                 <BookOpen className="w-8 h-8 text-yellow-400" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">
-                No Quiz Available Yet
-              </h2>
+              <h2 className="text-xl font-bold text-white mb-2">No Quiz Available Yet</h2>
               <p className="text-gray-400 mb-6">
                 {moduleName
                   ? `Quiz questions for the "${moduleName}" module are being developed.`
-                  : `Quiz questions for this learning path are being developed.`}
+                  : `Quiz questions for this learning path are being developed.`
+                }
               </p>
               <Link
                 href={`/paths/${path.slug}`}
@@ -259,12 +232,9 @@ export default function PathQuizPage() {
         {/* Module Navigation (if full path quiz) */}
         {!moduleId && path.modules.length > 1 && (
           <div className="mt-12 border-t border-gray-800 pt-8">
-            <h3 className="text-lg font-medium text-white mb-4">
-              Quiz by Module
-            </h3>
+            <h3 className="text-lg font-medium text-white mb-4">Quiz by Module</h3>
             <p className="text-sm text-gray-400 mb-4">
-              Want to focus on specific topics? Take a quiz for individual
-              modules:
+              Want to focus on specific topics? Take a quiz for individual modules:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {path.modules.map((module, index) => (
@@ -273,18 +243,14 @@ export default function PathQuizPage() {
                   href={`/paths/${path.slug}/quiz?module=${module.id}`}
                   className="flex items-center gap-3 p-3 bg-gray-800/30 hover:bg-gray-800/50 border border-gray-700/50 hover:border-gray-600 rounded-lg transition-colors group"
                 >
-                  <span
-                    className={`w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-sm font-medium ${iconClass}`}
-                  >
+                  <span className={`w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-sm font-medium ${iconClass}`}>
                     {index + 1}
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white group-hover:text-cyan-300 transition-colors truncate">
                       {module.title}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {module.terms.length} terms
-                    </p>
+                    <p className="text-xs text-gray-500">{module.terms.length} terms</p>
                   </div>
                 </Link>
               ))}
@@ -297,26 +263,16 @@ export default function PathQuizPage() {
       <footer className="border-t border-gray-800 py-8 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Vorion. Content licensed under CC BY
-            4.0.
+            © {new Date().getFullYear()} Vorion. Content licensed under CC BY 4.0.
           </p>
           <div className="flex gap-4 text-sm text-gray-500">
-            <Link
-              href="/lexicon"
-              className="hover:text-cyan-400 transition-colors"
-            >
+            <Link href="/lexicon" className="hover:text-cyan-400 transition-colors">
               Lexicon
             </Link>
-            <Link
-              href="/paths"
-              className="hover:text-cyan-400 transition-colors"
-            >
+            <Link href="/paths" className="hover:text-cyan-400 transition-colors">
               Paths
             </Link>
-            <Link
-              href="/docs"
-              className="hover:text-cyan-400 transition-colors"
-            >
+            <Link href="/docs" className="hover:text-cyan-400 transition-colors">
               Docs
             </Link>
           </div>

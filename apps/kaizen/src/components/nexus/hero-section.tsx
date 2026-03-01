@@ -36,7 +36,7 @@ function StatCard({ value, label, color }: StatCardProps) {
 
 export function HeroSection() {
   const localNodeCount = staticLexicon.length;
-  const _activeProviders = Object.values(providerStatus).filter(s => s.available).length;
+  const activeProviders = Object.values(providerStatus).filter(s => s.available).length;
 
   return (
     <div className="text-center py-12 mb-8 fade-in">
@@ -73,12 +73,12 @@ export function HeroSection() {
       {/* Subtitle */}
       <div className="mt-12 max-w-4xl mx-auto">
         <h2 className="text-xl font-bold text-white mb-4">
-          Kaizen — The Agentic AI Knowledge Base
+          Kaizen — Interactive AI Learning Experience
         </h2>
         <p className="text-gray-400 text-sm">
           Comprehensive documentation covering autonomous AI agents, multi-agent systems,
           governance protocols, and the Vorion ecosystem including BASIS Standard,
-          CAR, ATSF, and Cognigate.
+          Vorion, and Cognigate.
         </p>
       </div>
     </div>

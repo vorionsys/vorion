@@ -1,6 +1,6 @@
 # @vorionsys/atsf-core
 
-Agentic Trust Scoring Framework (ATSF) -- the core runtime for AI agent governance, trust scoring, and policy enforcement. Implements the complete 8-tier trust model (T0-T7) on a 0-1000 scale with behavioral signal processing, time-based Readiness Degree adjustments, recovery mechanics, and immutable audit trails.
+Agentic Trust Scoring Framework (ATSF) -- the core runtime for AI agent governance, trust scoring, and policy enforcement. Implements the complete 8-tier trust model (T0-T7) on a 0-1000 scale with behavioral signal processing, time-based decay, recovery mechanics, and immutable audit trails.
 
 ## Installation
 
@@ -19,8 +19,8 @@ ATSF continuously evaluates agent behavior across multiple dimensions and assign
 Key principles:
 
 - **Trust is earned, not granted.** Agents start at low trust and must demonstrate competence to advance.
-- **Readiness adjusts over time.** Idle agents can lose readiness; active, well-behaved agents maintain or gain it.
-- **Readiness reduction is asymmetric.** Trust dynamics are configurable by policy profile, with stricter readiness and recovery behavior at higher assurance requirements.
+- **Trust decays over time.** Idle agents lose trust; active, well-behaved agents maintain or gain it.
+- **Trust loss is asymmetric.** Trust is hard to gain and easy to lose (10:1 ratio per ATSF v2.0).
 - **Every decision is auditable.** An immutable proof chain records all governance decisions.
 
 ## The 8-Tier Trust Model (T0-T7)
@@ -78,7 +78,7 @@ await engine.recordSignal({
   metadata: { task: 'data-analysis' },
 });
 
-// Get the updated score (includes automatic Readiness Degree adjustment)
+// Get the updated score (includes automatic decay calculation)
 const record = await engine.getScore('agent-001');
 console.log(record?.score, record?.level);
 ```
@@ -90,12 +90,11 @@ console.log(record?.score, record?.level);
 ```typescript
 import { createTrustEngine } from '@vorionsys/atsf-core';
 
+// Trust decay uses stepped milestones (not configurable — consistent across ecosystem):
+// Days 7/14/28/42/56 → 6% drop each, Days 84/112/140/182 → 5% drop each
+// 182-day half-life: score = 50% of pre-decay value
 const engine = createTrustEngine({
-  decayRate: 0.01,                 // 1% decay per interval
-  decayIntervalMs: 60000,         // 1-minute intervals
   failureThreshold: 0.3,          // Signals below 0.3 = failure
-  acceleratedDecayMultiplier: 1.0, // No extra decay multiplier by default
-  readinessMode: 'checkpoint_schedule', // Preferred neutral mode naming
   successThreshold: 0.7,          // Signals above 0.7 = success
   recoveryRate: 0.02,             // 2% recovery per success signal
 });
@@ -167,7 +166,7 @@ engine.on('trust:tier_changed', (event) => {
 engine.on('trust:failure_detected', (event) => {
   console.log(`Failure #${event.failureCount} for ${event.entityId}`);
   if (event.acceleratedDecayActive) {
-    console.log('Additional decay multiplier is active for this policy profile');
+    console.log('Accelerated decay is now active (3x normal rate)');
   }
 });
 
@@ -371,82 +370,17 @@ Import from the package root or via deep imports:
 | `trust:signal_recorded` | Behavioral signal recorded |
 | `trust:score_changed` | Score changes by 5+ points |
 | `trust:tier_changed` | Entity promoted or demoted |
-| `trust:readiness_adjusted` | Readiness Degree adjusted (primary neutral event) |
-| `trust:freshness_adjusted` | Backward-compatible readiness alias |
-| `trust:decay_applied` | Legacy compatibility alias (includes `accelerated` flag) |
+| `trust:decay_applied` | Trust decayed (includes `accelerated` flag) |
 | `trust:failure_detected` | Signal value below failure threshold |
 | `trust:recovery_applied` | Recovery from successful signal |
 | `trust:recovery_milestone` | Tier restored, full recovery, or accelerated recovery earned |
 | `trust:*` | Wildcard -- all trust events |
 
-## Wave 1 API Stability
-
-The following modules are **stable for Wave 1** on the `0.2.x` series and covered by the semver guarantee. Anything not listed here is internal and subject to change without notice.
-
-### Stable (≥ v0.2.2)
-
-| Module | Key Exports |
-|--------|-------------|
-| `trust-engine` | `TrustEngine`, `createTrustEngine`, `TRUST_THRESHOLDS`, `TRUST_LEVEL_NAMES`, `SIGNAL_WEIGHTS` |
-| `basis` | `createEvaluator`, `RuleEvaluator`, `parseNamespace`, `validateRule`, `validateNamespace` |
-| `intent` | `createIntentService`, `IntentService` |
-| `enforce` | `createEnforcementService`, `EnforcementService` |
-| `proof` | `createProofService`, `ProofService` |
-| `governance` | `createGovernanceEngine`, `GovernanceEngine`, `createGovernanceRule` |
-| `persistence` | `createFileProvider`, `createMemoryProvider` |
-| `phase6` | `createPhase6TrustEngine`, `BASIS_CANONICAL_PRESETS`, `TrustTier`, `AgentRole`, `ContextType` |
-| `layers` | `createSecurityPipeline`, `BaseSecurityLayer` |
-| `langchain` | `createTrustAwareExecutor`, `createTrustTools` |
-| `sandbox-training` | `PromotionService`, `CHALLENGE_CATALOG` |
-| `chain` | `createChainAnchor`, `computeMerkleRoot`, `computeMerkleProof`, `sha256` |
-
-### Beta (functional — API shape may change before Wave 2)
-
-| Module | Notes |
-|--------|-------|
-| `intent-gateway` | `IntentGateway`, `createIntentGateway` — jurisdiction selectors not yet final |
-| `crewai` | CrewAI integration utilities |
-| `arbitration` | `MultiAgentTrustArbitrator` — multi-agent quorum logic stabilizing |
-| `containment` | `ProgressiveContainmentService` — protocol steps may be extended |
-
----
-
-## Deprecated Exports
-
-The following are present for backwards compatibility only. Migrate before v1.0.0.
-
-### `ACI_CANONICAL_PRESETS` → `BASIS_CANONICAL_PRESETS`
-
-`ACI_CANONICAL_PRESETS` is a legacy alias created during the ACI → BASIS nomenclature rename. It points to exactly the same object as `BASIS_CANONICAL_PRESETS` — there is no behavioral difference.
-
-```typescript
-// ❌ Deprecated — do not use in new code
-import { phase6 } from '@vorionsys/atsf-core';
-const preset = phase6.ACI_CANONICAL_PRESETS['basis:preset:balanced'];
-
-// ✅ Correct Wave 1 pattern
-import { phase6 } from '@vorionsys/atsf-core';
-const preset = phase6.BASIS_CANONICAL_PRESETS['basis:preset:balanced'];
-```
-
-| Milestone | Action |
-|-----------|--------|
-| `v0.3.0` | `@deprecated` JSDoc annotation added — TypeScript will surface a warning on all call sites |
-| `v1.0.0` | Export removed (Wave 2 release) |
-
-**Migration:** search-and-replace only — no behavioral change.
-
-### `ACIClient`, `ACIError`, `createACIClient`, `createLocalACIClient` (in `@vorionsys/car-client`)
-
-Same ACI → CAR rename — aliases in `@vorionsys/car-client` follow the identical removal timeline.
-
----
-
 ## Architecture
 
 ```
 @vorionsys/atsf-core
-  |-- trust-engine/     Trust scoring with 8-tier model, readiness adjustments, and recovery
+  |-- trust-engine/     Trust scoring with 8-tier model, decay, and recovery
   |-- basis/            BASIS rule evaluation engine
   |-- intent/           Intent submission and lifecycle tracking
   |-- enforce/          Policy decision point (allow/deny/escalate)
@@ -475,7 +409,7 @@ Same ACI → CAR rename — aliases in `@vorionsys/car-client` follow the identi
 
 ## Testing
 
-The package has comprehensive test coverage with **401+ tests** covering trust scoring, readiness-adjustment mechanics, recovery paths, governance pipelines, security layers, and edge cases.
+The package has comprehensive test coverage with **401+ tests** covering trust scoring, decay mechanics, recovery paths, governance pipelines, security layers, and edge cases.
 
 ```bash
 # Run all tests
@@ -485,14 +419,16 @@ npm test
 npm run test:watch
 ```
 
+## Documentation
+
+Full platform documentation is available at [https://vorion.org/docs](https://vorion.org/docs).
+
 ## License
 
-[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
-Copyright 2024-2026 Vorion
+[Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) -- Copyright 2024-2026 Vorion Systems
 
 ## Links
 
-- **Repository:** [github.com/vorionsys/vorion](https://github.com/vorionsys/vorion/tree/main/packages/atsf-core)
+- **Repository:** [github.com/vorionsys/vorion](https://github.com/vorionsys/vorion/tree/master/packages/atsf-core)
 - **Homepage:** [vorion.org](https://vorion.org)
 - **Issues:** [github.com/vorionsys/vorion/issues](https://github.com/vorionsys/vorion/issues)

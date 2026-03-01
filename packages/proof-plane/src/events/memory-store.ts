@@ -10,7 +10,7 @@ import type {
   ProofEventFilter,
   ProofEventSummary,
   ProofEventType,
-} from "@vorionsys/contracts";
+} from '@vorionsys/contracts';
 import {
   type ProofEventStore,
   type EventQueryOptions,
@@ -18,7 +18,7 @@ import {
   type EventStats,
   EventStoreError,
   EventStoreErrorCode,
-} from "./event-store.js";
+} from './event-store.js';
 
 /**
  * In-memory implementation of ProofEventStore
@@ -35,7 +35,7 @@ export class InMemoryEventStore implements ProofEventStore {
       throw new EventStoreError(
         `Event ${event.eventId} already exists`,
         EventStoreErrorCode.DUPLICATE_EVENT,
-        event.eventId,
+        event.eventId
       );
     }
 
@@ -82,7 +82,7 @@ export class InMemoryEventStore implements ProofEventStore {
    */
   async query(
     filter?: ProofEventFilter,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<EventQueryResult> {
     let events = this.getOrderedEvents(options?.order);
 
@@ -99,13 +99,9 @@ export class InMemoryEventStore implements ProofEventStore {
     const paginatedEvents = events.slice(offset, offset + limit);
 
     // Optionally strip payloads
-    const resultEvents =
-      options?.includePayload === false
-        ? paginatedEvents.map((e) => ({
-            ...e,
-            payload: { type: e.payload.type } as ProofEvent["payload"],
-          }))
-        : paginatedEvents;
+    const resultEvents = options?.includePayload === false
+      ? paginatedEvents.map(e => ({ ...e, payload: { type: e.payload.type } as ProofEvent['payload'] }))
+      : paginatedEvents;
 
     return {
       events: resultEvents,
@@ -119,7 +115,7 @@ export class InMemoryEventStore implements ProofEventStore {
    */
   async getByCorrelationId(
     correlationId: string,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<ProofEvent[]> {
     const result = await this.query({ correlationId }, options);
     return result.events;
@@ -130,7 +126,7 @@ export class InMemoryEventStore implements ProofEventStore {
    */
   async getByAgentId(
     agentId: string,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<ProofEvent[]> {
     const result = await this.query({ agentId }, options);
     return result.events;
@@ -142,7 +138,7 @@ export class InMemoryEventStore implements ProofEventStore {
   async getByTimeRange(
     from: Date,
     to: Date,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<ProofEvent[]> {
     const result = await this.query({ from, to }, options);
     return result.events;
@@ -153,7 +149,7 @@ export class InMemoryEventStore implements ProofEventStore {
    */
   async getByType(
     eventType: ProofEventType,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<ProofEvent[]> {
     const result = await this.query({ eventTypes: [eventType] }, options);
     return result.events;
@@ -164,10 +160,10 @@ export class InMemoryEventStore implements ProofEventStore {
    */
   async getSummaries(
     filter?: ProofEventFilter,
-    options?: EventQueryOptions,
+    options?: EventQueryOptions
   ): Promise<ProofEventSummary[]> {
     const result = await this.query(filter, options);
-    return result.events.map((e) => ({
+    return result.events.map(e => ({
       eventId: e.eventId,
       eventType: e.eventType,
       correlationId: e.correlationId,
@@ -181,10 +177,10 @@ export class InMemoryEventStore implements ProofEventStore {
    * Get the chain from a starting point
    */
   async getChain(fromEventId?: string, limit?: number): Promise<ProofEvent[]> {
-    const events = this.getOrderedEvents("asc");
+    const events = this.getOrderedEvents('asc');
 
     if (fromEventId) {
-      const startIndex = events.findIndex((e) => e.eventId === fromEventId);
+      const startIndex = events.findIndex(e => e.eventId === fromEventId);
       if (startIndex === -1) {
         return [];
       }
@@ -210,7 +206,7 @@ export class InMemoryEventStore implements ProofEventStore {
    * Get event statistics
    */
   async getStats(): Promise<EventStats> {
-    const events = this.getOrderedEvents("asc");
+    const events = this.getOrderedEvents('asc');
 
     const byType: Record<string, number> = {};
     const byAgent: Record<string, number> = {};
@@ -248,26 +244,20 @@ export class InMemoryEventStore implements ProofEventStore {
 
   // Private helpers
 
-  private getOrderedEvents(order: "asc" | "desc" = "asc"): ProofEvent[] {
+  private getOrderedEvents(order: 'asc' | 'desc' = 'asc'): ProofEvent[] {
     const events = this.eventOrder
-      .map((id) => this.events.get(id))
+      .map(id => this.events.get(id))
       .filter((e): e is ProofEvent => e !== undefined);
 
-    if (order === "desc") {
+    if (order === 'desc') {
       return events.reverse();
     }
     return events;
   }
 
-  private applyFilter(
-    events: ProofEvent[],
-    filter: ProofEventFilter,
-  ): ProofEvent[] {
-    return events.filter((event) => {
-      if (
-        filter.correlationId &&
-        event.correlationId !== filter.correlationId
-      ) {
+  private applyFilter(events: ProofEvent[], filter: ProofEventFilter): ProofEvent[] {
+    return events.filter(event => {
+      if (filter.correlationId && event.correlationId !== filter.correlationId) {
         return false;
       }
       if (filter.agentId && event.agentId !== filter.agentId) {

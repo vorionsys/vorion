@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import * as crypto from "node:crypto";
+import * as crypto from 'node:crypto';
 
 // Re-export runtime types for convenience
 export type {
@@ -16,7 +16,7 @@ export type {
   AgentCredentials,
   Action,
   TrustSignal,
-} from "@vorionsys/runtime";
+} from '@vorionsys/runtime';
 
 /**
  * SDK Configuration
@@ -27,7 +27,7 @@ export interface VorionConfig {
   /** API key for authentication */
   apiKey?: string;
   /** Default observation tier for agents */
-  defaultObservationTier?: "BLACK_BOX" | "GRAY_BOX" | "WHITE_BOX";
+  defaultObservationTier?: 'BLACK_BOX' | 'GRAY_BOX' | 'WHITE_BOX';
   /** Enable local mode (no API calls). If false and apiEndpoint is provided, uses remote mode. */
   localMode?: boolean;
   /** Request timeout in ms (default: 30000) */
@@ -45,7 +45,7 @@ export interface AgentOptions {
   /** Agent capabilities/permissions */
   capabilities?: string[];
   /** Observation tier */
-  observationTier?: "BLACK_BOX" | "GRAY_BOX" | "WHITE_BOX";
+  observationTier?: 'BLACK_BOX' | 'GRAY_BOX' | 'WHITE_BOX';
   /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -57,7 +57,7 @@ export interface ActionResult {
   /** Whether the action was allowed */
   allowed: boolean;
   /** Decision tier (GREEN/YELLOW/RED) */
-  tier: "GREEN" | "YELLOW" | "RED";
+  tier: 'GREEN' | 'YELLOW' | 'RED';
   /** Human-readable reason */
   reason: string;
   /** Proof commitment ID for audit */
@@ -91,7 +91,7 @@ class ApiClient {
   private timeout: number;
 
   constructor(baseUrl: string, apiKey: string, timeout: number = 30000) {
-    this.baseUrl = baseUrl.replace(/\/$/, ""); // Remove trailing slash
+    this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
     this.apiKey = apiKey;
     this.timeout = timeout;
   }
@@ -104,26 +104,19 @@ class ApiClient {
       const response = await fetch(`${this.baseUrl}${path}`, {
         method,
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
 
       if (!response.ok) {
-        const errorData = (await response
-          .json()
-          .catch(() => ({ error: "Unknown error" }))) as {
-          error?: string;
-          message?: string;
-        };
-        throw new Error(
-          `API error ${response.status}: ${errorData.error || errorData.message || "Unknown"}`,
-        );
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' })) as { error?: string; message?: string };
+        throw new Error(`API error ${response.status}: ${errorData.error || errorData.message || 'Unknown'}`);
       }
 
-      return (await response.json()) as T;
+      return await response.json() as T;
     } finally {
       clearTimeout(timeoutId);
     }
@@ -135,11 +128,7 @@ class ApiClient {
     agentName?: string;
     capabilities?: string[];
     observationTier?: string;
-    action: {
-      type: string;
-      resource: string;
-      parameters?: Record<string, unknown>;
-    };
+    action: { type: string; resource: string; parameters?: Record<string, unknown> };
   }) {
     return this.request<{
       intentId: string;
@@ -149,7 +138,7 @@ class ApiClient {
       proofId: string;
       constraints?: string[];
       processingTimeMs: number;
-    }>("POST", "/api/v1/intents", payload);
+    }>('POST', '/api/v1/intents', payload);
   }
 
   async checkIntent(payload: {
@@ -163,7 +152,7 @@ class ApiClient {
       wouldAllow: boolean;
       tier: string;
       reason: string;
-    }>("POST", "/api/v1/intents/check", payload);
+    }>('POST', '/api/v1/intents/check', payload);
   }
 
   // Trust endpoints
@@ -181,7 +170,7 @@ class ApiClient {
       capabilities: string[];
       expiresAt: string;
       reason?: string;
-    }>("POST", "/api/v1/trust/admit", payload);
+    }>('POST', '/api/v1/trust/admit', payload);
   }
 
   async getTrustInfo(agentId: string) {
@@ -192,18 +181,15 @@ class ApiClient {
       tierName: string | null;
       observationCeiling?: number;
       message?: string;
-    }>("GET", `/api/v1/trust/${agentId}`);
+    }>('GET', `/api/v1/trust/${agentId}`);
   }
 
-  async recordSignal(
-    agentId: string,
-    payload: {
-      type: "success" | "failure" | "violation" | "neutral";
-      source: string;
-      weight?: number;
-      context?: Record<string, unknown>;
-    },
-  ) {
+  async recordSignal(agentId: string, payload: {
+    type: 'success' | 'failure' | 'violation' | 'neutral';
+    source: string;
+    weight?: number;
+    context?: Record<string, unknown>;
+  }) {
     return this.request<{
       accepted: boolean;
       scoreBefore: number;
@@ -211,15 +197,12 @@ class ApiClient {
       change: number;
       newTier: number | null;
       newTierName: string | null;
-    }>("POST", `/api/v1/trust/${agentId}/signal`, payload);
+    }>('POST', `/api/v1/trust/${agentId}/signal`, payload);
   }
 
   // Health check
   async health() {
-    return this.request<{ status: string; version: string }>(
-      "GET",
-      "/api/v1/health",
-    );
+    return this.request<{ status: string; version: string }>('GET', '/api/v1/health');
   }
 }
 
@@ -266,7 +249,7 @@ export class Vorion {
   constructor(config: VorionConfig = {}) {
     this.config = {
       localMode: !config.apiEndpoint,
-      defaultObservationTier: "GRAY_BOX",
+      defaultObservationTier: 'GRAY_BOX',
       timeout: 30000,
       ...config,
     };
@@ -274,12 +257,12 @@ export class Vorion {
     // Initialize API client for remote mode
     if (!this.config.localMode && this.config.apiEndpoint) {
       if (!this.config.apiKey) {
-        throw new Error("apiKey is required for remote mode");
+        throw new Error('apiKey is required for remote mode');
       }
       this.apiClient = new ApiClient(
         this.config.apiEndpoint,
         this.config.apiKey,
-        this.config.timeout,
+        this.config.timeout
       );
     }
   }
@@ -296,10 +279,7 @@ export class Vorion {
         agentId: options.agentId,
         name: options.name,
         capabilities: options.capabilities ?? [],
-        observationTier:
-          options.observationTier ??
-          this.config.defaultObservationTier ??
-          "GRAY_BOX",
+        observationTier: options.observationTier ?? this.config.defaultObservationTier ?? 'GRAY_BOX',
       });
     }
 
@@ -347,7 +327,7 @@ export class Vorion {
    */
   async healthCheck(): Promise<{ status: string; version: string }> {
     if (!this.apiClient) {
-      return { status: "healthy", version: "local" };
+      return { status: 'healthy', version: 'local' };
     }
     return this.apiClient.health();
   }
@@ -360,11 +340,7 @@ export class Agent {
   private sdk: Vorion;
   private options: AgentOptions;
   private localTrustScore = 500; // Start at T3 (Monitored) for local mode
-  private actionHistory: Array<{
-    action: string;
-    allowed: boolean;
-    timestamp: number;
-  }> = [];
+  private actionHistory: Array<{ action: string; allowed: boolean; timestamp: number }> = [];
 
   constructor(sdk: Vorion, options: AgentOptions) {
     this.sdk = sdk;
@@ -403,7 +379,7 @@ export class Agent {
 
       return {
         allowed: result.allowed,
-        tier: result.tier as "GREEN" | "YELLOW" | "RED",
+        tier: result.tier as 'GREEN' | 'YELLOW' | 'RED',
         reason: result.reason,
         proofId: result.proofId,
         constraints: result.constraints,
@@ -413,14 +389,12 @@ export class Agent {
 
     // Local mode: simple capability check
     const proofId = crypto.randomUUID();
-    const hasCapability =
-      this.options.capabilities?.some(
-        (cap) =>
-          cap === "*" ||
-          cap === action.type || // Simple capability (e.g., 'read')
-          cap === `${action.type}:*` ||
-          cap === `${action.type}:${action.resource.split("/")[0]}`,
-      ) ?? false;
+    const hasCapability = this.options.capabilities?.some(cap =>
+      cap === '*' ||
+      cap === action.type || // Simple capability (e.g., 'read')
+      cap === `${action.type}:*` ||
+      cap === `${action.type}:${action.resource.split('/')[0]}`
+    ) ?? false;
     const allowed = hasCapability && this.localTrustScore >= 200;
 
     if (allowed) {
@@ -435,12 +409,12 @@ export class Agent {
 
     return {
       allowed,
-      tier: allowed ? "GREEN" : "RED",
+      tier: allowed ? 'GREEN' : 'RED',
       reason: allowed
-        ? "Action permitted"
+        ? 'Action permitted'
         : hasCapability
-          ? "Trust score too low"
-          : `Missing capability: ${action.type}:${action.resource.split("/")[0]}`,
+          ? 'Trust score too low'
+          : `Missing capability: ${action.type}:${action.resource.split('/')[0]}`,
       proofId,
       constraints: allowed ? this.getConstraintsForTier() : undefined,
     };
@@ -454,8 +428,8 @@ export class Agent {
 
     if (apiClient) {
       await apiClient.recordSignal(this.options.agentId, {
-        type: "success",
-        source: "sdk",
+        type: 'success',
+        source: 'sdk',
         weight: 0.1,
         context: { actionType },
       });
@@ -472,8 +446,8 @@ export class Agent {
 
     if (apiClient) {
       await apiClient.recordSignal(this.options.agentId, {
-        type: "failure",
-        source: "sdk",
+        type: 'failure',
+        source: 'sdk',
         weight: 0.5,
         context: { actionType, reason },
       });
@@ -492,9 +466,9 @@ export class Agent {
       const info = await apiClient.getTrustInfo(this.options.agentId);
       return {
         score: info.score ?? 0,
-        tierName: info.tierName ?? "Unknown",
+        tierName: info.tierName ?? 'Unknown',
         tierNumber: info.tier ?? 0,
-        observationTier: this.options.observationTier ?? "GRAY_BOX",
+        observationTier: this.options.observationTier ?? 'GRAY_BOX',
       };
     }
 
@@ -502,7 +476,7 @@ export class Agent {
       score: this.localTrustScore,
       tierName: this.getTierName(),
       tierNumber: this.getTierNumber(),
-      observationTier: this.options.observationTier ?? "GRAY_BOX",
+      observationTier: this.options.observationTier ?? 'GRAY_BOX',
     };
   }
 
@@ -530,11 +504,7 @@ export class Agent {
   /**
    * Get action history
    */
-  getActionHistory(): Array<{
-    action: string;
-    allowed: boolean;
-    timestamp: number;
-  }> {
+  getActionHistory(): Array<{ action: string; allowed: boolean; timestamp: number }> {
     return [...this.actionHistory];
   }
 
@@ -551,28 +521,28 @@ export class Agent {
 
   private getTierName(): string {
     const names = [
-      "Sandbox", // T0
-      "Observed", // T1
-      "Provisional", // T2
-      "Monitored", // T3
-      "Standard", // T4
-      "Trusted", // T5
-      "Certified", // T6
-      "Autonomous", // T7
+      'Sandbox',      // T0
+      'Observed',     // T1
+      'Provisional',  // T2
+      'Monitored',    // T3
+      'Standard',     // T4
+      'Trusted',      // T5
+      'Certified',    // T6
+      'Autonomous',   // T7
     ];
-    return names[this.getTierNumber()] ?? "Unknown";
+    return names[this.getTierNumber()] ?? 'Unknown';
   }
 
   private getConstraintsForTier(): string[] {
     const tier = this.getTierNumber();
     if (tier <= 1) {
-      return ["rate_limit:10/min", "audit:full", "sandbox:true"];
+      return ['rate_limit:10/min', 'audit:full', 'sandbox:true'];
     }
     if (tier <= 3) {
-      return ["rate_limit:100/min", "audit:standard"];
+      return ['rate_limit:100/min', 'audit:standard'];
     }
     if (tier <= 5) {
-      return ["rate_limit:1000/min", "audit:light"];
+      return ['rate_limit:1000/min', 'audit:light'];
     }
     return []; // T6-T7: minimal constraints
   }

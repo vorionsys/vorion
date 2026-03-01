@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/nexus';
 import { ProgressBar } from '@/components/progress';
 import { useProgressContext } from '@/contexts';
-import { getAllPaths } from '@/lib/learning-paths';
+import { getAllPaths, getPathBySlug } from '@/lib/learning-paths';
 import {
   User,
   Trophy,
@@ -14,6 +14,7 @@ import {
   Target,
   GraduationCap,
   CheckCircle2,
+  Clock,
   Calendar,
   TrendingUp,
   Download,
@@ -119,6 +120,8 @@ export default function ProfilePage() {
     exportData,
     importData,
     resetProgress,
+    getPathInfo,
+    checkPathCompleted,
   } = useProgressContext();
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);

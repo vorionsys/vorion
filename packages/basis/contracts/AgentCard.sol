@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * Features:
  * - W3C DID integration for decentralized identity
  * - Capability advertisement (what the agent can do)
- * - Vorion certification with trust scores
+ * - AgentAnchor certification with trust scores
  * - Revocable certifications for safety
  * - On-chain trust tier tracking (T0-T5)
  */
@@ -59,7 +59,7 @@ contract AgentCard is ERC721, ERC721URIStorage, ERC721Enumerable, AccessControl 
         string description;             // Description
         uint256 trustScore;             // TSG trust score (0-1000)
         TrustTier tier;                 // Trust tier (T0-T5)
-        bool certified;                 // Certified by Vorion?
+        bool certified;                 // Certified by AgentAnchor?
         address certifier;              // Certifying organization address
         uint256 certificationDate;      // Unix timestamp of certification
         uint256 certificationExpiry;    // Unix timestamp when certification expires
@@ -195,7 +195,7 @@ contract AgentCard is ERC721, ERC721URIStorage, ERC721Enumerable, AccessControl 
     }
 
     // ==========================================================================
-    // Certification (Vorion)
+    // Certification (AgentAnchor)
     // ==========================================================================
 
     /**

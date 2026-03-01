@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, X, Layers, Brain } from 'lucide-react';
+import { Send, X, Layers, Brain, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChatMessage } from './chat-message';
 import { ProcessingIndicator } from './processing-indicator';
 import { searchLexicon } from '@/lib/lexicon-data';
 import { generateId, sanitizeHtml } from '@/lib/utils';
-import type { ChatMessage as ChatMessageType, ProcessingStatus } from '@/types';
+import { getIntentRoute } from '@/lib/intent-routing';
+import type { AudienceType } from '@/lib/intent-routing';
+import type { ChatMessage as ChatMessageType, AIModel, ProcessingStatus } from '@/types';
 
 interface NexusChatProps {
   isOpen: boolean;
@@ -26,6 +28,8 @@ export function NexusChat({ isOpen, onToggle }: NexusChatProps) {
   ]);
   const [input, setInput] = useState('');
   const [processing, setProcessing] = useState<ProcessingStatus | null>(null);
+  const [intentContext, setIntentContext] = useState<string | null>(null);
+  const [directRoute, setDirectRoute] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -35,6 +39,41 @@ export function NexusChat({ isOpen, onToggle }: NexusChatProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
+
+  // Intent routing: check URL params on mount and pre-seed the chat
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const audience = params.get('audience');
+    const intent = params.get('intent');
+
+    if (audience && intent) {
+      const route = getIntentRoute(audience, intent);
+
+      // Store system context for the next API call
+      setIntentContext(route.systemContext);
+
+      // Store direct route if one exists
+      if (route.directRoute) {
+        setDirectRoute(route.directRoute);
+      }
+
+      // Auto-open the chat panel
+      if (!isOpen) {
+        onToggle();
+      }
+
+      // Add the greeting as the first assistant message
+      const greetingMessage: ChatMessageType = {
+        id: generateId(),
+        role: 'assistant',
+        content: route.greeting,
+        timestamp: new Date(),
+        source: 'local',
+      };
+      setMessages(prev => [...prev, greetingMessage]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +140,10 @@ export function NexusChat({ isOpen, onToggle }: NexusChatProps) {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({
+          query,
+          ...(intentContext ? { systemContext: intentContext } : {}),
+        }),
       });
 
       if (!res.ok) throw new Error('Synthesis failed');
@@ -117,7 +159,7 @@ export function NexusChat({ isOpen, onToggle }: NexusChatProps) {
         perspectives: data.perspectives,
       };
       setMessages(prev => [...prev, response]);
-    } catch (_error) {
+    } catch (error) {
       const errorMessage: ChatMessageType = {
         id: generateId(),
         role: 'assistant',
@@ -180,6 +222,21 @@ export function NexusChat({ isOpen, onToggle }: NexusChatProps) {
             ))}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Quick Link (from intent routing) */}
+          {directRoute && (
+            <div className="px-4 py-2 bg-gray-800/60 border-t border-gray-700/50">
+              <a
+                href={directRoute}
+                target={directRoute.startsWith('http') ? '_blank' : undefined}
+                rel={directRoute.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Quick link: go directly to your resource</span>
+              </a>
+            </div>
+          )}
 
           {/* Input */}
           <div className="p-3 bg-gray-800 border-t border-gray-700">

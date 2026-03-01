@@ -444,10 +444,14 @@ import { KYA, IdentityVerifier } from '@vorionsys/basis/kya';
 - Node.js >= 18.0.0
 - TypeScript >= 5.3 (recommended)
 
+## Documentation
+
+Full platform documentation is available at [https://vorion.org/docs](https://vorion.org/docs).
+
 ## Repository
 
-This package is part of the [Vorion monorepo](https://github.com/vorionsys/vorion) at `packages/basis`.
+This package is part of the [Vorion monorepo](https://github.com/vorionsys/vorion) at [`packages/basis`](https://github.com/vorionsys/vorion/tree/master/packages/basis).
 
 ## License
 
-[Apache-2.0](./LICENSE)
+Apache-2.0 -- Copyright 2026 Vorion Systems

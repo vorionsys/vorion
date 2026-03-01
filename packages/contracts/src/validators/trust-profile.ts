@@ -2,13 +2,9 @@
  * Zod schemas for trust profile types
  */
 
-import { z } from "zod";
-import { observationTierSchema, trustBandSchema } from "./enums.js";
-import type {
-  TrustFactorScores,
-  TrustProfile,
-  TrustEvidence,
-} from "../v2/trust-profile.js";
+import { z } from 'zod';
+import { observationTierSchema, trustBandSchema } from './enums.js';
+import type { TrustFactorScores, TrustProfile, TrustEvidence } from '../v2/trust-profile.js';
 
 /** Factor score range validator (0.0 to 1.0) */
 const factorScoreSchema = z.number().min(0).max(1);
@@ -16,7 +12,7 @@ const factorScoreSchema = z.number().min(0).max(1);
 /** Trust factor scores validator - record of factor codes to scores */
 export const trustFactorScoresSchema = z.record(
   z.string(),
-  factorScoreSchema,
+  factorScoreSchema
 ) satisfies z.ZodType<TrustFactorScores>;
 
 /** Composite score range validator (0-1000) */
@@ -30,17 +26,15 @@ export const trustEvidenceSchema = z.object({
   source: z.string().min(1),
   collectedAt: z.coerce.date(),
   expiresAt: z.coerce.date().optional(),
-  evidenceType: z
-    .enum([
-      "automated",
-      "hitl_approval",
-      "hitl_rejection",
-      "examination",
-      "audit",
-      "sandbox_test",
-      "peer_review",
-    ])
-    .optional(),
+  evidenceType: z.enum([
+    'automated',
+    'hitl_approval',
+    'hitl_rejection',
+    'examination',
+    'audit',
+    'sandbox_test',
+    'peer_review',
+  ]).optional(),
   metadata: z.record(z.unknown()).optional(),
 }) satisfies z.ZodType<TrustEvidence>;
 
@@ -67,11 +61,7 @@ export const trustCalculationRequestSchema = z.object({
 });
 
 // Type inference from schemas
-export type ValidatedTrustFactorScores = z.infer<
-  typeof trustFactorScoresSchema
->;
+export type ValidatedTrustFactorScores = z.infer<typeof trustFactorScoresSchema>;
 export type ValidatedTrustEvidence = z.infer<typeof trustEvidenceSchema>;
 export type ValidatedTrustProfile = z.infer<typeof trustProfileSchema>;
-export type ValidatedTrustCalculationRequest = z.infer<
-  typeof trustCalculationRequestSchema
->;
+export type ValidatedTrustCalculationRequest = z.infer<typeof trustCalculationRequestSchema>;

@@ -1,6 +1,6 @@
 /**
  * Phase 6 Q2: Context Policy - Multi-Tenant Factory
- *
+ * 
  * Creates and manages agent contexts across multiple tenants
  * Ensures strict isolation and immutability per tenant
  */
@@ -10,7 +10,7 @@ import {
   AgentContext,
   createAgentContext,
   verifyContextIntegrity,
-} from "./enforcement.js";
+} from './enforcement.js';
 
 /**
  * Agent context registry per tenant
@@ -43,7 +43,7 @@ export class MultiTenantContextFactory {
     tenantId: string,
     agentId: string,
     requestedContext: ContextType,
-    createdBy: string,
+    createdBy: string
   ): AgentContext {
     // Validate tenant exists
     if (!this.tenantHierarchy.has(tenantId)) {
@@ -62,7 +62,7 @@ export class MultiTenantContextFactory {
 
     if (requestedRank > maxRank) {
       throw new Error(
-        `Tenant ${tenantId} not allowed context ${requestedContext} (max: ${maxContext})`,
+        `Tenant ${tenantId} not allowed context ${requestedContext} (max: ${maxContext})`
       );
     }
 
@@ -70,7 +70,7 @@ export class MultiTenantContextFactory {
     const tenantContexts = this.contexts.get(tenantId)!;
     if (tenantContexts.has(agentId)) {
       throw new Error(
-        `Agent ${agentId} context already exists (immutable) - cannot recreate`,
+        `Agent ${agentId} context already exists (immutable) - cannot recreate`
       );
     }
 
@@ -79,7 +79,7 @@ export class MultiTenantContextFactory {
       requestedContext,
       agentId,
       tenantId,
-      createdBy,
+      createdBy
     );
 
     // Store in tenant's registry
@@ -101,7 +101,10 @@ export class MultiTenantContextFactory {
    * Retrieve an agent's context (only from its own tenant)
    * Enforces strict multi-tenant isolation
    */
-  getContextForAgent(tenantId: string, agentId: string): AgentContext | null {
+  getContextForAgent(
+    tenantId: string,
+    agentId: string
+  ): AgentContext | null {
     const tenantContexts = this.contexts.get(tenantId);
     if (!tenantContexts) {
       return null;

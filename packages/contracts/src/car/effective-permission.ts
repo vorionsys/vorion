@@ -11,16 +11,16 @@
  * @module @vorionsys/contracts/car/effective-permission
  */
 
-import { z } from "zod";
-import { CapabilityLevel, capabilityLevelSchema } from "./levels.js";
+import { z } from 'zod';
+import { CapabilityLevel, capabilityLevelSchema } from './levels.js';
 import {
   CertificationTier,
   certificationTierSchema,
   RuntimeTier,
   runtimeTierSchema,
   CERTIFICATION_TIER_CONFIGS,
-} from "./tiers.js";
-import { MAX_SUPERVISION_ELEVATION } from "./identity.js";
+} from './tiers.js';
+import { MAX_SUPERVISION_ELEVATION } from './identity.js';
 
 // ============================================================================
 // Effective Permission Context
@@ -111,13 +111,13 @@ export interface EffectivePermission {
  * Factors that can constrain effective permission.
  */
 export type ConstrainingFactor =
-  | "certification_tier"
-  | "competence_level"
-  | "runtime_tier"
-  | "observability_ceiling"
-  | "context_policy_ceiling"
-  | "supervision_elevation"
-  | "multiple";
+  | 'certification_tier'
+  | 'competence_level'
+  | 'runtime_tier'
+  | 'observability_ceiling'
+  | 'context_policy_ceiling'
+  | 'supervision_elevation'
+  | 'multiple';
 
 /**
  * Individual ceiling values applied to permission calculation.
@@ -139,13 +139,13 @@ export interface PermissionCeilings {
  * Zod schema for ConstrainingFactor.
  */
 export const constrainingFactorSchema = z.enum([
-  "certification_tier",
-  "competence_level",
-  "runtime_tier",
-  "observability_ceiling",
-  "context_policy_ceiling",
-  "supervision_elevation",
-  "multiple",
+  'certification_tier',
+  'competence_level',
+  'runtime_tier',
+  'observability_ceiling',
+  'context_policy_ceiling',
+  'supervision_elevation',
+  'multiple',
 ]);
 
 /**
@@ -225,7 +225,7 @@ function runtimeTierToCeiling(tier: RuntimeTier): CapabilityLevel {
  * ```
  */
 export function calculateEffectivePermission(
-  ctx: EffectivePermissionContext,
+  ctx: EffectivePermissionContext
 ): EffectivePermission {
   // Calculate individual ceilings
   // If supervision elevation is active, boost the certification ceiling
@@ -237,26 +237,17 @@ export function calculateEffectivePermission(
     effectiveCertTier = Math.min(
       ctx.certificationTier + elevation,
       supervisorCap,
-      CertificationTier.T7_AUTONOMOUS,
+      CertificationTier.T7_AUTONOMOUS
     ) as CertificationTier;
     // Elevation can never lower the base tier
-    effectiveCertTier = Math.max(
-      ctx.certificationTier,
-      effectiveCertTier,
-    ) as CertificationTier;
+    effectiveCertTier = Math.max(ctx.certificationTier, effectiveCertTier) as CertificationTier;
   }
 
   const certificationCeiling = certificationTierToCeiling(effectiveCertTier);
   const competenceCeiling = ctx.competenceLevel;
   const runtimeCeiling = runtimeTierToCeiling(ctx.runtimeTier);
-  const observabilityCeiling = Math.min(
-    7,
-    Math.max(0, ctx.observabilityCeiling),
-  ) as CapabilityLevel;
-  const contextPolicyCeiling = Math.min(
-    7,
-    Math.max(0, ctx.contextPolicyCeiling),
-  ) as CapabilityLevel;
+  const observabilityCeiling = Math.min(7, Math.max(0, ctx.observabilityCeiling)) as CapabilityLevel;
+  const contextPolicyCeiling = Math.min(7, Math.max(0, ctx.contextPolicyCeiling)) as CapabilityLevel;
 
   const ceilings: PermissionCeilings = {
     certificationCeiling,
@@ -268,19 +259,15 @@ export function calculateEffectivePermission(
 
   // Find the minimum ceiling
   const allCeilings = [
-    { factor: "certification_tier" as const, level: certificationCeiling },
-    { factor: "competence_level" as const, level: competenceCeiling },
-    { factor: "runtime_tier" as const, level: runtimeCeiling },
-    { factor: "observability_ceiling" as const, level: observabilityCeiling },
-    { factor: "context_policy_ceiling" as const, level: contextPolicyCeiling },
+    { factor: 'certification_tier' as const, level: certificationCeiling },
+    { factor: 'competence_level' as const, level: competenceCeiling },
+    { factor: 'runtime_tier' as const, level: runtimeCeiling },
+    { factor: 'observability_ceiling' as const, level: observabilityCeiling },
+    { factor: 'context_policy_ceiling' as const, level: contextPolicyCeiling },
   ];
 
-  const minCeilingLevel = Math.min(
-    ...allCeilings.map((c) => c.level),
-  ) as CapabilityLevel;
-  const constrainingFactors = allCeilings.filter(
-    (c) => c.level === minCeilingLevel,
-  );
+  const minCeilingLevel = Math.min(...allCeilings.map((c) => c.level)) as CapabilityLevel;
+  const constrainingFactors = allCeilings.filter((c) => c.level === minCeilingLevel);
 
   // Determine if constrained and by what
   const maxPossibleLevel = Math.max(
@@ -288,16 +275,15 @@ export function calculateEffectivePermission(
     competenceCeiling,
     runtimeCeiling,
     observabilityCeiling,
-    contextPolicyCeiling,
+    contextPolicyCeiling
   );
   const constrained = minCeilingLevel < maxPossibleLevel;
 
   let constrainingFactor: ConstrainingFactor | undefined;
   if (constrained) {
-    constrainingFactor =
-      constrainingFactors.length > 1
-        ? "multiple"
-        : constrainingFactors[0]!.factor;
+    constrainingFactor = constrainingFactors.length > 1
+      ? 'multiple'
+      : constrainingFactors[0]!.factor;
   }
 
   // Generate recommendations
@@ -305,29 +291,29 @@ export function calculateEffectivePermission(
   if (constrained) {
     for (const cf of constrainingFactors) {
       switch (cf.factor) {
-        case "certification_tier":
+        case 'certification_tier':
           recommendations.push(
-            `Increase certification tier from ${ctx.certificationTier} to unlock higher capability levels`,
+            `Increase certification tier from ${ctx.certificationTier} to unlock higher capability levels`
           );
           break;
-        case "runtime_tier":
+        case 'runtime_tier':
           recommendations.push(
-            `Request higher runtime tier from T${ctx.runtimeTier} to enable more autonomy`,
+            `Request higher runtime tier from T${ctx.runtimeTier} to enable more autonomy`
           );
           break;
-        case "observability_ceiling":
+        case 'observability_ceiling':
           recommendations.push(
-            "Improve observability instrumentation to raise the observability ceiling",
+            'Improve observability instrumentation to raise the observability ceiling'
           );
           break;
-        case "context_policy_ceiling":
+        case 'context_policy_ceiling':
           recommendations.push(
-            "Request policy exception or operate in a context with higher policy ceiling",
+            'Request policy exception or operate in a context with higher policy ceiling'
           );
           break;
-        case "competence_level":
+        case 'competence_level':
           recommendations.push(
-            "This is the declared competence level of the agent",
+            'This is the declared competence level of the agent'
           );
           break;
       }
@@ -356,7 +342,7 @@ export function calculateEffectivePermission(
  */
 export function permissionAllowsLevel(
   permission: EffectivePermission,
-  requiredLevel: CapabilityLevel,
+  requiredLevel: CapabilityLevel
 ): boolean {
   return permission.level >= requiredLevel;
 }
@@ -370,7 +356,7 @@ export function permissionAllowsLevel(
  */
 export function contextAllowsLevel(
   ctx: EffectivePermissionContext,
-  requiredLevel: CapabilityLevel,
+  requiredLevel: CapabilityLevel
 ): boolean {
   const permission = calculateEffectivePermission(ctx);
   return permissionAllowsLevel(permission, requiredLevel);
@@ -401,7 +387,7 @@ export interface PermissionCheckResult {
  */
 export function checkPermission(
   ctx: EffectivePermissionContext,
-  requiredLevel: CapabilityLevel,
+  requiredLevel: CapabilityLevel
 ): PermissionCheckResult {
   const permission = calculateEffectivePermission(ctx);
 
@@ -439,41 +425,32 @@ export const permissionCheckResultSchema = z.object({
  */
 export function modifyContextCeiling(
   ctx: EffectivePermissionContext,
-  factor: Exclude<ConstrainingFactor, "multiple">,
-  newValue: number,
+  factor: Exclude<ConstrainingFactor, 'multiple'>,
+  newValue: number
 ): EffectivePermissionContext {
   const newCtx = { ...ctx };
 
   switch (factor) {
-    case "certification_tier":
-      newCtx.certificationTier = Math.min(
-        7,
-        Math.max(0, newValue),
-      ) as CertificationTier;
+    case 'certification_tier':
+      newCtx.certificationTier = Math.min(7, Math.max(0, newValue)) as CertificationTier;
       break;
-    case "competence_level":
-      newCtx.competenceLevel = Math.min(
-        7,
-        Math.max(0, newValue),
-      ) as CapabilityLevel;
+    case 'competence_level':
+      newCtx.competenceLevel = Math.min(7, Math.max(0, newValue)) as CapabilityLevel;
       break;
-    case "runtime_tier":
+    case 'runtime_tier':
       newCtx.runtimeTier = Math.min(7, Math.max(0, newValue)) as RuntimeTier;
       break;
-    case "observability_ceiling":
+    case 'observability_ceiling':
       newCtx.observabilityCeiling = Math.min(7, Math.max(0, newValue));
       break;
-    case "context_policy_ceiling":
+    case 'context_policy_ceiling':
       newCtx.contextPolicyCeiling = Math.min(7, Math.max(0, newValue));
       break;
-    case "supervision_elevation":
+    case 'supervision_elevation':
       if (newCtx.supervisionElevation) {
         newCtx.supervisionElevation = {
           ...newCtx.supervisionElevation,
-          grantedElevation: Math.min(
-            MAX_SUPERVISION_ELEVATION,
-            Math.max(0, newValue),
-          ),
+          grantedElevation: Math.min(MAX_SUPERVISION_ELEVATION, Math.max(0, newValue)),
         };
       }
       break;
@@ -491,9 +468,9 @@ export function modifyContextCeiling(
  */
 export function calculateRequiredChanges(
   ctx: EffectivePermissionContext,
-  targetLevel: CapabilityLevel,
-): Map<Exclude<ConstrainingFactor, "multiple">, number> {
-  const changes = new Map<Exclude<ConstrainingFactor, "multiple">, number>();
+  targetLevel: CapabilityLevel
+): Map<Exclude<ConstrainingFactor, 'multiple'>, number> {
+  const changes = new Map<Exclude<ConstrainingFactor, 'multiple'>, number>();
   const permission = calculateEffectivePermission(ctx);
 
   if (permission.level >= targetLevel) {
@@ -505,29 +482,27 @@ export function calculateRequiredChanges(
   if (certificationCeiling < targetLevel) {
     // Need higher certification tier
     for (let tier = ctx.certificationTier + 1; tier <= 7; tier++) {
-      if (
-        certificationTierToCeiling(tier as CertificationTier) >= targetLevel
-      ) {
-        changes.set("certification_tier", tier);
+      if (certificationTierToCeiling(tier as CertificationTier) >= targetLevel) {
+        changes.set('certification_tier', tier);
         break;
       }
     }
   }
 
   if (permission.ceilings.competenceCeiling < targetLevel) {
-    changes.set("competence_level", targetLevel);
+    changes.set('competence_level', targetLevel);
   }
 
   if (permission.ceilings.runtimeCeiling < targetLevel) {
-    changes.set("runtime_tier", targetLevel);
+    changes.set('runtime_tier', targetLevel);
   }
 
   if (permission.ceilings.observabilityCeiling < targetLevel) {
-    changes.set("observability_ceiling", targetLevel);
+    changes.set('observability_ceiling', targetLevel);
   }
 
   if (permission.ceilings.contextPolicyCeiling < targetLevel) {
-    changes.set("context_policy_ceiling", targetLevel);
+    changes.set('context_policy_ceiling', targetLevel);
   }
 
   return changes;
@@ -544,7 +519,7 @@ export function calculateRequiredChanges(
  * @returns Default context with any overrides applied
  */
 export function createDefaultContext(
-  overrides?: Partial<EffectivePermissionContext>,
+  overrides?: Partial<EffectivePermissionContext>
 ): EffectivePermissionContext {
   return {
     certificationTier: CertificationTier.T0_SANDBOX,
@@ -579,30 +554,28 @@ export function createMaxPermissionContext(): EffectivePermissionContext {
  * Type guard for EffectivePermissionContext.
  */
 export function isEffectivePermissionContext(
-  value: unknown,
+  value: unknown
 ): value is EffectivePermissionContext {
   return (
-    typeof value === "object" &&
+    typeof value === 'object' &&
     value !== null &&
-    "certificationTier" in value &&
-    "competenceLevel" in value &&
-    "runtimeTier" in value &&
-    "observabilityCeiling" in value &&
-    "contextPolicyCeiling" in value
+    'certificationTier' in value &&
+    'competenceLevel' in value &&
+    'runtimeTier' in value &&
+    'observabilityCeiling' in value &&
+    'contextPolicyCeiling' in value
   );
 }
 
 /**
  * Type guard for EffectivePermission.
  */
-export function isEffectivePermission(
-  value: unknown,
-): value is EffectivePermission {
+export function isEffectivePermission(value: unknown): value is EffectivePermission {
   return (
-    typeof value === "object" &&
+    typeof value === 'object' &&
     value !== null &&
-    "level" in value &&
-    "constrained" in value &&
-    "ceilings" in value
+    'level' in value &&
+    'constrained' in value &&
+    'ceilings' in value
   );
 }

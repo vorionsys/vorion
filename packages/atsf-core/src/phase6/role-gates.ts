@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
+import { createLogger } from '../common/logger.js';
 import {
   type RoleGateEntry,
   type RoleGatePolicy,
@@ -29,9 +29,9 @@ import {
   validateRoleGateKernel,
   roleGatePolicySchema,
   roleGateEvaluationSchema,
-} from "./types.js";
+} from './types.js';
 
-const logger = createLogger({ component: "phase6:role-gates" });
+const logger = createLogger({ component: 'phase6:role-gates' });
 
 // =============================================================================
 // HASH UTILITIES
@@ -43,9 +43,9 @@ const logger = createLogger({ component: "phase6:role-gates" });
 async function calculateHash(data: string): Promise<string> {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 // =============================================================================
@@ -66,14 +66,7 @@ export function getRoleGateMatrix(): readonly RoleGateEntry[] {
       if (ROLE_GATE_MATRIX[role][tier]) {
         allowedTiers.push(tier);
         // Track minimum tier
-        const tierOrder = [
-          TrustTier.T0,
-          TrustTier.T1,
-          TrustTier.T2,
-          TrustTier.T3,
-          TrustTier.T4,
-          TrustTier.T5,
-        ];
+        const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
         if (tierOrder.indexOf(tier) < tierOrder.indexOf(minimumTier)) {
           minimumTier = tier;
         }
@@ -94,14 +87,7 @@ export function getRoleGateMatrix(): readonly RoleGateEntry[] {
  * Get minimum required tier for a role
  */
 export function getMinimumTierForRole(role: AgentRole): TrustTier {
-  for (const tier of [
-    TrustTier.T0,
-    TrustTier.T1,
-    TrustTier.T2,
-    TrustTier.T3,
-    TrustTier.T4,
-    TrustTier.T5,
-  ]) {
+  for (const tier of [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5]) {
     if (ROLE_GATE_MATRIX[role][tier]) {
       return tier;
     }
@@ -122,10 +108,7 @@ export interface KernelLayerResult {
  * Kernel layer: Validate role+tier combination against matrix
  * This is the fastest check - uses pre-computed matrix.
  */
-export function evaluateKernelLayer(
-  role: AgentRole,
-  tier: TrustTier,
-): KernelLayerResult {
+export function evaluateKernelLayer(role: AgentRole, tier: TrustTier): KernelLayerResult {
   const matrixAllows = validateRoleGateKernel(role, tier);
 
   if (!matrixAllows) {
@@ -162,10 +145,7 @@ export interface PolicyEvaluationContext {
 /**
  * Check if condition matches context
  */
-function conditionMatches(
-  condition: RoleGateCondition,
-  context: PolicyEvaluationContext,
-): boolean {
+function conditionMatches(condition: RoleGateCondition, context: PolicyEvaluationContext): boolean {
   // Check roles
   if (condition.roles && condition.roles.length > 0) {
     if (!condition.roles.includes(context.role)) {
@@ -182,20 +162,14 @@ function conditionMatches(
 
   // Check context types
   if (condition.contextTypes && condition.contextTypes.length > 0) {
-    if (
-      !context.contextType ||
-      !condition.contextTypes.includes(context.contextType)
-    ) {
+    if (!context.contextType || !condition.contextTypes.includes(context.contextType)) {
       return false;
     }
   }
 
   // Check domains
   if (condition.domains && condition.domains.length > 0) {
-    if (
-      !context.domains ||
-      !condition.domains.some((d) => context.domains!.includes(d))
-    ) {
+    if (!context.domains || !condition.domains.some((d) => context.domains!.includes(d))) {
       return false;
     }
   }
@@ -203,21 +177,15 @@ function conditionMatches(
   // Check time window
   if (condition.timeWindow) {
     const now = context.currentTime ?? new Date();
-    const currentHHMM = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+    const currentHHMM = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-    if (
-      currentHHMM < condition.timeWindow.start ||
-      currentHHMM > condition.timeWindow.end
-    ) {
+    if (currentHHMM < condition.timeWindow.start || currentHHMM > condition.timeWindow.end) {
       return false;
     }
   }
 
   // Check attestations
-  if (
-    condition.requiresAttestation &&
-    condition.requiresAttestation.length > 0
-  ) {
+  if (condition.requiresAttestation && condition.requiresAttestation.length > 0) {
     if (!context.attestations) {
       return false;
     }
@@ -238,7 +206,7 @@ export interface PolicyLayerResult {
   valid: boolean;
   appliedRuleId?: string;
   appliedPolicyVersion?: number;
-  action: "ALLOW" | "DENY" | "ESCALATE";
+  action: 'ALLOW' | 'DENY' | 'ESCALATE';
   reason: string;
 }
 
@@ -247,7 +215,7 @@ export interface PolicyLayerResult {
  */
 export function evaluatePolicyLayer(
   context: PolicyEvaluationContext,
-  policy: RoleGatePolicy,
+  policy: RoleGatePolicy
 ): PolicyLayerResult {
   // Sort rules by priority (lower number = higher priority)
   const sortedRules = [...policy.rules].sort((a, b) => a.priority - b.priority);
@@ -255,7 +223,7 @@ export function evaluatePolicyLayer(
   for (const rule of sortedRules) {
     if (conditionMatches(rule.condition, context)) {
       return {
-        valid: rule.action === "ALLOW",
+        valid: rule.action === 'ALLOW',
         appliedRuleId: rule.ruleId,
         appliedPolicyVersion: policy.version,
         action: rule.action,
@@ -267,8 +235,8 @@ export function evaluatePolicyLayer(
   // No rules matched - default allow (kernel already validated)
   return {
     valid: true,
-    action: "ALLOW",
-    reason: "No policy rules matched - default allow",
+    action: 'ALLOW',
+    reason: 'No policy rules matched - default allow',
   };
 }
 
@@ -302,24 +270,17 @@ export interface BasisLayerContext {
 /**
  * Validate override request
  */
-function validateOverride(override: OverrideRequest): {
-  valid: boolean;
-  reason?: string;
-} {
+function validateOverride(override: OverrideRequest): { valid: boolean; reason?: string } {
   const now = new Date();
 
   // Check expiration
   if (override.expiresAt < now) {
-    return { valid: false, reason: "Override has expired" };
+    return { valid: false, reason: 'Override has expired' };
   }
 
   // Check dual-control (requester != approver)
   if (override.requestedBy === override.approvedBy) {
-    return {
-      valid: false,
-      reason:
-        "Override requires dual-control (different requester and approver)",
-    };
+    return { valid: false, reason: 'Override requires dual-control (different requester and approver)' };
   }
 
   return { valid: true };
@@ -341,7 +302,7 @@ export interface BasisLayerResult {
  */
 export function evaluateBasisLayer(
   role: AgentRole,
-  context: BasisLayerContext,
+  context: BasisLayerContext
 ): BasisLayerResult {
   // Check denied roles
   if (context.contextConstraints.deniedRoles?.includes(role)) {
@@ -354,10 +315,7 @@ export function evaluateBasisLayer(
   }
 
   // Check allowed roles (if specified, role must be in list)
-  if (
-    context.contextConstraints.allowedRoles &&
-    context.contextConstraints.allowedRoles.length > 0
-  ) {
+  if (context.contextConstraints.allowedRoles && context.contextConstraints.allowedRoles.length > 0) {
     if (!context.contextConstraints.allowedRoles.includes(role)) {
       return {
         valid: false,
@@ -375,13 +333,11 @@ export function evaluateBasisLayer(
         valid: false,
         requiresOverride: true,
         contextConstraintsMet: true,
-        reason: "Override required but not provided",
+        reason: 'Override required but not provided',
       };
     }
 
-    const overrideResult = validateOverride(
-      context.contextConstraints.overrideRequest,
-    );
+    const overrideResult = validateOverride(context.contextConstraints.overrideRequest);
     if (!overrideResult.valid) {
       return {
         valid: false,
@@ -422,7 +378,7 @@ export async function evaluateRoleGate(
   tier: TrustTier,
   policy: RoleGatePolicy,
   basisContext: BasisLayerContext,
-  policyContext?: Partial<PolicyEvaluationContext>,
+  policyContext?: Partial<PolicyEvaluationContext>
 ): Promise<RoleGateEvaluation> {
   const now = new Date();
 
@@ -441,17 +397,17 @@ export async function evaluateRoleGate(
   const basisResult = evaluateBasisLayer(role, basisContext);
 
   // Determine final decision
-  let decision: "ALLOW" | "DENY" | "ESCALATE";
+  let decision: 'ALLOW' | 'DENY' | 'ESCALATE';
 
   if (!kernelResult.valid) {
     // Kernel denial cannot be overridden
-    decision = "DENY";
+    decision = 'DENY';
   } else if (!policyResult.valid) {
     decision = policyResult.action;
   } else if (!basisResult.valid) {
-    decision = basisResult.requiresOverride ? "ESCALATE" : "DENY";
+    decision = basisResult.requiresOverride ? 'ESCALATE' : 'DENY';
   } else {
-    decision = "ALLOW";
+    decision = 'ALLOW';
   }
 
   const evaluationData = {
@@ -496,7 +452,7 @@ export async function evaluateRoleGate(
     throw new Error(`Invalid role gate evaluation: ${parsed.error.message}`);
   }
 
-  if (decision !== "ALLOW") {
+  if (decision !== 'ALLOW') {
     logger.warn(
       {
         agentId,
@@ -507,7 +463,7 @@ export async function evaluateRoleGate(
         policyValid: policyResult.valid,
         basisValid: basisResult.valid,
       },
-      "Role gate denied or escalated",
+      'Role gate denied or escalated'
     );
   }
 
@@ -521,96 +477,92 @@ export async function evaluateRoleGate(
 /**
  * Create default role gate policy
  */
-export async function createDefaultRoleGatePolicy(
-  createdBy: string,
-): Promise<RoleGatePolicy> {
+export async function createDefaultRoleGatePolicy(createdBy: string): Promise<RoleGatePolicy> {
   const now = new Date();
 
   const policy: RoleGatePolicy = {
-    policyId: "default:role-gate-policy",
+    policyId: 'default:role-gate-policy',
     version: 1,
     rules: [
       // Rule 1: Block sovereign roles (R-L6+) in non-sovereign contexts
       {
-        ruleId: "rule:sovereign-context-required",
-        name: "Sovereign Context Required for High Roles",
+        ruleId: 'rule:sovereign-context-required',
+        name: 'Sovereign Context Required for High Roles',
         condition: {
           roles: [AgentRole.R_L6, AgentRole.R_L7, AgentRole.R_L8],
           contextTypes: [ContextType.LOCAL, ContextType.ENTERPRISE],
         },
-        action: "DENY",
+        action: 'DENY',
         priority: 10,
-        reason: "Sovereign roles (R-L6+) require sovereign context",
+        reason: 'Sovereign roles (R-L6+) require sovereign context',
       },
 
       // Rule 2: Require attestation for orchestrators
       {
-        ruleId: "rule:orchestrator-attestation",
-        name: "Orchestrator Attestation Required",
+        ruleId: 'rule:orchestrator-attestation',
+        name: 'Orchestrator Attestation Required',
         condition: {
           roles: [AgentRole.R_L3],
-          requiresAttestation: ["capability:orchestration"],
+          requiresAttestation: ['capability:orchestration'],
         },
-        action: "ALLOW",
+        action: 'ALLOW',
         priority: 20,
-        reason: "Orchestrators require capability attestation",
+        reason: 'Orchestrators require capability attestation',
       },
       {
-        ruleId: "rule:orchestrator-no-attestation",
-        name: "Orchestrator Without Attestation",
+        ruleId: 'rule:orchestrator-no-attestation',
+        name: 'Orchestrator Without Attestation',
         condition: {
           roles: [AgentRole.R_L3],
         },
-        action: "ESCALATE",
+        action: 'ESCALATE',
         priority: 21,
-        reason: "Orchestrator without attestation requires approval",
+        reason: 'Orchestrator without attestation requires approval',
       },
 
       // Rule 3: Allow basic roles everywhere
       {
-        ruleId: "rule:basic-roles-allowed",
-        name: "Basic Roles Allowed",
+        ruleId: 'rule:basic-roles-allowed',
+        name: 'Basic Roles Allowed',
         condition: {
           roles: [AgentRole.R_L0, AgentRole.R_L1],
         },
-        action: "ALLOW",
+        action: 'ALLOW',
         priority: 100,
-        reason: "Listener and executor roles are generally allowed",
+        reason: 'Listener and executor roles are generally allowed',
       },
 
       // Rule 4: Business hours restriction for architects
       {
-        ruleId: "rule:architect-business-hours",
-        name: "Architect Business Hours Only",
+        ruleId: 'rule:architect-business-hours',
+        name: 'Architect Business Hours Only',
         condition: {
           roles: [AgentRole.R_L4],
-          timeWindow: { start: "09:00", end: "17:00" },
+          timeWindow: { start: '09:00', end: '17:00' },
         },
-        action: "ALLOW",
+        action: 'ALLOW',
         priority: 30,
-        reason: "Architects allowed during business hours",
+        reason: 'Architects allowed during business hours',
       },
       {
-        ruleId: "rule:architect-outside-hours",
-        name: "Architect Outside Hours Escalation",
+        ruleId: 'rule:architect-outside-hours',
+        name: 'Architect Outside Hours Escalation',
         condition: {
           roles: [AgentRole.R_L4],
         },
-        action: "ESCALATE",
+        action: 'ESCALATE',
         priority: 31,
-        reason: "Architect operations outside business hours require approval",
+        reason: 'Architect operations outside business hours require approval',
       },
     ],
     effectiveFrom: now,
     createdAt: now,
     createdBy,
-    policyHash: await calculateHash(
-      JSON.stringify({
-        policyId: "default:role-gate-policy",
-        version: 1,
-        createdAt: now.toISOString(),
-      }),
-    ),
+    policyHash: await calculateHash(JSON.stringify({
+      policyId: 'default:role-gate-policy',
+      version: 1,
+      createdAt: now.toISOString(),
+    })),
   };
 
   return policy;
@@ -631,11 +583,11 @@ export class RoleGateService {
   /**
    * Initialize with default policy
    */
-  async initialize(createdBy: string = "system"): Promise<void> {
+  async initialize(createdBy: string = 'system'): Promise<void> {
     this.defaultPolicy = await createDefaultRoleGatePolicy(createdBy);
     const versions = [this.defaultPolicy];
     this.policies.set(this.defaultPolicy.policyId, versions);
-    logger.info("Role gate service initialized with default policy");
+    logger.info('Role gate service initialized with default policy');
   }
 
   /**
@@ -645,10 +597,7 @@ export class RoleGateService {
     const versions = this.policies.get(policy.policyId) ?? [];
     versions.push(policy);
     this.policies.set(policy.policyId, versions);
-    logger.info(
-      { policyId: policy.policyId, version: policy.version },
-      "Policy registered",
-    );
+    logger.info({ policyId: policy.policyId, version: policy.version }, 'Policy registered');
   }
 
   /**
@@ -677,7 +626,7 @@ export class RoleGateService {
     options?: {
       policyId?: string;
       policyContext?: Partial<PolicyEvaluationContext>;
-    },
+    }
   ): Promise<RoleGateEvaluation> {
     // Get policy
     const policy = options?.policyId
@@ -685,7 +634,7 @@ export class RoleGateService {
       : this.defaultPolicy;
 
     if (!policy) {
-      throw new Error("No policy available for evaluation");
+      throw new Error('No policy available for evaluation');
     }
 
     // Evaluate
@@ -695,7 +644,7 @@ export class RoleGateService {
       tier,
       policy,
       basisContext,
-      options?.policyContext,
+      options?.policyContext
     );
 
     // Store evaluation
@@ -728,7 +677,7 @@ export class RoleGateService {
 
     for (const evaluations of this.evaluations.values()) {
       for (const evaluation of evaluations) {
-        if (evaluation.decision !== "ALLOW") {
+        if (evaluation.decision !== 'ALLOW') {
           denied.push(evaluation);
         }
       }
@@ -742,7 +691,7 @@ export class RoleGateService {
    */
   getStats(): {
     totalEvaluations: number;
-    byDecision: Record<"ALLOW" | "DENY" | "ESCALATE", number>;
+    byDecision: Record<'ALLOW' | 'DENY' | 'ESCALATE', number>;
     byRole: Record<AgentRole, number>;
     policyCount: number;
   } {
@@ -793,4 +742,4 @@ export {
   TrustTier,
   ROLE_GATE_MATRIX,
   validateRoleGateKernel,
-} from "./types.js";
+} from './types.js';

@@ -13,7 +13,7 @@ export {
   getMaxTierForRole,
   getMinRoleForTier,
   RoleGateValidationError,
-} from "./kernel.js";
+} from './kernel.js';
 
 export {
   BasisPolicyEngine,
@@ -21,4 +21,4 @@ export {
   type PolicyException,
   type PolicyDecision,
   type PolicyAuditEntry,
-} from "./policy.js";
+} from './policy.js';

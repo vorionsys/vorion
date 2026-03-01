@@ -7,12 +7,7 @@
  * @packageDocumentation
  */
 
-import type {
-  ID,
-  Timestamp,
-  ControlAction,
-  TrustLevel,
-} from "../common/types.js";
+import type { ID, Timestamp, ControlAction, TrustLevel } from '../common/types.js';
 
 /**
  * Standard Vorion response contract
@@ -104,7 +99,7 @@ export interface ResponseConfidence {
   boostingFactors: ConfidenceFactor[];
 
   /** Confidence calibration source */
-  calibration: "historical" | "model" | "heuristic" | "expert";
+  calibration: 'historical' | 'model' | 'heuristic' | 'expert';
 }
 
 /**
@@ -140,7 +135,7 @@ export interface Assumption {
   category: AssumptionCategory;
 
   /** How critical is this assumption */
-  criticality: "low" | "medium" | "high" | "critical";
+  criticality: 'low' | 'medium' | 'high' | 'critical';
 
   /** Confidence that assumption holds (0-1) */
   confidence: number;
@@ -159,14 +154,14 @@ export interface Assumption {
  * Categories of assumptions
  */
 export type AssumptionCategory =
-  | "input_validity" // Assuming input is valid/correct
-  | "context_stability" // Assuming context won't change
-  | "resource_availability" // Assuming resources are available
-  | "permission_granted" // Assuming permissions exist
-  | "data_freshness" // Assuming data is current
-  | "model_accuracy" // Assuming model predictions are accurate
-  | "external_service" // Assuming external services work
-  | "user_intent"; // Assuming we understood user intent
+  | 'input_validity'      // Assuming input is valid/correct
+  | 'context_stability'   // Assuming context won't change
+  | 'resource_availability' // Assuming resources are available
+  | 'permission_granted'  // Assuming permissions exist
+  | 'data_freshness'      // Assuming data is current
+  | 'model_accuracy'      // Assuming model predictions are accurate
+  | 'external_service'    // Assuming external services work
+  | 'user_intent';        // Assuming we understood user intent
 
 /**
  * A condition that would invalidate the response
@@ -182,7 +177,7 @@ export interface InvalidityCondition {
   category: InvalidityCategory;
 
   /** Severity if condition occurs */
-  severity: "minor" | "moderate" | "major" | "complete";
+  severity: 'minor' | 'moderate' | 'major' | 'complete';
 
   /** How to detect if condition occurs */
   detection: string;
@@ -198,13 +193,13 @@ export interface InvalidityCondition {
  * Categories of invalidity
  */
 export type InvalidityCategory =
-  | "temporal" // Time-based expiration
-  | "state_change" // System state changed
-  | "data_update" // Underlying data changed
-  | "permission_revoked" // Permissions changed
-  | "context_shift" // Context no longer applies
-  | "external_factor" // External conditions changed
-  | "security_event"; // Security-related invalidation
+  | 'temporal'            // Time-based expiration
+  | 'state_change'        // System state changed
+  | 'data_update'         // Underlying data changed
+  | 'permission_revoked'  // Permissions changed
+  | 'context_shift'       // Context no longer applies
+  | 'external_factor'     // External conditions changed
+  | 'security_event';     // Security-related invalidation
 
 /**
  * Governance decision applied to request
@@ -256,12 +251,7 @@ export interface RequestModification {
  * Constraint applied to response
  */
 export interface ResponseConstraint {
-  type:
-    | "scope_limit"
-    | "rate_limit"
-    | "data_filter"
-    | "output_redact"
-    | "capability_restrict";
+  type: 'scope_limit' | 'rate_limit' | 'data_filter' | 'output_redact' | 'capability_restrict';
   target: string;
   constraint: string;
   reason: string;
@@ -319,7 +309,7 @@ export interface ProcessingStep {
 export interface DataSource {
   sourceId: string;
   sourceName: string;
-  sourceType: "database" | "api" | "cache" | "model" | "user_input" | "system";
+  sourceType: 'database' | 'api' | 'cache' | 'model' | 'user_input' | 'system';
   dataTimestamp: Timestamp;
   confidence: number;
 }
@@ -385,7 +375,7 @@ export interface ReplayInfo {
  */
 export interface ExternalDependency {
   name: string;
-  type: "api" | "database" | "service" | "model";
+  type: 'api' | 'database' | 'service' | 'model';
   version: string;
   stateAtRequest: Record<string, unknown>;
 }
@@ -446,22 +436,22 @@ export interface ContractError {
  * Error categories
  */
 export type ErrorCategory =
-  | "validation" // Input validation failed
-  | "authorization" // Permission denied
-  | "governance" // Governance decision blocked
-  | "resource" // Resource unavailable
-  | "external" // External service failure
-  | "internal" // Internal system error
-  | "timeout" // Operation timed out
-  | "rate_limit" // Rate limit exceeded
-  | "containment"; // Containment restriction
+  | 'validation'        // Input validation failed
+  | 'authorization'     // Permission denied
+  | 'governance'        // Governance decision blocked
+  | 'resource'          // Resource unavailable
+  | 'external'          // External service failure
+  | 'internal'          // Internal system error
+  | 'timeout'           // Operation timed out
+  | 'rate_limit'        // Rate limit exceeded
+  | 'containment';      // Containment restriction
 
 /**
  * Action that was attempted before failure
  */
 export interface AttemptedAction {
   action: string;
-  result: "success" | "partial" | "failed";
+  result: 'success' | 'partial' | 'failed';
   details: string;
 }
 
@@ -493,7 +483,7 @@ export interface CreateResponseRequest<T = unknown> {
  */
 export interface CreateErrorRequest {
   requestId: ID;
-  error: Omit<ContractError, "retryAfterMs"> & { retryAfterMs?: number };
+  error: Omit<ContractError, 'retryAfterMs'> & { retryAfterMs?: number };
   governance?: GovernanceDecision;
   attempted?: AttemptedAction[];
   remediation?: RemediationStep[];

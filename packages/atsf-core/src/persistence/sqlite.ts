@@ -7,14 +7,14 @@
  * @packageDocumentation
  */
 
-import { mkdir } from "fs/promises";
-import { dirname } from "path";
-import type { ID } from "../common/types.js";
-import type { TrustRecord } from "../trust-engine/index.js";
-import type { PersistenceProvider, TrustRecordQuery } from "./types.js";
-import { createLogger } from "../common/logger.js";
+import { mkdir } from 'fs/promises';
+import { dirname } from 'path';
+import type { ID } from '../common/types.js';
+import type { TrustRecord } from '../trust-engine/index.js';
+import type { PersistenceProvider, TrustRecordQuery } from './types.js';
+import { createLogger } from '../common/logger.js';
 
-const logger = createLogger({ component: "persistence-sqlite" });
+const logger = createLogger({ component: 'persistence-sqlite' });
 
 /**
  * SQLite database interface (better-sqlite3 compatible)
@@ -30,10 +30,7 @@ export interface SQLiteDatabase {
  * SQLite statement interface
  */
 export interface SQLiteStatement {
-  run(...params: unknown[]): {
-    changes: number;
-    lastInsertRowid: number | bigint;
-  };
+  run(...params: unknown[]): { changes: number; lastInsertRowid: number | bigint };
   get(...params: unknown[]): unknown;
   all(...params: unknown[]): unknown[];
 }
@@ -41,10 +38,7 @@ export interface SQLiteStatement {
 /**
  * SQLite database constructor type
  */
-export type SQLiteDatabaseConstructor = new (
-  path: string,
-  options?: { readonly?: boolean },
-) => SQLiteDatabase;
+export type SQLiteDatabaseConstructor = new (path: string, options?: { readonly?: boolean }) => SQLiteDatabase;
 
 /**
  * SQLite persistence provider configuration
@@ -89,16 +83,14 @@ interface TrustRecordRow {
  * - Automatic JSON serialization of complex fields
  */
 export class SQLitePersistenceProvider implements PersistenceProvider {
-  readonly name = "sqlite";
+  readonly name = 'sqlite';
   private db: SQLiteDatabase | null = null;
-  private config: Required<Omit<SQLitePersistenceConfig, "Database">> & {
-    Database: SQLiteDatabaseConstructor;
-  };
+  private config: Required<Omit<SQLitePersistenceConfig, 'Database'>> & { Database: SQLiteDatabaseConstructor };
   private initialized = false;
 
   constructor(config: SQLitePersistenceConfig) {
     this.config = {
-      tableName: "trust_records",
+      tableName: 'trust_records',
       walMode: true,
       ...config,
     };
@@ -122,26 +114,20 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 
       // Enable WAL mode for better concurrent performance
       if (this.config.walMode) {
-        this.db.pragma("journal_mode = WAL");
+        this.db.pragma('journal_mode = WAL');
       }
 
       // Enable foreign keys
-      this.db.pragma("foreign_keys = ON");
+      this.db.pragma('foreign_keys = ON');
 
       // Create table if not exists
       this.createSchema();
 
       this.initialized = true;
-      logger.info(
-        { path: this.config.path, table: this.config.tableName },
-        "SQLite persistence initialized",
-      );
+      logger.info({ path: this.config.path, table: this.config.tableName }, 'SQLite persistence initialized');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error(
-        { error: message, path: this.config.path },
-        "Failed to initialize SQLite persistence",
-      );
+      logger.error({ error: message, path: this.config.path }, 'Failed to initialize SQLite persistence');
       throw new Error(`SQLite initialization failed: ${message}`);
     }
   }
@@ -151,7 +137,7 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
    */
   private createSchema(): void {
     if (!this.db) {
-      throw new Error("Database not initialized");
+      throw new Error('Database not initialized');
     }
 
     const tableName = this.config.tableName;
@@ -182,7 +168,7 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
       CREATE INDEX IF NOT EXISTS idx_${tableName}_last_calculated ON ${tableName}(last_calculated_at);
     `);
 
-    logger.debug({ table: tableName }, "SQLite schema created");
+    logger.debug({ table: tableName }, 'SQLite schema created');
   }
 
   /**
@@ -190,18 +176,14 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
    */
   private ensureInitialized(): void {
     if (!this.db || !this.initialized) {
-      throw new Error(
-        "SQLite persistence not initialized. Call initialize() first.",
-      );
+      throw new Error('SQLite persistence not initialized. Call initialize() first.');
     }
   }
 
   /**
    * Convert a TrustRecord to a database row
    */
-  private recordToRow(
-    record: TrustRecord,
-  ): Omit<TrustRecordRow, "created_at" | "updated_at"> {
+  private recordToRow(record: TrustRecord): Omit<TrustRecordRow, 'created_at' | 'updated_at'> {
     return {
       entity_id: record.entityId,
       score: record.score,
@@ -210,7 +192,7 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
       signals: JSON.stringify(record.signals),
       last_calculated_at: record.lastCalculatedAt,
       history: JSON.stringify(record.history),
-      recent_failures: JSON.stringify(record.recentFailures),
+      recent_failures: JSON.stringify([]),
       recent_successes: JSON.stringify(record.recentSuccesses),
       peak_score: record.peakScore,
       consecutive_successes: record.consecutiveSuccesses,
@@ -221,15 +203,16 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
    * Convert a database row to a TrustRecord
    */
   private rowToRecord(row: TrustRecordRow): TrustRecord {
+    const components = JSON.parse(row.components);
     return {
       entityId: row.entity_id,
       score: row.score,
       level: row.level as 0 | 1 | 2 | 3 | 4 | 5,
-      components: JSON.parse(row.components),
+      components,
+      factorScores: {},
       signals: JSON.parse(row.signals),
       lastCalculatedAt: row.last_calculated_at,
       history: JSON.parse(row.history),
-      recentFailures: JSON.parse(row.recent_failures),
       recentSuccesses: JSON.parse(row.recent_successes),
       peakScore: row.peak_score,
       consecutiveSuccesses: row.consecutive_successes,
@@ -277,19 +260,13 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
         row.recent_failures,
         row.recent_successes,
         row.peak_score,
-        row.consecutive_successes,
+        row.consecutive_successes
       );
 
-      logger.debug(
-        { entityId: record.entityId },
-        "Trust record saved to SQLite",
-      );
+      logger.debug({ entityId: record.entityId }, 'Trust record saved to SQLite');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error(
-        { error: message, entityId: record.entityId },
-        "Failed to save trust record",
-      );
+      logger.error({ error: message, entityId: record.entityId }, 'Failed to save trust record');
       throw new Error(`Failed to save trust record: ${message}`);
     }
   }
@@ -302,7 +279,7 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 
     try {
       const stmt = this.db!.prepare(
-        `SELECT * FROM ${this.config.tableName} WHERE entity_id = ?`,
+        `SELECT * FROM ${this.config.tableName} WHERE entity_id = ?`
       );
       const row = stmt.get(entityId) as TrustRecordRow | undefined;
 
@@ -313,7 +290,7 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
       return this.rowToRecord(row);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error({ error: message, entityId }, "Failed to get trust record");
+      logger.error({ error: message, entityId }, 'Failed to get trust record');
       throw new Error(`Failed to get trust record: ${message}`);
     }
   }
@@ -326,22 +303,19 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 
     try {
       const stmt = this.db!.prepare(
-        `DELETE FROM ${this.config.tableName} WHERE entity_id = ?`,
+        `DELETE FROM ${this.config.tableName} WHERE entity_id = ?`
       );
       const result = stmt.run(entityId);
 
       const deleted = result.changes > 0;
       if (deleted) {
-        logger.debug({ entityId }, "Trust record deleted from SQLite");
+        logger.debug({ entityId }, 'Trust record deleted from SQLite');
       }
 
       return deleted;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error(
-        { error: message, entityId },
-        "Failed to delete trust record",
-      );
+      logger.error({ error: message, entityId }, 'Failed to delete trust record');
       throw new Error(`Failed to delete trust record: ${message}`);
     }
   }
@@ -354,14 +328,14 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 
     try {
       const stmt = this.db!.prepare(
-        `SELECT entity_id FROM ${this.config.tableName}`,
+        `SELECT entity_id FROM ${this.config.tableName}`
       );
       const rows = stmt.all() as { entity_id: string }[];
 
       return rows.map((row) => row.entity_id);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error({ error: message }, "Failed to list entity IDs");
+      logger.error({ error: message }, 'Failed to list entity IDs');
       throw new Error(`Failed to list entity IDs: ${message}`);
     }
   }
@@ -378,33 +352,32 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 
       // Build WHERE conditions
       if (options.minLevel !== undefined) {
-        conditions.push("level >= ?");
+        conditions.push('level >= ?');
         params.push(options.minLevel);
       }
       if (options.maxLevel !== undefined) {
-        conditions.push("level <= ?");
+        conditions.push('level <= ?');
         params.push(options.maxLevel);
       }
       if (options.minScore !== undefined) {
-        conditions.push("score >= ?");
+        conditions.push('score >= ?');
         params.push(options.minScore);
       }
       if (options.maxScore !== undefined) {
-        conditions.push("score <= ?");
+        conditions.push('score <= ?');
         params.push(options.maxScore);
       }
 
       // Build query
       let query = `SELECT * FROM ${this.config.tableName}`;
       if (conditions.length > 0) {
-        query += ` WHERE ${conditions.join(" AND ")}`;
+        query += ` WHERE ${conditions.join(' AND ')}`;
       }
 
       // Add sorting
-      const sortBy = options.sortBy ?? "score";
-      const sortOrder = options.sortOrder ?? "desc";
-      const sortColumn =
-        sortBy === "lastCalculatedAt" ? "last_calculated_at" : sortBy;
+      const sortBy = options.sortBy ?? 'score';
+      const sortOrder = options.sortOrder ?? 'desc';
+      const sortColumn = sortBy === 'lastCalculatedAt' ? 'last_calculated_at' : sortBy;
       query += ` ORDER BY ${sortColumn} ${sortOrder.toUpperCase()}`;
 
       // Add pagination
@@ -423,10 +396,7 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
       return rows.map((row) => this.rowToRecord(row));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error(
-        { error: message, options },
-        "Failed to query trust records",
-      );
+      logger.error({ error: message, options }, 'Failed to query trust records');
       throw new Error(`Failed to query trust records: ${message}`);
     }
   }
@@ -439,17 +409,14 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 
     try {
       const stmt = this.db!.prepare(
-        `SELECT 1 FROM ${this.config.tableName} WHERE entity_id = ? LIMIT 1`,
+        `SELECT 1 FROM ${this.config.tableName} WHERE entity_id = ? LIMIT 1`
       );
       const result = stmt.get(entityId);
 
       return result !== undefined;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error(
-        { error: message, entityId },
-        "Failed to check entity existence",
-      );
+      logger.error({ error: message, entityId }, 'Failed to check entity existence');
       throw new Error(`Failed to check entity existence: ${message}`);
     }
   }
@@ -462,14 +429,14 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 
     try {
       const stmt = this.db!.prepare(
-        `SELECT COUNT(*) as count FROM ${this.config.tableName}`,
+        `SELECT COUNT(*) as count FROM ${this.config.tableName}`
       );
       const result = stmt.get() as { count: number };
 
       return result.count;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error({ error: message }, "Failed to count records");
+      logger.error({ error: message }, 'Failed to count records');
       throw new Error(`Failed to count records: ${message}`);
     }
   }
@@ -482,13 +449,10 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 
     try {
       this.db!.exec(`DELETE FROM ${this.config.tableName}`);
-      logger.info(
-        { table: this.config.tableName },
-        "All trust records cleared",
-      );
+      logger.info({ table: this.config.tableName }, 'All trust records cleared');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error({ error: message }, "Failed to clear records");
+      logger.error({ error: message }, 'Failed to clear records');
       throw new Error(`Failed to clear records: ${message}`);
     }
   }
@@ -502,10 +466,10 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
         this.db.close();
         this.db = null;
         this.initialized = false;
-        logger.info({ path: this.config.path }, "SQLite connection closed");
+        logger.info({ path: this.config.path }, 'SQLite connection closed');
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.error({ error: message }, "Failed to close SQLite connection");
+        logger.error({ error: message }, 'Failed to close SQLite connection');
         throw new Error(`Failed to close SQLite connection: ${message}`);
       }
     }
@@ -522,14 +486,12 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
     this.ensureInitialized();
 
     const recordCount = await this.count();
-    const journalMode = this.db!.pragma("journal_mode") as {
-      journal_mode: string;
-    }[];
+    const journalMode = this.db!.pragma('journal_mode') as { journal_mode: string }[];
 
     return {
       recordCount,
       fileSizeBytes: null, // Would need fs.stat to get this
-      walMode: journalMode[0]?.journal_mode === "wal",
+      walMode: journalMode[0]?.journal_mode === 'wal',
     };
   }
 }
@@ -537,8 +499,6 @@ export class SQLitePersistenceProvider implements PersistenceProvider {
 /**
  * Create a new SQLite persistence provider
  */
-export function createSQLiteProvider(
-  config: SQLitePersistenceConfig,
-): SQLitePersistenceProvider {
+export function createSQLiteProvider(config: SQLitePersistenceConfig): SQLitePersistenceProvider {
   return new SQLitePersistenceProvider(config);
 }

@@ -7,13 +7,9 @@
  * This gate returns PASS/REJECT decisions for the Kaizen pipeline.
  */
 
-import { z } from "zod";
-import { TrustTier, TIER_THRESHOLDS } from "./trust-factors.js";
-import {
-  hasCapability,
-  getCapabilitiesForTier,
-  type Capability,
-} from "./trust-capabilities.js";
+import { z } from 'zod';
+import { TrustTier, TIER_THRESHOLDS } from './trust-factors.js';
+import { hasCapability, getCapabilitiesForTier, type Capability } from './trust-capabilities.js';
 
 // =============================================================================
 // VALIDATION GATE TYPES
@@ -24,11 +20,11 @@ import {
  */
 export enum GateDecision {
   /** Agent passes validation, proceed to Layer 2 */
-  PASS = "PASS",
+  PASS = 'PASS',
   /** Agent fails validation, block execution */
-  REJECT = "REJECT",
+  REJECT = 'REJECT',
   /** Agent requires human review before proceeding */
-  ESCALATE = "ESCALATE",
+  ESCALATE = 'ESCALATE',
 }
 
 /**
@@ -36,13 +32,13 @@ export enum GateDecision {
  */
 export enum ValidationSeverity {
   /** Informational - does not affect decision */
-  INFO = "info",
+  INFO = 'info',
   /** Warning - may affect future decisions */
-  WARNING = "warning",
+  WARNING = 'warning',
   /** Error - causes rejection */
-  ERROR = "error",
+  ERROR = 'error',
   /** Critical - immediate rejection with logging */
-  CRITICAL = "critical",
+  CRITICAL = 'critical',
 }
 
 /**
@@ -166,7 +162,7 @@ export interface ValidationGateOptions {
  */
 export type CustomValidator = (
   manifest: AgentManifest,
-  profile?: RegisteredProfile,
+  profile?: RegisteredProfile
 ) => ValidationIssue[];
 
 // =============================================================================
@@ -260,36 +256,35 @@ function validateCARFormat(agentId: string | undefined): ValidationIssue[] {
   // Handle undefined/empty agentId
   if (!agentId) {
     issues.push({
-      code: "MISSING_AGENT_ID",
-      message: "Agent ID is required",
+      code: 'MISSING_AGENT_ID',
+      message: 'Agent ID is required',
       severity: ValidationSeverity.ERROR,
-      path: "agentId",
+      path: 'agentId',
     });
     return issues;
   }
 
   // Basic CAR format: registry.org.class:DOMAINS-Ln@version
-  const carRegex =
-    /^([a-z0-9]+)\.([a-z0-9-]+)\.([a-z0-9-]+):([A-Z]+)-L([0-7])@(\d+\.\d+\.\d+)(?:#[a-z0-9,_-]+)?$/;
+  const carRegex = /^([a-z0-9]+)\.([a-z0-9-]+)\.([a-z0-9-]+):([A-Z]+)-L([0-7])@(\d+\.\d+\.\d+)(?:#[a-z0-9,_-]+)?$/;
 
   if (!carRegex.test(agentId)) {
     // Check if it looks like a legacy format or just an ID
-    if (agentId.includes(":") && agentId.includes("@")) {
+    if (agentId.includes(':') && agentId.includes('@')) {
       issues.push({
-        code: "INVALID_CAR_FORMAT",
-        message: "CAR string format is invalid",
+        code: 'INVALID_CAR_FORMAT',
+        message: 'CAR string format is invalid',
         severity: ValidationSeverity.ERROR,
-        path: "agentId",
-        expected: "registry.org.class:DOMAINS-Ln@x.y.z",
+        path: 'agentId',
+        expected: 'registry.org.class:DOMAINS-Ln@x.y.z',
         actual: agentId,
       });
-    } else if (!agentId.includes(".")) {
+    } else if (!agentId.includes('.')) {
       // Simple ID format - acceptable but noted
       issues.push({
-        code: "SIMPLE_ID_FORMAT",
-        message: "Agent uses simple ID format instead of full CAR string",
+        code: 'SIMPLE_ID_FORMAT',
+        message: 'Agent uses simple ID format instead of full CAR string',
         severity: ValidationSeverity.INFO,
-        path: "agentId",
+        path: 'agentId',
       });
     }
   }
@@ -302,17 +297,17 @@ function validateCARFormat(agentId: string | undefined): ValidationIssue[] {
  */
 function validateAgainstProfile(
   manifest: AgentManifest,
-  profile: RegisteredProfile,
+  profile: RegisteredProfile
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
   // Check organization match
   if (manifest.organization && manifest.organization !== profile.organization) {
     issues.push({
-      code: "ORG_MISMATCH",
-      message: "Organization does not match registered profile",
+      code: 'ORG_MISMATCH',
+      message: 'Organization does not match registered profile',
       severity: ValidationSeverity.ERROR,
-      path: "organization",
+      path: 'organization',
       expected: profile.organization,
       actual: manifest.organization,
     });
@@ -321,10 +316,10 @@ function validateAgainstProfile(
   // Check agent class match
   if (manifest.agentClass && manifest.agentClass !== profile.agentClass) {
     issues.push({
-      code: "CLASS_MISMATCH",
-      message: "Agent class does not match registered profile",
+      code: 'CLASS_MISMATCH',
+      message: 'Agent class does not match registered profile',
       severity: ValidationSeverity.ERROR,
-      path: "agentClass",
+      path: 'agentClass',
       expected: profile.agentClass,
       actual: manifest.agentClass,
     });
@@ -334,10 +329,10 @@ function validateAgainstProfile(
   if (manifest.capabilityLevel !== undefined) {
     if (manifest.capabilityLevel > profile.maxCapabilityLevel) {
       issues.push({
-        code: "CAPABILITY_LEVEL_EXCEEDED",
-        message: "Claimed capability level exceeds registered maximum",
+        code: 'CAPABILITY_LEVEL_EXCEEDED',
+        message: 'Claimed capability level exceeds registered maximum',
         severity: ValidationSeverity.ERROR,
-        path: "capabilityLevel",
+        path: 'capabilityLevel',
         expected: `<= ${profile.maxCapabilityLevel}`,
         actual: String(manifest.capabilityLevel),
       });
@@ -347,16 +342,16 @@ function validateAgainstProfile(
   // Check domains
   if (manifest.domains) {
     const unauthorizedDomains = manifest.domains.filter(
-      (d) => !profile.approvedDomains.includes(d),
+      (d) => !profile.approvedDomains.includes(d)
     );
     if (unauthorizedDomains.length > 0) {
       issues.push({
-        code: "UNAUTHORIZED_DOMAINS",
-        message: `Agent claims unauthorized domains: ${unauthorizedDomains.join(", ")}`,
+        code: 'UNAUTHORIZED_DOMAINS',
+        message: `Agent claims unauthorized domains: ${unauthorizedDomains.join(', ')}`,
         severity: ValidationSeverity.ERROR,
-        path: "domains",
-        expected: profile.approvedDomains.join(", "),
-        actual: manifest.domains.join(", "),
+        path: 'domains',
+        expected: profile.approvedDomains.join(', '),
+        actual: manifest.domains.join(', '),
       });
     }
   }
@@ -364,14 +359,14 @@ function validateAgainstProfile(
   // Check requested capabilities
   if (manifest.requestedCapabilities) {
     const unauthorizedCaps = manifest.requestedCapabilities.filter(
-      (c) => !profile.approvedCapabilities.includes(c),
+      (c) => !profile.approvedCapabilities.includes(c)
     );
     if (unauthorizedCaps.length > 0) {
       issues.push({
-        code: "UNAUTHORIZED_CAPABILITIES",
-        message: `Agent requests unauthorized capabilities: ${unauthorizedCaps.join(", ")}`,
+        code: 'UNAUTHORIZED_CAPABILITIES',
+        message: `Agent requests unauthorized capabilities: ${unauthorizedCaps.join(', ')}`,
         severity: ValidationSeverity.WARNING,
-        path: "requestedCapabilities",
+        path: 'requestedCapabilities',
       });
     }
   }
@@ -384,16 +379,16 @@ function validateAgainstProfile(
  */
 function validateTrustTier(
   manifest: AgentManifest,
-  minimumTier?: TrustTier,
+  minimumTier?: TrustTier
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
   if (manifest.trustScore === undefined) {
     issues.push({
-      code: "MISSING_TRUST_SCORE",
-      message: "Agent manifest does not include trust score",
+      code: 'MISSING_TRUST_SCORE',
+      message: 'Agent manifest does not include trust score',
       severity: ValidationSeverity.WARNING,
-      path: "trustScore",
+      path: 'trustScore',
     });
     return issues;
   }
@@ -404,10 +399,10 @@ function validateTrustTier(
     // Compare numeric tier values directly (TrustTier is a numeric enum 0-7)
     if (agentTier < minimumTier) {
       issues.push({
-        code: "INSUFFICIENT_TRUST_TIER",
+        code: 'INSUFFICIENT_TRUST_TIER',
         message: `Agent trust tier T${agentTier} is below minimum required T${minimumTier}`,
         severity: ValidationSeverity.ERROR,
-        path: "trustScore",
+        path: 'trustScore',
         expected: `>= T${minimumTier}`,
         actual: `T${agentTier}`,
       });
@@ -420,19 +415,14 @@ function validateTrustTier(
 /**
  * Validate requested capabilities against trust tier
  */
-function validateCapabilitiesAgainstTier(manifest: AgentManifest): {
-  issues: ValidationIssue[];
-  allowed: string[];
-  denied: string[];
-} {
+function validateCapabilitiesAgainstTier(
+  manifest: AgentManifest
+): { issues: ValidationIssue[]; allowed: string[]; denied: string[] } {
   const issues: ValidationIssue[] = [];
   const allowed: string[] = [];
   const denied: string[] = [];
 
-  if (
-    !manifest.requestedCapabilities ||
-    manifest.requestedCapabilities.length === 0
-  ) {
+  if (!manifest.requestedCapabilities || manifest.requestedCapabilities.length === 0) {
     return { issues, allowed, denied };
   }
 
@@ -445,10 +435,10 @@ function validateCapabilitiesAgainstTier(manifest: AgentManifest): {
     } else {
       denied.push(capability);
       issues.push({
-        code: "CAPABILITY_TIER_INSUFFICIENT",
+        code: 'CAPABILITY_TIER_INSUFFICIENT',
         message: `Capability ${capability} requires higher trust tier than ${agentTier}`,
         severity: ValidationSeverity.WARNING,
-        path: "requestedCapabilities",
+        path: 'requestedCapabilities',
         actual: capability,
       });
     }
@@ -490,7 +480,7 @@ function validateCapabilitiesAgainstTier(manifest: AgentManifest): {
 export function validateAgent(
   manifest: AgentManifest,
   profile?: RegisteredProfile,
-  options: ValidationGateOptions = {},
+  options: ValidationGateOptions = {}
 ): ValidationGateResult {
   const startTime = Date.now();
   const issues: ValidationIssue[] = [];
@@ -500,10 +490,10 @@ export function validateAgent(
   if (!schemaResult.success) {
     for (const error of schemaResult.error.errors) {
       issues.push({
-        code: "SCHEMA_VALIDATION_FAILED",
+        code: 'SCHEMA_VALIDATION_FAILED',
         message: error.message,
         severity: ValidationSeverity.ERROR,
-        path: error.path.join("."),
+        path: error.path.join('.'),
       });
     }
   }
@@ -513,18 +503,14 @@ export function validateAgent(
   issues.push(...carIssues);
 
   // If agentId is missing, short-circuit with early rejection
-  if (carIssues.some((i) => i.code === "MISSING_AGENT_ID")) {
+  if (carIssues.some(i => i.code === 'MISSING_AGENT_ID')) {
     return {
       decision: GateDecision.REJECT,
       valid: false,
-      agentId: manifest.agentId ?? "unknown",
+      agentId: manifest.agentId ?? 'unknown',
       issues,
-      errors: issues.filter(
-        (i) =>
-          i.severity === ValidationSeverity.ERROR ||
-          i.severity === ValidationSeverity.CRITICAL,
-      ),
-      warnings: issues.filter((i) => i.severity === ValidationSeverity.WARNING),
+      errors: issues.filter(i => i.severity === ValidationSeverity.ERROR || i.severity === ValidationSeverity.CRITICAL),
+      warnings: issues.filter(i => i.severity === ValidationSeverity.WARNING),
       validatedAt: new Date(),
       durationMs: Date.now() - startTime,
     };
@@ -535,10 +521,10 @@ export function validateAgent(
     issues.push(...validateAgainstProfile(manifest, profile));
   } else if (options.requireRegisteredProfile) {
     issues.push({
-      code: "PROFILE_NOT_FOUND",
-      message: "Agent must have a registered profile",
+      code: 'PROFILE_NOT_FOUND',
+      message: 'Agent must have a registered profile',
       severity: ValidationSeverity.ERROR,
-      path: "agentId",
+      path: 'agentId',
     });
   }
 
@@ -549,16 +535,16 @@ export function validateAgent(
   if (options.requiredDomains && options.requiredDomains.length > 0) {
     const agentDomains = manifest.domains || [];
     const missingDomains = options.requiredDomains.filter(
-      (d) => !agentDomains.includes(d),
+      (d) => !agentDomains.includes(d)
     );
     if (missingDomains.length > 0) {
       issues.push({
-        code: "MISSING_REQUIRED_DOMAINS",
-        message: `Agent missing required domains: ${missingDomains.join(", ")}`,
+        code: 'MISSING_REQUIRED_DOMAINS',
+        message: `Agent missing required domains: ${missingDomains.join(', ')}`,
         severity: ValidationSeverity.ERROR,
-        path: "domains",
-        expected: options.requiredDomains.join(", "),
-        actual: agentDomains.join(", ") || "none",
+        path: 'domains',
+        expected: options.requiredDomains.join(', '),
+        actual: agentDomains.join(', ') || 'none',
       });
     }
   }
@@ -574,7 +560,7 @@ export function validateAgent(
         issues.push(...validator(manifest, profile));
       } catch (e) {
         issues.push({
-          code: "CUSTOM_VALIDATOR_ERROR",
+          code: 'CUSTOM_VALIDATOR_ERROR',
           message: `Custom validator failed: ${e instanceof Error ? e.message : String(e)}`,
           severity: ValidationSeverity.WARNING,
         });
@@ -584,21 +570,15 @@ export function validateAgent(
 
   // Separate errors and warnings
   const errors = issues.filter(
-    (i) =>
-      i.severity === ValidationSeverity.ERROR ||
-      i.severity === ValidationSeverity.CRITICAL,
+    (i) => i.severity === ValidationSeverity.ERROR || i.severity === ValidationSeverity.CRITICAL
   );
-  const warnings = issues.filter(
-    (i) => i.severity === ValidationSeverity.WARNING,
-  );
+  const warnings = issues.filter((i) => i.severity === ValidationSeverity.WARNING);
 
   // Determine decision
   let decision: GateDecision;
   let valid: boolean;
 
-  const hasCritical = issues.some(
-    (i) => i.severity === ValidationSeverity.CRITICAL,
-  );
+  const hasCritical = issues.some((i) => i.severity === ValidationSeverity.CRITICAL);
   const hasErrors = errors.length > 0;
   const hasWarnings = warnings.length > 0;
 
@@ -608,15 +588,9 @@ export function validateAgent(
   } else if (options.strict && hasWarnings) {
     decision = GateDecision.REJECT;
     valid = false;
-  } else if (
-    !options.strict &&
-    hasWarnings &&
-    capValidation.denied.length > 0
-  ) {
+  } else if (!options.strict && hasWarnings && capValidation.denied.length > 0) {
     // Agent wants capabilities they can't have - escalate for review
-    decision = options.allowCapabilityEscalation
-      ? GateDecision.ESCALATE
-      : GateDecision.REJECT;
+    decision = options.allowCapabilityEscalation ? GateDecision.ESCALATE : GateDecision.REJECT;
     valid = decision === GateDecision.ESCALATE;
   } else {
     decision = GateDecision.PASS;
@@ -627,20 +601,15 @@ export function validateAgent(
   const recommendations: string[] = [];
   if (capValidation.denied.length > 0) {
     recommendations.push(
-      `Increase trust score to access denied capabilities: ${capValidation.denied.join(", ")}`,
+      `Increase trust score to access denied capabilities: ${capValidation.denied.join(', ')}`
     );
   }
   if (!profile && !options.requireRegisteredProfile) {
-    recommendations.push(
-      "Consider registering agent profile for enhanced validation",
-    );
+    recommendations.push('Consider registering agent profile for enhanced validation');
   }
 
   // Calculate trust tier
-  const trustTier =
-    manifest.trustScore !== undefined
-      ? scoreToTier(manifest.trustScore)
-      : undefined;
+  const trustTier = manifest.trustScore !== undefined ? scoreToTier(manifest.trustScore) : undefined;
 
   return {
     decision,
@@ -653,10 +622,8 @@ export function validateAgent(
     warnings,
     validatedAt: new Date(),
     durationMs: Date.now() - startTime,
-    allowedCapabilities:
-      capValidation.allowed.length > 0 ? capValidation.allowed : undefined,
-    deniedCapabilities:
-      capValidation.denied.length > 0 ? capValidation.denied : undefined,
+    allowedCapabilities: capValidation.allowed.length > 0 ? capValidation.allowed : undefined,
+    deniedCapabilities: capValidation.denied.length > 0 ? capValidation.denied : undefined,
     recommendations: recommendations.length > 0 ? recommendations : undefined,
   };
 }
@@ -667,7 +634,7 @@ export function validateAgent(
 export function isValidAgent(
   manifest: AgentManifest,
   profile?: RegisteredProfile,
-  options?: ValidationGateOptions,
+  options?: ValidationGateOptions
 ): boolean {
   return validateAgent(manifest, profile, options).valid;
 }
@@ -677,16 +644,10 @@ export function isValidAgent(
  */
 export function createValidationGate(defaultOptions: ValidationGateOptions) {
   return {
-    validate: (
-      manifest: AgentManifest,
-      profile?: RegisteredProfile,
-      options?: ValidationGateOptions,
-    ) => validateAgent(manifest, profile, { ...defaultOptions, ...options }),
-    isValid: (
-      manifest: AgentManifest,
-      profile?: RegisteredProfile,
-      options?: ValidationGateOptions,
-    ) => isValidAgent(manifest, profile, { ...defaultOptions, ...options }),
+    validate: (manifest: AgentManifest, profile?: RegisteredProfile, options?: ValidationGateOptions) =>
+      validateAgent(manifest, profile, { ...defaultOptions, ...options }),
+    isValid: (manifest: AgentManifest, profile?: RegisteredProfile, options?: ValidationGateOptions) =>
+      isValidAgent(manifest, profile, { ...defaultOptions, ...options }),
   };
 }
 

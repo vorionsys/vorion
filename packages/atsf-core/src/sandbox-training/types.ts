@@ -12,20 +12,20 @@
 // =============================================================================
 
 /** T1 trust factors that the boot camp tests */
-export type T1Factor = "CT-COMP" | "CT-REL" | "CT-OBS";
+export type T1Factor = 'CT-COMP' | 'CT-REL' | 'CT-OBS';
 
 /** Difficulty progression within each factor */
-export type ChallengeDifficulty = "basic" | "intermediate" | "adversarial";
+export type ChallengeDifficulty = 'basic' | 'intermediate' | 'adversarial';
 
 /** Category of adversarial injection */
 export type AdversarialType =
-  | "malformed_input"
-  | "timeout_pressure"
-  | "privilege_escalation"
-  | "injection"
-  | "rate_flood"
-  | "misleading_context"
-  | "none";
+  | 'malformed_input'
+  | 'timeout_pressure'
+  | 'privilege_escalation'
+  | 'injection'
+  | 'rate_flood'
+  | 'misleading_context'
+  | 'none';
 
 // =============================================================================
 // CHALLENGE DEFINITION
@@ -70,7 +70,7 @@ export interface ChallengeInput {
 /** Evaluation strategy for a challenge */
 export interface ChallengeEvaluator {
   /** Type of evaluation */
-  type: "exact_match" | "schema_validation" | "behavior_check" | "custom";
+  type: 'exact_match' | 'schema_validation' | 'behavior_check' | 'custom';
   /** Expected output (for exact_match) */
   expected?: unknown;
   /** Schema the response must conform to (for schema_validation) */
@@ -202,17 +202,13 @@ export interface GraduationResult {
 // =============================================================================
 
 /** All T1 factors */
-export const T1_FACTORS: readonly T1Factor[] = [
-  "CT-COMP",
-  "CT-REL",
-  "CT-OBS",
-] as const;
+export const T1_FACTORS: readonly T1Factor[] = ['CT-COMP', 'CT-REL', 'CT-OBS'] as const;
 
 /** Difficulty progression order */
 export const DIFFICULTY_ORDER: readonly ChallengeDifficulty[] = [
-  "basic",
-  "intermediate",
-  "adversarial",
+  'basic',
+  'intermediate',
+  'adversarial',
 ] as const;
 
 /** Difficulty weights for scoring */
@@ -224,7 +220,7 @@ export const DIFFICULTY_WEIGHTS: Record<ChallengeDifficulty, number> = {
 
 /** Factor to trust signal type mapping */
 export const FACTOR_TO_SIGNAL: Record<T1Factor, string> = {
-  "CT-COMP": "behavioral.competence",
-  "CT-REL": "behavioral.reliability",
-  "CT-OBS": "compliance.observability",
+  'CT-COMP': 'behavioral.competence',
+  'CT-REL': 'behavioral.reliability',
+  'CT-OBS': 'compliance.observability',
 } as const;

@@ -10,9 +10,9 @@
  * @module @vorionsys/contracts/car/attestation
  */
 
-import { z } from "zod";
-import { CertificationTier, certificationTierSchema } from "./tiers.js";
-import { type DomainCode, domainCodeSchema } from "./domains.js";
+import { z } from 'zod';
+import { CertificationTier, certificationTierSchema } from './tiers.js';
+import { type DomainCode, domainCodeSchema } from './domains.js';
 
 // ============================================================================
 // Attestation Scope
@@ -31,61 +31,49 @@ import { type DomainCode, domainCodeSchema } from "./domains.js";
  * - identity: Identity verification attestation
  */
 export type AttestationScope =
-  | "full"
-  | "domain"
-  | "level"
-  | "training"
-  | "security"
-  | "compliance"
-  | "identity"
-  | "supervision";
+  | 'full'
+  | 'domain'
+  | 'level'
+  | 'training'
+  | 'security'
+  | 'compliance'
+  | 'identity'
+  | 'supervision';
 
 /**
  * Array of all attestation scopes.
  */
 export const ATTESTATION_SCOPES: readonly AttestationScope[] = [
-  "full",
-  "domain",
-  "level",
-  "training",
-  "security",
-  "compliance",
-  "identity",
-  "supervision",
+  'full',
+  'domain',
+  'level',
+  'training',
+  'security',
+  'compliance',
+  'identity',
+  'supervision',
 ] as const;
 
 /**
  * Zod schema for AttestationScope validation.
  */
 export const attestationScopeSchema = z.enum(
-  [
-    "full",
-    "domain",
-    "level",
-    "training",
-    "security",
-    "compliance",
-    "identity",
-    "supervision",
-  ],
-  { errorMap: () => ({ message: "Invalid attestation scope" }) },
+  ['full', 'domain', 'level', 'training', 'security', 'compliance', 'identity', 'supervision'],
+  { errorMap: () => ({ message: 'Invalid attestation scope' }) }
 );
 
 /**
  * Descriptions for attestation scopes.
  */
-export const ATTESTATION_SCOPE_DESCRIPTIONS: Readonly<
-  Record<AttestationScope, string>
-> = {
-  full: "Complete capability attestation covering all aspects of agent certification",
-  domain: "Attestation for a specific capability domain",
-  level: "Attestation for a specific autonomy level",
-  training: "Attestation for training data quality and methodology",
-  security: "Security audit attestation",
-  compliance: "Regulatory compliance attestation",
-  identity: "Identity verification attestation",
-  supervision:
-    "Supervision relationship attestation granting temporary tier elevation",
+export const ATTESTATION_SCOPE_DESCRIPTIONS: Readonly<Record<AttestationScope, string>> = {
+  full: 'Complete capability attestation covering all aspects of agent certification',
+  domain: 'Attestation for a specific capability domain',
+  level: 'Attestation for a specific autonomy level',
+  training: 'Attestation for training data quality and methodology',
+  security: 'Security audit attestation',
+  compliance: 'Regulatory compliance attestation',
+  identity: 'Identity verification attestation',
+  supervision: 'Supervision relationship attestation granting temporary tier elevation',
 } as const;
 
 // ============================================================================
@@ -96,18 +84,18 @@ export const ATTESTATION_SCOPE_DESCRIPTIONS: Readonly<
  * Status of an attestation.
  */
 export type AttestationStatus =
-  | "active" // Currently valid
-  | "expired" // Past expiration date
-  | "revoked" // Explicitly revoked
-  | "suspended" // Temporarily suspended
-  | "pending"; // Awaiting validation
+  | 'active'      // Currently valid
+  | 'expired'     // Past expiration date
+  | 'revoked'     // Explicitly revoked
+  | 'suspended'   // Temporarily suspended
+  | 'pending';    // Awaiting validation
 
 /**
  * Zod schema for AttestationStatus validation.
  */
 export const attestationStatusSchema = z.enum(
-  ["active", "expired", "revoked", "suspended", "pending"],
-  { errorMap: () => ({ message: "Invalid attestation status" }) },
+  ['active', 'expired', 'revoked', 'suspended', 'pending'],
+  { errorMap: () => ({ message: 'Invalid attestation status' }) }
 );
 
 // ============================================================================
@@ -133,14 +121,12 @@ export interface AttestationEvidence {
 /**
  * Zod schema for AttestationEvidence validation.
  */
-export const attestationEvidenceSchema = z
-  .object({
-    testResults: z.string().url().optional(),
-    auditReport: z.string().url().optional(),
-    trainingVerification: z.string().url().optional(),
-    complianceDocumentation: z.string().url().optional(),
-  })
-  .catchall(z.string().url().optional());
+export const attestationEvidenceSchema = z.object({
+  testResults: z.string().url().optional(),
+  auditReport: z.string().url().optional(),
+  trainingVerification: z.string().url().optional(),
+  complianceDocumentation: z.string().url().optional(),
+}).catchall(z.string().url().optional());
 
 // ============================================================================
 // Cryptographic Proof
@@ -275,15 +261,15 @@ export interface AttestationVerificationError {
  * Error codes for attestation verification.
  */
 export type AttestationVerificationErrorCode =
-  | "INVALID_SIGNATURE"
-  | "EXPIRED"
-  | "REVOKED"
-  | "SUSPENDED"
-  | "ISSUER_NOT_TRUSTED"
-  | "SUBJECT_MISMATCH"
-  | "INVALID_FORMAT"
-  | "PROOF_MISSING"
-  | "VERIFICATION_FAILED";
+  | 'INVALID_SIGNATURE'
+  | 'EXPIRED'
+  | 'REVOKED'
+  | 'SUSPENDED'
+  | 'ISSUER_NOT_TRUSTED'
+  | 'SUBJECT_MISMATCH'
+  | 'INVALID_FORMAT'
+  | 'PROOF_MISSING'
+  | 'VERIFICATION_FAILED';
 
 /**
  * Attestation verification warning.
@@ -300,15 +286,15 @@ export interface AttestationVerificationWarning {
  */
 export const attestationVerificationErrorSchema = z.object({
   code: z.enum([
-    "INVALID_SIGNATURE",
-    "EXPIRED",
-    "REVOKED",
-    "SUSPENDED",
-    "ISSUER_NOT_TRUSTED",
-    "SUBJECT_MISMATCH",
-    "INVALID_FORMAT",
-    "PROOF_MISSING",
-    "VERIFICATION_FAILED",
+    'INVALID_SIGNATURE',
+    'EXPIRED',
+    'REVOKED',
+    'SUSPENDED',
+    'ISSUER_NOT_TRUSTED',
+    'SUBJECT_MISMATCH',
+    'INVALID_FORMAT',
+    'PROOF_MISSING',
+    'VERIFICATION_FAILED',
   ]),
   message: z.string(),
 });
@@ -378,9 +364,7 @@ export interface CreateAttestationOptions {
  * });
  * ```
  */
-export function createAttestation(
-  options: CreateAttestationOptions,
-): Attestation {
+export function createAttestation(options: CreateAttestationOptions): Attestation {
   const now = new Date();
   const validityMs = options.validityMs ?? 365 * 24 * 60 * 60 * 1000; // Default: 1 year
 
@@ -393,7 +377,7 @@ export function createAttestation(
     domains: options.domains,
     issuedAt: now,
     expiresAt: new Date(now.getTime() + validityMs),
-    status: "active",
+    status: 'active',
     evidence: options.evidence,
     metadata: options.metadata,
   };
@@ -414,7 +398,7 @@ export function createAttestation(
 export function verifyAttestation(
   attestation: Attestation,
   expectedSubject?: string,
-  trustedIssuers?: readonly string[],
+  trustedIssuers?: readonly string[]
 ): AttestationVerificationResult {
   const errors: AttestationVerificationError[] = [];
   const warnings: AttestationVerificationWarning[] = [];
@@ -423,33 +407,33 @@ export function verifyAttestation(
   // Check expiration
   if (attestation.expiresAt < now) {
     errors.push({
-      code: "EXPIRED",
+      code: 'EXPIRED',
       message: `Attestation expired on ${attestation.expiresAt.toISOString()}`,
     });
   }
 
   // Check status
-  if (attestation.status === "revoked") {
+  if (attestation.status === 'revoked') {
     errors.push({
-      code: "REVOKED",
-      message: "Attestation has been revoked",
+      code: 'REVOKED',
+      message: 'Attestation has been revoked',
     });
-  } else if (attestation.status === "suspended") {
+  } else if (attestation.status === 'suspended') {
     errors.push({
-      code: "SUSPENDED",
-      message: "Attestation is currently suspended",
+      code: 'SUSPENDED',
+      message: 'Attestation is currently suspended',
     });
-  } else if (attestation.status === "pending") {
+  } else if (attestation.status === 'pending') {
     warnings.push({
-      code: "PENDING",
-      message: "Attestation is still pending validation",
+      code: 'PENDING',
+      message: 'Attestation is still pending validation',
     });
   }
 
   // Check subject match
   if (expectedSubject && attestation.subject !== expectedSubject) {
     errors.push({
-      code: "SUBJECT_MISMATCH",
+      code: 'SUBJECT_MISMATCH',
       message: `Attestation subject ${attestation.subject} does not match expected ${expectedSubject}`,
     });
   }
@@ -457,7 +441,7 @@ export function verifyAttestation(
   // Check trusted issuer
   if (trustedIssuers && !trustedIssuers.includes(attestation.issuer)) {
     errors.push({
-      code: "ISSUER_NOT_TRUSTED",
+      code: 'ISSUER_NOT_TRUSTED',
       message: `Issuer ${attestation.issuer} is not in the trusted issuers list`,
     });
   }
@@ -465,17 +449,16 @@ export function verifyAttestation(
   // Check proof presence
   if (!attestation.proof) {
     warnings.push({
-      code: "NO_PROOF",
-      message: "Attestation does not include cryptographic proof",
+      code: 'NO_PROOF',
+      message: 'Attestation does not include cryptographic proof',
     });
   }
 
   // Check for near expiration
-  const daysUntilExpiry =
-    (attestation.expiresAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000);
+  const daysUntilExpiry = (attestation.expiresAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000);
   if (daysUntilExpiry > 0 && daysUntilExpiry < 30) {
     warnings.push({
-      code: "EXPIRING_SOON",
+      code: 'EXPIRING_SOON',
       message: `Attestation expires in ${Math.ceil(daysUntilExpiry)} days`,
     });
   }
@@ -502,7 +485,7 @@ export function verifyAttestation(
 export function isAttestationValid(attestation: Attestation): boolean {
   const now = new Date();
   return (
-    attestation.status === "active" &&
+    attestation.status === 'active' &&
     attestation.issuedAt <= now &&
     attestation.expiresAt > now
   );
@@ -514,9 +497,7 @@ export function isAttestationValid(attestation: Attestation): boolean {
  * @param attestation - The attestation to check
  * @returns Remaining validity in milliseconds (negative if expired)
  */
-export function getAttestationRemainingValidity(
-  attestation: Attestation,
-): number {
+export function getAttestationRemainingValidity(attestation: Attestation): number {
   return attestation.expiresAt.getTime() - Date.now();
 }
 
@@ -529,15 +510,15 @@ export function getAttestationRemainingValidity(
  */
 export function attestationCoversDomain(
   attestation: Attestation,
-  domain: DomainCode,
+  domain: DomainCode
 ): boolean {
   // Full scope covers all domains
-  if (attestation.scope === "full") {
+  if (attestation.scope === 'full') {
     return true;
   }
 
   // Domain scope must include the specific domain
-  if (attestation.scope === "domain" && attestation.domains) {
+  if (attestation.scope === 'domain' && attestation.domains) {
     return attestation.domains.includes(domain);
   }
 
@@ -548,20 +529,15 @@ export function attestationCoversDomain(
  * Type guard to check if a value is a valid AttestationScope.
  */
 export function isAttestationScope(value: unknown): value is AttestationScope {
-  return (
-    typeof value === "string" &&
-    ATTESTATION_SCOPES.includes(value as AttestationScope)
-  );
+  return typeof value === 'string' && ATTESTATION_SCOPES.includes(value as AttestationScope);
 }
 
 /**
  * Type guard to check if a value is a valid AttestationStatus.
  */
-export function isAttestationStatus(
-  value: unknown,
-): value is AttestationStatus {
+export function isAttestationStatus(value: unknown): value is AttestationStatus {
   return (
-    typeof value === "string" &&
-    ["active", "expired", "revoked", "suspended", "pending"].includes(value)
+    typeof value === 'string' &&
+    ['active', 'expired', 'revoked', 'suspended', 'pending'].includes(value)
   );
 }

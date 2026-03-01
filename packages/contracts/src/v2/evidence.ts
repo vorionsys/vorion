@@ -5,7 +5,7 @@
  * Supports forensic completeness requirements.
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 import {
   UUIDSchema,
   TimestampSchema,
@@ -13,40 +13,40 @@ import {
   HashSchema,
   CorrelationIdSchema,
   SeveritySchema,
-} from "../common/primitives.js";
+} from '../common/primitives.js';
 
 // ============================================================================
 // EVIDENCE TYPES
 // ============================================================================
 
 export const EvidenceTypeSchema = z.enum([
-  "INTENT_SUBMISSION",
-  "AUTHORIZATION_DECISION",
-  "EXECUTION_START",
-  "EXECUTION_STEP",
-  "EXECUTION_COMPLETE",
-  "TOOL_INVOCATION",
-  "TOOL_RESPONSE",
-  "TRUST_COMPUTATION",
-  "TRUST_DELTA",
-  "POLICY_EVALUATION",
-  "CONSTRAINT_APPLICATION",
-  "ESCALATION_REQUEST",
-  "ESCALATION_RESPONSE",
-  "VIOLATION_DETECTED",
-  "INCIDENT_REPORT",
-  "HUMAN_INTERVENTION",
-  "SYSTEM_EVENT",
-  "AUDIT_CHECKPOINT",
+  'INTENT_SUBMISSION',
+  'AUTHORIZATION_DECISION',
+  'EXECUTION_START',
+  'EXECUTION_STEP',
+  'EXECUTION_COMPLETE',
+  'TOOL_INVOCATION',
+  'TOOL_RESPONSE',
+  'TRUST_COMPUTATION',
+  'TRUST_DELTA',
+  'POLICY_EVALUATION',
+  'CONSTRAINT_APPLICATION',
+  'ESCALATION_REQUEST',
+  'ESCALATION_RESPONSE',
+  'VIOLATION_DETECTED',
+  'INCIDENT_REPORT',
+  'HUMAN_INTERVENTION',
+  'SYSTEM_EVENT',
+  'AUDIT_CHECKPOINT',
 ]);
 
 export const EvidenceClassificationSchema = z.enum([
-  "ROUTINE",
-  "SIGNIFICANT",
-  "COMPLIANCE_RELEVANT",
-  "SECURITY_RELEVANT",
-  "INCIDENT_RELATED",
-  "LEGAL_HOLD",
+  'ROUTINE',
+  'SIGNIFICANT',
+  'COMPLIANCE_RELEVANT',
+  'SECURITY_RELEVANT',
+  'INCIDENT_RELATED',
+  'LEGAL_HOLD',
 ]);
 
 // ============================================================================
@@ -56,7 +56,7 @@ export const EvidenceClassificationSchema = z.enum([
 export const EvidenceItemSchema = z.object({
   // Identity
   id: UUIDSchema,
-  schemaVersion: SemVerSchema.default("2.0.0"),
+  schemaVersion: SemVerSchema.default('2.0.0'),
   correlationId: CorrelationIdSchema,
 
   // Classification
@@ -77,12 +77,12 @@ export const EvidenceItemSchema = z.object({
   rawPayload: z.string().optional(), // Base64 encoded
 
   // Actor
-  actorType: z.enum(["HUMAN", "AGENT", "SYSTEM", "EXTERNAL"]),
+  actorType: z.enum(['HUMAN', 'AGENT', 'SYSTEM', 'EXTERNAL']),
   actorId: z.string().min(1),
   actorName: z.string().optional(),
 
   // Trust Context
-  trustBandAtTime: z.enum(["T0", "T1", "T2", "T3", "T4", "T5"]).optional(),
+  trustBandAtTime: z.enum(['T0', 'T1', 'T2', 'T3', 'T4', 'T5']).optional(),
   trustProfileId: UUIDSchema.optional(),
 
   // Timing
@@ -103,7 +103,7 @@ export const EvidenceItemSchema = z.object({
 export const EvidencePackSchema = z.object({
   // Identity
   id: UUIDSchema,
-  schemaVersion: SemVerSchema.default("2.0.0"),
+  schemaVersion: SemVerSchema.default('2.0.0'),
   correlationId: CorrelationIdSchema,
 
   // Content
@@ -113,15 +113,7 @@ export const EvidencePackSchema = z.object({
   // Summary
   startTime: TimestampSchema,
   endTime: TimestampSchema.optional(),
-  outcome: z.enum([
-    "SUCCESS",
-    "FAILURE",
-    "ERROR",
-    "TIMEOUT",
-    "CANCELLED",
-    "BLOCKED",
-    "IN_PROGRESS",
-  ]),
+  outcome: z.enum(['SUCCESS', 'FAILURE', 'ERROR', 'TIMEOUT', 'CANCELLED', 'BLOCKED', 'IN_PROGRESS']),
 
   // Classification
   highestSeverity: SeveritySchema.optional(),
@@ -150,18 +142,18 @@ export const EvidencePackSchema = z.object({
 export const ProofEventSchema = z.object({
   // Identity
   id: UUIDSchema,
-  schemaVersion: SemVerSchema.default("2.0.0"),
+  schemaVersion: SemVerSchema.default('2.0.0'),
   correlationId: CorrelationIdSchema,
 
   // Type
   proofType: z.enum([
-    "DECISION_PROOF",
-    "EXECUTION_PROOF",
-    "TRUST_COMPUTATION_PROOF",
-    "POLICY_EVALUATION_PROOF",
-    "COMPLIANCE_ATTESTATION",
-    "INCIDENT_PROOF",
-    "AUDIT_PROOF",
+    'DECISION_PROOF',
+    'EXECUTION_PROOF',
+    'TRUST_COMPUTATION_PROOF',
+    'POLICY_EVALUATION_PROOF',
+    'COMPLIANCE_ATTESTATION',
+    'INCIDENT_PROOF',
+    'AUDIT_PROOF',
   ]),
 
   // References
@@ -201,9 +193,7 @@ export const ProofEventSchema = z.object({
 
 /** ERPL Evidence type enum (distinct from trust-profile EvidenceType) */
 export type ERPLEvidenceType = z.infer<typeof EvidenceTypeSchema>;
-export type EvidenceClassification = z.infer<
-  typeof EvidenceClassificationSchema
->;
+export type EvidenceClassification = z.infer<typeof EvidenceClassificationSchema>;
 export type EvidenceItem = z.infer<typeof EvidenceItemSchema>;
 export type EvidencePack = z.infer<typeof EvidencePackSchema>;
 // export type ProofEvent = z.infer<typeof ProofEventSchema>; // Deprecated name - removed to avoid collision

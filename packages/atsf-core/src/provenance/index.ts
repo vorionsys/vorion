@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { createLogger } from "../common/logger.js";
-import type { ID, ControlAction } from "../common/types.js";
+import { createLogger } from '../common/logger.js';
+import type { ID, ControlAction } from '../common/types.js';
 import type {
   DecisionProvenance,
   ProvenanceRequest,
@@ -22,11 +22,11 @@ import type {
   LayerResult,
   EvidenceItem,
   CounterfactualRejected,
-} from "./types.js";
+} from './types.js';
 
-export * from "./types.js";
+export * from './types.js';
 
-const logger = createLogger({ component: "provenance" });
+const logger = createLogger({ component: 'provenance' });
 
 /**
  * Builder for constructing Decision Provenance Objects incrementally
@@ -53,7 +53,7 @@ export class ProvenanceBuilder {
       counterfactualsRejected: [],
       assumptions: [],
       invalidityConditions: [],
-      engineVersion: "1.0.0",
+      engineVersion: '1.0.0',
     };
   }
 
@@ -135,7 +135,7 @@ export class ProvenanceBuilder {
   setFinalDecision(
     action: ControlAction,
     explanation: string,
-    confidence: number,
+    confidence: number
   ): this {
     this.provenance.finalAction = action;
     this.provenance.finalExplanation = explanation;
@@ -168,13 +168,12 @@ export class ProvenanceBuilder {
       evidence: this.provenance.evidence!,
       assumptions: this.provenance.assumptions!,
       invalidityConditions: this.provenance.invalidityConditions!,
-      finalAction: this.provenance.finalAction ?? "deny",
-      finalExplanation:
-        this.provenance.finalExplanation ?? "No explanation provided",
+      finalAction: this.provenance.finalAction ?? 'deny',
+      finalExplanation: this.provenance.finalExplanation ?? 'No explanation provided',
       totalDurationMs: duration,
       decidedAt: now,
       engineVersion: this.provenance.engineVersion!,
-      provenanceHash: "", // Will be calculated
+      provenanceHash: '', // Will be calculated
     };
 
     // Calculate hash for integrity
@@ -225,7 +224,7 @@ export class ProvenanceService {
         rulesApplied: provenance.rulesApplied.length,
         chainsEvaluated: provenance.causalChainsEvaluated.length,
       },
-      "Provenance record stored",
+      'Provenance record stored'
     );
   }
 
@@ -279,9 +278,7 @@ export class ProvenanceService {
     }
 
     if (query.minConfidence !== undefined) {
-      results = results.filter(
-        (p) => p.confidenceScore >= query.minConfidence!,
-      );
+      results = results.filter((p) => p.confidenceScore >= query.minConfidence!);
     }
 
     if (query.startDate) {
@@ -310,7 +307,7 @@ export class ProvenanceService {
   }> {
     const provenance = this.records.get(decisionId);
     if (!provenance) {
-      return { valid: false, issues: ["Provenance record not found"] };
+      return { valid: false, issues: ['Provenance record not found'] };
     }
 
     const issues: string[] = [];
@@ -318,26 +315,20 @@ export class ProvenanceService {
     // Verify hash
     const expectedHash = await calculateProvenanceHash({
       ...provenance,
-      provenanceHash: "",
+      provenanceHash: '',
     });
 
     if (provenance.provenanceHash !== expectedHash) {
-      issues.push("Hash mismatch - record may have been tampered");
+      issues.push('Hash mismatch - record may have been tampered');
     }
 
     // Verify logical consistency
-    if (
-      provenance.rulesApplied.length === 0 &&
-      provenance.finalAction !== "deny"
-    ) {
-      issues.push("Non-deny action with no rules applied");
+    if (provenance.rulesApplied.length === 0 && provenance.finalAction !== 'deny') {
+      issues.push('Non-deny action with no rules applied');
     }
 
-    if (
-      !provenance.dominantChain &&
-      provenance.causalChainsEvaluated.length > 0
-    ) {
-      issues.push("Causal chains evaluated but no dominant chain selected");
+    if (!provenance.dominantChain && provenance.causalChainsEvaluated.length > 0) {
+      issues.push('Causal chains evaluated but no dominant chain selected');
     }
 
     return {
@@ -401,10 +392,8 @@ export class ProvenanceService {
     return {
       totalRecords: records.length,
       byAction,
-      averageConfidence:
-        records.length > 0 ? totalConfidence / records.length : 0,
-      averageDurationMs:
-        records.length > 0 ? totalDuration / records.length : 0,
+      averageConfidence: records.length > 0 ? totalConfidence / records.length : 0,
+      averageDurationMs: records.length > 0 ? totalDuration / records.length : 0,
     };
   }
 }
@@ -413,17 +402,15 @@ export class ProvenanceService {
  * Calculate SHA-256 hash for a provenance record
  */
 async function calculateProvenanceHash(
-  provenance: Omit<DecisionProvenance, "provenanceHash"> & {
-    provenanceHash?: string;
-  },
+  provenance: Omit<DecisionProvenance, 'provenanceHash'> & { provenanceHash?: string }
 ): Promise<string> {
   const { provenanceHash: _, ...dataToHash } = provenance;
   const data = JSON.stringify(dataToHash);
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /**
@@ -442,7 +429,7 @@ export function createCausalStep(
   operation: string,
   output: string,
   confidence: number,
-  evidence: EvidenceItem[] = [],
+  evidence: EvidenceItem[] = []
 ): CausalStep {
   return {
     stepNumber,
@@ -461,7 +448,7 @@ export function createCausalChain(
   trigger: TriggerEvent,
   steps: CausalStep[],
   outcome: ChainOutcome,
-  confidence: number,
+  confidence: number
 ): CausalChain {
   return {
     chainId: crypto.randomUUID(),
