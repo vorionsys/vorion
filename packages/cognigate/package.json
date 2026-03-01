@@ -38,7 +38,7 @@
     "audit-trail",
     "policy-enforcement"
   ],
-  "author": "Agent Anchor AI <team@agentanchorai.com>",
+  "author": "Vorion <team@vorion.org>",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
