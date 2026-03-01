@@ -66,7 +66,7 @@ export function getRoleGateMatrix(): readonly RoleGateEntry[] {
       if (ROLE_GATE_MATRIX[role][tier]) {
         allowedTiers.push(tier);
         // Track minimum tier
-        const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
+        const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7];
         if (tierOrder.indexOf(tier) < tierOrder.indexOf(minimumTier)) {
           minimumTier = tier;
         }
@@ -87,7 +87,7 @@ export function getRoleGateMatrix(): readonly RoleGateEntry[] {
  * Get minimum required tier for a role
  */
 export function getMinimumTierForRole(role: AgentRole): TrustTier {
-  for (const tier of [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5]) {
+  for (const tier of [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7]) {
     if (ROLE_GATE_MATRIX[role][tier]) {
       return tier;
     }

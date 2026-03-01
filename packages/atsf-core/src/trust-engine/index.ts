@@ -2,7 +2,7 @@
  * Trust Engine - Behavioral Trust Scoring
  *
  * Calculates and maintains trust scores for entities based on behavioral signals.
- * Features 6-tier trust system with event emission for observability.
+ * Features 8-tier trust system (T0-T7) with event emission for observability.
  *
  * @packageDocumentation
  */
@@ -227,6 +227,48 @@ export interface TrustCalculation {
   /** Per-factor scores for all 16 trust factors */
   factorScores: Record<string, number>;
   factors: string[];
+}
+
+/**
+ * Human-readable explanation of a trust score.
+ *
+ * Returned by `TrustEngine.explainScore()` to provide full transparency
+ * into how a score was computed. Every field is designed for audit logs,
+ * dashboards, or end-user display.
+ */
+export interface TrustExplanation {
+  /** Entity ID */
+  entityId: ID;
+  /** Final trust score (0-1000) */
+  score: TrustScore;
+  /** Trust level index (0-7) */
+  level: TrustLevel;
+  /** Human-readable level name (e.g. "Trusted") */
+  levelName: string;
+  /** Score range for the current level */
+  levelRange: { min: number; max: number };
+  /** Score needed to reach the next level (null if at T7) */
+  pointsToNextLevel: number | null;
+  /** Total number of signals ingested */
+  signalCount: number;
+  /** Breakdown of each factor: code, weight, raw score, weighted contribution */
+  factorBreakdown: {
+    code: string;
+    weight: number;
+    rawScore: number;
+    /** Contribution = rawScore * weight * 1000 (portion of final score) */
+    contribution: number;
+  }[];
+  /** Top factors contributing positively (sorted by contribution desc) */
+  topPositiveFactors: string[];
+  /** Top factors dragging score down (sorted by contribution asc) */
+  topNegativeFactors: string[];
+  /** Decay multiplier currently applied (1.0 = no decay) */
+  decayMultiplier: number;
+  /** Days since last signal */
+  daysSinceLastSignal: number | null;
+  /** ISO timestamp of explanation generation */
+  generatedAt: string;
 }
 
 /**
@@ -560,6 +602,12 @@ export class TrustEngine extends EventEmitter {
     }
     score = Math.round(score);
 
+    // Guard: if factor arithmetic produced NaN/Infinity, fall back to 0
+    if (!Number.isFinite(score)) {
+      logger.warn({ entityId, score }, 'Score computation produced non-finite value, defaulting to 0');
+      score = 0;
+    }
+
     // Clamp to valid range
     const clampedScore = Math.max(0, Math.min(1000, score));
     const level = this.scoreToLevel(clampedScore);
@@ -763,9 +811,36 @@ export class TrustEngine extends EventEmitter {
   }
 
   /**
+   * Validate a trust signal before ingestion.
+   * Rejects NaN, Infinity, out-of-range values, and missing required fields.
+   *
+   * @throws Error on invalid signal
+   */
+  private validateSignal(signal: TrustSignal): void {
+    if (!signal) {
+      throw new Error('Signal is required');
+    }
+    if (!signal.entityId) {
+      throw new Error('Signal must have an entityId');
+    }
+    if (!signal.type || typeof signal.type !== 'string') {
+      throw new Error('Signal must have a non-empty string type');
+    }
+    if (!Number.isFinite(signal.value)) {
+      throw new Error(`Invalid signal value: ${signal.value} (must be a finite number)`);
+    }
+    if (signal.value < 0 || signal.value > 1) {
+      throw new Error(`Signal value out of range: ${signal.value} (must be 0.0–1.0)`);
+    }
+  }
+
+  /**
    * Record a trust signal
+   * @throws Error if signal is invalid (NaN, out of range, missing fields)
    */
   async recordSignal(signal: TrustSignal): Promise<void> {
+    this.validateSignal(signal);
+
     let record = this.records.get(signal.entityId);
     let isNewEntity = false;
 
@@ -960,6 +1035,83 @@ export class TrustEngine extends EventEmitter {
    */
   getLevelName(level: TrustLevel): string {
     return TRUST_LEVEL_NAMES[level];
+  }
+
+  /**
+   * Generate a human-readable explanation of an entity's current trust score.
+   *
+   * Provides full transparency into how the score was computed, including
+   * per-factor contributions, decay status, and what's needed to advance.
+   *
+   * @example
+   * ```ts
+   * const explanation = await engine.explainScore('agent-123');
+   * console.log(`Score: ${explanation.score} (${explanation.levelName})`);
+   * console.log(`Top factor: ${explanation.topPositiveFactors[0]}`);
+   * console.log(`Points to next tier: ${explanation.pointsToNextLevel}`);
+   * ```
+   */
+  async explainScore(entityId: ID): Promise<TrustExplanation> {
+    const record = this.records.get(entityId);
+    if (!record) {
+      throw new Error(`Entity not found: ${entityId}`);
+    }
+
+    const signals = record.signals ?? [];
+    const factorScores = this.calculateFactorScores(signals);
+
+    // Build factor breakdown
+    const factorBreakdown = FACTOR_CODES.map((code) => {
+      const weight = FACTOR_WEIGHTS[code];
+      const rawScore = factorScores[code];
+      const contribution = Math.round(rawScore * weight * 1000 * 100) / 100;
+      return { code, weight, rawScore, contribution };
+    });
+
+    // Sort for top positive/negative
+    const sorted = [...factorBreakdown].sort((a, b) => b.contribution - a.contribution);
+    const midpoint = 0.5; // Neutral factor score
+    const topPositiveFactors = sorted
+      .filter((f) => f.rawScore > midpoint)
+      .slice(0, 5)
+      .map((f) => f.code);
+    const topNegativeFactors = sorted
+      .filter((f) => f.rawScore < midpoint)
+      .sort((a, b) => a.contribution - b.contribution)
+      .slice(0, 5)
+      .map((f) => f.code);
+
+    // Calculate decay
+    const lastSignalTime = signals.length > 0
+      ? Math.max(...signals.map((s) => new Date(s.timestamp).getTime()))
+      : null;
+    const daysSinceLastSignal = lastSignalTime !== null
+      ? (Date.now() - lastSignalTime) / (24 * 60 * 60 * 1000)
+      : null;
+    const decayMultiplier = daysSinceLastSignal !== null
+      ? calculateDecayMultiplier(daysSinceLastSignal)
+      : 1.0;
+
+    // Points to next level
+    const currentLevel = record.level;
+    const nextLevelThreshold = currentLevel < 7 ? TRUST_THRESHOLDS[(currentLevel + 1) as TrustLevel] : null;
+    const pointsToNextLevel = nextLevelThreshold !== null ? nextLevelThreshold.min - record.score : null;
+
+    return {
+      entityId,
+      score: record.score,
+      level: currentLevel,
+      levelName: TRUST_LEVEL_NAMES[currentLevel],
+      levelRange: TRUST_THRESHOLDS[currentLevel],
+      pointsToNextLevel: pointsToNextLevel !== null && pointsToNextLevel > 0 ? pointsToNextLevel : null,
+      signalCount: signals.length,
+      factorBreakdown,
+      topPositiveFactors,
+      topNegativeFactors,
+      decayMultiplier: Math.round(decayMultiplier * 1000) / 1000,
+      daysSinceLastSignal: daysSinceLastSignal !== null ? Math.round(daysSinceLastSignal * 100) / 100 : null,
+      generatedAt: new Date().toISOString(),
+    };
   }
 
   /**

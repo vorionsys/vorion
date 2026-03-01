@@ -108,8 +108,8 @@ export function calculateEffectiveCeiling(context: CeilingContext): CeilingSourc
  * Get organizational ceiling (from constraints)
  */
 function getOrgCeiling(context: AgentContext): number {
-  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
-  const tierScores = [99, 299, 499, 699, 899, 1000];
+  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7];
+  const tierScores = [199, 349, 499, 649, 799, 875, 950, 1000];
   const idx = tierOrder.indexOf(context.parentOrg.constraints.maxTrustTier);
   return tierScores[idx] ?? 1000;
 }
@@ -118,8 +118,8 @@ function getOrgCeiling(context: AgentContext): number {
  * Get deployment ceiling (from max allowed tier)
  */
 function getDeploymentCeiling(context: AgentContext): number {
-  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
-  const tierScores = [99, 299, 499, 699, 899, 1000];
+  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7];
+  const tierScores = [199, 349, 499, 649, 799, 875, 950, 1000];
   const idx = tierOrder.indexOf(context.parentOrg.parentDeployment.maxAllowedTier);
   return tierScores[idx] ?? 1000;
 }
@@ -212,7 +212,7 @@ export function enforcePolicyCeiling(
 
   // Check required tier if specified
   if (policyContext.requiredTier !== undefined) {
-    const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
+    const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7];
     const currentIdx = tierOrder.indexOf(tier);
     const requiredIdx = tierOrder.indexOf(policyContext.requiredTier);
 

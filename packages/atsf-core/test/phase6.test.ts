@@ -119,22 +119,24 @@ describe('Phase 6 Type System', () => {
   });
 
   describe('getTierFromScore', () => {
-    it('should return T0 for scores 0-99', () => {
+    it('should return T0 for scores 0-199', () => {
       expect(getTierFromScore(0)).toBe(TrustTier.T0);
       expect(getTierFromScore(50)).toBe(TrustTier.T0);
-      expect(getTierFromScore(99)).toBe(TrustTier.T0);
+      expect(getTierFromScore(199)).toBe(TrustTier.T0);
     });
 
-    it('should return T5 for scores 900+', () => {
-      expect(getTierFromScore(900)).toBe(TrustTier.T5);
-      expect(getTierFromScore(1000)).toBe(TrustTier.T5);
-    });
-
-    it('should return correct tier for boundary values', () => {
-      expect(getTierFromScore(100)).toBe(TrustTier.T1);
-      expect(getTierFromScore(300)).toBe(TrustTier.T2);
+    it('should return correct tier for canonical boundary values', () => {
+      expect(getTierFromScore(200)).toBe(TrustTier.T1);
+      expect(getTierFromScore(350)).toBe(TrustTier.T2);
       expect(getTierFromScore(500)).toBe(TrustTier.T3);
-      expect(getTierFromScore(700)).toBe(TrustTier.T4);
+      expect(getTierFromScore(650)).toBe(TrustTier.T4);
+      expect(getTierFromScore(800)).toBe(TrustTier.T5);
+      expect(getTierFromScore(876)).toBe(TrustTier.T6);
+      expect(getTierFromScore(951)).toBe(TrustTier.T7);
+    });
+
+    it('should return T7 for max score', () => {
+      expect(getTierFromScore(1000)).toBe(TrustTier.T7);
     });
   });
 

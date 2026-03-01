@@ -8,6 +8,7 @@ import {
   type TrustEngineConfig,
   type TrustDecayAppliedEvent,
   type TrustTierChangedEvent,
+  type TrustExplanation,
 } from '../src/trust-engine/index.js';
 import type { TrustSignal } from '../src/common/types.js';
 
@@ -580,6 +581,74 @@ describe('TrustEngine', () => {
       testEngine.removeAllListeners();
 
       expect(testEngine.getListenerStats().totalListeners).toBe(0);
+    });
+  });
+
+  describe('explainScore', () => {
+    it('should throw for unknown entity', async () => {
+      await expect(engine.explainScore('nonexistent')).rejects.toThrow('Entity not found');
+    });
+
+    it('should explain a freshly initialized entity', async () => {
+      await engine.initializeEntity('explain-1', 3);
+
+      const explanation = await engine.explainScore('explain-1');
+
+      expect(explanation.entityId).toBe('explain-1');
+      expect(explanation.score).toBeGreaterThanOrEqual(TRUST_THRESHOLDS[3].min);
+      expect(explanation.level).toBe(3);
+      expect(explanation.levelName).toBe('Monitored');
+      expect(explanation.levelRange).toEqual(TRUST_THRESHOLDS[3]);
+      expect(explanation.signalCount).toBe(0);
+      expect(explanation.factorBreakdown).toHaveLength(16);
+      expect(explanation.generatedAt).toBeDefined();
+      // Fresh entity has no signals, so no decay
+      expect(explanation.daysSinceLastSignal).toBeNull();
+      expect(explanation.decayMultiplier).toBe(1.0);
+    });
+
+    it('should show factor breakdown summing to score', async () => {
+      await engine.initializeEntity('explain-2', 1);
+      // Record a signal
+      await engine.recordSignal({
+        entityId: 'explain-2',
+        type: 'behavioral.task_completed',
+        value: 0.9,
+        source: 'test',
+        timestamp: new Date().toISOString(),
+      });
+
+      const explanation = await engine.explainScore('explain-2');
+
+      // Each factor has code, weight, rawScore, contribution
+      for (const f of explanation.factorBreakdown) {
+        expect(f.code).toBeDefined();
+        expect(f.weight).toBeGreaterThanOrEqual(0);
+        expect(f.rawScore).toBeGreaterThanOrEqual(0);
+        expect(f.rawScore).toBeLessThanOrEqual(1);
+        expect(typeof f.contribution).toBe('number');
+      }
+
+      expect(explanation.signalCount).toBeGreaterThan(0);
+      expect(explanation.daysSinceLastSignal).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should compute pointsToNextLevel', async () => {
+      await engine.initializeEntity('explain-3', 0);
+
+      const explanation = await engine.explainScore('explain-3');
+
+      // At T0 (min score 0), next level is T1 (min 200)
+      expect(explanation.pointsToNextLevel).toBeGreaterThan(0);
+    });
+
+    it('should return null pointsToNextLevel at max level', async () => {
+      await engine.initializeEntity('explain-4', 7);
+
+      const explanation = await engine.explainScore('explain-4');
+
+      expect(explanation.level).toBe(7);
+      expect(explanation.pointsToNextLevel).toBeNull();
     });
   });
 });

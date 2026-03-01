@@ -849,15 +849,18 @@ export const ACI_CANONICAL_PRESETS = BASIS_CANONICAL_PRESETS;
 // =============================================================================
 
 /**
- * Get trust tier from score
+ * Get trust tier from score — canonical 8-tier model (T0–T7)
+ * Uses TRUST_TIER_BOUNDARIES thresholds.
  */
 export function getTierFromScore(score: number): TrustTier {
-  if (score < 100) return TrustTier.T0;
-  if (score < 300) return TrustTier.T1;
-  if (score < 500) return TrustTier.T2;
-  if (score < 700) return TrustTier.T3;
-  if (score < 900) return TrustTier.T4;
-  return TrustTier.T5;
+  if (score >= TRUST_TIER_BOUNDARIES[TrustTier.T7].min) return TrustTier.T7;
+  if (score >= TRUST_TIER_BOUNDARIES[TrustTier.T6].min) return TrustTier.T6;
+  if (score >= TRUST_TIER_BOUNDARIES[TrustTier.T5].min) return TrustTier.T5;
+  if (score >= TRUST_TIER_BOUNDARIES[TrustTier.T4].min) return TrustTier.T4;
+  if (score >= TRUST_TIER_BOUNDARIES[TrustTier.T3].min) return TrustTier.T3;
+  if (score >= TRUST_TIER_BOUNDARIES[TrustTier.T2].min) return TrustTier.T2;
+  if (score >= TRUST_TIER_BOUNDARIES[TrustTier.T1].min) return TrustTier.T1;
+  return TrustTier.T0;
 }
 
 /**
@@ -889,16 +892,3 @@ export function generateHash(data: string): string {
   // This is a placeholder that should be replaced
   return `sha256:${Buffer.from(data).toString('base64').slice(0, 64)}`;
 }
-
-// =============================================================================
-// RE-EXPORTS from trust-engine/phase6-types (legacy compatibility)
-// =============================================================================
-
-export {
-  validateContextType,
-  validateCreationType,
-  CANONICAL_TRUST_PRESETS,
-  CREATION_TYPE_MODIFIERS,
-  type AgentContextPolicy,
-  type TrustEvent,
-} from "../trust-engine/phase6-types.js";

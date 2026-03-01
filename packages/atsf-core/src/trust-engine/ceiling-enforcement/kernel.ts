@@ -143,28 +143,32 @@ export function validateScoreForContext(
  * This is used downstream (in role-gates, context-policy) to determine
  * what operations are allowed.
  * 
- * Tier mapping:
- * - T0: 0-100 (Sandbox)
- * - T1: 100-300 (Monitored)
- * - T2: 300-500 (Supervised)
- * - T3: 500-700 (Autonomous)
- * - T4: 700-900 (Sovereign)
- * - T5: 900-1000 (Verified)
+ * Canonical 8-tier mapping (per BASIS specification):
+ * - T0: 0-199 (Sandbox)
+ * - T1: 200-349 (Observed)
+ * - T2: 350-499 (Provisional)
+ * - T3: 500-649 (Monitored)
+ * - T4: 650-799 (Standard)
+ * - T5: 800-875 (Trusted)
+ * - T6: 876-950 (Certified)
+ * - T7: 951-1000 (Autonomous)
  * 
  * @param clampedScore - Score after ceiling enforcement
- * @returns Tier number 0-5
+ * @returns Tier number 0-7
  */
 export function getTierFromScore(clampedScore: number): number {
   if (clampedScore < 0 || clampedScore > 1000) {
     throw new Error(`Score out of range: ${clampedScore}`);
   }
   
-  if (clampedScore < 100) return 0;
-  if (clampedScore < 300) return 1;
-  if (clampedScore < 500) return 2;
-  if (clampedScore < 700) return 3;
-  if (clampedScore < 900) return 4;
-  return 5;
+  if (clampedScore >= 951) return 7;
+  if (clampedScore >= 876) return 6;
+  if (clampedScore >= 800) return 5;
+  if (clampedScore >= 650) return 4;
+  if (clampedScore >= 500) return 3;
+  if (clampedScore >= 350) return 2;
+  if (clampedScore >= 200) return 1;
+  return 0;
 }
 
 /**
@@ -178,7 +182,7 @@ export function getTierFromScore(clampedScore: number): number {
  * 
  * @param clampedScore - Score after ceiling enforcement
  * @param contextType - Context that limited the score
- * @returns Effective tier 0-5
+ * @returns Effective tier 0-7
  */
 export function getEffectiveAuthorizationTier(
   clampedScore: number,

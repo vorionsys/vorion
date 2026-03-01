@@ -194,8 +194,8 @@ export class OrganizationalContextBuilder {
     const parentMaxTier = input.parentDeployment.maxAllowedTier;
     const requestedMaxTier = input.constraints.maxTrustTier ?? parentMaxTier;
 
-    // Tier comparison (T0 < T1 < ... < T5)
-    const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
+    // Tier comparison (T0 < T1 < ... < T7)
+    const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7];
     const parentTierIdx = tierOrder.indexOf(parentMaxTier);
     const requestedTierIdx = tierOrder.indexOf(requestedMaxTier);
 
@@ -228,7 +228,7 @@ export class OrganizationalContextBuilder {
     // Ensure updates don't exceed parent deployment ceiling
     if (updates.maxTrustTier !== undefined) {
       const parentMaxTier = this.context.parentDeployment!.maxAllowedTier;
-      const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
+      const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7];
       const parentTierIdx = tierOrder.indexOf(parentMaxTier);
       const requestedTierIdx = tierOrder.indexOf(updates.maxTrustTier);
 
@@ -373,7 +373,7 @@ export async function verifyOrganizationalContext(
   }
 
   // Verify constraints don't exceed parent
-  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
+  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7];
   const parentTierIdx = tierOrder.indexOf(context.parentDeployment.maxAllowedTier);
   const orgTierIdx = tierOrder.indexOf(context.constraints.maxTrustTier);
 
@@ -507,8 +507,8 @@ export function getAgentContextCeiling(context: AgentContext): number {
   const contextCeiling = CONTEXT_CEILINGS[context.contextType];
 
   // Org constraint ceiling (convert tier to score)
-  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5];
-  const tierScores = [99, 299, 499, 699, 899, 1000];
+  const tierOrder = [TrustTier.T0, TrustTier.T1, TrustTier.T2, TrustTier.T3, TrustTier.T4, TrustTier.T5, TrustTier.T6, TrustTier.T7];
+  const tierScores = [199, 349, 499, 649, 799, 875, 950, 1000];
   const orgTierIdx = tierOrder.indexOf(context.parentOrg.constraints.maxTrustTier);
   const orgCeiling = tierScores[orgTierIdx];
 
