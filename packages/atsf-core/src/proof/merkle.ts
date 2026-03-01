@@ -87,6 +87,32 @@ export interface ExternalAnchor {
 }
 
 /**
+ * Local Ethereum anchor receipt
+ *
+ * Represents a locally-recorded anchor receipt for a Merkle root hash.
+ * In local/simulated mode the receipt is stored in-memory with a
+ * deterministic transaction hash derived from the root hash so that
+ * anchoring is reproducible and testable without a live blockchain.
+ *
+ * @experimental On-chain Ethereum anchoring is not yet implemented.
+ *               This receipt is produced by the local simulation layer.
+ */
+export interface EthereumAnchorReceipt {
+  /** Deterministic simulated transaction hash (0x-prefixed hex) */
+  transactionHash: string;
+  /** The Merkle root that was anchored */
+  rootHash: string;
+  /** The configured RPC URL (for audit trail) */
+  rpcUrl: string;
+  /** Block number (always 0 in local mode) */
+  blockNumber: number;
+  /** Timestamp when the local anchor was created */
+  anchoredAt: Date;
+  /** Whether this is a simulated (local) anchor */
+  simulated: boolean;
+}
+
+/**
  * Batch aggregation result
  */
 export interface BatchAggregationResult {
@@ -278,6 +304,7 @@ export class MerkleAggregationService {
   private pending: PendingItem[] = [];
   private anchors: Map<string, MerkleAnchor> = new Map();
   private proofsByAnchor: Map<string, Map<string, MerkleProof>> = new Map();
+  private ethereumReceipts: Map<string, EthereumAnchorReceipt> = new Map();
   private anchorTimer: NodeJS.Timeout | null = null;
   private signingKey: nodeCrypto.KeyObject | null = null;
 
@@ -449,18 +476,20 @@ export class MerkleAggregationService {
       }
     }
 
-    // Ethereum (placeholder)
+    // Ethereum (local/simulated — @experimental on-chain support planned for Wave 2)
     if (this.config.externalAnchorServices?.ethereum) {
       try {
         const result = await this.submitEthereumAnchor(
           rootHash,
           this.config.externalAnchorServices.ethereum
         );
-        if (result) {
-          anchors.push(result);
-        }
+        anchors.push(result);
       } catch (error) {
-        logger.warn({ error }, 'Ethereum anchoring failed');
+        logger.error(
+          { error, rpcUrl: this.config.externalAnchorServices.ethereum },
+          'Ethereum anchoring failed — this should not happen in local simulation mode'
+        );
+        throw error;
       }
     }
 
@@ -506,20 +535,83 @@ export class MerkleAggregationService {
   }
 
   /**
-   * Submit Ethereum anchor
+   * Submit Ethereum anchor (local/simulated mode)
+   *
+   * Produces a deterministic, locally-stored anchor receipt derived from
+   * the Merkle root hash.  The simulated transaction hash is an HMAC-SHA256
+   * of the root hash keyed by the configured RPC URL, prefixed with `0x`.
+   * This ensures the same root + endpoint always yields the same "tx hash",
+   * making the output reproducible and testable.
+   *
+   * @experimental On-chain Ethereum anchoring requires a live RPC endpoint,
+   *               a funded wallet, and a deployed anchor contract.  This
+   *               simulated path will be replaced once Wave 2 introduces
+   *               the on-chain connector.
+   *
+   * @throws {Error} If the deterministic hash computation fails.
    */
   private async submitEthereumAnchor(
     rootHash: string,
     rpcUrl: string
-  ): Promise<ExternalAnchor | null> {
-    // Placeholder for Ethereum anchoring
-    // In production, this would:
-    // 1. Create a transaction with rootHash in data field
-    // 2. Sign and submit transaction
-    // 3. Wait for confirmation
+  ): Promise<ExternalAnchor> {
+    logger.warn(
+      { rpcUrl, rootHash: rootHash.substring(0, 16) },
+      'Ethereum on-chain anchoring is not yet available — using local simulation. ' +
+        'Configure a live RPC endpoint and anchor contract for production use.'
+    );
 
-    logger.debug({ rpcUrl }, 'Ethereum anchoring not fully implemented');
-    return null;
+    // Deterministic simulated transaction hash:
+    //   txHash = HMAC-SHA256(key=rpcUrl, data=rootHash)
+    // This is stable across calls with the same inputs and requires no
+    // external dependencies.
+    const txHash =
+      '0x' +
+      nodeCrypto
+        .createHmac('sha256', rpcUrl)
+        .update(rootHash)
+        .digest('hex');
+
+    const receipt: EthereumAnchorReceipt = {
+      transactionHash: txHash,
+      rootHash,
+      rpcUrl,
+      blockNumber: 0,
+      anchoredAt: new Date(),
+      simulated: true,
+    };
+
+    // Persist locally so callers can retrieve the receipt later.
+    this.ethereumReceipts.set(txHash, receipt);
+
+    logger.info(
+      {
+        transactionHash: txHash.substring(0, 18),
+        rootHash: rootHash.substring(0, 16),
+        simulated: true,
+      },
+      'Local Ethereum anchor receipt created'
+    );
+
+    return {
+      type: 'ethereum',
+      reference: txHash,
+      timestamp: receipt.anchoredAt,
+      confirmed: true, // locally confirmed
+    };
+  }
+
+  /**
+   * Retrieve a local Ethereum anchor receipt by its simulated transaction hash.
+   */
+  getEthereumReceipt(transactionHash: string): EthereumAnchorReceipt | undefined {
+    return this.ethereumReceipts.get(transactionHash);
+  }
+
+  /**
+   * Retrieve all local Ethereum anchor receipts.
+   */
+  getAllEthereumReceipts(): EthereumAnchorReceipt[] {
+    return Array.from(this.ethereumReceipts.values());
   }
 
   /**
@@ -577,6 +669,7 @@ export class MerkleAggregationService {
     totalProofs: number;
     pendingItems: number;
     externalAnchors: number;
+    ethereumReceipts: number;
   } {
     let totalProofs = 0;
     let externalAnchors = 0;
@@ -594,6 +687,7 @@ export class MerkleAggregationService {
       totalProofs,
       pendingItems: this.pending.length,
       externalAnchors,
+      ethereumReceipts: this.ethereumReceipts.size,
     };
   }
 

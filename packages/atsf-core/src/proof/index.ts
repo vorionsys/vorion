@@ -424,6 +424,7 @@ export {
   type MerkleProof,
   type MerkleAnchor,
   type ExternalAnchor,
+  type EthereumAnchorReceipt,
   type BatchAggregationResult,
   type MerkleAggregationConfig,
 

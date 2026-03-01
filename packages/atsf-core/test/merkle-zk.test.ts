@@ -11,6 +11,9 @@ import {
   MerkleAggregationService,
   createMerkleAggregationService,
 
+  // Types
+  type EthereumAnchorReceipt,
+
   // ZK Proofs
   createCommitment,
   verifyCommitment,
@@ -140,6 +143,192 @@ describe('Merkle Aggregation Service', () => {
     expect(stats.totalAnchors).toBe(1);
     expect(stats.totalProofs).toBe(2);
     expect(stats.pendingItems).toBe(0);
+  });
+
+  it('should track ethereumReceipts in stats when external anchoring disabled', async () => {
+    const service = createMerkleAggregationService({
+      enableExternalAnchoring: false,
+    });
+
+    await service.addItem('item-1', 'data-1');
+    await service.anchor();
+
+    const stats = service.getStats();
+    expect(stats.ethereumReceipts).toBe(0);
+  });
+});
+
+// =============================================================================
+// ETHEREUM ANCHOR (LOCAL/SIMULATED) TESTS
+// =============================================================================
+
+describe('Ethereum Anchor - Local Simulation', () => {
+  it('should produce an ExternalAnchor with type ethereum when anchoring', async () => {
+    const service = createMerkleAggregationService({
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: true,
+      externalAnchorServices: {
+        ethereum: 'http://localhost:8545',
+      },
+    });
+
+    await service.addItem('item-1', 'proof-data-1');
+    await service.addItem('item-2', 'proof-data-2');
+
+    const result = await service.anchor();
+
+    expect(result).toBeDefined();
+    expect(result!.anchor.externalAnchors.length).toBeGreaterThanOrEqual(1);
+
+    const ethAnchor = result!.anchor.externalAnchors.find((a) => a.type === 'ethereum');
+    expect(ethAnchor).toBeDefined();
+    expect(ethAnchor!.reference).toMatch(/^0x[0-9a-f]{64}$/);
+    expect(ethAnchor!.confirmed).toBe(true);
+    expect(ethAnchor!.timestamp).toBeInstanceOf(Date);
+  });
+
+  it('should produce deterministic transaction hashes for same root and rpcUrl', async () => {
+    // Two services with the same config should produce the same tx hash
+    // for the same data (since the root hash will be the same).
+    const config = {
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: true,
+      externalAnchorServices: {
+        ethereum: 'http://localhost:8545',
+      },
+    };
+
+    const service1 = createMerkleAggregationService(config);
+    const service2 = createMerkleAggregationService(config);
+
+    // Add identical items so trees produce the same root hash
+    await service1.addItem('item-a', 'data-a');
+    await service2.addItem('item-a', 'data-a');
+
+    const result1 = await service1.anchor();
+    const result2 = await service2.anchor();
+
+    const txHash1 = result1!.anchor.externalAnchors.find((a) => a.type === 'ethereum')!.reference;
+    const txHash2 = result2!.anchor.externalAnchors.find((a) => a.type === 'ethereum')!.reference;
+
+    expect(txHash1).toBe(txHash2);
+  });
+
+  it('should produce different transaction hashes for different rpcUrls', async () => {
+    const service1 = createMerkleAggregationService({
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: true,
+      externalAnchorServices: { ethereum: 'http://localhost:8545' },
+    });
+
+    const service2 = createMerkleAggregationService({
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: true,
+      externalAnchorServices: { ethereum: 'http://mainnet.infura.io/v3/test' },
+    });
+
+    await service1.addItem('item-a', 'data-a');
+    await service2.addItem('item-a', 'data-a');
+
+    const result1 = await service1.anchor();
+    const result2 = await service2.anchor();
+
+    const txHash1 = result1!.anchor.externalAnchors.find((a) => a.type === 'ethereum')!.reference;
+    const txHash2 = result2!.anchor.externalAnchors.find((a) => a.type === 'ethereum')!.reference;
+
+    expect(txHash1).not.toBe(txHash2);
+  });
+
+  it('should store and retrieve EthereumAnchorReceipt', async () => {
+    const service = createMerkleAggregationService({
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: true,
+      externalAnchorServices: { ethereum: 'http://localhost:8545' },
+    });
+
+    await service.addItem('item-1', 'data-1');
+    const result = await service.anchor();
+
+    const ethAnchor = result!.anchor.externalAnchors.find((a) => a.type === 'ethereum')!;
+    const receipt = service.getEthereumReceipt(ethAnchor.reference);
+
+    expect(receipt).toBeDefined();
+    expect(receipt!.transactionHash).toBe(ethAnchor.reference);
+    expect(receipt!.rootHash).toBe(result!.anchor.rootHash);
+    expect(receipt!.rpcUrl).toBe('http://localhost:8545');
+    expect(receipt!.blockNumber).toBe(0);
+    expect(receipt!.simulated).toBe(true);
+    expect(receipt!.anchoredAt).toBeInstanceOf(Date);
+  });
+
+  it('should return all ethereum receipts', async () => {
+    const service = createMerkleAggregationService({
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: true,
+      externalAnchorServices: { ethereum: 'http://localhost:8545' },
+    });
+
+    await service.addItem('item-1', 'data-1');
+    await service.anchor();
+
+    await service.addItem('item-2', 'data-2');
+    await service.anchor();
+
+    const receipts = service.getAllEthereumReceipts();
+    expect(receipts.length).toBe(2);
+    expect(receipts.every((r) => r.simulated === true)).toBe(true);
+  });
+
+  it('should track ethereumReceipts count in stats', async () => {
+    const service = createMerkleAggregationService({
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: true,
+      externalAnchorServices: { ethereum: 'http://localhost:8545' },
+    });
+
+    await service.addItem('item-1', 'data-1');
+    await service.anchor();
+
+    const stats = service.getStats();
+    expect(stats.ethereumReceipts).toBe(1);
+    expect(stats.externalAnchors).toBe(1);
+  });
+
+  it('should not produce ethereum anchors when enableExternalAnchoring is false', async () => {
+    const service = createMerkleAggregationService({
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: false,
+      externalAnchorServices: { ethereum: 'http://localhost:8545' },
+    });
+
+    await service.addItem('item-1', 'data-1');
+    const result = await service.anchor();
+
+    expect(result!.anchor.externalAnchors.length).toBe(0);
+    expect(service.getAllEthereumReceipts().length).toBe(0);
+  });
+
+  it('should not produce ethereum anchors when no ethereum URL configured', async () => {
+    const service = createMerkleAggregationService({
+      minBatchSize: 1,
+      maxBatchSize: 100,
+      enableExternalAnchoring: true,
+      externalAnchorServices: {},
+    });
+
+    await service.addItem('item-1', 'data-1');
+    const result = await service.anchor();
+
+    expect(result!.anchor.externalAnchors.length).toBe(0);
+    expect(service.getAllEthereumReceipts().length).toBe(0);
   });
 });
 
