@@ -16,12 +16,15 @@
  * Run:  npx tsx examples/crewai-integration.ts
  */
 
-import { TrustEngine, TRUST_LEVEL_NAMES, TrustInsufficientError } from '@vorionsys/atsf-core';
 import {
+  TrustEngine,
+  TRUST_LEVEL_NAMES,
+  TrustInsufficientError,
   createCrewAgentExecutor,
   createCrewExecutor,
   createCrewTrustTools,
 } from '@vorionsys/atsf-core';
+
 import type { CrewAgentConfig, CrewConfig, CrewTaskConfig } from '@vorionsys/atsf-core';
 
 // ---------------------------------------------------------------------------
@@ -149,7 +152,7 @@ async function main(): Promise<void> {
   const cb = analystExecutor.callbackHandler;
   for (let i = 0; i < 5; i++) {
     await cb.handleTaskStart('failure-sim', `fail-${i}`);
-    await cb.handleTaskError(new Error('Simulated error'), `fail-${i}`);
+    await cb.handleTaskError('failure-sim', new Error('Simulated error'), `fail-${i}`);
   }
 
   try {
