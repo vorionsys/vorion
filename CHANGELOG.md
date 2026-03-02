@@ -5,6 +5,36 @@ All notable changes to the Vorion monorepo will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.5] — 2026-03-01
+
+### Added
+- **LangChain Example**: `examples/langchain-integration.ts` — TrustCallbackHandler, TrustAwareExecutor, trust-gated tools with signal recording against real LangChain adapter API
+- **CrewAI Example**: `examples/crewai-integration.ts` — CrewAgentExecutor per-agent trust gating, CrewExecutor.kickoff crew-level enforcement, task failure simulation
+- **AutoGen Example**: `examples/autogen-integration.ts` — raw TrustSignalRecorder adapter pattern for AutoGen event hooks, trustGatedAction, speaker-filtering pattern
+
+### Fixed
+- `validateCapabilities` stub in `packages/runtime/src/trust-facade/index.ts` replaced with real action-set validation (KNOWN_ACTIONS set, capability regex, admin/wildcard rejection)
+- `generateHash` placeholder in `packages/atsf-core/src/phase6/types.ts` replaced with real SHA-256 via Node.js `crypto` (`sha256:<64-char-hex>` format)
+- `packages/atsf-core/vitest.config.ts` include pattern expanded to `tests/**/*.test.ts` (Phase 6 tests in `tests/phase6/` were unreachable)
+- Stale `voriongit` GitHub org references purged from `packages/shared-constants/dist/` (clean rebuild after deleting dist + .turbo)
+- `Bo Xandar Lee` alias removed from `README.md` and `GOVERNANCE.md`
+- `vorion-org` GitHub link in `apps/kaizen/src/lib/intent-routing.ts` updated to `vorionsys`
+
+### Changed
+- Coverage thresholds (50% lines/functions/branches/statements) added to 8 packages: `council`, `proof-plane`, `ai-gateway`, `car-cli`, `car-client`, `contracts`, `shared-constants`, `sdk`
+
+### Tests Added
+- Phase 6 (`atsf-core/tests/phase6/phase6.test.ts`): 149 tests spanning all 5 architectural decisions
+  - Q1 ceiling enforcement: 29 tests (clampToCeiling, tier boundaries T0-T7, audit trail hashing)
+  - Q2 context policy: 26 tests (validateContextType, CONTEXT_CEILINGS, immutability, multi-tenant isolation)
+  - Q3 role gates: 19 tests (full ROLE_GATE_MATRIX coverage, validateRoleGateKernel, BASIS enforcement)
+  - Q4 weight presets: 18 tests (all 3 CANONICAL_TRUST_PRESETS, sum-to-1 validation, delta tracking)
+  - Q5 creation modifiers: 40 tests (validateCreationType, modifier arithmetic, getTierFromScore, migration events)
+  - Integration: 7 tests (multi-layer composition, efficiency metrics)
+  - Performance: 4 tests (sub-millisecond timing assertions)
+  - Hashing: 6 tests (determinism, format, unicode, empty string)
+- Runtime: 62/62 tests continue to pass after validateCapabilities fix
+
 ## [0.1.4] — 2026-03-01
 
 ### Added

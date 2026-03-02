@@ -28,6 +28,9 @@ Local mode (in-memory) requires no additional setup.
 | [`trust-scoring.ts`](trust-scoring.ts) | Trust score lifecycle: get status, submit outcomes, view history, understand tier transitions (T0-T7) |
 | [`governance.ts`](governance.ts) | Governance enforcement: parse intents, enforce rules, check permissions, handle decisions |
 | [`car-identity.ts`](car-identity.ts) | CAR (Contextual Authority Record): generate, parse, validate, and manipulate CAR identity strings |
+| [`langchain-integration.ts`](langchain-integration.ts) | LangChain integration: TrustCallbackHandler, TrustAwareExecutor, trust-gated tools |
+| [`crewai-integration.ts`](crewai-integration.ts) | CrewAI integration: per-agent CrewAgentExecutor, crew-level kickoff with trust gating |
+| [`autogen-integration.ts`](autogen-integration.ts) | AutoGen integration: TrustSignalRecorder wrapper, trust-gated actions, speaker filtering |
 
 ## Running
 

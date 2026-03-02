@@ -70,7 +70,7 @@ const INTENT_ROUTES: Record<string, Record<string, IntentRoute>> = {
       systemContext:
         'The user is a developer looking to contribute to the Vorion open-source project. Guide them toward contribution guidelines, good first issues, and the repository structure.',
       suggestedTerms: ['open-source', 'basis-protocol'],
-      directRoute: 'https://github.com/vorion-org',
+      directRoute: 'https://github.com/vorionsys',
     },
   },
 

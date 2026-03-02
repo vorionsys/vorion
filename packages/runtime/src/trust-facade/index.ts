@@ -328,11 +328,41 @@ export class TrustFacade implements TrustGate {
   // ============================================================
 
   private validateCapabilities(capabilities?: string[]): string[] {
-    // Stub - would validate against capability registry
-    if (!capabilities) {
+    if (!capabilities || capabilities.length === 0) {
       return [];
     }
-    return capabilities.filter((cap) => !cap.includes('admin'));
+
+    const KNOWN_ACTIONS = new Set(['read', 'write', 'execute', 'delete', 'create', 'update', 'list', 'query', 'invoke', 'publish', 'subscribe']);
+    // Capability format: "action:resource" or "action:*" — wildcards allowed only on resource
+    const CAPABILITY_PATTERN = /^[a-z][a-z0-9_-]*:[a-z0-9_\-/*]+$/;
+    const denied: string[] = [];
+    const valid: string[] = [];
+
+    for (const cap of capabilities) {
+      // Reject blanket admin access
+      if (cap === 'admin' || cap === '*' || cap.startsWith('admin:')) {
+        denied.push(cap);
+        continue;
+      }
+      // Validate format
+      if (!CAPABILITY_PATTERN.test(cap)) {
+        denied.push(cap);
+        continue;
+      }
+      // Validate action is a known type
+      const action = cap.split(':')[0]!;
+      if (!KNOWN_ACTIONS.has(action)) {
+        denied.push(cap);
+        continue;
+      }
+      valid.push(cap);
+    }
+
+    if (denied.length > 0) {
+      logger.warn({ denied }, 'validateCapabilities: rejected invalid or forbidden capabilities');
+    }
+
+    return valid;
   }
 
   private calculateInitialScore(agent: AgentCredentials): number {

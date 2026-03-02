@@ -3,23 +3,22 @@
 > **Honest status:** 0 external users. 0 production deployments outside our own.
 > This roadmap exists so you can decide whether we're worth watching.
 
-## Current: v0.1.1 — Humble First Release (Feb 2026)
+## Current: v0.1.5 — Wave 3 (March 2026)
 
-**What shipped:**
-- `@vorionsys/basis` — Core governance schema + validation
-- `@vorionsys/atsf-core` — Trust scoring engine (T0–T7)
-- `@vorionsys/car-id` — Agent identity registry
-- `@vorionsys/tripwire` — Pre-reasoning safety checks
-- `@vorionsys/cognigate-client` — Client SDK for Cognigate runtime
-- [Cognigate](https://cognigate.dev) — Live enforcement runtime (Python/FastAPI)
-- 15,309 tests across the monorepo
+**What shipped (v0.1.4 + v0.1.5):**
+- All P0 critical fixes: JWT, CORS, /ready endpoint, `computeEfficiencyMetric`, phantom package
+- Phase 6 architectural decisions: 149-test suite covering Q1–Q5 (ceil enforcement, context immutability, role gates, weight presets, creation modifiers)
+- `validateCapabilities` and `generateHash` stubs replaced with real implementations
+- LangChain, CrewAI, AutoGen integration examples (`examples/`)
+- Coverage thresholds added to 8 packages
+- Monitoring, tracing, load-test scripts, OpenAPI spec, migration guide
+- 15,000+ tests across the monorepo
 - [BASIS spec v0.1](BASIS.md) — open for feedback
 
 **What's honest:**
 - No external contributors yet
 - No independent security audit
-- No published benchmarks
-- Tier boundaries (T0–T7) are arbitrary starting points
+- Tier boundaries (T0–T7) are starting points, not validated against real agent behavior
 - Two maintainers, both self-taught
 
 ## v0.2 — Feedback-Driven (Target: Mid-April 2026)
@@ -27,9 +26,9 @@
 *This milestone depends entirely on community feedback. If nobody cares, we'll keep building anyway — but priorities shift.*
 
 **Planned:**
-- [ ] LangChain integration example (working wrapper, not toy)
-- [ ] CrewAI integration example
-- [ ] AutoGen integration example
+- [x] LangChain integration example (working wrapper, not toy)
+- [x] CrewAI integration example
+- [x] AutoGen integration example
 - [ ] Published latency benchmarks (p50/p95/p99)
 - [ ] Improved TRIPWIRE patterns based on red-team feedback
 - [ ] BASIS spec v0.2 incorporating community input
@@ -88,5 +87,5 @@ Former banquet servers who learned to code with AI tools. Full story at [vorion.
 
 ---
 
-*Last updated: February 2026*
+*Last updated: March 2026*
 *Stars when this was written: probably still 0*

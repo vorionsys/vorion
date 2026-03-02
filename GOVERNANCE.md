@@ -12,7 +12,7 @@ How decisions get made in the Vorion project.
 | Name | GitHub | Role |
 |------|--------|------|
 | Alex Blanc | [@vorionsys](https://github.com/vorionsys) | Co-founder, spec lead |
-| Ryan Cason (Bo Xandar Lee) | [@chunkstar](https://github.com/chunkstar) | Co-founder, engineering lead |
+| Ryan Cason | [@chunkstar](https://github.com/chunkstar) | Co-founder, engineering lead |
 
 Maintainers have merge authority on all repositories under `vorionsys/`.
 

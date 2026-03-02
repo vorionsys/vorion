@@ -176,7 +176,7 @@ Apache-2.0. See [LICENSE](LICENSE) for details.
 
 ## The people behind Vorion
 
-Created by **Alex Blanc** and **Ryan Cason (Bo Xandar Lee)** — two former banquet servers who taught themselves to code with AI and wanted to give something back to the community.
+Created by **Alex Blanc** and **Ryan Cason** — two former banquet servers who taught themselves to code with AI and wanted to give something back to the community.
 
 We believe AI is humanity's greatest asset in the making, but it won't happen by chance. It must be guided.
 

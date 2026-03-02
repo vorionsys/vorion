@@ -14,6 +14,7 @@
  */
 
 import { z } from 'zod';
+import { createHash } from 'node:crypto';
 
 // =============================================================================
 // COMMON ENUMS & CONSTANTS
@@ -885,10 +886,8 @@ export function clampToCeiling(score: number, ceiling: number): number {
 }
 
 /**
- * Generate SHA-256 hash (placeholder - use crypto in implementation)
+ * Generate SHA-256 hash using Node.js crypto
  */
 export function generateHash(data: string): string {
-  // In real implementation, use crypto.subtle.digest or Node's crypto
-  // This is a placeholder that should be replaced
-  return `sha256:${Buffer.from(data).toString('base64').slice(0, 64)}`;
+  return `sha256:${createHash('sha256').update(data).digest('hex')}`;
 }

@@ -5,5 +5,12 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/index.ts', '**/*.test.ts'],
+      thresholds: { lines: 50, functions: 50, branches: 50, statements: 50 },
+    },
   },
 });
