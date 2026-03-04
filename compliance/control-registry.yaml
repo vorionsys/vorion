@@ -1712,6 +1712,10 @@ registry:
   # ===========================================================================
   # CROSS-REFERENCES: Control Equivalences Across Frameworks
   # ===========================================================================
+
+
+
+
     # === GENERATED: organizational + technical_extended ===
     organizational:
       description: "Controls implemented via organizational policy, HR procedures, and infrastructure provider inheritance (Vercel SOC 2 Type II, Neon SOC 2 Type II). These controls are policy-and-procedure based rather than implemented directly in code."

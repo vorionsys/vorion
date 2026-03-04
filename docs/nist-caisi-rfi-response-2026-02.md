@@ -529,7 +529,7 @@ contact@vorion.org
 
 ---
 
-*Document Version: 2.1*
-*Prepared: February 2026*
+*Document Version: 2.2*
+*Prepared: March 2026*
 *For submission to: www.regulations.gov, Docket NIST-2025-0035*
 *Deadline: March 9, 2026, 11:59 PM ET*
