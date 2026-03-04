@@ -1,0 +1,1536 @@
+openapi: 3.1.0
+info:
+  contact:
+    name: AgentAnchor Support
+    url: https://agentanchorai.com
+  description: "AI Governance Operating System API - Manage agents, trust scores,\
+    \ marketplace, and governance with complete audit trails."
+  license:
+    name: Proprietary
+    url: https://agentanchorai.com/terms
+  title: AgentAnchor API
+  version: 1.0.0
+servers:
+- description: Production
+  url: https://app.agentanchorai.com/api/v1
+- description: Development
+  url: http://localhost:3000/api/v1
+security:
+- BearerAuth: []
+tags:
+- description: "Create, manage, and query AI agents"
+  name: Agents
+- description: Trust score management and history
+  name: Trust
+- description: Governance council decisions and precedents
+  name: Council
+- description: "Agent listings, acquisitions, and feedback"
+  name: Marketplace
+- description: Immutable governance records and verification
+  name: Truth Chain
+- description: Audit trail and anomaly detection
+  name: Observer
+- description: Event subscriptions and delivery
+  name: Webhooks
+- description: User notification management
+  name: Notifications
+paths:
+  /agents:
+    get:
+      description: "Retrieve a paginated list of agents. Returns user's agents if\
+        \ authenticated, otherwise public marketplace agents."
+      operationId: listAgents
+      parameters:
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - draft
+          - training
+          - active
+          - suspended
+          - archived
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: published
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listAgents_200_response"
+          description: List of agents
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+      summary: List agents
+      tags:
+      - Agents
+  /agents/{id}:
+    get:
+      description: Retrieve detailed information about a specific agent.
+      operationId: getAgent
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAgent_200_response"
+          description: Agent details
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      summary: Get agent details
+      tags:
+      - Agents
+  /agents/{id}/trust:
+    get:
+      description: Retrieve trust score change history for an agent.
+      operationId: getTrustHistory
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getTrustHistory_200_response"
+          description: Trust history records
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      summary: Get trust history
+      tags:
+      - Trust
+    post:
+      description: Apply a trust score change to an agent. Requires write scope.
+      operationId: applyTrustChange
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrustChange"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/applyTrustChange_200_response"
+          description: Updated trust information
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      summary: Apply trust change
+      tags:
+      - Trust
+  /truth-chain:
+    get:
+      description: Retrieve immutable governance records from the truth chain.
+      operationId: listTruthChainRecords
+      parameters:
+      - explode: true
+        in: query
+        name: agent_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: record_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listTruthChainRecords_200_response"
+          description: List of truth chain records
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: List truth chain records
+      tags:
+      - Truth Chain
+    post:
+      description: Create a new immutable record on the truth chain. Requires admin
+        scope.
+      operationId: createTruthChainRecord
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createTruthChainRecord_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createTruthChainRecord_201_response"
+          description: Created record
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: Create truth chain record
+      tags:
+      - Truth Chain
+  /truth-chain/verify/{hash}:
+    get:
+      description: Verify the authenticity and chain integrity of a truth chain record.
+        This endpoint is public.
+      operationId: verifyTruthChainRecord
+      parameters:
+      - description: SHA-256 hash of the record
+        explode: false
+        in: path
+        name: hash
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+          description: Verification result
+        "404":
+          $ref: "#/components/responses/NotFound"
+      security: []
+      summary: Verify record
+      tags:
+      - Truth Chain
+  /marketplace/listings:
+    get:
+      description: Search and filter marketplace agent listings.
+      operationId: listMarketplaceListings
+      parameters:
+      - description: Search query
+        explode: true
+        in: query
+        name: q
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: category
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: min_trust
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: price_type
+        required: false
+        schema:
+          enum:
+          - free
+          - one_time
+          - subscription
+          - commission
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          enum:
+          - newest
+          - popular
+          - rating
+          - trust
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listMarketplaceListings_200_response"
+          description: List of marketplace listings
+      security: []
+      summary: Browse listings
+      tags:
+      - Marketplace
+    post:
+      description: Create a new marketplace listing for an agent.
+      operationId: createMarketplaceListing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createMarketplaceListing_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createMarketplaceListing_201_response"
+          description: Created listing
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: Create listing
+      tags:
+      - Marketplace
+  /marketplace/acquisitions:
+    get:
+      description: List agent acquisitions for the authenticated user.
+      operationId: listAcquisitions
+      parameters:
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - pending
+          - active
+          - cancelled
+          - expired
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listAcquisitions_200_response"
+          description: List of acquisitions
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: List acquisitions
+      tags:
+      - Marketplace
+    post:
+      description: Acquire an agent from the marketplace.
+      operationId: acquireAgent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/acquireAgent_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/acquireAgent_201_response"
+          description: Acquisition created
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: Acquire agent
+      tags:
+      - Marketplace
+  /observer/events:
+    get:
+      description: Query the append-only observer event log.
+      operationId: queryObserverEvents
+      parameters:
+      - explode: true
+        in: query
+        name: agent_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: event_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: severity
+        required: false
+        schema:
+          enum:
+          - info
+          - warning
+          - error
+          - critical
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: since
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queryObserverEvents_200_response"
+          description: List of observer events
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: Query events
+      tags:
+      - Observer
+  /observer/anomalies:
+    get:
+      description: List detected anomalies and behavioral deviations.
+      operationId: listAnomalies
+      parameters:
+      - explode: true
+        in: query
+        name: agent_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - open
+          - investigating
+          - resolved
+          - dismissed
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listAnomalies_200_response"
+          description: List of anomalies
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: List anomalies
+      tags:
+      - Observer
+  /webhooks:
+    get:
+      description: List webhook subscriptions for the authenticated user.
+      operationId: listWebhooks
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listWebhooks_200_response"
+          description: List of webhooks
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: List webhooks
+      tags:
+      - Webhooks
+    post:
+      description: Create a new webhook subscription.
+      operationId: createWebhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createWebhook_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createWebhook_201_response"
+          description: Created webhook with signing secret
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: Create webhook
+      tags:
+      - Webhooks
+  /webhooks/{id}:
+    delete:
+      operationId: deleteWebhook
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Webhook deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      summary: Delete webhook
+      tags:
+      - Webhooks
+    get:
+      operationId: getWebhook
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createWebhook_201_response"
+          description: Webhook details
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      summary: Get webhook
+      tags:
+      - Webhooks
+    patch:
+      operationId: updateWebhook
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateWebhook_request"
+      responses:
+        "200":
+          description: Updated webhook
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      summary: Update webhook
+      tags:
+      - Webhooks
+  /webhooks/{id}/test:
+    post:
+      description: Send a test event to the webhook endpoint.
+      operationId: testWebhook
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/testWebhook_200_response"
+          description: Test result
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+      summary: Test webhook
+      tags:
+      - Webhooks
+  /notifications:
+    get:
+      description: Get notifications for the authenticated user.
+      operationId: listNotifications
+      parameters:
+      - explode: true
+        in: query
+        name: unread_only
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listNotifications_200_response"
+          description: List of notifications
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: List notifications
+      tags:
+      - Notifications
+    patch:
+      operationId: markNotificationsRead
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/markNotificationsRead_request"
+      responses:
+        "200":
+          description: Notifications updated
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+      summary: Mark notifications read
+      tags:
+      - Notifications
+components:
+  responses:
+    Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Invalid or missing API key
+    RateLimited:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          explode: false
+          schema:
+            type: integer
+          style: simple
+        X-RateLimit-Remaining:
+          explode: false
+          schema:
+            type: integer
+          style: simple
+        X-RateLimit-Reset:
+          explode: false
+          schema:
+            format: date-time
+            type: string
+          style: simple
+    NotFound:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Resource not found
+  schemas:
+    Agent:
+      example:
+        trust_tier: untrusted
+        capabilities:
+        - capabilities
+        - capabilities
+        certification_level: none
+        name: name
+        description: description
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        published: true
+        trust_score: 80
+        status: draft
+      properties:
+        id:
+          description: Unique agent identifier
+          format: uuid
+          type: string
+        name:
+          description: Agent display name
+          type: string
+        description:
+          description: Agent description
+          type: string
+        status:
+          description: Current agent status
+          enum:
+          - draft
+          - training
+          - active
+          - suspended
+          - archived
+          type: string
+        trust_score:
+          description: Current trust score (0-1000)
+          maximum: 1000
+          minimum: 0
+          type: integer
+        trust_tier:
+          description: Trust tier based on score
+          enum:
+          - untrusted
+          - novice
+          - proven
+          - trusted
+          - elite
+          - legendary
+          type: string
+        certification_level:
+          description: Council certification level
+          enum:
+          - none
+          - basic
+          - standard
+          - advanced
+          - expert
+          type: string
+        published:
+          description: Whether agent is listed on marketplace
+          type: boolean
+        capabilities:
+          description: List of agent capabilities
+          items:
+            type: string
+          type: array
+        created_at:
+          description: Creation timestamp
+          format: date-time
+          type: string
+    TrustChange:
+      example:
+        change_amount: -83
+        reason: reason
+        agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        reference_id: reference_id
+        category: council_decision
+      properties:
+        agent_id:
+          format: uuid
+          type: string
+        change_amount:
+          description: Amount to adjust trust score
+          maximum: 100
+          minimum: -100
+          type: integer
+        reason:
+          description: Human-readable reason for change
+          type: string
+        category:
+          description: Category of trust change
+          enum:
+          - council_decision
+          - human_override
+          - task_completion
+          - violation
+          - decay
+          - bonus
+          type: string
+        reference_id:
+          description: Optional reference to related record
+          type: string
+      required:
+      - agent_id
+      - category
+      - change_amount
+      - reason
+    TrustHistory:
+      example:
+        new_score: 6
+        change_amount: 1
+        reason: reason
+        recorded_at: 2000-01-23T04:56:07.000+00:00
+        agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        previous_tier: previous_tier
+        previous_score: 0
+        new_tier: new_tier
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        category: category
+      properties:
+        id:
+          format: uuid
+          type: string
+        agent_id:
+          format: uuid
+          type: string
+        previous_score:
+          type: integer
+        new_score:
+          type: integer
+        change_amount:
+          type: integer
+        previous_tier:
+          type: string
+        new_tier:
+          type: string
+        reason:
+          type: string
+        category:
+          type: string
+        recorded_at:
+          format: date-time
+          type: string
+    TruthChainRecord:
+      example:
+        sequence: 0
+        agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        data: "{}"
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        record_type: council_decision
+        hash: hash
+        previous_hash: previous_hash
+        timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          format: uuid
+          type: string
+        sequence:
+          description: Position in chain
+          type: integer
+        record_type:
+          enum:
+          - council_decision
+          - certification
+          - human_override
+          - ownership_change
+          - marketplace_listing
+          - acquisition
+          type: string
+        agent_id:
+          format: uuid
+          type: string
+        hash:
+          description: SHA-256 hash of record
+          type: string
+        previous_hash:
+          description: Hash of previous record
+          type: string
+        data:
+          description: Record payload
+          type: object
+        timestamp:
+          format: date-time
+          type: string
+    VerificationResult:
+      example:
+        record:
+          sequence: 0
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          data: "{}"
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          record_type: council_decision
+          hash: hash
+          previous_hash: previous_hash
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        verified: true
+        chain_valid: true
+        verification_url: https://openapi-generator.tech
+      properties:
+        verified:
+          type: boolean
+        chain_valid:
+          description: Whether chain integrity is intact
+          type: boolean
+        record:
+          $ref: "#/components/schemas/TruthChainRecord"
+        verification_url:
+          format: uri
+          type: string
+    MarketplaceListing:
+      example:
+        agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        avg_rating: 1.4658129805029452
+        total_acquisitions: 5
+        description: description
+        price_type: free
+        price_amount: 0.8008281904610115
+        created_at: 2000-01-23T04:56:07.000+00:00
+        commission_rate: 6.027456183070403
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        title: title
+        trainer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        status: draft
+      properties:
+        id:
+          format: uuid
+          type: string
+        agent_id:
+          format: uuid
+          type: string
+        trainer_id:
+          format: uuid
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        price_type:
+          enum:
+          - free
+          - one_time
+          - subscription
+          - commission
+          type: string
+        price_amount:
+          type: number
+        commission_rate:
+          description: Commission percentage (0-100)
+          type: number
+        status:
+          enum:
+          - draft
+          - published
+          - suspended
+          - archived
+          type: string
+        avg_rating:
+          type: number
+        total_acquisitions:
+          type: integer
+        created_at:
+          format: date-time
+          type: string
+    Acquisition:
+      example:
+        consumer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        listing_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        acquired_at: 2000-01-23T04:56:07.000+00:00
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        status: pending
+      properties:
+        id:
+          format: uuid
+          type: string
+        listing_id:
+          format: uuid
+          type: string
+        consumer_id:
+          format: uuid
+          type: string
+        status:
+          enum:
+          - pending
+          - active
+          - cancelled
+          - expired
+          type: string
+        acquired_at:
+          format: date-time
+          type: string
+    Webhook:
+      example:
+        active: true
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        secret: secret
+        url: https://openapi-generator.tech
+        events:
+        - events
+        - events
+      properties:
+        id:
+          format: uuid
+          type: string
+        url:
+          format: uri
+          type: string
+        events:
+          description: Event types to subscribe to
+          items:
+            type: string
+          type: array
+        secret:
+          description: HMAC signing secret
+          type: string
+        active:
+          type: boolean
+        created_at:
+          format: date-time
+          type: string
+    ObserverEvent:
+      example:
+        severity: info
+        event_type: event_type
+        agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        data: "{}"
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        hash: hash
+        timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          format: uuid
+          type: string
+        event_type:
+          type: string
+        agent_id:
+          format: uuid
+          type: string
+        severity:
+          enum:
+          - info
+          - warning
+          - error
+          - critical
+          type: string
+        data:
+          type: object
+        hash:
+          type: string
+        timestamp:
+          format: date-time
+          type: string
+    Error:
+      example:
+        error:
+          code: code
+          message: message
+      properties:
+        error:
+          $ref: "#/components/schemas/Error_error"
+    PaginationMeta:
+      example:
+        total: 5
+        limit: 1
+        page: 6
+        has_more: true
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        has_more:
+          type: boolean
+    listAgents_200_response:
+      example:
+        data:
+        - trust_tier: untrusted
+          capabilities:
+          - capabilities
+          - capabilities
+          certification_level: none
+          name: name
+          description: description
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          published: true
+          trust_score: 80
+          status: draft
+        - trust_tier: untrusted
+          capabilities:
+          - capabilities
+          - capabilities
+          certification_level: none
+          name: name
+          description: description
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          published: true
+          trust_score: 80
+          status: draft
+        meta:
+          total: 5
+          limit: 1
+          page: 6
+          has_more: true
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/Agent"
+          type: array
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+    getAgent_200_response:
+      example:
+        data:
+          trust_tier: untrusted
+          capabilities:
+          - capabilities
+          - capabilities
+          certification_level: none
+          name: name
+          description: description
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          published: true
+          trust_score: 80
+          status: draft
+      properties:
+        data:
+          $ref: "#/components/schemas/Agent"
+    getTrustHistory_200_response:
+      example:
+        data:
+        - new_score: 6
+          change_amount: 1
+          reason: reason
+          recorded_at: 2000-01-23T04:56:07.000+00:00
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          previous_tier: previous_tier
+          previous_score: 0
+          new_tier: new_tier
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          category: category
+        - new_score: 6
+          change_amount: 1
+          reason: reason
+          recorded_at: 2000-01-23T04:56:07.000+00:00
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          previous_tier: previous_tier
+          previous_score: 0
+          new_tier: new_tier
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          category: category
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/TrustHistory"
+          type: array
+    applyTrustChange_200_response:
+      example:
+        new_score: 6
+        previous_tier: previous_tier
+        previous_score: 0
+        new_tier: new_tier
+        tier_changed: true
+      properties:
+        previous_score:
+          type: integer
+        new_score:
+          type: integer
+        previous_tier:
+          type: string
+        new_tier:
+          type: string
+        tier_changed:
+          type: boolean
+    listTruthChainRecords_200_response:
+      example:
+        data:
+        - sequence: 0
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          data: "{}"
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          record_type: council_decision
+          hash: hash
+          previous_hash: previous_hash
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        - sequence: 0
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          data: "{}"
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          record_type: council_decision
+          hash: hash
+          previous_hash: previous_hash
+          timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/TruthChainRecord"
+          type: array
+    createTruthChainRecord_request:
+      properties:
+        record_type:
+          type: string
+        agent_id:
+          format: uuid
+          type: string
+        data:
+          type: object
+      required:
+      - data
+      - record_type
+    createTruthChainRecord_201_response:
+      example:
+        data:
+          sequence: 0
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          data: "{}"
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          record_type: council_decision
+          hash: hash
+          previous_hash: previous_hash
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        verification_url: https://openapi-generator.tech
+      properties:
+        data:
+          $ref: "#/components/schemas/TruthChainRecord"
+        verification_url:
+          format: uri
+          type: string
+    listMarketplaceListings_200_response:
+      example:
+        data:
+        - agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          avg_rating: 1.4658129805029452
+          total_acquisitions: 5
+          description: description
+          price_type: free
+          price_amount: 0.8008281904610115
+          created_at: 2000-01-23T04:56:07.000+00:00
+          commission_rate: 6.027456183070403
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          title: title
+          trainer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: draft
+        - agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          avg_rating: 1.4658129805029452
+          total_acquisitions: 5
+          description: description
+          price_type: free
+          price_amount: 0.8008281904610115
+          created_at: 2000-01-23T04:56:07.000+00:00
+          commission_rate: 6.027456183070403
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          title: title
+          trainer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: draft
+        meta:
+          total: 5
+          limit: 1
+          page: 6
+          has_more: true
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/MarketplaceListing"
+          type: array
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+    createMarketplaceListing_request:
+      properties:
+        agent_id:
+          format: uuid
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        price_type:
+          enum:
+          - free
+          - one_time
+          - subscription
+          - commission
+          type: string
+        price_amount:
+          type: number
+        commission_rate:
+          type: number
+      required:
+      - agent_id
+      - price_type
+      - title
+    createMarketplaceListing_201_response:
+      example:
+        data:
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          avg_rating: 1.4658129805029452
+          total_acquisitions: 5
+          description: description
+          price_type: free
+          price_amount: 0.8008281904610115
+          created_at: 2000-01-23T04:56:07.000+00:00
+          commission_rate: 6.027456183070403
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          title: title
+          trainer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: draft
+      properties:
+        data:
+          $ref: "#/components/schemas/MarketplaceListing"
+    listAcquisitions_200_response:
+      example:
+        data:
+        - consumer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          listing_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          acquired_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: pending
+        - consumer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          listing_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          acquired_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: pending
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/Acquisition"
+          type: array
+    acquireAgent_request:
+      properties:
+        listing_id:
+          format: uuid
+          type: string
+      required:
+      - listing_id
+    acquireAgent_201_response:
+      example:
+        data:
+          consumer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          listing_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          acquired_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          status: pending
+      properties:
+        data:
+          $ref: "#/components/schemas/Acquisition"
+    queryObserverEvents_200_response:
+      example:
+        data:
+        - severity: info
+          event_type: event_type
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          data: "{}"
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          hash: hash
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        - severity: info
+          event_type: event_type
+          agent_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          data: "{}"
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          hash: hash
+          timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/ObserverEvent"
+          type: array
+    listAnomalies_200_response:
+      example:
+        data:
+        - "{}"
+        - "{}"
+      properties:
+        data:
+          items:
+            type: object
+          type: array
+    listWebhooks_200_response:
+      example:
+        data:
+        - active: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          secret: secret
+          url: https://openapi-generator.tech
+          events:
+          - events
+          - events
+        - active: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          secret: secret
+          url: https://openapi-generator.tech
+          events:
+          - events
+          - events
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/Webhook"
+          type: array
+    createWebhook_request:
+      properties:
+        url:
+          format: uri
+          type: string
+        events:
+          description: "Event types: agent.created, agent.updated, trust.changed,\
+            \ council.decision, acquisition.completed"
+          items:
+            type: string
+          type: array
+      required:
+      - events
+      - url
+    createWebhook_201_response:
+      example:
+        data:
+          active: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          secret: secret
+          url: https://openapi-generator.tech
+          events:
+          - events
+          - events
+      properties:
+        data:
+          $ref: "#/components/schemas/Webhook"
+    updateWebhook_request:
+      properties:
+        url:
+          format: uri
+          type: string
+        events:
+          items:
+            type: string
+          type: array
+        active:
+          type: boolean
+    testWebhook_200_response:
+      example:
+        status_code: 0
+        success: true
+        response_time_ms: 6
+      properties:
+        success:
+          type: boolean
+        status_code:
+          type: integer
+        response_time_ms:
+          type: integer
+    listNotifications_200_response:
+      example:
+        unread_count: 0
+        data:
+        - "{}"
+        - "{}"
+      properties:
+        data:
+          items:
+            type: object
+          type: array
+        unread_count:
+          type: integer
+    markNotificationsRead_request:
+      properties:
+        notification_ids:
+          items:
+            type: string
+          type: array
+        mark_all:
+          type: boolean
+    Error_error:
+      example:
+        code: code
+        message: message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+  securitySchemes:
+    BearerAuth:
+      description: API Key authentication. Get your key from Settings > API Keys.
+      scheme: bearer
+      type: http

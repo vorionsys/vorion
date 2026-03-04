@@ -2,13 +2,24 @@
 
 import { useState } from 'react';
 import { Navbar, NeuralLink, NexusChat } from '@/components/nexus';
+import { useSubmissions } from '@/lib/supabase-hooks';
 
 export default function NeuralPage() {
   const [chatOpen, setChatOpen] = useState(false);
+  const { submitTerm } = useSubmissions();
 
-  const handleSubmit = (data: { term: string; definition: string; level: string }) => {
-    console.log('Submitted:', data);
-    // TODO: Connect to Firebase
+  const handleSubmit = async (data: { term: string; definition: string; level: string }) => {
+    const result = await submitTerm({
+      term: data.term,
+      definition: data.definition,
+      level: data.level as 'novice' | 'intermediate' | 'expert' | 'theoretical',
+    });
+
+    if (result) {
+      console.log('Submitted to Supabase:', result);
+    } else {
+      console.warn('Submission failed or Supabase not configured');
+    }
   };
 
   return (

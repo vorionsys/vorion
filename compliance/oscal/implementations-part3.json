@@ -1,0 +1,478 @@
+{
+  "implementations": {
+    "ra-1": {
+      "description": "Cognigate maintains a Risk Assessment policy governing how the INTENT layer performs automated risk classification on every inbound agent request. Policy documentation covers the tripwire pattern library (regex-based detection for shell injection, path traversal, SQL injection, privilege escalation), the AI Critic adversarial evaluation protocol, and the 0.0-1.0 risk scoring methodology. Procedures are codified in the PolicyEngine (app/core/policy_engine.py) with YAML/JSON-defined constraints, severity levels (CRITICAL, HIGH, MEDIUM, LOW), and remediation guidance. Policy artifacts are version-controlled in the GitHub repository and reviewed on every pull request via required PR approvals.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion provides the platform risk assessment policy and automated enforcement. Consumer organizations are responsible for defining organization-specific risk thresholds and policy constraints via the PolicyEngine YAML configuration interface."
+    },
+    "ra-2": {
+      "description": "Cognigate categorizes every inbound agent request through the INTENT layer's multi-stage risk classification pipeline. Security categorization is performed by: (1) TripwireScanner (app/core/tripwires.py) which applies deterministic regex pattern matching against FORBIDDEN_PATTERNS for immediate CRITICAL classification, (2) ParanoiaMode which performs euphemism detection and keyword analysis for MEDIUM/HIGH categorization, (3) AI Critic (app/core/critic.py) which provides adversarial LLM-based categorization via Claude, GPT, Gemini, or Grok providers. Each request receives a composite risk_score from 0.0 (benign) to 1.0 (maximum threat). The system itself is categorized as a Moderate-impact system based on FIPS 199 analysis of its governance data.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Security categorization is inherent to every API request processed by the /v1/intent/analyze endpoint. The risk score directly drives enforcement decisions in the ENFORCE layer."
+    },
+    "ra-3": {
+      "description": "Cognigate performs automated risk assessment on every agent action request through its three-layer architecture. The INTENT layer produces a structured RiskAssessment containing: threat identification (via tripwire pattern matching for 15+ attack categories including rm_recursive_root, sql_injection, path_traversal, privilege_escalation, reverse_shell), likelihood estimation (risk_score 0.0-1.0 computed from tripwire hits, critic verdicts, and paranoia signals), and impact analysis (severity classification as critical/high/medium/low). Risk assessments are immutably recorded in the PROOF chain with SHA-256 hashing and Ed25519 signatures. The proof chain endpoint /v1/proof/{id}/verify allows independent verification of any risk assessment record.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Cognigate's entire purpose is continuous, automated risk assessment. Every request to /v1/intent/analyze produces a risk assessment that is then enforced and recorded."
+    },
+    "ra-3(1)": {
+      "description": "Cognigate performs supply chain risk assessment through its SBOM generation pipeline (cognigate/.github/workflows/sbom.yml). The pipeline generates CycloneDX 1.5 and SPDX 2.3 SBOMs from requirements.txt and pyproject.toml, then correlates known vulnerabilities via pip-audit against the PyPI/OSV vulnerability database. Vulnerability correlation results are embedded directly into the CycloneDX SBOM as structured vulnerability entries with affected component references, severity ratings, and remediation recommendations. SBOM history is versioned and archived in the sbom-history/ directory for longitudinal supply chain risk tracking.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Supply chain risk assessment runs on every tagged release, weekly via cron schedule, and on-demand via workflow_dispatch. Results are attached to GitHub Releases."
+    },
+    "ra-5": {
+      "description": "Cognigate implements multi-layered vulnerability monitoring and scanning in its CI/CD pipeline: (1) pip-audit scans all Python dependencies against the PyPI/OSV vulnerability database on every push and PR (cognigate/.github/workflows/ci.yml, security job), (2) Bandit performs Python-specific security analysis with -ll severity threshold, (3) CodeQL semantic analysis runs on push/PR/weekly schedule with security-extended and security-and-quality query suites (vorion/.github/workflows/security-scan.yml), (4) Gitleaks scans for exposed secrets and credentials (vorion/.github/workflows/secrets-scan.yml), (5) Trivy performs filesystem vulnerability scanning. Scan results are uploaded as SARIF reports to GitHub Security tab for centralized vulnerability tracking.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion provides automated vulnerability scanning across the CI/CD pipeline. Consumer organizations are responsible for monitoring scan results and applying patches within their deployment timelines."
+    },
+    "ra-5(2)": {
+      "description": "Cognigate's vulnerability scanning tools are automatically updated on each CI/CD run. The CI pipeline installs the latest versions of pip-audit, Bandit, CodeQL, Gitleaks, and Trivy via their respective GitHub Actions (actions/checkout@v4, github/codeql-action/init@v3, gitleaks/gitleaks-action@v2). pip-audit automatically fetches the latest vulnerability data from PyPI/OSV on each execution. The SBOM pipeline (sbom.yml) installs cyclonedx-bom>=4.0.0, pip-audit>=2.7.0, and spdx-tools>=0.8.0 with minimum version constraints to ensure current vulnerability databases.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Vulnerability databases are refreshed on every CI run. pip-audit queries live PyPI/OSV data. CodeQL uses the latest query packs from github/codeql-action@v3."
+    },
+    "ra-5(5)": {
+      "description": "Cognigate CI/CD scanning executes with elevated permissions required for thorough analysis. The security-scan.yml workflow runs with 'contents: read' and 'security-events: write' permissions, enabling CodeQL to perform deep semantic analysis across the full codebase. pip-audit scans the complete installed dependency tree including transitive dependencies. Bandit scans the entire app/ directory recursively (-r app/). The SBOM workflow runs with 'contents: write' and 'security-events: write' permissions for complete artifact generation and SARIF upload.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "CI/CD pipeline permissions are defined in workflow YAML files and enforced by GitHub Actions permission model."
+    },
+    "ra-5(11)": {
+      "description": "Cognigate maintains a public vulnerability disclosure channel through its GitHub repository security advisories feature. The Gitleaks SARIF reports are uploaded to the GitHub Security tab via github/codeql-action/upload-sarif@v3, enabling centralized tracking of security findings. Vulnerability summaries from the SBOM pipeline are published as release artifacts, providing transparency into dependency vulnerability status for each version.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "GitHub Security Advisories provide the disclosure mechanism. A formal public disclosure program with dedicated reporting channels and response SLAs is planned."
+    },
+    "ra-7": {
+      "description": "Cognigate implements automated risk response through the ENFORCE layer's five enforcement sublayers. When the INTENT layer identifies a risk, the system responds with one of four decisions: allowed, denied, escalated, or modified. The CircuitBreaker (app/core/circuit_breaker.py) provides system-wide risk response by transitioning to OPEN state (blocking all requests) when thresholds are exceeded: HIGH_RISK_THRESHOLD (>10% high-risk actions), INJECTION_DETECTED, TRIPWIRE_CASCADE, ENTITY_MISBEHAVIOR, or CRITICAL_DRIFT. The PolicyEngine evaluates constraints with configurable requires_approval flags for escalation workflows. VelocityCaps (app/core/velocity.py) provide L0/L1/L2 rate limiting as a graduated risk response.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Risk response is automated and deterministic. The circuit breaker provides fail-safe system protection. Half-open recovery allows controlled resumption after threat remediation."
+    },
+    "ra-9": {
+      "description": "Cognigate performs criticality analysis through its 8-tier trust model and capability taxonomy. The trust model assigns criticality levels to agent operations based on 100+ capabilities across 8 namespaces (sandbox, data, comm, execute, financial, admin, efficiency, custom). Higher-tier capabilities (e.g., admin.*, financial.*) are classified as critical and require correspondingly higher trust scores (0-1000 scale) for access. The PolicyEngine (app/core/policy_engine.py) defines constraint severity levels (CRITICAL, HIGH, MEDIUM, LOW) that map to criticality classifications. Critical functions trigger additional scrutiny through the AI Critic adversarial evaluation layer.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Criticality analysis is embedded in the capability taxonomy and trust tier mapping. Consumer organizations participate by configuring which capabilities are available at each trust level."
+    },
+    "sa-1": {
+      "description": "Cognigate maintains system and services acquisition policies governing its development lifecycle, including: secure coding standards enforced via Ruff linter (pyflakes rules), Black formatter, and mypy type checking in CI; dependency acquisition controls via pip-audit vulnerability scanning and Dependabot automated updates; third-party service acquisition procedures for AI providers (Anthropic Claude, OpenAI GPT, Google Gemini, xAI Grok) with configurable provider selection (app/config.py critic_provider setting). Policy artifacts are maintained in the GitHub repository with version control and PR review gates.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion provides the acquisition framework and CI/CD enforcement. Consumer organizations are responsible for their own procurement policies when deploying Cognigate."
+    },
+    "sa-2": {
+      "description": "Cognigate allocates security resources through dedicated CI/CD pipeline jobs and security tooling infrastructure. The CI pipeline (cognigate/.github/workflows/ci.yml) allocates separate compute resources for: test execution (pytest with 85%+ coverage threshold), linting (Ruff, Black), type checking (mypy), and security scanning (pip-audit, Bandit). The SBOM pipeline allocates dedicated workflow resources for CycloneDX/SPDX generation, NTIA validation, and vulnerability correlation. Security scanning runs on every push/PR with dedicated ubuntu-latest runners and cached dependencies for consistent execution.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "GitHub Actions provides compute resource allocation for security activities. Capital planning for infrastructure is a shared responsibility with the consumer organization."
+    },
+    "sa-3": {
+      "description": "Cognigate follows a secure system development lifecycle (SDLC) implemented through GitHub-based development workflows. The lifecycle includes: (1) feature branch development with required PR reviews, (2) automated CI/CD gates — tests must pass at 85%+ coverage (--cov-fail-under=85), security scans must pass (pip-audit, Bandit), linting must pass (Ruff), (3) SAST analysis via CodeQL with security-extended query suites, (4) SBOM generation on release with NTIA minimum element validation, (5) secrets scanning via Gitleaks on every push/PR. The codebase uses Python 3.13 with Pydantic models for type-safe data validation, FastAPI for API framework, and SQLAlchemy for database access.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "The SDLC is enforced through CI/CD pipeline gates. All security scanning runs as blocking checks before merge to main/master."
+    },
+    "sa-4": {
+      "description": "Cognigate's acquisition process for third-party components is governed by: (1) requirements.txt and pyproject.toml for Python dependency declaration with version pinning, (2) pip-audit scanning against PyPI/OSV for known vulnerabilities before deployment, (3) CycloneDX 1.5 SBOM generation documenting all acquired components with PURL identifiers, license data, and cryptographic hashes, (4) SPDX 2.3 cross-reference for license compliance verification. All third-party AI provider integrations (Anthropic, OpenAI, Google, xAI) are documented in app/core/critic.py with explicit API interface contracts and configurable provider selection.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Component acquisition is automated through the SBOM pipeline. Consumer organizations are responsible for evaluating acquisition decisions for their deployment context."
+    },
+    "sa-4(1)": {
+      "description": "Cognigate documents the functional properties of its security controls through: (1) module-level docstrings in every core component (tripwires.py, circuit_breaker.py, signatures.py, policy_engine.py, velocity.py, critic.py) describing security behavior, (2) Pydantic model definitions (app/models/) providing typed schemas for all security-relevant data structures, (3) FastAPI auto-generated OpenAPI documentation at /docs and /redoc exposing all endpoint security parameters, (4) the PROOF layer's ProofRecord schema documenting the complete functional interface for audit trail operations including hash algorithms, signature formats, and chain verification.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Functional properties are embedded in code documentation and auto-generated API specifications. OpenAPI schema is available at the /docs endpoint."
+    },
+    "sa-4(2)": {
+      "description": "Cognigate provides design and implementation information for security controls at multiple detail levels: (1) High-level design — the three-layer architecture (INTENT, ENFORCE, PROOF) with documented data flow between layers, (2) Low-level design — module implementations in app/core/ with class-level documentation for SignatureManager, CircuitBreaker, TripwireScanner, PolicyEngine, VelocityCaps, CriticProvider, (3) Source code — full Python source in the GitHub repository with type annotations (mypy-checked), structured logging (structlog), and comprehensive test suites (85%+ coverage). Implementation details include cryptographic algorithm selection (Ed25519, SHA-256), database schema (SQLAlchemy models in app/db/models.py), and API protocol definitions (FastAPI routers).",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Complete source code and design documentation is maintained in the GitHub repository. Architecture documentation is available in the compliance/oscal/ directory."
+    },
+    "sa-4(9)": {
+      "description": "Cognigate explicitly identifies all functions, ports, protocols, and services: (1) Functions — 100+ capabilities across 8 namespaces documented in the capability taxonomy, (2) Ports — HTTPS (443) for API access, configurable database port for PostgreSQL (5432), (3) Protocols — HTTPS/TLS 1.2+ for all API communications, Ed25519 for digital signatures, SHA-256 for integrity verification, (4) Services — REST API endpoints under /v1/ prefix (intent, enforce, proof, trust, agents, admin, health, reference, tools, compliance, gateway, auth_keys), AI provider APIs (Anthropic, OpenAI, Google, xAI) via outbound HTTPS. All endpoints are documented in FastAPI auto-generated OpenAPI specification.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "The OpenAPI specification at /docs provides a complete machine-readable inventory of all functions, ports, protocols, and services."
+    },
+    "sa-4(10)": {
+      "description": "Cognigate's API authentication uses API key-based authentication via the X-Admin-Key header (app/core/auth.py) for administrative endpoints. The authentication mechanism uses secrets.compare_digest for timing-safe comparison to prevent timing attacks. While not PIV-based, the authentication architecture supports integration with organizational PIV/CAC infrastructure through the X-API-Key header mechanism and configurable authentication middleware.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "PIV credential usage is the responsibility of the deploying organization's identity infrastructure. Cognigate provides API key authentication that can be fronted by PIV-aware identity providers."
+    },
+    "sa-5": {
+      "description": "Cognigate provides comprehensive system documentation through: (1) Auto-generated OpenAPI 3.x specification at /docs and /redoc endpoints documenting every API endpoint, request/response schemas, authentication requirements, and error codes, (2) Module-level docstrings in all core components explaining security architecture, design decisions, and operational behavior, (3) Pydantic model definitions serving as executable documentation for all data structures (ProofRecord, IntentAnalysis, EnforceVerdict, TrustProfile), (4) OSCAL component definition (compliance/oscal/component-definition.json) documenting security control mappings, (5) Architecture overview in compliance/oscal/architecture-overview.md.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Documentation is auto-generated from code where possible to ensure accuracy. OpenAPI spec is always current with the deployed API version."
+    },
+    "sa-8": {
+      "description": "Cognigate applies security and privacy engineering principles throughout its architecture: (1) Defense in depth — three independent security layers (INTENT, ENFORCE, PROOF) each providing distinct protection, (2) Least privilege — 8-tier trust model with progressive capability unlocking requiring earned trust scores, (3) Fail-secure — CircuitBreaker defaults to OPEN (deny-all) state when safety thresholds are exceeded, (4) Separation of concerns — tripwires (deterministic), AI critic (probabilistic), and policy engine (rule-based) operate independently, (5) Complete mediation — every agent request passes through all three layers before execution, (6) Minimal attack surface — API endpoints require authentication via X-Admin-Key, (7) Accountability — immutable PROOF chain records every decision with cryptographic integrity.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Security engineering principles are embedded in the architecture. The three-layer design ensures no single point of security failure."
+    },
+    "sa-9": {
+      "description": "Cognigate manages external system services through controlled integration points: (1) AI Provider Services — Claude (Anthropic), GPT (OpenAI), Gemini (Google), Grok (xAI) are accessed via the CriticProvider abstraction (app/core/critic.py) with configurable provider selection, timeout controls (gateway_timeout_ms=30000), and circuit breaker protection (gateway_circuit_breaker_threshold=5), (2) Database Services — PostgreSQL (Neon) for production via DATABASE_URL environment variable, SQLite for development, accessed through SQLAlchemy async ORM, (3) Deployment Infrastructure — Vercel serverless platform for hosting, GitHub for source control and CI/CD. All external services communicate over TLS 1.2+.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion manages direct external service integrations. Consumer organizations are responsible for evaluating external service risk in their authorization boundary."
+    },
+    "sa-9(2)": {
+      "description": "Cognigate identifies external system service functions, ports, protocols, and services: (1) AI Providers — HTTPS/443 outbound to api.anthropic.com, api.openai.com, generativelanguage.googleapis.com, api.x.ai for critic evaluation, (2) Database — PostgreSQL/5432 to Neon-hosted database via DATABASE_URL, (3) Deployment — HTTPS/443 to Vercel edge network, (4) Source Control — HTTPS/443 to GitHub API for CI/CD operations, (5) Vulnerability Data — HTTPS/443 to PyPI and OSV APIs for pip-audit scanning. All service endpoints are declared in app/config.py (agentanchor_api_url) and CI workflow files.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "External service endpoints are explicitly configured in app/config.py and documented in the OpenAPI specification."
+    },
+    "sa-10": {
+      "description": "Cognigate enforces developer configuration management through GitHub-based version control: (1) All source code is version-controlled in Git with full commit history, (2) CI/CD pipeline enforces configuration integrity — tests (85%+ coverage), linting (Ruff, Black), type checking (mypy), security scanning (pip-audit, Bandit, CodeQL, Gitleaks) must pass before merge, (3) Dependency versions are pinned in requirements.txt and pyproject.toml with hash-verified installs, (4) Configuration changes tracked via pull request reviews on main/master branches, (5) CI concurrency controls prevent parallel conflicting builds (cancel-in-progress: true). Environment-specific configuration is managed through Pydantic Settings with .env file support.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Configuration management is enforced through CI/CD pipeline gates. No code reaches production without passing all automated checks."
+    },
+    "sa-11": {
+      "description": "Cognigate implements comprehensive developer testing and evaluation: (1) Unit tests — pytest with 85%+ coverage threshold enforced by --cov-fail-under=85 in CI, (2) Property-based testing — Hypothesis library for invariant verification (tests/test_property.py, tests/test_invariants.py), (3) Adversarial testing — dedicated test suite (tests/test_adversarial.py) testing tripwire bypass attempts, injection attacks, and evasion techniques, (4) Chaos testing — tests/test_chaos.py for resilience verification, (5) Regression testing — tests/test_regressions.py for previously-discovered bug prevention, (6) Integration testing — tests/test_proof_integration.py for cross-layer verification, (7) Security scanning — Bandit SAST (bandit -r app/ -ll), pip-audit dependency analysis, CodeQL semantic analysis. Test coverage spans 65+ test files across all core modules.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Developer testing includes standard, property-based, adversarial, chaos, and regression test categories. All must pass in CI before merge."
+    },
+    "sa-15": {
+      "description": "Cognigate mandates specific development tools, standards, and processes: (1) Language — Python 3.13 with type annotations, (2) Framework — FastAPI with Pydantic v2 for request/response validation, (3) Linting — Ruff (pyflakes rules) and Black formatter enforced in CI, (4) Type checking — mypy with --ignore-missing-imports, (5) Testing — pytest with pytest-asyncio, pytest-cov, Hypothesis, (6) Security — pip-audit, Bandit, CodeQL, Gitleaks, (7) SBOM tooling — cyclonedx-bom, cyclonedx-py, spdx-tools, (8) Database — SQLAlchemy async ORM with Alembic migrations, (9) Logging — structlog for structured JSON logging, (10) CI/CD — GitHub Actions with concurrency controls and artifact caching.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Development tools and standards are enforced through CI/CD pipeline configuration files and pyproject.toml."
+    },
+    "sa-22": {
+      "description": "Cognigate monitors for unsupported system components through: (1) pip-audit dependency scanning which flags packages with known end-of-life status, (2) Dependabot automated dependency update PRs for outdated packages, (3) SBOM generation documenting all component versions for lifecycle tracking, (4) Python version management — currently targeting Python 3.13 with version specified in CI workflows (env.PYTHON_VERSION). The pyproject.toml and requirements.txt are actively maintained with version constraints. Components identified as unsupported are flagged for replacement in the vulnerability-summary.json artifact.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion monitors component support status through automated tooling. Consumer organizations must ensure their deployment infrastructure components remain supported."
+    },
+    "sc-1": {
+      "description": "Cognigate maintains system and communications protection policies governing: (1) Cryptographic standards — Ed25519 (FIPS 186-5) for digital signatures, SHA-256 for integrity hashing, TLS 1.2+ for transport encryption, (2) Boundary protection — API authentication via X-Admin-Key header, CORS policy enforcement, (3) Session management — configurable access_token_expire_minutes (default 30), (4) Information protection — SHA-256 hash chain integrity for proof records, timing-safe secret comparison via secrets.compare_digest. Policies are enforced programmatically through the FastAPI middleware stack and cryptographic module implementations.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion provides the platform SC policy and enforcement. Consumer organizations define organization-specific network and boundary protection policies for their deployment environment."
+    },
+    "sc-2": {
+      "description": "Cognigate separates system and user functionality through architectural boundaries: (1) Administrative endpoints (app/routers/admin.py) are protected by X-Admin-Key authentication and separated from public API endpoints, (2) The FastAPI router structure isolates functional domains — intent, enforce, proof, trust, agents, admin, health, reference, tools, compliance, gateway, auth_keys — into separate router modules, (3) Database access is isolated through the repository pattern (app/db/proof_repository.py) preventing direct SQL access from API handlers, (4) Configuration separation via Pydantic Settings with environment-variable-based configuration isolated from application logic.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "System management functionality is isolated in the admin router with dedicated authentication. User-facing endpoints operate through separate routers."
+    },
+    "sc-4": {
+      "description": "Cognigate prevents information leakage through shared system resources: (1) Each API request is processed in an isolated request context with no shared mutable state between concurrent requests, (2) The ProofRepository uses SQLAlchemy async sessions scoped to individual requests, preventing cross-request data leakage, (3) CircuitBreaker state uses thread-safe locking (threading.Lock) to prevent race conditions in shared state access, (4) VelocityCaps maintain per-entity counters using defaultdict with deque structures isolated by entity_id, (5) Structured logging via structlog binds context variables per-request to prevent log data leakage.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Request isolation is enforced by FastAPI's async request handling and SQLAlchemy's scoped session pattern."
+    },
+    "sc-5": {
+      "description": "Cognigate protects against denial-of-service through multiple mechanisms: (1) VelocityCaps (app/core/velocity.py) enforce three-tier rate limiting — L0 per-second burst limits, L1 per-minute sustained limits, L2 per-hour/day quotas — all per-entity to prevent individual agent flooding, (2) CircuitBreaker (app/core/circuit_breaker.py) trips to OPEN state blocking all requests when VELOCITY_ABUSE is detected, (3) CI/CD concurrency controls (cancel-in-progress: true) prevent pipeline resource exhaustion, (4) Gateway timeout configuration (gateway_timeout_ms=30000) prevents upstream service hangs from consuming resources, (5) Vercel deployment provides infrastructure-level DDoS protection through its edge network.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level DoS protection is provided by Cognigate. Infrastructure-level DDoS protection is inherited from the Vercel deployment platform."
+    },
+    "sc-7": {
+      "description": "Cognigate implements boundary protection through: (1) API gateway pattern — all agent requests enter through the FastAPI application boundary via /v1/ prefixed endpoints, (2) Authentication boundary — admin endpoints require X-Admin-Key header validated through timing-safe comparison (secrets.compare_digest), (3) CORS boundary — FastAPI CORS middleware controls cross-origin access, (4) Network boundary — Vercel deployment provides edge network isolation with TLS termination, (5) Upstream boundary — the gateway router (app/routers/gateway.py) mediates all outbound connections to AgentAnchor API with circuit breaker protection, (6) Trust boundary — the 8-tier trust model creates a logical boundary where capability access is gated by earned trust scores.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level boundary protection is provided by Cognigate. Network-level boundary protection is inherited from the deployment infrastructure."
+    },
+    "sc-7(3)": {
+      "description": "Cognigate limits external network connections to a defined set: (1) AI provider APIs — connections only to api.anthropic.com, api.openai.com, generativelanguage.googleapis.com, api.x.ai as configured in critic.py, (2) Database — single connection to the PostgreSQL instance specified by DATABASE_URL, (3) Upstream API — single connection to agentanchor_api_url (configurable, default: https://app.agentanchorai.com/api), (4) No arbitrary outbound connections are permitted from application code. External connection endpoints are explicitly declared in app/config.py and app/core/critic.py provider configurations.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level connection limiting is enforced through explicit endpoint configuration. Network-level egress filtering is the responsibility of the deployment infrastructure."
+    },
+    "sc-7(4)": {
+      "description": "Cognigate routes external telecommunications through managed interfaces: (1) All inbound API traffic passes through Vercel's edge network which provides TLS termination, geographic routing, and DDoS mitigation, (2) All outbound connections to AI providers pass through the CriticProvider abstraction (app/core/critic.py) with circuit breaker protection (gateway_circuit_breaker_threshold=5), timeout controls (gateway_timeout_ms=30000), and structured logging, (3) The upstream_client.py manages outbound connections with configurable timeout and error handling.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application traffic is managed through defined interfaces. Infrastructure-level telecommunications service management is inherited from Vercel."
+    },
+    "sc-7(5)": {
+      "description": "Cognigate implements deny-by-default network communications: (1) API endpoints only accept requests matching defined FastAPI route patterns — undefined paths return 404, (2) Admin endpoints deny access by default unless valid X-Admin-Key is provided, returning HTTP 401 Unauthorized, (3) The PolicyEngine defaults to deny when no matching policy rule permits an action, (4) CircuitBreaker OPEN state implements complete deny-all for system-wide threat response, (5) TripwireScanner implements block-by-default for any pattern match against FORBIDDEN_PATTERNS — no override is possible regardless of trust level.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Deny-by-default is architecturally enforced. Tripwire blocks cannot be overridden by any trust level."
+    },
+    "sc-7(7)": {
+      "description": "Cognigate prevents split tunneling for remote device connections through its centralized API architecture: (1) All agent communications must pass through the /v1/ API gateway — there is no bypass mechanism, (2) The gateway router (app/routers/gateway.py) ensures all upstream communications are mediated through the Cognigate enforcement pipeline, (3) Agents cannot establish direct connections to backend services; all requests are proxied through the INTENT -> ENFORCE -> PROOF pipeline. The centralized mediation architecture inherently prevents split tunneling by requiring all traffic to traverse the governance engine.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level split tunneling prevention is enforced by the mandatory mediation architecture. Network-level split tunneling controls are the responsibility of the consumer organization's network infrastructure."
+    },
+    "sc-7(8)": {
+      "description": "Cognigate routes internal communications through authenticated interfaces: (1) The gateway router proxies all communications to upstream services (AgentAnchor API) through the authenticated upstream_client.py with API key authentication, (2) Database connections use authenticated sessions via DATABASE_URL with credential-embedded connection strings, (3) AI provider connections include API key authentication in request headers (e.g., X-API-Key for Anthropic, Authorization: Bearer for OpenAI). All internal routing is logged via structlog for audit trail generation.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level traffic routing through authenticated proxies is implemented. Network-level proxy infrastructure is the responsibility of the deployment environment."
+    },
+    "sc-8": {
+      "description": "Cognigate protects transmission confidentiality and integrity through: (1) TLS 1.2+ enforcement for all API communications — Vercel deployment terminates TLS at the edge with managed certificates, (2) All outbound connections to AI providers (Anthropic, OpenAI, Google, xAI) use HTTPS exclusively, (3) Database connections support SSL/TLS via PostgreSQL connection parameters in DATABASE_URL, (4) Ed25519 digital signatures on proof records provide message-level integrity verification independent of transport security, (5) SHA-256 hashing of proof chain records provides integrity verification for stored data.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Transport-level encryption is enforced by TLS. Application-level integrity is provided by the SHA-256 hash chain. TLS certificate management is inherited from Vercel."
+    },
+    "sc-8(1)": {
+      "description": "Cognigate implements cryptographic protection for transmission confidentiality and integrity: (1) TLS 1.2+ with modern cipher suites for all HTTPS communications — managed by Vercel's edge network with automatic certificate provisioning and renewal, (2) Ed25519 digital signatures (FIPS 186-5 compliant) applied to proof records via SignatureManager (app/core/signatures.py) providing non-repudiation independent of transport encryption, (3) API key authentication transmitted via secure headers (X-Admin-Key, X-API-Key) over TLS-protected channels, (4) Database connection encryption via PostgreSQL SSL mode parameters.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level cryptographic protection is implemented. TLS certificate and cipher suite management is inherited from Vercel's edge infrastructure."
+    },
+    "sc-10": {
+      "description": "Cognigate manages network session disconnect through configurable timeouts: (1) Access token expiration — access_token_expire_minutes defaults to 30 minutes (app/config.py), (2) Gateway timeout — gateway_timeout_ms=30000 (30 seconds) for upstream service connections, preventing indefinite session holds, (3) Database session scoping — SQLAlchemy async sessions are scoped to individual requests and released on completion, (4) AI Critic timeouts — provider-specific timeout configurations prevent hanging connections to external AI services. Session state is not maintained between requests due to the stateless REST API architecture.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Stateless REST architecture inherently limits session duration. Explicit timeouts are configured for all external connections."
+    },
+    "sc-12": {
+      "description": "Cognigate manages cryptographic keys through the SignatureManager (app/core/signatures.py): (1) Ed25519 key pair generation — keys can be generated in-memory (development), loaded from files (production), or loaded from environment variables (cloud deployment), (2) Key storage — production keys are stored as environment variables in Vercel's encrypted secrets store, (3) Key usage — private keys are used exclusively for signing proof records, public keys for signature verification, (4) Key initialization — SignatureManager.initialize() loads keys from configurable sources with graceful degradation if cryptography package is unavailable. The PROOF chain uses the public key for verification at /v1/proof/{id}/verify.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides the key management framework. Consumer organizations are responsible for key generation, rotation, and secure storage in their deployment environment."
+    },
+    "sc-13": {
+      "description": "Cognigate implements FIPS-validated cryptographic algorithms: (1) Ed25519 (FIPS 186-5) — digital signatures for proof record integrity via the cryptography Python package (cryptography.hazmat.primitives.asymmetric.ed25519), (2) SHA-256 (FIPS 180-4) — hash algorithm for proof record content and chain linkage, (3) TLS 1.2+ (FIPS 140-2 compliant when using approved cipher suites) — transport encryption for all API communications, (5) AES-256 — at-rest encryption for database storage (PostgreSQL transparent data encryption). Cryptographic implementations use the Python cryptography library backed by OpenSSL.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level cryptography uses FIPS-compliant algorithms. FIPS mode enforcement for the underlying cryptographic module is the responsibility of the deployment environment."
+    },
+    "sc-15": {
+      "description": "Cognigate does not implement collaborative computing devices (video conferencing, audio, etc.). The system operates as a headless REST API engine without real-time collaborative features. AI Critic interactions with external providers are one-way request/response patterns, not collaborative sessions. The system's dashboard UI (accessible via /tools and other HTML endpoints) provides read-only monitoring, not collaborative functionality.",
+      "implementation_status": "not_applicable",
+      "responsibility": "not_applicable",
+      "remarks": "Cognigate is a headless API service without collaborative computing capabilities. This control is not applicable to the system's functionality."
+    },
+    "sc-17": {
+      "description": "Cognigate's TLS certificates for HTTPS endpoints are managed through Vercel's automated PKI infrastructure, which provisions and renews certificates from trusted Certificate Authorities (Let's Encrypt) with automated renewal before expiration. Ed25519 public keys for proof record signature verification are distributed through the /v1/proof/{id}/verify endpoint, which returns verification results including the public key used. The SignatureManager (app/core/signatures.py) supports key loading from files or environment variables for certificate distribution in enterprise deployments.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "TLS certificate management is inherited from Vercel. Ed25519 key distribution for proof verification is provided by Cognigate. Enterprise PKI integration is the consumer's responsibility."
+    },
+    "sc-18": {
+      "description": "Cognigate controls mobile code execution through its policy engine and capability taxonomy: (1) The INTENT layer analyzes all code execution requests for malicious patterns via TripwireScanner, (2) The capability taxonomy restricts code execution to authorized capabilities (execute.* namespace) gated by trust tier, (3) FORBIDDEN_PATTERNS in tripwires.py block dangerous code execution patterns (shell injection, command injection, reverse shells), (4) The API does not serve or execute client-side mobile code — it is a server-side REST API returning JSON responses only.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Cognigate is a server-side API that does not serve mobile code. The tripwire system prevents unauthorized code execution patterns in agent requests."
+    },
+    "sc-20": {
+      "description": "Cognigate relies on infrastructure-provided authoritative DNS services. The Vercel deployment platform provides authoritative DNS resolution for the application's domain with DNSSEC support. Cognigate does not implement its own DNS resolution service but consumes DNS services from the deployment infrastructure. All API endpoint addresses are resolved through the Vercel edge network's DNS infrastructure.",
+      "implementation_status": "inherited",
+      "responsibility": "inherited",
+      "remarks": "Authoritative DNS services are provided by the Vercel deployment platform. Cognigate inherits DNS security from the infrastructure."
+    },
+    "sc-21": {
+      "description": "Cognigate's DNS resolution for outbound connections (to AI providers, database, upstream services) uses the runtime environment's recursive/caching resolver. In the Vercel deployment, DNS resolution is handled by Vercel's infrastructure DNS resolvers. The Python runtime's socket library performs DNS lookups using the system-configured resolver. DNSSEC validation for outbound connections is provided by the infrastructure DNS resolver configuration.",
+      "implementation_status": "inherited",
+      "responsibility": "inherited",
+      "remarks": "Recursive DNS resolution and validation is inherited from the deployment infrastructure (Vercel). Cognigate does not implement its own DNS resolver."
+    },
+    "sc-22": {
+      "description": "Cognigate's DNS architecture is provisioned through the Vercel platform, which provides fault-tolerant DNS with Anycast routing, geographic redundancy, and automatic failover. The application does not implement its own name resolution service. DNS provisioning for custom domains is managed through Vercel's DNS configuration interface with support for A, AAAA, CNAME, and TXT records.",
+      "implementation_status": "inherited",
+      "responsibility": "inherited",
+      "remarks": "DNS architecture and provisioning is fully inherited from Vercel's global edge network."
+    },
+    "sc-23": {
+      "description": "Cognigate implements session authenticity through: (1) API key authentication — X-Admin-Key header with timing-safe comparison (secrets.compare_digest) prevents session hijacking via timing attacks, (2) Stateless REST architecture — no server-side session state eliminates session fixation attacks, (3) TLS 1.2+ — transport encryption prevents session token interception, (4) Request-scoped database sessions — SQLAlchemy async sessions are created and destroyed per-request, (5) Proof chain integrity — each proof record includes chain_position and previous_hash fields providing cryptographic linkage that detects record insertion or manipulation.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Session authenticity is enforced through stateless architecture and cryptographic authentication. No session cookies or tokens are stored server-side."
+    },
+    "sc-28": {
+      "description": "Cognigate protects information at rest through multiple mechanisms: (1) Proof chain records are stored with SHA-256 hash chain integrity and Ed25519 digital signatures, enabling tamper detection on any stored record, (2) Database records in PostgreSQL use the database engine's at-rest encryption capabilities, (3) Vercel deployment stores environment variables (including API keys and database credentials) in encrypted secrets storage, (4) SBOM artifacts are stored as GitHub release assets with repository access controls, (5) CI/CD artifacts are retained for 90 days with GitHub's encrypted artifact storage.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level integrity protection is provided by the SHA-256 hash chain. Database-level at-rest encryption is the responsibility of the database provider (Neon PostgreSQL). Infrastructure secrets encryption is inherited from Vercel."
+    },
+    "sc-28(1)": {
+      "description": "Cognigate employs cryptographic mechanisms to protect information at rest: (1) SHA-256 hash chain — every proof record is hashed with SHA-256 (FIPS 180-4), with the hash incorporating the previous record's hash to create a cryptographic chain, (2) Ed25519 digital signatures (FIPS 186-5) — proof records are signed with the system's private key, enabling signature verification via /v1/proof/{id}/verify, (3) Input/output hashing — ProofRecord stores inputs_hash and outputs_hash fields containing SHA-256 hashes of the original data, (4) PostgreSQL transparent data encryption for database storage. The cryptographic chain makes unauthorized modification of any single record detectable through chain verification.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level cryptographic protection is implemented through the PROOF layer. Database-level encryption is managed by the PostgreSQL provider."
+    },
+    "si-1": {
+      "description": "Cognigate maintains system and information integrity policies through: (1) the PROOF layer's immutable SHA-256 hash chain providing cryptographic integrity for all enforcement decisions, (2) the TripwireScanner providing deterministic malicious input detection, (3) the CircuitBreaker providing automated integrity response when safety thresholds are breached, (4) Pydantic model validation on all API inputs enforcing schema integrity, (5) CI/CD integrity gates — tests (85%+ coverage), SAST scanning (Bandit, CodeQL), dependency auditing (pip-audit). Policy documentation is version-controlled in the GitHub repository.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion provides the platform SI policy and automated enforcement mechanisms. Consumer organizations define organization-specific integrity monitoring thresholds."
+    },
+    "si-2": {
+      "description": "Cognigate implements flaw remediation through: (1) pip-audit scanning on every CI/CD run identifying known vulnerabilities in Python dependencies with fix version recommendations, (2) Dependabot automated pull requests for dependency updates, (3) Bandit SAST identifying Python security flaws with -ll severity threshold, (4) CodeQL semantic analysis with security-extended query suites detecting code-level flaws, (5) SBOM vulnerability correlation embedding fix recommendations into CycloneDX artifacts. Identified flaws trigger CI pipeline failures preventing deployment of vulnerable code. Remediation tracking is maintained through GitHub Issues and Security Advisories.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Flaw identification is automated through CI/CD. Consumer organizations are responsible for applying remediation within their defined timelines."
+    },
+    "si-2(2)": {
+      "description": "Cognigate automates flaw remediation status tracking through: (1) pip-audit generates JSON reports (sbom/pip-audit-report.json) documenting all identified vulnerabilities, affected versions, and fix availability, (2) SBOM pipeline correlates vulnerabilities with component inventory and embeds status in CycloneDX SBOM, (3) vulnerability-summary.json provides a machine-readable remediation status dashboard with CVE IDs, descriptions, affected packages, and fix recommendations, (4) Dependabot automatically generates PRs for available fixes, providing real-time remediation status in the GitHub PR queue, (5) GitHub Security tab aggregates all SARIF-uploaded scan results for centralized status monitoring.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Flaw remediation status is automatically tracked through CI/CD artifacts and GitHub Security features."
+    },
+    "si-3": {
+      "description": "Cognigate provides malicious code protection through its TripwireScanner (app/core/tripwires.py): (1) 15+ regex patterns in FORBIDDEN_PATTERNS detect malicious commands including filesystem destruction (rm -rf /, rmdir system), shell injection (;, &&, ||, |, backticks in commands), path traversal (../), SQL injection (SELECT, DROP, UNION patterns), reverse shells (nc, netcat, bash -i), privilege escalation (sudo, su, chmod 777, chown root), cryptocurrency mining commands, and data exfiltration patterns, (2) Tripwires execute BEFORE any LLM analysis providing zero-latency detection, (3) Tripwire matches result in immediate BLOCK with no override regardless of trust level, (4) All triggers are logged for audit via structlog, (5) AI Critic (app/core/critic.py) provides secondary malicious intent detection through adversarial LLM evaluation.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Cognigate's tripwire system IS malicious code detection. It operates at the application layer detecting malicious agent commands rather than traditional file-based malware."
+    },
+    "si-4": {
+      "description": "Cognigate implements comprehensive system monitoring through: (1) CircuitBreaker (app/core/circuit_breaker.py) monitors system-wide safety metrics and trips on HIGH_RISK_THRESHOLD (>10% high-risk actions), INJECTION_DETECTED, TRIPWIRE_CASCADE, ENTITY_MISBEHAVIOR, CRITICAL_DRIFT, VELOCITY_ABUSE, CRITIC_BLOCK_CASCADE, (2) VelocityCaps monitor per-entity action frequency at L0 (per-second), L1 (per-minute), L2 (hourly/daily) tiers, (3) Trust model monitors entity behavior with 182-day decay and gaming detection (RAPID_CHANGE, SCORE_MANIPULATION), (4) Structured logging via structlog captures all INTENT, ENFORCE, and PROOF events in JSON format, (5) PROOF chain records every enforcement decision with timestamps and entity attribution for forensic analysis, (6) Health endpoint (/v1/health) provides real-time system status monitoring.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level monitoring is comprehensive. Consumer organizations are responsible for infrastructure-level monitoring and SIEM integration."
+    },
+    "si-4(2)": {
+      "description": "Cognigate employs automated tools for real-time analysis: (1) TripwireScanner performs real-time regex pattern matching on every inbound request with sub-millisecond execution, (2) CircuitBreaker performs real-time statistical analysis of risk thresholds using rolling window calculations, (3) VelocityCaps perform real-time rate analysis using deque-based sliding window counters, (4) AI Critic provides real-time adversarial analysis of agent intentions via LLM evaluation, (5) Trust scoring performs real-time reputation analysis with decay and gaming detection algorithms. All analysis results feed into the enforcement decision pipeline before any action is permitted.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Real-time analysis is performed on every request through the INTENT -> ENFORCE pipeline. No request bypasses automated analysis."
+    },
+    "si-4(4)": {
+      "description": "Cognigate monitors both inbound and outbound communications: (1) Inbound — every API request is analyzed through the INTENT layer (tripwires, paranoia mode, AI critic) before processing, with structured logging capturing request metadata, risk scores, and enforcement decisions, (2) Outbound — the gateway router (app/routers/gateway.py) and upstream_client.py log all outbound requests to external services with response codes and timing, (3) AI Critic outbound requests include structured logging of provider, prompt content, and response metadata, (4) CircuitBreaker monitors aggregate traffic patterns across both inbound and outbound communications for anomaly detection.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "All communications are logged and monitored. The PROOF chain provides immutable records of all enforcement decisions derived from communication analysis."
+    },
+    "si-4(5)": {
+      "description": "Cognigate generates automated alerts through: (1) CircuitBreaker state transitions — CLOSED->OPEN transitions generate system-wide alerts indicating safety threshold breach with TripReason classification (HIGH_RISK_THRESHOLD, INJECTION_DETECTED, CRITICAL_DRIFT, TRIPWIRE_CASCADE, ENTITY_MISBEHAVIOR, MANUAL_HALT), (2) TripwireScanner matches generate CRITICAL-severity alerts with pattern_name, matched_text, and message details, (3) VelocityCaps generate alerts when entity rate limits are exceeded at any tier, (4) Trust model gaming detection generates alerts for RAPID_CHANGE and SCORE_MANIPULATION patterns. All alerts are emitted through structlog and recorded in the PROOF chain.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level alerts are generated by Cognigate's monitoring systems. Integration with organizational alerting/notification systems (PagerDuty, email, SMS) is the consumer's responsibility."
+    },
+    "si-5": {
+      "description": "Cognigate receives and processes security alerts through: (1) pip-audit integration with PyPI/OSV vulnerability databases providing real-time advisory data for Python dependencies, (2) GitHub Dependabot security advisories for automated vulnerability notification, (3) CodeQL security alerts published to GitHub Security tab, (4) Gitleaks findings uploaded as SARIF reports for secrets exposure alerts. Security advisories drive automated CI/CD pipeline responses — vulnerable dependencies trigger pipeline failures preventing deployment. Advisory dissemination occurs through GitHub Security tab notifications and SBOM vulnerability-summary.json artifacts.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion receives and processes security advisories through automated tooling. Consumer organizations are responsible for subscribing to and acting on advisories relevant to their deployment."
+    },
+    "si-7": {
+      "description": "Cognigate implements software and information integrity through: (1) PROOF chain — immutable SHA-256 hash chain with Ed25519 digital signatures, where each record's hash incorporates the previous record's hash creating a cryptographic integrity chain, (2) Chain verification endpoint — /v1/proof/{id}/verify validates individual record integrity by recomputing and comparing hashes, (3) Tamper detection — any modification to a proof record breaks the hash chain, detectable through sequential verification, (4) Git-based source integrity — all code changes are tracked in version control with commit signatures, (5) CI/CD integrity gates — tests and security scans must pass before deployment, preventing compromised code from reaching production.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "The PROOF layer IS an integrity verification system. It provides cryptographic proof of every enforcement decision, detectable if any record is altered."
+    },
+    "si-7(1)": {
+      "description": "Cognigate performs integrity checks on proof records: (1) SHA-256 hash verification — recomputes the hash of proof record contents and compares against the stored hash field, (2) Chain continuity verification — validates that each record's previous_hash matches the preceding record's hash field, detecting insertions or deletions, (4) Ed25519 signature verification — the SignatureManager.verify() method validates digital signatures against the system's public key, detecting unauthorized modifications. Integrity checks are available on-demand via /v1/proof/{id}/verify and can be run as batch verification across the entire chain.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Integrity checks use three independent verification methods: dual hashing, chain linkage, and digital signatures."
+    },
+    "si-7(7)": {
+      "description": "Cognigate incorporates detection of unauthorized changes into its incident response: (1) Hash chain breaks are detected when /v1/proof/{id}/verify returns verification failure, triggering CRITICAL-severity alerts, (2) CircuitBreaker trips to OPEN state on detection of CRITICAL_DRIFT indicating unexpected system state changes, (3) TripwireScanner detects unauthorized command patterns that could modify system state, (4) Ed25519 signature verification failures indicate unauthorized record modification. Detection of unauthorized changes triggers automated responses: CircuitBreaker halts system operation, the event is recorded in the PROOF chain with TRUST_DELTA entries, and entity trust scores are decremented.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Unauthorized change detection is integrated with the CircuitBreaker automated response system and trust model scoring."
+    },
+    "si-8": {
+      "description": "Cognigate provides spam protection through its VelocityCaps and pattern detection systems: (1) VelocityCaps (app/core/velocity.py) enforce per-entity rate limits at three tiers — L0 burst (per-second), L1 sustained (per-minute), L2 quotas (hourly/daily) — preventing automated spam from AI agents, (2) CircuitBreaker detects VELOCITY_ABUSE patterns indicating spam-like behavior and trips to OPEN state, (3) TripwireScanner detects mass-action patterns in agent requests. While not traditional email spam protection, these mechanisms prevent the AI agent equivalent of spam — high-volume, low-value, or malicious automated requests.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Spam protection is implemented as rate limiting and abuse detection appropriate for an API-based AI governance service rather than email-based spam filtering."
+    },
+    "si-10": {
+      "description": "Cognigate implements comprehensive information input validation: (1) Pydantic v2 model validation on every API endpoint — all request bodies are validated against typed schemas (IntentAnalysis, EnforceVerdict, ProofRecord, TrustProfile, ProofQuery) with field-level constraints (Field(..., ge=0, le=1000), Literal types, regex patterns), (2) FastAPI automatic request validation — path parameters, query parameters, and headers are type-checked by the framework, (3) TripwireScanner regex validation — input content is scanned for malicious patterns before processing, (4) PolicyEngine condition validation — ExpressionEvaluator validates policy expressions using a safe operator whitelist (==, !=, <, >, in, not in, and, or) preventing expression injection. Invalid inputs return HTTP 422 Unprocessable Entity with detailed validation error messages.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Input validation is enforced at multiple layers: HTTP framework (FastAPI), schema validation (Pydantic), content scanning (TripwireScanner), and policy evaluation (ExpressionEvaluator)."
+    },
+    "si-11": {
+      "description": "Cognigate implements structured error handling: (1) FastAPI exception handlers return standardized error responses with HTTP status codes (400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 422 Unprocessable Entity, 500 Internal Server Error) without exposing internal implementation details, (2) AuthError and ForbiddenError (app/core/auth.py) return structured error responses with WWW-Authenticate headers, (3) TripwireResult returns only pattern_name and message without exposing the underlying regex patterns, (4) Structured logging via structlog captures detailed error context server-side while returning sanitized errors to clients, (5) Pydantic validation errors return field-level error details without exposing model internals.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Error messages are sanitized for external consumption while detailed error context is logged server-side via structlog for operational debugging."
+    },
+    "si-12": {
+      "description": "Cognigate manages information retention through: (1) PROOF chain records are immutable and retained indefinitely in the PostgreSQL database as the permanent audit trail, (2) CI/CD artifacts are retained for 90 days (retention-days: 90 in upload-artifact@v4 actions) for build reproducibility, (3) SBOM history is versioned and archived in the sbom-history/ directory committed to the Git repository for permanent retention, (4) Coverage reports are retained for 30 days (retention-days: 30) for test analysis, (5) Database records follow PostgreSQL's storage management with no automatic purging of operational data. Retention policies are encoded in CI workflow configuration files.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level retention is implemented through CI/CD configuration. Consumer organizations are responsible for defining and enforcing organization-specific retention requirements for their deployment."
+    },
+    "si-16": {
+      "description": "Cognigate protects against memory-based attacks through: (1) Python runtime memory management — Python's managed memory model with garbage collection prevents buffer overflow and memory corruption attacks common in C/C++ applications, (2) Pydantic v2 model validation prevents oversized input payloads from consuming excessive memory, (3) VelocityCaps limit the rate of requests preventing memory exhaustion from rapid-fire API calls, (4) FastAPI's async architecture uses event-loop-based concurrency avoiding thread-stack memory issues. The application runs on Vercel's managed serverless infrastructure which provides process-level memory isolation between function invocations.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level memory protection is provided by Python's managed runtime. Infrastructure-level memory protection (ASLR, DEP, stack canaries) is inherited from the deployment platform."
+    },
+    "sr-1": {
+      "description": "Cognigate maintains supply chain risk management policies governing: (1) dependency acquisition — all Python dependencies are declared in requirements.txt and pyproject.toml with version constraints, (2) SBOM generation — CycloneDX 1.5 and SPDX 2.3 SBOMs are generated automatically on release, weekly, and on-demand (cognigate/.github/workflows/sbom.yml), (3) vulnerability monitoring — pip-audit scans against PyPI/OSV on every CI run, (4) component provenance — PURL identifiers and SHA-256 hashes track component origins in SBOM artifacts, (5) supplier assessment — AI provider integrations (Anthropic, OpenAI, Google, xAI) are evaluated for security posture. Policy is enforced through CI/CD pipeline gates.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Vorion provides the supply chain risk management framework. Consumer organizations are responsible for extending SCRM policies to cover their deployment infrastructure components."
+    },
+    "sr-2": {
+      "description": "Cognigate's supply chain risk management plan is implemented through: (1) SBOM pipeline (cognigate/.github/workflows/sbom.yml) defining the end-to-end process for component inventory, vulnerability correlation, NTIA validation, and artifact archival, (2) CI/CD security gates — pip-audit and Bandit run on every push/PR preventing vulnerable dependencies from reaching production, (3) Dependency tracking — requirements.txt, pyproject.toml, and package.json declare all supply chain inputs, (4) SBOM history versioning — archived in sbom-history/ with versioned filenames (sbom-v{VERSION}-{DATE}-cyclonedx.json) for longitudinal tracking, (5) Vulnerability correlation — pip-audit results are embedded into CycloneDX SBOM with affected component references and remediation recommendations.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "The SCRM plan is codified in CI/CD pipeline definitions and executed automatically. SBOM artifacts provide the evidentiary basis for supply chain risk posture."
+    },
+    "sr-2(1)": {
+      "description": "Cognigate's supply chain risk management activities are supported by defined roles: (1) the CI/CD pipeline automates SCRM execution (SBOM generation, vulnerability scanning, dependency auditing), (2) Vorion engineering team reviews vulnerability findings from pip-audit, CodeQL, and Dependabot, (3) security scan results are published to GitHub Security tab for visibility across the development team, (4) SBOM artifacts are attached to releases for external stakeholder review. The SCRM team's activities include dependency update reviews (Dependabot PRs), vulnerability triage (pip-audit findings), and supply chain integrity verification (NTIA validation checks).",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "SCRM team activities are partially automated through CI/CD. Consumer organizations should designate their own SCRM personnel for their deployment context."
+    },
+    "sr-3": {
+      "description": "Cognigate implements supply chain controls and processes: (1) Dependency integrity — pip installs from PyPI with hash verification available via pip --require-hashes, (2) Component identification — CycloneDX SBOM includes PURL identifiers for every dependency enabling provenance tracking to specific package versions on PyPI, (3) Vulnerability gate — pip-audit blocks CI pipeline on known-vulnerable dependencies, (4) License compliance — SBOM includes license identifiers for each component (licenseConcluded, licenseDeclared fields in SPDX), (5) NTIA minimum elements validation — automated checks verify supplier name, component name/version, unique identifiers, dependency relationships, SBOM authorship, and timestamp for every generated SBOM.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Supply chain controls are enforced through the SBOM pipeline and CI/CD security gates. NTIA compliance is validated automatically."
+    },
+    "sr-5": {
+      "description": "Cognigate employs specific acquisition strategies and tools for supply chain risk reduction: (1) pip package manager with PyPI as the sole package source — no untrusted package repositories, (2) Version pinning in requirements.txt prevents unexpected dependency changes, (3) Dependabot automated monitoring for dependency updates with security-focused PR generation, (4) cyclonedx-py and spdx-tools for standardized component inventory, (5) pip-audit for real-time vulnerability checking against PyPI/OSV databases, (6) GitHub Actions marketplace with verified actions (actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4) for CI/CD tooling acquisition.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Acquisition tools are standardized across the development pipeline. All tools are sourced from verified publishers."
+    },
+    "sr-6": {
+      "description": "Cognigate performs supplier assessment through automated and manual processes: (1) AI provider evaluation — Anthropic, OpenAI, Google, and xAI are assessed as critic providers with configurable selection (app/config.py critic_provider), (2) Package supplier assessment — pip-audit evaluates package maintainer responsiveness by tracking vulnerability fix availability and timeline, (3) SBOM supplier fields — CycloneDX and SPDX SBOMs document supplier information for each component, (4) GitHub Actions supplier verification — CI/CD uses only verified GitHub Actions from trusted publishers with pinned versions (@v4, @v3, @v2), (5) Infrastructure supplier assessment — Vercel and Neon PostgreSQL are evaluated as infrastructure suppliers.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Automated supplier assessment is performed through the SBOM pipeline. Consumer organizations should conduct their own assessment of Vorion as a supplier."
+    },
+    "sr-8": {
+      "description": "Cognigate maintains notification agreements for supply chain compromise detection through: (1) Dependabot security alerts — GitHub automatically notifies on known vulnerabilities in declared dependencies, (2) GitHub Security Advisories — vulnerability disclosures from the Python ecosystem are automatically surfaced, (3) pip-audit PyPI/OSV integration — vulnerabilities published to OSV database trigger detection on next CI/CD run, (4) Gitleaks — detects inadvertent credential exposure that could indicate supply chain compromise, (5) SARIF upload to GitHub Security tab provides centralized notification aggregation. Notification frequency is continuous for Dependabot/Security Advisories and per-CI-run for pip-audit/Gitleaks.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Automated notifications are provided through GitHub's security ecosystem. Consumer organizations should establish their own notification agreements with their infrastructure suppliers."
+    },
+    "sr-10": {
+      "description": "Cognigate inspects system components through automated scanning: (1) SBOM generation inspects all Python dependencies by extracting name, version, license, PURL, and cryptographic hashes, (2) NTIA minimum element validation inspects SBOM completeness across 11 check categories (supplier name, component name/version, unique identifiers, dependency relationships, authorship, timestamp, format, spec version, serial number, licenses, hashes), (3) pip-audit inspects each installed package against vulnerability databases, (4) Bandit inspects Python source code for security anti-patterns, (5) CodeQL performs deep semantic inspection of code for vulnerability patterns. Inspection results are archived as CI/CD artifacts with 90-day retention.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Component inspection is automated through the CI/CD pipeline. Results are documented in SBOM artifacts and security scan reports."
+    },
+    "sr-11": {
+      "description": "Cognigate ensures component authenticity through: (1) PURL (Package URL) identifiers in SBOM artifacts uniquely identifying each component's origin registry (PyPI), package name, and version, (2) SHA-256 cryptographic hashes recorded in SBOM for each component enabling integrity verification against PyPI's published hashes, (3) pip's built-in hash verification for installed packages, (4) GitHub Actions version pinning (@v4, @v3) with SHA-based action references preventing CI/CD tool substitution, (5) CycloneDX bom-ref fields providing unique component references within the SBOM for cross-referencing.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Component authenticity is verified through cryptographic hashes and package registry provenance recorded in SBOM artifacts."
+    },
+    "sr-11(1)": {
+      "description": "Cognigate provides anti-counterfeit awareness through: (1) SBOM documentation educating stakeholders on component provenance verification using PURL identifiers and cryptographic hashes, (2) CI/CD pipeline configuration files serve as training artifacts demonstrating proper dependency verification practices (version pinning, hash checking, vulnerability scanning), (3) vulnerability-summary.json provides transparency into component security posture, enabling identification of potentially counterfeit or compromised packages. Development team training on supply chain security practices is conducted as part of the secure development lifecycle.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Automated tooling provides the foundation for anti-counterfeit awareness. Formal training programs for supply chain security are planned."
+    },
+    "sr-11(2)": {
+      "description": "Cognigate implements configuration control for component service and repair through: (1) requirements.txt and pyproject.toml version pinning ensures components are only updated through controlled processes, (2) Dependabot PRs require review before merging dependency updates, preventing unauthorized component changes, (3) CI/CD pipeline re-runs all security checks (pip-audit, Bandit, tests) on dependency updates before they reach production, (4) SBOM history versioning tracks component changes across releases enabling before/after comparison, (5) Git commit history provides complete audit trail of all dependency modifications.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Component configuration control is enforced through version pinning and CI/CD pipeline gates."
+    },
+    "sr-12": {
+      "description": "Cognigate manages component disposal through: (1) Git-based dependency removal — removing packages from requirements.txt/pyproject.toml is tracked in version control with full audit trail, (2) SBOM history comparison — previous and current SBOMs can be diffed to identify removed components, (3) CI/CD artifact retention — build artifacts are automatically purged after 90 days (retention-days: 90) and coverage reports after 30 days (retention-days: 30), (4) Database record retention — proof chain records are retained according to defined retention policies. Component disposal decisions are documented through Git commit messages and PR descriptions.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Software component disposal is managed through version control. Physical hardware disposal is not applicable to the SaaS deployment model."
+    }
+  }
+}

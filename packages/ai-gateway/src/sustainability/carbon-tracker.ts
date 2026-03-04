@@ -29,6 +29,9 @@ export interface ModelEnergyProfile {
  * Tracks energy consumption and carbon emissions for AI operations
  */
 export class CarbonTracker {
+  /** In-memory accumulator of all tracked task records */
+  private trackedTasks: CarbonMetrics[] = []
+
   private static MODEL_ENERGY_PROFILES: Record<string, ModelEnergyProfile> = {
     // Anthropic - Cloud-based (US average grid)
     'claude-opus-4': {
@@ -138,11 +141,71 @@ export class CarbonTracker {
       timestamp: new Date(),
     }
 
+    // Store in the in-memory accumulator
+    this.trackedTasks.push(metrics)
+
     console.log(
-      `[CARBON_TRACKER] Task ${taskId}: ${carbonEmitted.toFixed(6)} kg CO2e (${energyConsumed.toFixed(6)} kWh)`
+      `[CARBON_TRACKER] Task ${taskId}: ${carbonEmitted.toFixed(6)} kg CO2e (${energyConsumed.toFixed(6)} kWh) [${this.trackedTasks.length} total tracked]`
     )
 
     return metrics
+  }
+
+  /**
+   * Compute carbon metrics for a hypothetical task without recording it.
+   * Used for estimates and comparisons that should not pollute tracked data.
+   */
+  computeMetrics(
+    provider: string,
+    model: string,
+    tokensInput: number,
+    tokensOutput: number,
+    duration: number
+  ): CarbonMetrics {
+    const profile = this.getModelProfile(provider, model)
+
+    const totalTokens = tokensInput + tokensOutput
+    const energyConsumed = totalTokens * profile.energyPerToken / 1000
+    const carbonEmitted = energyConsumed * profile.carbonIntensity
+
+    return {
+      taskId: '_estimate',
+      modelProvider: provider,
+      modelName: model,
+      tokensInput,
+      tokensOutput,
+      duration,
+      energyConsumed,
+      carbonEmitted,
+      timestamp: new Date(),
+    }
+  }
+
+  /**
+   * Get all tracked task records (read-only copy)
+   */
+  getTrackedTasks(): ReadonlyArray<CarbonMetrics> {
+    return [...this.trackedTasks]
+  }
+
+  /**
+   * Get tracked tasks within a date range
+   */
+  getTrackedTasksInRange(startDate: Date, endDate: Date): CarbonMetrics[] {
+    const start = startDate.getTime()
+    const end = endDate.getTime()
+    return this.trackedTasks.filter((t) => {
+      const ts = t.timestamp.getTime()
+      return ts >= start && ts <= end
+    })
+  }
+
+  /**
+   * Reset all tracked data (for testing)
+   */
+  reset(): void {
+    this.trackedTasks = []
+    console.log('[CARBON_TRACKER] All tracked data has been reset')
   }
 
   /**
@@ -205,7 +268,7 @@ export class CarbonTracker {
   }
 
   /**
-   * Get aggregate carbon metrics
+   * Get aggregate carbon metrics computed from actual tracked tasks
    */
   async getAggregateMetrics(
     startDate: Date,
@@ -217,20 +280,68 @@ export class CarbonTracker {
     avgCarbonPerTask: number
     greenTaskPercent: number
   }> {
-    // Would query from database in production
-    // For now, return mock data
+    const tasks = this.getTrackedTasksInRange(startDate, endDate)
+
+    if (tasks.length === 0) {
+      return {
+        totalTasks: 0,
+        totalEnergy: 0,
+        totalCarbon: 0,
+        avgCarbonPerTask: 0,
+        greenTaskPercent: 0,
+      }
+    }
+
+    const greenModels = new Set(
+      Object.values(CarbonTracker.MODEL_ENERGY_PROFILES)
+        .filter((p) => p.isGreenOptimized)
+        .map((p) => p.model)
+    )
+
+    let totalEnergy = 0
+    let totalCarbon = 0
+    let greenCount = 0
+
+    for (const task of tasks) {
+      totalEnergy += task.energyConsumed
+      totalCarbon += task.carbonEmitted
+      if (greenModels.has(task.modelName)) {
+        greenCount++
+      }
+    }
+
     return {
-      totalTasks: 150,
-      totalEnergy: 2.4, // kWh
-      totalCarbon: 0.92, // kg CO2e
-      avgCarbonPerTask: 0.0061, // kg CO2e
-      greenTaskPercent: 45.5, // %
+      totalTasks: tasks.length,
+      totalEnergy, // kWh
+      totalCarbon, // kg CO2e
+      avgCarbonPerTask: totalCarbon / tasks.length, // kg CO2e
+      greenTaskPercent: (greenCount / tasks.length) * 100, // %
     }
   }
 
   /**
-   * Get hourly carbon intensity forecast
-   * (for off-peak scheduling)
+   * Time-of-day carbon intensity adjustment factors.
+   * Off-peak hours (22:00-06:00) have lower grid carbon intensity.
+   */
+  private static HOURLY_ADJUSTMENT_FACTORS: number[] = [
+    // 0-6: off-peak (night) — 30% lower
+    0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7,
+    // 7-11: morning ramp-up — 10% higher
+    1.1, 1.1, 1.1, 1.1, 1.1,
+    // 12-17: afternoon peak — 10% higher
+    1.1, 1.1, 1.1, 1.1, 1.1, 1.1,
+    // 18-21: evening — 10% higher
+    1.1, 1.1, 1.1, 1.1,
+    // 22-23: off-peak (night) — 30% lower
+    0.7, 0.7,
+  ]
+
+  /**
+   * Get hourly carbon intensity forecast.
+   * Uses actual tracked hourly emission patterns as a baseline when data is
+   * available, with time-of-day adjustment factors applied. Falls back to
+   * the US grid average (0.386 kg CO2e/kWh) when no tracked data exists
+   * for a given hour.
    */
   async getCarbonIntensityForecast(): Promise<
     Array<{
@@ -239,17 +350,37 @@ export class CarbonTracker {
       isLowEmission: boolean
     }>
   > {
-    // In production, would use WattTime API or similar
-    // Simulated 24-hour profile with lower emissions at night
-    const baseIntensity = 0.386
+    const defaultBaseIntensity = 0.386 // US grid average (kg CO2e/kWh)
+
+    // Build per-hour observed weighted-average carbon intensity from tracked data.
+    // We compute: sum(carbonEmitted) / sum(energyConsumed) per hour bucket.
+    const hourlyCarbon: number[] = new Array(24).fill(0)
+    const hourlyEnergy: number[] = new Array(24).fill(0)
+
+    for (const task of this.trackedTasks) {
+      const hour = task.timestamp.getHours()
+      hourlyCarbon[hour] += task.carbonEmitted
+      hourlyEnergy[hour] += task.energyConsumed
+    }
+
     const forecast = []
 
     for (let hour = 0; hour < 24; hour++) {
-      // Lower emissions 10pm-6am (off-peak)
+      const adjustmentFactor = CarbonTracker.HOURLY_ADJUSTMENT_FACTORS[hour]
       const isOffPeak = hour >= 22 || hour <= 6
-      const intensity = isOffPeak
-        ? baseIntensity * 0.7 // 30% lower at night
-        : baseIntensity * 1.1 // 10% higher during day
+
+      // If we have tracked energy data for this hour, derive the observed
+      // carbon intensity (weighted average across all providers/models that
+      // actually ran during this hour). Apply the time-of-day adjustment on
+      // top to produce the forecast.
+      let baseIntensity: number
+      if (hourlyEnergy[hour] > 0) {
+        baseIntensity = hourlyCarbon[hour] / hourlyEnergy[hour]
+      } else {
+        baseIntensity = defaultBaseIntensity
+      }
+
+      const intensity = baseIntensity * adjustmentFactor
 
       forecast.push({
         hour,

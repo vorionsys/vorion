@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/api/schema/stryker-core.json",
+  "packageManager": "npm",
+  "reporters": ["clear-text", "progress", "json"],
+  "mutate": [
+    "packages/security/src/security/policy-engine/condition-evaluator.ts",
+    "packages/security/src/security/policy-engine/engine.ts",
+    "packages/security/src/security/policy-engine/rule-evaluator.ts",
+    "packages/security/src/security/policy-engine/built-in-policies.ts"
+  ],
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vitest.config.ts"
+  },
+  "mutator": {
+    "excludedMutations": ["StringLiteral"]
+  },
+  "timeoutMS": 60000,
+  "timeoutFactor": 2.5,
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": null
+  },
+  "incremental": false,
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".next",
+    "k6",
+    "e2e",
+    ".stryker-tmp"
+  ]
+}

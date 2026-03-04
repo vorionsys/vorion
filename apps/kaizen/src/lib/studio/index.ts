@@ -1,2 +1,2 @@
 export * from './factions';
-export * from './firebase';
+export * from './supabase-studio';

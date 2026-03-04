@@ -80,30 +80,3 @@ export {
 
 // Re-export logger for consumers
 export { createLogger, type LoggerOptions } from './common/logger.js';
-
-// Tracing - Lightweight OpenTelemetry-compatible tracing abstraction
-export {
-  // Core types & interfaces
-  type Span,
-  type SpanStatus,
-  type Tracer,
-  type ConsoleTracerOptions,
-  // Tracer implementations
-  NoopTracer,
-  ConsoleTracer,
-  InMemoryTracer,
-  // Global tracer accessors
-  getTracer,
-  setTracer,
-  resetTracer,
-  // Span helpers
-  withSpan,
-  withSpanSync,
-  // Context propagation
-  TraceContext,
-  type TraceContextFields,
-  generateTraceId,
-  generateSpanId,
-  extractTraceContext,
-  injectTraceContext,
-} from './tracing/index.js';

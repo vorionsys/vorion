@@ -7,7 +7,7 @@
  *
  * For production use with persistence, use the full implementation from the
  * vorion core package. This SDK package provides:
- * - Type definitions aligned with @vorionsys/contracts
+ * - Type definitions aligned with @vorion/contracts
  * - In-memory mock for testing
  * - Interface definitions for custom implementations
  *

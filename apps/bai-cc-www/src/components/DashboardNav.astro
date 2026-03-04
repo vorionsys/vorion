@@ -1,0 +1,251 @@
+---
+const navLinks = [
+  {
+    href: '/',
+    label: 'Dashboard',
+    icon: 'grid',
+  },
+  {
+    href: '/domains',
+    label: 'Domains',
+    icon: 'globe',
+  },
+  {
+    href: '/cicd',
+    label: 'CI/CD',
+    icon: 'git-branch',
+  },
+  {
+    href: '/packages',
+    label: 'Packages',
+    icon: 'package',
+  },
+  {
+    href: '/deployments',
+    label: 'Deployments',
+    icon: 'rocket',
+  },
+  {
+    href: '/ecosystem',
+    label: 'Ecosystem',
+    icon: 'layers',
+  },
+];
+
+const currentPath = Astro.url.pathname;
+
+function isActive(href: string): boolean {
+  if (href === '/') return currentPath === '/';
+  return currentPath === href || currentPath.startsWith(href + '/');
+}
+---
+
+<header class="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md">
+  <nav class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-14">
+      <!-- Left: Logo + Title -->
+      <a href="/" class="flex items-center gap-2.5 group shrink-0">
+        <div class="w-7 h-7 rounded-md bg-gradient-to-br from-vorion-500 to-accent-cyan flex items-center justify-center">
+          <span class="text-white font-bold text-xs">BC</span>
+        </div>
+        <span class="font-semibold text-sm text-slate-200 group-hover:text-white transition-colors hidden sm:inline">
+          BAI Command Center
+        </span>
+      </a>
+
+      <!-- Center: Nav links with icons -->
+      <div class="hidden lg:flex items-center gap-0.5">
+        {navLinks.map(link => (
+          <a
+            href={link.href}
+            class:list={[
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
+              isActive(link.href)
+                ? 'bg-vorion-500/15 text-vorion-400 shadow-sm shadow-vorion-500/10'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+            ]}
+          >
+            {link.icon === 'grid' && (
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+            )}
+            {link.icon === 'globe' && (
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+            )}
+            {link.icon === 'git-branch' && (
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <line x1="6" y1="3" x2="6" y2="15" />
+                <circle cx="18" cy="6" r="3" />
+                <circle cx="6" cy="18" r="3" />
+                <path d="M18 9a9 9 0 0 1-9 9" />
+              </svg>
+            )}
+            {link.icon === 'package' && (
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            )}
+            {link.icon === 'rocket' && (
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+              </svg>
+            )}
+            {link.icon === 'layers' && (
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                <polyline points="2 17 12 22 22 17" />
+                <polyline points="2 12 12 17 22 12" />
+              </svg>
+            )}
+            {link.label}
+          </a>
+        ))}
+      </div>
+
+      <!-- Right: Last updated + refresh area -->
+      <div class="hidden lg:flex items-center gap-3">
+        <div id="last-updated" class="flex items-center gap-1.5 text-xs text-slate-500">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span id="last-updated-text">Updated just now</span>
+        </div>
+        <div id="refresh-indicator" class="w-1.5 h-1.5 rounded-full bg-accent-emerald" title="Connected"></div>
+      </div>
+
+      <!-- Mobile menu button -->
+      <button
+        type="button"
+        class="lg:hidden p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+        aria-label="Toggle navigation menu"
+        id="dashboard-mobile-menu-btn"
+      >
+        <svg class="w-5 h-5 block" id="hamburger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg class="w-5 h-5 hidden" id="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div class="lg:hidden hidden border-t border-slate-800/50" id="dashboard-mobile-menu">
+      <div class="py-2 space-y-0.5">
+        {navLinks.map(link => (
+          <a
+            href={link.href}
+            class:list={[
+              'flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors',
+              isActive(link.href)
+                ? 'bg-vorion-500/15 text-vorion-400'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            ]}
+          >
+            {link.icon === 'grid' && (
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+            )}
+            {link.icon === 'globe' && (
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+            )}
+            {link.icon === 'git-branch' && (
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <line x1="6" y1="3" x2="6" y2="15" />
+                <circle cx="18" cy="6" r="3" />
+                <circle cx="6" cy="18" r="3" />
+                <path d="M18 9a9 9 0 0 1-9 9" />
+              </svg>
+            )}
+            {link.icon === 'package' && (
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+              </svg>
+            )}
+            {link.icon === 'rocket' && (
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+              </svg>
+            )}
+            {link.icon === 'layers' && (
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                <polyline points="2 17 12 22 22 17" />
+                <polyline points="2 12 12 17 22 12" />
+              </svg>
+            )}
+            {link.label}
+          </a>
+        ))}
+      </div>
+      <div class="px-3 py-2 border-t border-slate-800/50">
+        <div class="flex items-center gap-1.5 text-xs text-slate-500">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span>Updated just now</span>
+          <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto"></div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const btn = document.getElementById('dashboard-mobile-menu-btn');
+  const menu = document.getElementById('dashboard-mobile-menu');
+  const hamburgerIcon = document.getElementById('hamburger-icon');
+  const closeIcon = document.getElementById('close-icon');
+
+  btn?.addEventListener('click', () => {
+    const isHidden = menu?.classList.contains('hidden');
+    menu?.classList.toggle('hidden');
+    hamburgerIcon?.classList.toggle('hidden', !isHidden ? false : true);
+    hamburgerIcon?.classList.toggle('block', !isHidden ? true : false);
+    closeIcon?.classList.toggle('hidden', !isHidden ? true : false);
+    closeIcon?.classList.toggle('block', !isHidden ? false : true);
+  });
+
+  // Update the "last updated" timestamp
+  function updateTimestamp() {
+    const el = document.getElementById('last-updated-text');
+    if (el) {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      el.textContent = `Updated ${hours}:${minutes}`;
+    }
+  }
+
+  // Set initial timestamp after a brief delay to show "just now" first
+  setTimeout(updateTimestamp, 60000);
+  setInterval(updateTimestamp, 60000);
+</script>

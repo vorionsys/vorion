@@ -1,0 +1,183 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Vorion Public Trust Dashboard - Real-time AI agent trust scores and governance metrics' } = Astro.props;
+const currentPath = Astro.url.pathname;
+
+// Read health status for dynamic footer
+let footerStatus = 'unknown';
+let footerDotColor = 'bg-slate-500';
+try {
+  const kv = (Astro.locals as any).runtime?.env?.BAI_CC_CACHE;
+  if (kv) {
+    const raw = await kv.get('dashboard:service-status');
+    if (raw) {
+      const data = JSON.parse(raw);
+      footerStatus = data.overallStatus ?? 'unknown';
+    }
+  }
+} catch { /* fallback to unknown */ }
+
+const footerStatusText = footerStatus === 'operational' ? 'All systems operational'
+  : footerStatus === 'degraded' ? 'Some services degraded'
+  : 'Status checking...';
+footerDotColor = footerStatus === 'operational' ? 'bg-emerald-500'
+  : footerStatus === 'degraded' ? 'bg-yellow-500'
+  : 'bg-slate-500';
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0f172a" />
+    <meta property="og:title" content={`${title} | Vorion`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/og-image.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>{title} | Vorion</title>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white antialiased">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-emerald-600 text-white px-4 py-2 rounded-lg z-50">
+      Skip to main content
+    </a>
+
+    <!-- Top announcement bar -->
+    <div class="bg-emerald-600/10 border-b border-emerald-600/20 py-2 px-4 text-center text-sm">
+      <span class="text-emerald-400">🔒 Transparent AI Governance</span>
+      <span class="text-slate-400 ml-2">Real-time trust metrics from the Vorion platform</span>
+    </div>
+
+    <header class="sticky top-0 z-40 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-xl">
+      <nav class="container mx-auto px-4 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+          <!-- Logo -->
+          <a href="/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center text-lg font-bold shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
+              V
+            </div>
+            <div>
+              <span class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">Vorion</span>
+              <span class="text-slate-400 text-xs block -mt-1">Trust Dashboard</span>
+            </div>
+          </a>
+
+          <!-- Navigation -->
+          <div class="hidden md:flex items-center gap-1">
+            <a href="/" class={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentPath === '/' ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:text-white hover:bg-slate-800/50'}`}>
+              Overview
+            </a>
+            <a href="/agents" class={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentPath.startsWith('/agents') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:text-white hover:bg-slate-800/50'}`}>
+              Agents
+            </a>
+            <a href="/governance" class={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentPath.startsWith('/governance') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:text-white hover:bg-slate-800/50'}`}>
+              Governance
+            </a>
+            <a href="/architecture" class={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentPath.startsWith('/architecture') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:text-white hover:bg-slate-800/50'}`}>
+              Architecture
+            </a>
+            <a href="/health" class={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentPath.startsWith('/health') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:text-white hover:bg-slate-800/50'}`}>
+              Health
+            </a>
+            <a href="/tests" class={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentPath.startsWith('/tests') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:text-white hover:bg-slate-800/50'}`}>
+              Tests
+            </a>
+          </div>
+
+          <!-- Status indicator -->
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 text-sm">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span class="text-slate-400 hidden sm:inline">Live</span>
+            </div>
+            <a href="https://vorion.org" target="_blank" rel="noopener" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm transition-colors border border-slate-700">
+              Platform →
+            </a>
+          </div>
+        </div>
+
+        <!-- Mobile navigation -->
+        <div class="flex md:hidden items-center gap-2 mt-4 -mx-1 overflow-x-auto pb-2">
+          <a href="/" class={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${currentPath === '/' ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:bg-slate-800/50'}`}>
+            Overview
+          </a>
+          <a href="/agents" class={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${currentPath.startsWith('/agents') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:bg-slate-800/50'}`}>
+            Agents
+          </a>
+          <a href="/governance" class={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${currentPath.startsWith('/governance') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:bg-slate-800/50'}`}>
+            Governance
+          </a>
+          <a href="/architecture" class={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${currentPath.startsWith('/architecture') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:bg-slate-800/50'}`}>
+            Architecture
+          </a>
+          <a href="/health" class={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${currentPath.startsWith('/health') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:bg-slate-800/50'}`}>
+            Health
+          </a>
+          <a href="/tests" class={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${currentPath.startsWith('/tests') ? 'bg-slate-800 text-emerald-400' : 'text-slate-300 hover:bg-slate-800/50'}`}>
+            Tests
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content" class="container mx-auto px-4 lg:px-8 py-8 min-h-[calc(100vh-16rem)]">
+      <slot />
+    </main>
+
+    <footer class="border-t border-slate-700/50 bg-slate-900/50 mt-auto">
+      <div class="container mx-auto px-4 lg:px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="font-semibold text-white mb-3">Vorion AI Governance</h3>
+            <p class="text-slate-400 text-sm">
+              Enterprise-grade AI agent trust and governance platform.
+              Ensuring safe, accountable AI deployment.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white mb-3">Resources</h3>
+            <ul class="space-y-2 text-sm">
+              <li><a href="https://atsf.vorion.org" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">Documentation</a></li>
+              <li><a href="https://basis.vorion.org" target="_blank" rel="noopener" class="text-slate-400 hover:text-emerald-400 transition-colors">BASIS Spec</a></li>
+              <li><a href="/health" class="text-slate-400 hover:text-emerald-400 transition-colors">System Status</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white mb-3">Data Transparency</h3>
+            <p class="text-slate-400 text-sm">
+              Dashboard data refreshes every 5 minutes.
+              All metrics are computed from on-chain governance records.
+            </p>
+            <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
+              <span class={`w-2 h-2 rounded-full ${footerDotColor}`}></span>
+              {footerStatusText}
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 pt-6 border-t border-slate-800 text-center text-slate-500 text-sm">
+          <p>© {new Date().getFullYear()} Vorion. Built for transparent AI governance.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+

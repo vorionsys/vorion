@@ -2,9 +2,9 @@
  * Common types used throughout Vorion
  *
  * These types provide backwards compatibility with legacy code.
- * For new code, prefer using canonical types from @vorionsys/contracts.
+ * For new code, prefer using canonical types from @vorion/contracts.
  *
- * @see {@link @vorionsys/contracts} for canonical type definitions
+ * @see {@link @vorion/contracts} for canonical type definitions
  * @packageDocumentation
  */
 
@@ -49,7 +49,7 @@ export type EntityType = 'agent' | 'user' | 'service' | 'system';
  *
  * Represents the lifecycle states of an intent through the governance pipeline.
  *
- * @see {@link @vorionsys/contracts!Intent} for canonical intent definition
+ * @see {@link @vorion/contracts!Intent} for canonical intent definition
  */
 export type IntentStatus =
   | 'pending'
@@ -224,9 +224,9 @@ export interface Proof {
  * Trust signal for scoring
  *
  * Represents evidence that affects trust score calculation.
- * Maps to canonical TrustEvidence from @vorionsys/contracts.
+ * Maps to canonical TrustEvidence from @vorion/contracts.
  *
- * @see {@link @vorionsys/contracts!TrustEvidence} for canonical evidence type
+ * @see {@link @vorion/contracts!TrustEvidence} for canonical evidence type
  */
 export interface TrustSignal {
   id: ID;
@@ -258,9 +258,9 @@ export interface TrustComponents {
 /**
  * Risk level for operations
  *
- * Maps to canonical RiskProfile from @vorionsys/contracts.
+ * Maps to canonical RiskProfile from @vorion/contracts.
  *
- * @see {@link @vorionsys/contracts!RiskProfile} for canonical risk levels
+ * @see {@link @vorion/contracts!RiskProfile} for canonical risk levels
  */
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 

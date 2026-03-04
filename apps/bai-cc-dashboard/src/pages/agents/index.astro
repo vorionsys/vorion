@@ -1,0 +1,102 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Read agent list directly from KV (self-fetch doesn't work in CF Pages SSR)
+let agents: any[] = [];
+try {
+  const kv = (Astro.locals as any).runtime?.env?.BAI_CC_CACHE;
+  if (kv) {
+    const raw = await kv.get('dashboard:public-agents');
+    if (raw) agents = JSON.parse(raw).agents ?? [];
+  }
+} catch {
+  // Agents will be empty
+}
+
+function getTrustBandColor(score: number): string {
+  if (score >= 951) return 'text-cyan-400 bg-cyan-400/10';
+  if (score >= 876) return 'text-purple-400 bg-purple-400/10';
+  if (score >= 800) return 'text-blue-400 bg-blue-400/10';
+  if (score >= 650) return 'text-green-400 bg-green-400/10';
+  if (score >= 500) return 'text-yellow-400 bg-yellow-400/10';
+  if (score >= 350) return 'text-orange-400 bg-orange-400/10';
+  if (score >= 200) return 'text-red-400 bg-red-400/10';
+  return 'text-stone-400 bg-stone-400/10';
+}
+
+function getTrustBandLabel(score: number): string {
+  if (score >= 951) return 'T7 Autonomous';
+  if (score >= 876) return 'T6 Certified';
+  if (score >= 800) return 'T5 Trusted';
+  if (score >= 650) return 'T4 Standard';
+  if (score >= 500) return 'T3 Monitored';
+  if (score >= 350) return 'T2 Provisional';
+  if (score >= 200) return 'T1 Observed';
+  return 'T0 Sandbox';
+}
+---
+
+<Layout title="Public Agents | Vorion Dashboard">
+  <div class="space-y-8">
+    <section class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold">Public Agents</h1>
+        <p class="text-slate-400 mt-2">Verified AI agents with public trust scores</p>
+      </div>
+      <a href="/" class="text-slate-400 hover:text-white transition-colors">
+        ← Back to Dashboard
+      </a>
+    </section>
+
+    {agents.length > 0 ? (
+      <section class="grid gap-4">
+        {agents.map((agent: any) => (
+          <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 hover:border-slate-600 transition-colors">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-xl font-bold">
+                  {agent.name?.charAt(0)?.toUpperCase() ?? '?'}
+                </div>
+                <div>
+                  <h2 class="text-xl font-semibold">{agent.name ?? 'Unknown Agent'}</h2>
+                  <p class="text-sm text-slate-400">{agent.type ?? 'AI Agent'}</p>
+                </div>
+              </div>
+              <div class={`px-3 py-1 rounded-full text-sm font-medium ${getTrustBandColor(agent.trust_score ?? 0)}`}>
+                {getTrustBandLabel(agent.trust_score ?? 0)}
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <p class="text-sm text-slate-400">Trust Score</p>
+                <p class="text-2xl font-bold text-emerald-400">{agent.trust_score ?? 0}</p>
+              </div>
+              <div>
+                <p class="text-sm text-slate-400">Actions</p>
+                <p class="text-2xl font-bold">{agent.action_count ?? 0}</p>
+              </div>
+              <div>
+                <p class="text-sm text-slate-400">Success Rate</p>
+                <p class="text-2xl font-bold">{agent.success_rate ?? '—'}%</p>
+              </div>
+              <div>
+                <p class="text-sm text-slate-400">Registered</p>
+                <p class="text-sm mt-1">{agent.created_at ? new Date(agent.created_at).toLocaleDateString() : '—'}</p>
+              </div>
+            </div>
+
+            {agent.description && (
+              <p class="mt-4 text-slate-400 text-sm">{agent.description}</p>
+            )}
+          </div>
+        ))}
+      </section>
+    ) : (
+      <section class="text-center py-16 bg-slate-800/30 rounded-xl border border-slate-700">
+        <p class="text-slate-400">No public agents available</p>
+        <p class="text-sm text-slate-500 mt-2">Agents will appear here once registered and verified</p>
+      </section>
+    )}
+  </div>
+</Layout>

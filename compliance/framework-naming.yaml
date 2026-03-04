@@ -1,0 +1,103 @@
+# =============================================================================
+# FRAMEWORK NAMING NORMALIZATION
+# =============================================================================
+# Canonical framework identifiers with aliases for cross-artifact consistency.
+# The control-registry.yaml uses snake_case identifiers. The Cognigate runtime
+# uses UPPER-KEBAB-CASE identifiers. This file provides a normalization mapping
+# so that any system can resolve any alias to the canonical form.
+#
+# Maintained by: Vorion Compliance Engineering
+# Referenced by: control-registry.yaml, Cognigate runtime, OSCAL artifacts
+# =============================================================================
+
+frameworks:
+  NIST-800-53:
+    canonical: "NIST-800-53"
+    aliases: ["nist_800_53", "nist-800-53", "NIST_800_53"]
+    full_name: "NIST SP 800-53 Rev 5"
+    version: "Rev 5"
+    jurisdiction: "US Federal"
+
+  NIST-AI-RMF:
+    canonical: "NIST-AI-RMF"
+    aliases: ["nist_ai_rmf", "nist-ai-rmf", "NIST_AI_RMF"]
+    full_name: "NIST AI RMF 1.0"
+    version: "1.0"
+    jurisdiction: "US"
+
+  NIST-800-171:
+    canonical: "NIST-800-171"
+    aliases: ["nist_800_171", "nist-800-171", "NIST_800_171"]
+    full_name: "NIST SP 800-171 Rev 3"
+    version: "Rev 3"
+    jurisdiction: "US DoD / CUI"
+
+  EU-AI-ACT:
+    canonical: "EU-AI-ACT"
+    aliases: ["eu_ai_act", "eu-ai-act", "EU_AI_ACT"]
+    full_name: "EU AI Act"
+    version: "2024/1689"
+    jurisdiction: "European Union"
+
+  ISO-42001:
+    canonical: "ISO-42001"
+    aliases: ["iso_42001", "iso-42001", "ISO_42001"]
+    full_name: "ISO/IEC 42001:2023"
+    version: "2023"
+    jurisdiction: "International"
+
+  ISO-27001:
+    canonical: "ISO-27001"
+    aliases: ["iso_27001", "iso-27001", "ISO_27001"]
+    full_name: "ISO/IEC 27001:2022"
+    version: "2022"
+    jurisdiction: "International"
+
+  SOC2:
+    canonical: "SOC2"
+    aliases: ["soc2", "soc-2", "SOC_2", "SOC-2"]
+    full_name: "SOC 2 Type II"
+    version: "2017 (updated 2022)"
+    jurisdiction: "US / International"
+
+  CMMC:
+    canonical: "CMMC"
+    aliases: ["cmmc", "CMMC_2", "cmmc_2"]
+    full_name: "CMMC 2.0 Level 2"
+    version: "2.0"
+    jurisdiction: "US DoD"
+
+  FEDRAMP:
+    canonical: "FEDRAMP"
+    aliases: ["fedramp", "fed-ramp", "FedRAMP", "fed_ramp"]
+    full_name: "FedRAMP Moderate"
+    version: "Moderate Baseline"
+    jurisdiction: "US Federal Cloud"
+
+  GDPR:
+    canonical: "GDPR"
+    aliases: ["gdpr", "GDPR_EU", "gdpr_eu"]
+    full_name: "GDPR"
+    version: "2016/679"
+    jurisdiction: "European Union"
+
+  SINGAPORE-PDPA:
+    canonical: "SINGAPORE-PDPA"
+    aliases: ["singapore_pdpa", "singapore-pdpa", "SINGAPORE_PDPA", "pdpa"]
+    full_name: "Singapore PDPA"
+    version: "2012 (amended 2020)"
+    jurisdiction: "Singapore"
+
+  JAPAN-APPI:
+    canonical: "JAPAN-APPI"
+    aliases: ["japan_appi", "japan-appi", "JAPAN_APPI", "appi"]
+    full_name: "Japan APPI"
+    version: "2020 Amendment"
+    jurisdiction: "Japan"
+
+  COSAIS:
+    canonical: "COSAIS"
+    aliases: ["cosais", "COSAiS", "co_sais"]
+    full_name: "COSAiS"
+    version: "Draft 2025"
+    jurisdiction: "US (NIST)"

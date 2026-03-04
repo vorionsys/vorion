@@ -1,0 +1,85 @@
+{
+  "name": "@vorionsys/infrastructure",
+  "version": "0.1.0",
+  "description": "Infrastructure components for the Vorion platform - PostgreSQL HA, replication, and cluster management",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./database": {
+      "types": "./dist/database/index.d.ts",
+      "import": "./dist/database/index.js"
+    },
+    "./database/replication": {
+      "types": "./dist/database/replication.d.ts",
+      "import": "./dist/database/replication.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "pg": "^8.11.3",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/pg": "^8.10.9",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "pg": "^8.0.0",
+    "prom-client": "^14.0.0 || ^15.0.0"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": false
+    },
+    "prom-client": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "postgresql",
+    "replication",
+    "high-availability",
+    "patroni",
+    "pg_auto_failover",
+    "failover",
+    "infrastructure",
+    "vorion"
+  ],
+  "author": "Vorion <team@vorion.org>",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voriongit/vorion.git",
+    "directory": "packages/infrastructure"
+  },
+  "bugs": {
+    "url": "https://github.com/voriongit/vorion/issues"
+  },
+  "homepage": "https://vorion.org",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,679 @@
+{
+  "assessment-plan": {
+    "uuid": "a4c8e1d3-7f92-4b06-ae51-3d9f8c2b7e14",
+    "metadata": {
+      "title": "Vorion Cognigate Security Assessment Plan",
+      "last-modified": "2026-02-20T10:00:00.000Z",
+      "version": "1.0.0-draft",
+      "oscal-version": "1.1.2",
+      "revision-history": [
+        {
+          "version": "1.0.0-draft",
+          "oscal-version": "1.1.2",
+          "title": "Initial SAP draft for 3PAO engagement",
+          "published": "2026-02-20T10:00:00.000Z",
+          "last-modified": "2026-02-20T10:00:00.000Z",
+          "remarks": "Draft assessment plan template. Pending values (3PAO details, assessment dates, tool selections) require input from the engaged 3PAO and system owner before finalization."
+        }
+      ],
+      "roles": [
+        {
+          "id": "assessor",
+          "title": "Security Assessor",
+          "description": "FedRAMP-approved 3PAO assessor conducting the independent security assessment."
+        },
+        {
+          "id": "assessment-lead",
+          "title": "Assessment Lead",
+          "description": "Lead assessor responsible for coordinating assessment activities and delivering the SAR."
+        },
+        {
+          "id": "system-owner",
+          "title": "System Owner",
+          "description": "Vorion personnel responsible for the Cognigate system and its security posture."
+        },
+        {
+          "id": "isso",
+          "title": "Information System Security Officer",
+          "description": "Individual responsible for ensuring the security posture of the Cognigate system is maintained."
+        },
+        {
+          "id": "penetration-tester",
+          "title": "Penetration Tester",
+          "description": "Specialist conducting authorized penetration testing of the Cognigate authorization boundary."
+        }
+      ],
+      "parties": [
+        {
+          "uuid": "b7d34e91-5a28-4c63-9f10-8e6d2a4b1c73",
+          "type": "organization",
+          "name": "3PAO — see organizational chart",
+          "short-name": "3PAO (TBD)",
+          "links": [
+            {
+              "href": "https://example.com/3pao-pending",
+              "rel": "homepage"
+            }
+          ],
+          "remarks": "FedRAMP-approved Third Party Assessment Organization. Replace with actual 3PAO details upon engagement."
+        },
+        {
+          "uuid": "15874bdf-72f9-47ba-8376-7d514e3f6bfd",
+          "type": "organization",
+          "name": "Vorion, Inc.",
+          "short-name": "Vorion",
+          "remarks": "Developer and operator of the Cognigate AI Agent Governance Engine."
+        },
+        {
+          "uuid": "c2e8f4a1-6d39-4b75-8c12-9a3e7f5d0b86",
+          "type": "person",
+          "name": "3PAO Assessment Lead (Role-based — see organizational chart)",
+          "email-addresses": ["assessment-lead@3pao.example.com"],
+          "member-of-organizations": ["b7d34e91-5a28-4c63-9f10-8e6d2a4b1c73"],
+          "remarks": "3PAO assessment lead. Replace upon 3PAO engagement."
+        },
+        {
+          "uuid": "d5f1a8c3-2e74-4d96-b039-6c8e1f7a4b52",
+          "type": "person",
+          "name": "3PAO Penetration Tester (Role-based — see organizational chart)",
+          "email-addresses": ["pen-tester@3pao.example.com"],
+          "member-of-organizations": ["b7d34e91-5a28-4c63-9f10-8e6d2a4b1c73"],
+          "remarks": "Penetration testing specialist. Replace upon 3PAO engagement."
+        }
+      ],
+      "responsible-parties": [
+        {
+          "role-id": "assessor",
+          "party-uuids": ["b7d34e91-5a28-4c63-9f10-8e6d2a4b1c73"]
+        },
+        {
+          "role-id": "assessment-lead",
+          "party-uuids": ["c2e8f4a1-6d39-4b75-8c12-9a3e7f5d0b86"]
+        },
+        {
+          "role-id": "system-owner",
+          "party-uuids": ["15874bdf-72f9-47ba-8376-7d514e3f6bfd"]
+        },
+        {
+          "role-id": "penetration-tester",
+          "party-uuids": ["d5f1a8c3-2e74-4d96-b039-6c8e1f7a4b52"]
+        }
+      ]
+    },
+    "import-ssp": {
+      "href": "./ssp-draft.json",
+      "remarks": "References Vorion Cognigate SSP (UUID: 377406bb-6cc0-40b7-8158-d22d457e67d7). NIST SP 800-53 Rev 5 Moderate baseline with 313 controls."
+    },
+    "local-definitions": {
+      "activities": [
+        {
+          "uuid": "e1a2b3c4-d5e6-4f78-9a0b-1c2d3e4f5a6b",
+          "title": "Document Review",
+          "description": "Comprehensive review of all system security documentation including the SSP, policies, POA&M, SBOM, architecture diagrams, and continuous monitoring evidence.",
+          "props": [
+            { "name": "method", "value": "EXAMINE" }
+          ],
+          "related-controls": {
+            "control-selections": [
+              {
+                "description": "All documented controls across 20 families",
+                "include-all": {}
+              }
+            ]
+          },
+          "remarks": "Review artifacts: SSP (ssp-draft.json), OSCAL component definition, POA&M, CycloneDX/SPDX SBOMs, PROOF ledger samples, 12 policy documents, architecture overview, and automated test results."
+        },
+        {
+          "uuid": "f2b3c4d5-e6f7-4089-ab1c-2d3e4f5a6b7c",
+          "title": "Automated Security Testing",
+          "description": "Execution of automated security analysis tools against the Cognigate codebase and deployed infrastructure.",
+          "props": [
+            { "name": "method", "value": "TEST" }
+          ],
+          "related-controls": {
+            "control-selections": [
+              {
+                "description": "Controls validated by automated tooling",
+                "include-controls": [
+                  { "with-ids": ["ra-5", "sa-11", "sa-11.1", "si-2", "si-3", "si-7", "cm-6", "cm-7", "sc-13", "sr-4"] }
+                ]
+              }
+            ]
+          },
+          "remarks": "Tools: CodeQL (SAST), Trivy (container/dependency scanning), Gitleaks (secrets detection), npm audit, pip-audit, GitHub Dependabot. Validate that all 97 automated security tests pass."
+        },
+        {
+          "uuid": "a3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7e",
+          "title": "Manual Security Testing",
+          "description": "Manual testing of API security, trust tier enforcement, proof chain integrity verification, and authorization boundary controls.",
+          "props": [
+            { "name": "method", "value": "TEST" }
+          ],
+          "related-controls": {
+            "control-selections": [
+              {
+                "description": "Controls requiring manual validation",
+                "include-controls": [
+                  { "with-ids": ["ac-3", "ac-6", "au-10", "au-11", "ia-2", "ia-5", "sc-8", "sc-12", "sc-13", "sc-28", "si-7"] }
+                ]
+              }
+            ]
+          },
+          "remarks": "Focus areas: (1) /v1/intent, /v1/enforce, /v1/proof API security testing, (2) trust tier boundary manipulation attempts across all 8 tiers, (3) PROOF chain SHA-256 hash chain integrity verification, (4) Ed25519 signature validation."
+        },
+        {
+          "uuid": "b4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f",
+          "title": "Personnel Interviews",
+          "description": "Structured interviews with system owner, ISSO, security engineering team, and operations personnel.",
+          "props": [
+            { "name": "method", "value": "INTERVIEW" }
+          ],
+          "related-controls": {
+            "control-selections": [
+              {
+                "description": "Controls validated through personnel interviews",
+                "include-controls": [
+                  { "with-ids": ["at-2", "at-3", "cp-2", "cp-4", "ir-2", "ir-3", "pl-2", "ps-2", "ps-3", "pm-1", "pm-2", "pm-9"] }
+                ]
+              }
+            ]
+          },
+          "remarks": "Interview subjects: System Owner, ISSO, Security Engineering Lead, DevOps/SRE personnel, Incident Response team lead. Verify organizational processes, training programs, and contingency/IR capabilities."
+        },
+        {
+          "uuid": "c5e6f7a8-b9c0-4d1e-2f3a-4b5c6d7e8f9a",
+          "title": "Penetration Testing",
+          "description": "External penetration testing of the Cognigate authorization boundary, including API endpoints, authentication mechanisms, and network-level controls.",
+          "props": [
+            { "name": "method", "value": "TEST" }
+          ],
+          "related-controls": {
+            "control-selections": [
+              {
+                "description": "Controls validated through penetration testing",
+                "include-controls": [
+                  { "with-ids": ["ac-3", "ac-4", "ac-17", "ca-8", "ia-2", "ia-2.1", "ia-2.2", "ia-5", "ia-8", "sc-7", "sc-8", "sc-23"] }
+                ]
+              }
+            ]
+          },
+          "remarks": "Scope: External assessment against /v1/intent, /v1/enforce, /v1/proof API surfaces. Includes authentication bypass attempts, API key brute-force resistance, TLS configuration validation, and authorization boundary traversal. Rules of engagement defined in terms-and-conditions."
+        },
+        {
+          "uuid": "d6f7a8b9-c0d1-4e2f-3a4b-5c6d7e8f9a0b",
+          "title": "AI-Specific Security Assessment",
+          "description": "Specialized assessment of AI governance controls unique to the Cognigate platform, including Critic manipulation resistance, model poisoning defenses, trust escalation abuse, and BASIS specification compliance.",
+          "props": [
+            { "name": "method", "value": "TEST" }
+          ],
+          "related-controls": {
+            "control-selections": [
+              {
+                "description": "AI-governance-specific controls",
+                "include-controls": [
+                  { "with-ids": ["ac-3", "ac-6", "au-10", "ca-2", "si-3", "si-4", "si-7", "si-10"] }
+                ]
+              }
+            ]
+          },
+          "remarks": "AI-specific test cases: (1) Critic manipulation -- attempt to influence Critic assessment outcomes through crafted intent payloads, (2) Model poisoning resistance -- evaluate trust score integrity under adversarial input, (3) Trust escalation abuse -- attempt unauthorized tier promotion across 8-tier trust model, (4) Proof chain tampering -- attempt to forge or alter PROOF ledger entries, (5) Circuit breaker bypass -- attempt to continue operations after emergency shutoff."
+        }
+      ],
+      "objectives-and-methods": [
+        {
+          "control-id": "ac-1",
+          "description": "Access Control (AC) -- 34 controls. Validate API key lifecycle, trust-tier access gates, session management, system use notification, and least privilege enforcement across 8 trust tiers.",
+          "props": [
+            { "name": "family", "value": "AC" },
+            { "name": "control-count", "value": "34" }
+          ]
+        },
+        {
+          "control-id": "at-1",
+          "description": "Awareness and Training (AT) -- 6 controls. Verify security awareness program with Cognigate-specific training modules for operators and AI agent developers.",
+          "props": [
+            { "name": "family", "value": "AT" },
+            { "name": "control-count", "value": "6" }
+          ]
+        },
+        {
+          "control-id": "au-1",
+          "description": "Audit and Accountability (AU) -- 19 controls. CRITICAL: Validate PROOF chain integrity -- SHA-256 hash chain with Ed25519 signatures, tamper-evident audit trail, non-repudiation of agent actions, and audit reduction/analysis capabilities.",
+          "props": [
+            { "name": "family", "value": "AU" },
+            { "name": "control-count", "value": "19" },
+            { "name": "priority", "value": "high" }
+          ]
+        },
+        {
+          "control-id": "ca-1",
+          "description": "Assessment, Authorization, and Monitoring (CA) -- 11 controls. Evaluate independent Critic assessment mechanism, continuous monitoring via CA-7, and OSCAL authorization package completeness.",
+          "props": [
+            { "name": "family", "value": "CA" },
+            { "name": "control-count", "value": "11" }
+          ]
+        },
+        {
+          "control-id": "cm-1",
+          "description": "Configuration Management (CM) -- 21 controls. Verify Git baselines, CI/CD impact analysis, software usage restrictions, configuration inventory, and SBOM accuracy.",
+          "props": [
+            { "name": "family", "value": "CM" },
+            { "name": "control-count", "value": "21" }
+          ]
+        },
+        {
+          "control-id": "cp-1",
+          "description": "Contingency Planning (CP) -- 23 controls. Assess disaster recovery procedures, Vercel multi-region failover, Neon PostgreSQL replication, and backup/restore capabilities. 3 controls N/A (inherited infrastructure).",
+          "props": [
+            { "name": "family", "value": "CP" },
+            { "name": "control-count", "value": "23" }
+          ]
+        },
+        {
+          "control-id": "ia-1",
+          "description": "Identification and Authentication (IA) -- 23 controls. HIGHEST PRIORITY: 5 controls partially implemented (IA-2(1), IA-2(2), IA-5(1), IA-8(1), IA-8(2)). Assess compensating controls (256-bit entropy keys, rate limiting, circuit breaker, trust tier isolation). Validate MFA roadmap feasibility. Verify Ed25519 key-based authentication strength.",
+          "props": [
+            { "name": "family", "value": "IA" },
+            { "name": "control-count", "value": "23" },
+            { "name": "priority", "value": "critical" },
+            { "name": "partial-controls", "value": "5" }
+          ]
+        },
+        {
+          "control-id": "ir-1",
+          "description": "Incident Response (IR) -- 13 controls. Evaluate AI-governance-specific incident classification, circuit breaker integration, and supply chain incident coordination.",
+          "props": [
+            { "name": "family", "value": "IR" },
+            { "name": "control-count", "value": "13" }
+          ]
+        },
+        {
+          "control-id": "ma-1",
+          "description": "Maintenance (MA) -- 8 controls. Verify CI/CD as controlled maintenance, approved tool inventory, and SAST/SCA enforcement on every pull request.",
+          "props": [
+            { "name": "family", "value": "MA" },
+            { "name": "control-count", "value": "8" }
+          ]
+        },
+        {
+          "control-id": "mp-1",
+          "description": "Media Protection (MP) -- 7 controls. Validate digital asset classification, AES-256 encryption at rest, and Ed25519 integrity verification in transit.",
+          "props": [
+            { "name": "family", "value": "MP" },
+            { "name": "control-count", "value": "7" }
+          ]
+        },
+        {
+          "control-id": "pe-1",
+          "description": "Physical and Environmental Protection (PE) -- 18 controls. Verify circuit breaker emergency shutoff (PE-10). 16 controls inherited from cloud providers (Vercel/AWS) -- validate inheritance documentation.",
+          "props": [
+            { "name": "family", "value": "PE" },
+            { "name": "control-count", "value": "18" }
+          ]
+        },
+        {
+          "control-id": "pl-1",
+          "description": "Planning (PL) -- 7 controls. Review system architecture documentation, rules of behavior, and information architecture for completeness and accuracy.",
+          "props": [
+            { "name": "family", "value": "PL" },
+            { "name": "control-count", "value": "7" }
+          ]
+        },
+        {
+          "control-id": "pm-1",
+          "description": "Program Management (PM) -- 25 controls. Evaluate security resource allocation, POA&M process, enterprise architecture alignment, and CUI protection program. 2 controls N/A.",
+          "props": [
+            { "name": "family", "value": "PM" },
+            { "name": "control-count", "value": "25" }
+          ]
+        },
+        {
+          "control-id": "ps-1",
+          "description": "Personnel Security (PS) -- 9 controls. Assess dual-domain personnel security policy covering human operators AND AI agent entities.",
+          "props": [
+            { "name": "family", "value": "PS" },
+            { "name": "control-count", "value": "9" }
+          ]
+        },
+        {
+          "control-id": "pt-1",
+          "description": "PII Processing and Transparency (PT) -- 9 controls. Validate minimal PII processing claims, earned consent model, and decision transparency mechanisms. 3 controls N/A.",
+          "props": [
+            { "name": "family", "value": "PT" },
+            { "name": "control-count", "value": "9" }
+          ]
+        },
+        {
+          "control-id": "ra-1",
+          "description": "Risk Assessment (RA) -- 10 controls. Evaluate vulnerability disclosure program, continuous scanning cadence, and GitHub Security Advisory integration.",
+          "props": [
+            { "name": "family", "value": "RA" },
+            { "name": "control-count", "value": "10" }
+          ]
+        },
+        {
+          "control-id": "sa-1",
+          "description": "System and Services Acquisition (SA) -- 16 controls. Assess secure SDLC implementation, SBOM generation (CycloneDX/SPDX), and supply chain security controls. 1 control N/A.",
+          "props": [
+            { "name": "family", "value": "SA" },
+            { "name": "control-count", "value": "16" }
+          ]
+        },
+        {
+          "control-id": "sc-1",
+          "description": "System and Communications Protection (SC) -- 25 controls. CRITICAL: Validate Ed25519 signature implementation (RFC 8032), SHA-256 hash chain, TLS 1.2+ enforcement, session authenticity, and cryptographic key management. 1 control N/A.",
+          "props": [
+            { "name": "family", "value": "SC" },
+            { "name": "control-count", "value": "25" },
+            { "name": "priority", "value": "high" }
+          ]
+        },
+        {
+          "control-id": "si-1",
+          "description": "System and Information Integrity (SI) -- 17 controls. CRITICAL: Validate SHA-256 hash chain verification logic, automated integrity monitoring, flaw remediation process, and Critic-based anomaly detection.",
+          "props": [
+            { "name": "family", "value": "SI" },
+            { "name": "control-count", "value": "17" },
+            { "name": "priority", "value": "high" }
+          ]
+        },
+        {
+          "control-id": "sr-1",
+          "description": "Supply Chain Risk Management (SR) -- 12 controls. Assess SBOM provenance tracking, anti-counterfeit measures, hash verification of dependencies, and supplier assessment process.",
+          "props": [
+            { "name": "family", "value": "SR" },
+            { "name": "control-count", "value": "12" }
+          ]
+        }
+      ]
+    },
+    "terms-and-conditions": {
+      "parts": [
+        {
+          "name": "assessment-scope",
+          "title": "Assessment Scope",
+          "prose": "This assessment covers the Vorion Cognigate AI Agent Governance Runtime as defined in the System Security Plan (SSP UUID: 377406bb-6cc0-40b7-8158-d22d457e67d7). The assessment boundary includes the Cognigate Engine core, PROOF Plane, Policy Engine, Trust Engine, and all supporting API infrastructure (/v1/intent, /v1/enforce, /v1/proof). External AI agents and their host environments are outside the assessment boundary but interactions with the Cognigate governance layer are in scope. All 313 NIST SP 800-53 Rev 5 Moderate baseline controls will be assessed, with particular focus on the 5 partially implemented IA controls."
+        },
+        {
+          "name": "assessment-schedule",
+          "title": "Assessment Schedule",
+          "prose": "Assessment start date to be determined upon 3PAO engagement. Estimated duration: 4-6 weeks. Phase 1: Document review and interview preparation (Week 1). Phase 2: Automated and manual testing (Weeks 2-3). Phase 3: Penetration testing and AI-specific assessment (Week 4). Phase 4: Findings analysis and SAR preparation (Weeks 5-6)."
+        },
+        {
+          "name": "rules-of-engagement",
+          "title": "Rules of Engagement",
+          "prose": "Penetration testing is authorized against the Cognigate staging environment only. Production environment testing requires explicit written authorization from the System Owner. Testing windows: To be agreed upon during assessment planning. Emergency contact during testing: Vorion ISSO (Role-based — see organizational chart). The assessor must immediately cease testing if: (1) unintended data exposure is detected, (2) system availability is degraded beyond acceptable thresholds, or (3) the System Owner requests a halt. All discovered vulnerabilities must be reported to the ISSO within 24 hours of discovery."
+        },
+        {
+          "name": "data-handling",
+          "title": "Data Handling Requirements",
+          "prose": "All assessment data, findings, and evidence must be handled at the MODERATE classification level. Assessment artifacts must be encrypted in transit (TLS 1.2+) and at rest (AES-256). The 3PAO must securely destroy all assessment data within 90 days of SAR delivery unless otherwise agreed in writing. PROOF ledger samples provided as evidence must not be shared outside the assessment team."
+        },
+        {
+          "name": "deliverables",
+          "title": "Assessment Deliverables",
+          "prose": "The 3PAO shall deliver: (1) Security Assessment Report (SAR) in OSCAL format, (2) Risk Exposure Table with findings categorized by severity, (3) Penetration Test Report with detailed methodology and results, (4) AI-Specific Assessment Report covering Critic manipulation, trust escalation, and proof chain integrity testing, (5) Updated POA&M recommendations. All deliverables due within 2 weeks of assessment completion."
+        }
+      ]
+    },
+    "reviewed-controls": {
+      "description": "All 313 NIST SP 800-53 Rev 5 Moderate baseline controls across 20 control families. 277 implemented, 5 partially implemented, 31 not applicable.",
+      "control-selections": [
+        {
+          "description": "Full NIST SP 800-53 Rev 5 Moderate baseline",
+          "include-all": {},
+          "remarks": "All controls from the NIST SP 800-53 Rev 5 Moderate baseline are included in this assessment. The 31 N/A controls (primarily PE family inherited from cloud providers) will be validated for appropriate N/A justification. The 5 partially implemented IA controls will receive focused assessment including compensating control evaluation."
+        }
+      ],
+      "control-objective-selections": [
+        {
+          "description": "Priority assessment objectives for partially implemented controls",
+          "include-controls": [
+            {
+              "with-ids": ["ia-2.1", "ia-2.2", "ia-5.1", "ia-8.1", "ia-8.2"],
+              "remarks": "These 5 IA controls are partially implemented with documented compensating controls and remediation roadmaps targeting Q2-Q3 2026. Assessment must evaluate: (1) effectiveness of compensating controls, (2) residual risk with current implementation, (3) feasibility of remediation timeline."
+            }
+          ]
+        }
+      ]
+    },
+    "assessment-subjects": [
+      {
+        "type": "component",
+        "description": "Cognigate Engine -- AI Agent Governance Runtime core including intent normalization, policy enforcement, trust scoring, and PROOF generation.",
+        "include-all": {},
+        "remarks": "Primary assessment subject. Encompasses the three-layer architecture: INTENT layer (normalization), ENFORCE layer (policy evaluation), and PROOF layer (cryptographic audit chain)."
+      },
+      {
+        "type": "component",
+        "description": "PROOF Plane -- Immutable SHA-256 hash chain audit ledger providing tamper-evident recording of all governance decisions.",
+        "include-all": {},
+        "remarks": "Critical sub-component. PROOF chain integrity is foundational to AU family controls. Assessment must verify SHA-256 hash chain continuity and Ed25519 signature validity."
+      },
+      {
+        "type": "component",
+        "description": "Policy Engine -- BASIS rule evaluation engine enforcing governance policies against normalized intents.",
+        "include-all": {},
+        "remarks": "Sub-component responsible for AC and CM family controls. Assessment must verify policy enforcement accuracy across all 8 trust tiers."
+      },
+      {
+        "type": "component",
+        "description": "Trust Engine -- 8-tier trust scoring system governing agent privilege levels.",
+        "include-all": {},
+        "remarks": "Sub-component responsible for IA and AC family controls. Assessment must verify trust tier boundaries cannot be bypassed or escalated without authorization."
+      },
+      {
+        "type": "inventory-item",
+        "description": "API Infrastructure -- /v1/intent, /v1/enforce, /v1/proof endpoints deployed on Vercel Edge Functions.",
+        "include-all": {},
+        "remarks": "Network boundary assessment subject. All external interactions with Cognigate occur through these API surfaces."
+      }
+    ],
+    "assessment-assets": {
+      "assessment-platforms": [
+        {
+          "uuid": "e7f8a9b0-c1d2-4e3f-a4b5-c6d7e8f9a0b1",
+          "title": "Static Application Security Testing (SAST)",
+          "props": [
+            { "name": "tool-name", "value": "CodeQL" },
+            { "name": "vendor", "value": "GitHub" }
+          ],
+          "remarks": "CodeQL for static analysis of TypeScript/Python codebase. Validates SA-11, SI-3, and RA-5 controls."
+        },
+        {
+          "uuid": "f8a9b0c1-d2e3-4f4a-b5c6-d7e8f9a0b1c2",
+          "title": "Software Composition Analysis (SCA)",
+          "props": [
+            { "name": "tool-name", "value": "Trivy" },
+            { "name": "vendor", "value": "Aqua Security" }
+          ],
+          "remarks": "Trivy for container and dependency vulnerability scanning. Supplements npm audit and pip-audit. Validates RA-5 and SR-4 controls."
+        },
+        {
+          "uuid": "a9b0c1d2-e3f4-4a5b-c6d7-e8f9a0b1c2d3",
+          "title": "Secrets Detection",
+          "props": [
+            { "name": "tool-name", "value": "Gitleaks" },
+            { "name": "vendor", "value": "Gitleaks" }
+          ],
+          "remarks": "Gitleaks for detecting hardcoded secrets, API keys, and credentials in source code and git history. Validates IA-5 and SC-12 controls."
+        },
+        {
+          "uuid": "b0c1d2e3-f4a5-4b6c-d7e8-f9a0b1c2d3e4",
+          "title": "Penetration Testing Platform",
+          "props": [
+            { "name": "tool-name", "value": "3PAO-selected penetration testing suite (Role-based — see organizational chart)" },
+            { "name": "vendor", "value": "To be determined upon 3PAO engagement" }
+          ],
+          "remarks": "3PAO-selected penetration testing tools for API security assessment, authentication bypass testing, and authorization boundary validation. Tool selection to be finalized during assessment planning."
+        },
+        {
+          "uuid": "c1d2e3f4-a5b6-4c7d-e8f9-a0b1c2d3e4f5",
+          "title": "SBOM Validation Tools",
+          "props": [
+            { "name": "tool-name", "value": "CycloneDX CLI / SPDX Tools" },
+            { "name": "vendor", "value": "OWASP / Linux Foundation" }
+          ],
+          "remarks": "Tools for validating SBOM completeness and accuracy against deployed artifacts. Validates SA-17, SR-4, and SR-5 controls."
+        },
+        {
+          "uuid": "d2e3f4a5-b6c7-4d8e-f9a0-b1c2d3e4f5a6",
+          "title": "AI Security Assessment Tools",
+          "props": [
+            { "name": "tool-name", "value": "AI-specific security assessment tooling (to be determined during assessment planning)" },
+            { "name": "vendor", "value": "To be determined during assessment planning" }
+          ],
+          "remarks": "Specialized tooling for assessing AI governance controls: Critic manipulation resistance testing, trust tier escalation fuzzing, proof chain tampering detection, and adversarial input generation."
+        }
+      ]
+    },
+    "tasks": [
+      {
+        "uuid": "e3f4a5b6-c7d8-4e9f-a0b1-c2d3e4f5a6b7",
+        "type": "action",
+        "title": "Phase 1: Document Review and Preparation",
+        "description": "Review all SSP documentation, policies, POA&M, SBOMs, architecture diagrams, and continuous monitoring evidence. Prepare interview questions and test plans.",
+        "timing": {
+          "within-date-range": {
+            "start": "To be determined upon 3PAO engagement",
+            "end": "To be determined upon 3PAO engagement"
+          }
+        },
+        "associated-activities": [
+          { "activity-uuid": "e1a2b3c4-d5e6-4f78-9a0b-1c2d3e4f5a6b" }
+        ],
+        "remarks": "Estimated duration: 1 week. Deliverable: Document review findings and detailed test plan."
+      },
+      {
+        "uuid": "f4a5b6c7-d8e9-4f0a-b1c2-d3e4f5a6b7c8",
+        "type": "action",
+        "title": "Phase 2: Automated and Manual Testing",
+        "description": "Execute automated security scans (CodeQL, Trivy, Gitleaks, npm audit, pip-audit) and manual API security testing against staging environment.",
+        "timing": {
+          "within-date-range": {
+            "start": "To be determined upon 3PAO engagement",
+            "end": "To be determined upon 3PAO engagement"
+          }
+        },
+        "associated-activities": [
+          { "activity-uuid": "f2b3c4d5-e6f7-4089-ab1c-2d3e4f5a6b7c" },
+          { "activity-uuid": "a3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7e" }
+        ],
+        "remarks": "Estimated duration: 2 weeks. Focus on IA family compensating controls, PROOF chain integrity, and trust tier enforcement."
+      },
+      {
+        "uuid": "a5b6c7d8-e9f0-4a1b-c2d3-e4f5a6b7c8d9",
+        "type": "action",
+        "title": "Phase 3: Penetration Testing and AI-Specific Assessment",
+        "description": "Conduct authorized penetration testing against the Cognigate authorization boundary and AI-specific security assessment including Critic manipulation and trust escalation testing.",
+        "timing": {
+          "within-date-range": {
+            "start": "To be determined upon 3PAO engagement",
+            "end": "To be determined upon 3PAO engagement"
+          }
+        },
+        "associated-activities": [
+          { "activity-uuid": "c5e6f7a8-b9c0-4d1e-2f3a-4b5c6d7e8f9a" },
+          { "activity-uuid": "d6f7a8b9-c0d1-4e2f-3a4b-5c6d7e8f9a0b" }
+        ],
+        "remarks": "Estimated duration: 1 week. Requires staging environment access and System Owner authorization. AI-specific tests are novel and may require methodology development."
+      },
+      {
+        "uuid": "b6c7d8e9-f0a1-4b2c-d3e4-f5a6b7c8d9e0",
+        "type": "action",
+        "title": "Phase 4: Interviews and Evidence Collection",
+        "description": "Conduct structured interviews with system owner, ISSO, security engineering team, and operations personnel. Collect and validate remaining evidence.",
+        "timing": {
+          "within-date-range": {
+            "start": "To be determined upon 3PAO engagement",
+            "end": "To be determined upon 3PAO engagement"
+          }
+        },
+        "associated-activities": [
+          { "activity-uuid": "b4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f" }
+        ],
+        "remarks": "Estimated duration: 1 week (concurrent with Phase 3). Interview subjects must be available per agreed schedule."
+      },
+      {
+        "uuid": "c7d8e9f0-a1b2-4c3d-e4f5-a6b7c8d9e0f1",
+        "type": "action",
+        "title": "Phase 5: Analysis and SAR Preparation",
+        "description": "Analyze all findings, prepare the Security Assessment Report (SAR) in OSCAL format, and develop POA&M update recommendations.",
+        "timing": {
+          "within-date-range": {
+            "start": "To be determined upon 3PAO engagement",
+            "end": "To be determined upon 3PAO engagement"
+          }
+        },
+        "remarks": "Estimated duration: 2 weeks. Deliverables: OSCAL SAR, Risk Exposure Table, Penetration Test Report, AI-Specific Assessment Report, POA&M recommendations."
+      }
+    ],
+    "back-matter": {
+      "resources": [
+        {
+          "uuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+          "title": "NIST SP 800-53 Rev 5",
+          "citation": {
+            "text": "NIST Special Publication 800-53 Revision 5: Security and Privacy Controls for Information Systems and Organizations"
+          },
+          "rlinks": [
+            { "href": "https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" }
+          ]
+        },
+        {
+          "uuid": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+          "title": "NIST SP 800-53A Rev 5",
+          "citation": {
+            "text": "NIST Special Publication 800-53A Revision 5: Assessing Security and Privacy Controls in Information Systems and Organizations"
+          },
+          "rlinks": [
+            { "href": "https://csrc.nist.gov/publications/detail/sp/800-53a/rev-5/final" }
+          ]
+        },
+        {
+          "uuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+          "title": "FedRAMP Security Assessment Framework",
+          "citation": {
+            "text": "FedRAMP Security Assessment Framework including SAP, SAR, and POA&M templates"
+          },
+          "rlinks": [
+            { "href": "https://www.fedramp.gov/documents-templates/" }
+          ]
+        },
+        {
+          "uuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+          "title": "NIST AI Risk Management Framework 1.0",
+          "citation": {
+            "text": "NIST Artificial Intelligence Risk Management Framework (AI RMF 1.0)"
+          },
+          "rlinks": [
+            { "href": "https://www.nist.gov/itl/ai-risk-management-framework" }
+          ]
+        },
+        {
+          "uuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+          "title": "Vorion Cognigate SSP",
+          "props": [
+            { "name": "type", "value": "oscal-ssp" },
+            { "name": "version", "value": "2.0.0" }
+          ],
+          "rlinks": [
+            { "href": "./ssp-draft.json" }
+          ],
+          "remarks": "SSP UUID: 377406bb-6cc0-40b7-8158-d22d457e67d7. NIST SP 800-53 Rev 5 Moderate baseline. 313 controls, 277 implemented, 5 partial, 31 N/A."
+        },
+        {
+          "uuid": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
+          "title": "Vorion Cognigate POA&M",
+          "props": [
+            { "name": "type", "value": "oscal-poam" }
+          ],
+          "rlinks": [
+            { "href": "./poam.json" }
+          ],
+          "remarks": "Plan of Action and Milestones tracking 5 partially implemented IA controls with remediation targets of Q2-Q3 2026."
+        }
+      ]
+    }
+  }
+}

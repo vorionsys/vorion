@@ -1,0 +1,745 @@
+openapi: 3.1.0
+info:
+  title: Agent Anchor API
+  description: |
+    Agent Anchor provides AI agent registry, trust scoring, and attestation services.
+
+    ## Authentication
+    All API requests require an API key passed via the `Authorization` header:
+    ```
+    Authorization: Bearer your-api-key
+    ```
+
+    ## Rate Limiting
+    - Standard: 1000 requests/minute
+    - Burst: 100 requests/second
+
+    ## Versioning
+    This API uses URL path versioning. Current version: v1
+  version: 1.0.0
+  contact:
+    name: Vorion Team
+    url: https://vorion.dev
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://api.agentanchor.dev/v1
+    description: Production
+  - url: https://api.staging.agentanchor.dev/v1
+    description: Staging
+  - url: http://localhost:3000/v1
+    description: Local development
+
+tags:
+  - name: Agents
+    description: Agent registration and management
+  - name: Trust
+    description: Trust score retrieval and computation
+  - name: Attestations
+    description: Submit and query attestations
+  - name: A2A
+    description: Agent-to-agent communication
+  - name: Health
+    description: System health and status
+
+paths:
+  /agents:
+    post:
+      operationId: registerAgent
+      summary: Register a new agent
+      tags: [Agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterAgentRequest'
+      responses:
+        '201':
+          description: Agent registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+    get:
+      operationId: listAgents
+      summary: List agents
+      tags: [Agents]
+      parameters:
+        - name: state
+          in: query
+          schema:
+            $ref: '#/components/schemas/AgentState'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentListResponse'
+
+  /agents/{car}:
+    get:
+      operationId: getAgent
+      summary: Get agent by ACI
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/ACI'
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateAgent
+      summary: Update agent
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/ACI'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAgentRequest'
+      responses:
+        '200':
+          description: Agent updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteAgent
+      summary: Delete agent (soft delete)
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/ACI'
+      responses:
+        '204':
+          description: Agent deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agents/{aci}/state:
+    post:
+      operationId: transitionAgentState
+      summary: Transition agent state
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/ACI'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateTransitionRequest'
+      responses:
+        '200':
+          description: State transitioned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateTransitionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /agents/{aci}/trust:
+    get:
+      operationId: getTrustScore
+      summary: Get trust score for agent
+      tags: [Trust]
+      parameters:
+        - $ref: '#/components/parameters/ACI'
+      responses:
+        '200':
+          description: Trust score
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustScoreResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /attestations:
+    post:
+      operationId: submitAttestation
+      summary: Submit an attestation
+      tags: [Attestations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAttestationRequest'
+      responses:
+        '201':
+          description: Attestation recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+    get:
+      operationId: queryAttestations
+      summary: Query attestations
+      tags: [Attestations]
+      parameters:
+        - name: aci
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/AttestationType'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Attestation list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationListResponse'
+
+  /a2a/invoke:
+    post:
+      operationId: a2aInvoke
+      summary: Invoke action on another agent
+      tags: [A2A]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/A2AInvokeRequest'
+      responses:
+        '200':
+          description: Invocation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/A2AInvokeResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '504':
+          $ref: '#/components/responses/Timeout'
+
+  /a2a/discover:
+    get:
+      operationId: a2aDiscover
+      summary: Discover available agents
+      tags: [A2A]
+      parameters:
+        - name: capabilities
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: minTier
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 7
+        - name: action
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Discovered endpoints
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/A2ADiscoverResponse'
+
+  /health:
+    get:
+      operationId: getHealth
+      summary: Get system health
+      tags: [Health]
+      responses:
+        '200':
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: System unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+
+  parameters:
+    ACI:
+      name: aci
+      in: path
+      required: true
+      description: Categorical Agentic Registry
+      schema:
+        type: string
+        pattern: '^[a-z0-9-]+\.[a-z0-9-]+\.[a-z0-9-]+:[A-Z]+-L[0-4]@\d+\.\d+\.\d+'
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Timeout:
+      description: Request timeout
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # Agent Schemas
+    RegisterAgentRequest:
+      type: object
+      required: [organization, agentClass, domains, level, version]
+      properties:
+        organization:
+          type: string
+          minLength: 1
+          maxLength: 64
+        agentClass:
+          type: string
+          minLength: 1
+          maxLength: 64
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainCode'
+          minItems: 1
+        level:
+          $ref: '#/components/schemas/CapabilityLevel'
+        version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+'
+        metadata:
+          type: object
+          additionalProperties: true
+
+    UpdateAgentRequest:
+      type: object
+      properties:
+        metadata:
+          type: object
+          additionalProperties: true
+
+    AgentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Agent'
+
+    AgentListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Agent'
+            nextCursor:
+              type: string
+            hasMore:
+              type: boolean
+
+    Agent:
+      type: object
+      properties:
+        aci:
+          type: string
+        organization:
+          type: string
+        agentClass:
+          type: string
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainCode'
+        level:
+          $ref: '#/components/schemas/CapabilityLevel'
+        version:
+          type: string
+        state:
+          $ref: '#/components/schemas/AgentState'
+        metadata:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AgentState:
+      type: string
+      enum: [provisioned, active, suspended, revoked, archived]
+
+    DomainCode:
+      type: string
+      enum: [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
+
+    CapabilityLevel:
+      type: integer
+      enum: [0, 1, 2, 3, 4]
+
+    StateTransitionRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [activate, suspend, revoke, archive]
+        reason:
+          type: string
+
+    StateTransitionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            previousState:
+              $ref: '#/components/schemas/AgentState'
+            newState:
+              $ref: '#/components/schemas/AgentState'
+
+    # Trust Schemas
+    TrustScoreResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/TrustScore'
+
+    TrustScore:
+      type: object
+      properties:
+        aci:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        tier:
+          type: integer
+          minimum: 0
+          maximum: 7
+        factors:
+          type: object
+          properties:
+            behavioral:
+              type: number
+            historical:
+              type: number
+            security:
+              type: number
+            compliance:
+              type: number
+        computedAt:
+          type: string
+          format: date-time
+
+    # Attestation Schemas
+    AttestationType:
+      type: string
+      enum: [behavioral, identity, security, compliance, external]
+
+    SubmitAttestationRequest:
+      type: object
+      required: [aci, type, outcome, action]
+      properties:
+        aci:
+          type: string
+        type:
+          $ref: '#/components/schemas/AttestationType'
+        outcome:
+          type: string
+          enum: [success, failure]
+        action:
+          type: string
+        metadata:
+          type: object
+
+    AttestationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Attestation'
+
+    AttestationListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Attestation'
+            nextCursor:
+              type: string
+            hasMore:
+              type: boolean
+
+    Attestation:
+      type: object
+      properties:
+        id:
+          type: string
+        aci:
+          type: string
+        type:
+          $ref: '#/components/schemas/AttestationType'
+        outcome:
+          type: string
+        action:
+          type: string
+        metadata:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+    # A2A Schemas
+    A2AInvokeRequest:
+      type: object
+      required: [targetAci, action]
+      properties:
+        targetAci:
+          type: string
+        action:
+          type: string
+        params:
+          type: object
+        timeoutMs:
+          type: integer
+          default: 30000
+        async:
+          type: boolean
+          default: false
+
+    A2AInvokeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            requestId:
+              type: string
+            success:
+              type: boolean
+            result:
+              type: object
+            error:
+              $ref: '#/components/schemas/A2AError'
+            metrics:
+              $ref: '#/components/schemas/A2AMetrics'
+            trustChain:
+              type: array
+              items:
+                $ref: '#/components/schemas/A2AChainLink'
+
+    A2ADiscoverResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            endpoints:
+              type: array
+              items:
+                $ref: '#/components/schemas/A2AEndpoint'
+            count:
+              type: integer
+
+    A2AEndpoint:
+      type: object
+      properties:
+        aci:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/A2AAction'
+        status:
+          type: string
+          enum: [healthy, unhealthy, unknown]
+
+    A2AAction:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        minTier:
+          type: integer
+        streaming:
+          type: boolean
+
+    A2AError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+    A2AMetrics:
+      type: object
+      properties:
+        durationMs:
+          type: integer
+        subCallCount:
+          type: integer
+
+    A2AChainLink:
+      type: object
+      properties:
+        aci:
+          type: string
+        tier:
+          type: integer
+        action:
+          type: string
+        timestamp:
+          type: string
+
+    # Health Schemas
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [healthy, degraded, unhealthy]
+            version:
+              type: string
+            uptime:
+              type: integer
+            components:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  status:
+                    type: string
+                  latencyMs:
+                    type: integer
+
+    # Error Schema
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+
+security:
+  - bearerAuth: []

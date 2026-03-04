@@ -133,7 +133,7 @@ COGNIGATE_DOMAINS.main;                // "https://cognigate.dev"
 API_ENDPOINTS.cognigate.production;    // "https://cognigate.dev/v1"
 API_ENDPOINTS.agentAnchor.sandbox;     // "https://sandbox.agentanchorai.com/v1"
 VORION_EMAILS.security;               // "security@vorion.org"
-GITHUB.vorion.mainRepo;               // "https://github.com/vorionsys/vorion"
+GITHUB.vorion.mainRepo;               // "https://github.com/voriongit/vorion"
 NPM_PACKAGES.vorion.sharedConstants;   // "@vorionsys/shared-constants"
 ```
 
@@ -500,7 +500,7 @@ Full platform documentation is available at [https://vorion.org/docs](https://vo
 
 This package lives in the Vorion monorepo:
 
-[https://github.com/vorionsys/vorion/tree/master/packages/shared-constants](https://github.com/vorionsys/vorion/tree/master/packages/shared-constants)
+[https://github.com/voriongit/vorion/tree/master/packages/shared-constants](https://github.com/voriongit/vorion/tree/master/packages/shared-constants)
 
 ## License
 

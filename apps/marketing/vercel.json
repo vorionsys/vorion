@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "astro",
+  "rewrites": [
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "carid.vorion.org" }], "destination": "/carid" },
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "logic.vorion.org" }], "destination": "/logic" },
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "trust.vorion.org" }], "destination": "/trust" },
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "verify.vorion.org" }], "destination": "/verify" },
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "feedback.vorion.org" }], "destination": "/feedback" },
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "opensource.vorion.org" }], "destination": "/opensource" }
+  ]
+}

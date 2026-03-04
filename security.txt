@@ -1,11 +1,25 @@
 # Vorion Security Policy
 # https://securitytxt.org/
 
-Contact: mailto:security@vorion.org
-Policy: https://github.com/vorionsys/vorion/blob/main/.github/SECURITY.md
+# Contact information for reporting security vulnerabilities
+Contact: mailto:security@vorion.example.com
+Contact: https://hackerone.com/vorion
 
+# PGP key for encrypted communication
+Encryption: https://vorion.example.com/.well-known/pgp-key.txt
+
+# Security policy and vulnerability disclosure program
+Policy: https://vorion.example.com/docs/security/VULNERABILITY_DISCLOSURE.md
+Acknowledgments: https://vorion.example.com/security/hall-of-fame
+
+# Preferred languages for communication
 Preferred-Languages: en
 
-Canonical: https://vorion.org/.well-known/security.txt
+# Canonical URL for this security.txt
+Canonical: https://vorion.example.com/.well-known/security.txt
 
-Expires: 2027-03-01T23:59:59.000Z
+# Expiration date for this security.txt (1 year from creation)
+Expires: 2027-01-29T23:59:59.000Z
+
+# Hiring security professionals
+Hiring: https://vorion.example.com/careers/security

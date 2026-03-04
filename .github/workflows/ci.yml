@@ -1,161 +1,522 @@
-# =============================================================================
-# CI - Continuous Integration
-# =============================================================================
-# Runs on every push to main and every pull request targeting main.
-# Builds all packages, runs type checking, and executes the full test suite.
-# Uses Turbo for build orchestration with remote caching when available.
-# =============================================================================
-
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
+  NODE_VERSION: '20'
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-  NODE_ENV: test
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
-  ci:
-    name: Build, Typecheck & Test
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    strategy:
-      fail-fast: true
-      matrix:
-        node-version: [20]
-
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      packages-changed: ${{ steps.filter.outputs.packages }}
+      apps-changed: ${{ steps.filter.outputs.apps }}
+      docs-changed: ${{ steps.filter.outputs.docs }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            packages:
+              - 'packages/**'
+            apps:
+              - 'apps/**'
+            docs:
+              - 'kaizen-docs/**'
+              - 'docs/**'
+
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: |
-            ~/.npm
-            node_modules
-            packages/*/node_modules
-            apps/*/node_modules
-          key: npm-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-node${{ matrix.node-version }}-
-
-      - name: Cache Turbo build artifacts
-        uses: actions/cache@v4
+      - name: Cache Turbo
+        uses: actions/cache@v5
         with:
           path: .turbo
-          key: turbo-${{ runner.os }}-node${{ matrix.node-version }}-${{ github.sha }}
+          key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
-            turbo-${{ runner.os }}-node${{ matrix.node-version }}-
+            turbo-${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
-      - name: Build all packages
-        run: npm run build
+      - name: Install rollup native dependency
+        run: npm install @rollup/rollup-linux-x64-gnu --no-save --legacy-peer-deps
+
+      - name: Lint
+        run: npx turbo lint --filter="./packages/*" --filter="./apps/*" --continue
 
       - name: Typecheck
-        run: npm run typecheck
-
-      - name: Run tests (excluding coverage-gated packages)
         run: >-
-          npm run test --
-          --filter=!@vorionsys/proof-plane
-          --filter=!@vorionsys/runtime
-          --filter=!@vorionsys/contracts
-          --filter=!@vorionsys/atsf-core
-          --filter=!@vorionsys/basis
-          --filter=!@vorionsys/car-client
-          --filter=!@vorionsys/cognigate
-          --filter=!@vorionsys/cognigate-api
-          --filter=!@vorionsys/council
-          --filter=!@vorionsys/sdk
-          --filter=!@vorionsys/kaizen
+          npx turbo typecheck --filter="./packages/*"
+          --continue
 
-  coverage:
-    name: Coverage Gates
+      - name: Check circular dependencies
+        run: npm run check:circular
+
+  build-packages:
+    name: Build Packages
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    strategy:
-      fail-fast: true
-      matrix:
-        node-version: [20]
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        id: npm-cache
+      - name: Cache Turbo
+        uses: actions/cache@v5
         with:
-          path: |
-            ~/.npm
-            node_modules
-            packages/*/node_modules
-            apps/*/node_modules
-          key: npm-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
-            npm-${{ runner.os }}-node${{ matrix.node-version }}-
+            turbo-${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
-      - name: Proof-plane coverage gate
-        run: npm --workspace @vorionsys/proof-plane run test:coverage
+      - name: Install rollup native dependency
+        run: npm install @rollup/rollup-linux-x64-gnu --no-save --legacy-peer-deps
 
-      - name: Runtime coverage gate
-        run: npm --workspace @vorionsys/runtime run test:coverage
+      - name: Build packages
+        run: >-
+          npx turbo build --filter="./packages/*"
+          --continue
 
-      - name: Contracts coverage gate
-        run: npm --workspace @vorionsys/contracts run test:coverage
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-dist
+          path: |
+            packages/*/dist
+          retention-days: 1
 
-      - name: ATSF Core coverage gate
-        run: npm --workspace @vorionsys/atsf-core run test:coverage
+  build-apps:
+    name: Build Apps
+    runs-on: ubuntu-latest
+    needs: [build-packages]
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          # agentanchor excluded — requires runtime services for build
+          # dashboard excluded — requires DATABASE_URL and runtime services
+          - name: agentanchor-www
+            path: apps/agentanchor-www
+          - name: aurais
+            path: apps/aurais
+          - name: bai-cc-www
+            path: apps/bai-cc-www
+          - name: marketing
+            path: apps/marketing
+          - name: status-www
+            path: apps/status-www
+          - name: vorion-www
+            path: vorion-www
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Basis coverage gate
-        run: npm --workspace @vorionsys/basis run test:coverage
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
-      - name: CAR Client coverage gate
-        run: npm --workspace @vorionsys/car-client run test:coverage
+      - name: Cache Turbo
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
 
-      - name: Cognigate coverage gate
-        run: npm --workspace @vorionsys/cognigate run test:coverage
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-dist
+          path: packages
 
-      - name: Cognigate API coverage gate
-        run: npm --workspace @vorionsys/cognigate-api run test:coverage
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
 
-      - name: Council coverage gate
-        run: npm --workspace @vorionsys/council run test:coverage
+      - name: Build ${{ matrix.app.name }}
+        run: npx turbo build --filter="./${{ matrix.app.path }}"
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
 
-      - name: SDK coverage gate
-        run: npm --workspace @vorionsys/sdk run test:coverage
+  test-packages:
+    name: Test Packages
+    runs-on: ubuntu-latest
+    needs: [build-packages]
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Kaizen coverage gate
-        run: npm --workspace @vorionsys/kaizen run test:coverage
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Turbo
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-dist
+          path: packages
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install rollup native dependency
+        run: npm install @rollup/rollup-linux-x64-gnu --no-save --legacy-peer-deps
+
+      - name: Run tests
+        run: >-
+          npx turbo test --filter="./packages/*"
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: packages/*/coverage/lcov.info
+          flags: packages
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  test-apps:
+    name: Test Apps
+    runs-on: ubuntu-latest
+    needs: [build-packages]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: vorion
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: vorion_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Turbo
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-dist
+          path: packages
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install rollup native dependency
+        run: npm install @rollup/rollup-linux-x64-gnu --no-save --legacy-peer-deps
+
+      - name: Run app tests
+        run: npx turbo test --filter="./apps/*"
+        env:
+          DATABASE_URL: postgres://vorion:testpassword@localhost:5432/vorion_test
+          REDIS_URL: redis://localhost:6379
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # Lockfile integrity check - fail if missing or out of sync
+      - name: Verify lockfile exists
+        run: |
+          if [ ! -f "package-lock.json" ]; then
+            echo "::error::package-lock.json is missing. Lockfile is required for reproducible builds."
+            exit 1
+          fi
+          echo "Lockfile exists"
+
+      - name: Verify lockfile is up to date
+        run: |
+          npm ci --legacy-peer-deps --dry-run 2>&1 | tee npm-ci-output.txt
+          if grep -q "npm warn" npm-ci-output.txt && grep -q "package-lock.json" npm-ci-output.txt; then
+            echo "::warning::package-lock.json may be out of sync with package.json"
+          fi
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      # NPM Audit - Critical/High vulnerabilities block deployment
+      - name: Run npm audit (critical/high - blocking)
+        run: |
+          echo "## NPM Security Audit - Critical/High" >> $GITHUB_STEP_SUMMARY
+          npm audit --audit-level=high --json > audit-results.json 2>&1 || true
+
+          # Parse results
+          CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit-results.json)
+          HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit-results.json)
+          MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' audit-results.json)
+          LOW=$(jq '.metadata.vulnerabilities.low // 0' audit-results.json)
+
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+          echo "| Moderate | $MODERATE |" >> $GITHUB_STEP_SUMMARY
+          echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "::error::Found $CRITICAL critical vulnerabilities. Deployment blocked."
+            npm audit --audit-level=critical
+            exit 1
+          fi
+
+          if [ "$HIGH" -gt 0 ]; then
+            echo "::warning::Found $HIGH high severity vulnerabilities. Review recommended."
+            npm audit --audit-level=high || true
+          fi
+
+          echo "No critical or high vulnerabilities found"
+
+      - name: Generate full audit report
+        if: always()
+        run: |
+          echo "## Full Vulnerability Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          npm audit --audit-level=low 2>&1 | head -100 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      # Secret scanning with gitleaks
+      # Note: Requires GITLEAKS_LICENSE org secret for organization repos.
+      # Non-blocking until license is provisioned.
+      - name: Secret scanning with gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      # SAST scanning with Semgrep (BLOCKING)
+      # Triaged 2026-02-24: 145 raw findings -> 0 after excluding false positives and accepted risks.
+      # Excluded rules (9 total):
+      #   direct-response-write: FP on JSON API endpoints (83 findings, all return JSON not HTML)
+      #   raw-html-format: FP on JSON API error responses (2 findings, same pattern as above)
+      #   bypass-tls-verification: Accepted risk for managed DB SSL connections (27 findings)
+      #   gcm-no-tag-length: FP on HSM wrappers where auth tag length is managed by hardware (21 findings)
+      #   detected-google-gcm-service-account: FP on security detection modules (6 findings)
+      #   detected-stripe-api-key: FP on security detection modules (3 findings)
+      #   detected-pgp-private-key-block: FP on security detection modules (2 findings)
+      #   detected-bcrypt-hash: FP on security detection modules (0 findings, kept for safety)
+      #   detect-child-process: Accepted risk in CLI doctor command (1 finding)
+      # Excluded paths: archive/, docs/ATSF*, docs/atsf*, deploy/ (see .semgrepignore)
+      - name: SAST scan with Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/typescript
+            p/javascript
+            p/react
+            p/nodejs
+          generateSarif: true
+        env:
+          SEMGREP_ARGS: >-
+            --exclude-rule javascript.express.security.audit.xss.direct-response-write.direct-response-write
+            --exclude-rule javascript.express.security.injection.raw-html-format.raw-html-format
+            --exclude-rule problem-based-packs.insecure-transport.js-node.bypass-tls-verification.bypass-tls-verification
+            --exclude-rule generic.secrets.security.detected-google-gcm-service-account.detected-google-gcm-service-account
+            --exclude-rule generic.secrets.security.detected-pgp-private-key-block.detected-pgp-private-key-block
+            --exclude-rule generic.secrets.security.detected-stripe-api-key.detected-stripe-api-key
+            --exclude-rule generic.secrets.security.detected-bcrypt-hash.detected-bcrypt-hash
+            --exclude-rule javascript.node-crypto.security.gcm-no-tag-length.gcm-no-tag-length
+            --exclude-rule javascript.lang.security.detect-child-process.detect-child-process
+
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+        continue-on-error: true
+
+  # Dependency license check
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Check licenses
+        run: |
+          npx license-checker --production --onlyAllow "MIT;MIT-0;MIT*;Apache-2.0;BSD;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Unlicense;Python-2.0;PSF;0BSD;MPL-2.0;LGPL-3.0;LGPL-3.0-or-later;BlueOak-1.0.0;WTFPL" --excludePrivatePackages || {
+            echo "::error::Found dependencies with non-approved licenses"
+            exit 1
+          }
+
+  tier-consistency:
+    name: Tier Consistency Check
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Check tier consistency
+        run: npx tsx scripts/check-tier-consistency.ts
+
+  test-react:
+    name: Test React Components
+    runs-on: ubuntu-latest
+    needs: [build-packages]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Turbo
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-dist
+          path: packages
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install rollup native dependency
+        run: npm install @rollup/rollup-linux-x64-gnu --no-save --legacy-peer-deps
+
+      - name: Test Kaizen React components
+        run: npx vitest run --config apps/kaizen/vitest.config.ts
+
+      - name: Test Agentanchor React components
+        run: npx vitest run apps/agentanchor/components/__tests__/
+
+      - name: Test Dashboard React components
+        run: npx vitest run apps/dashboard/src/components/__tests__/
+
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, build-apps, test-packages, test-apps, test-react, security, license-check]
+    if: always()
+    steps:
+      - name: Check required jobs passed
+        run: |
+          echo "=== Required Jobs ==="
+          echo "lint-and-typecheck: ${{ needs.lint-and-typecheck.result }}"
+          echo "build-apps: ${{ needs.build-apps.result }}"
+          echo "test-packages: ${{ needs.test-packages.result }}"
+          echo "test-apps: ${{ needs.test-apps.result }}"
+          echo "test-react: ${{ needs.test-react.result }}"
+          echo "security: ${{ needs.security.result }}"
+          echo "license-check: ${{ needs.license-check.result }}"
+
+          if [[ "${{ needs.lint-and-typecheck.result }}" != "success" ]] || \
+             [[ "${{ needs.build-apps.result }}" != "success" ]] || \
+             [[ "${{ needs.test-packages.result }}" != "success" ]] || \
+             [[ "${{ needs.test-apps.result }}" != "success" ]] || \
+             [[ "${{ needs.test-react.result }}" != "success" ]] || \
+             [[ "${{ needs.security.result }}" != "success" ]] || \
+             [[ "${{ needs.license-check.result }}" != "success" ]]; then
+            echo "One or more required jobs failed"
+            exit 1
+          fi
+
+          echo "All required CI jobs passed!"

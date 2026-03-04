@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const features = [
+  {
+    icon: 'search',
+    title: 'Instant Lookup',
+    description: 'Enter a CAR ID to see trust tier, score, and provenance. Get a complete trust profile for any registered agent in milliseconds.',
+  },
+  {
+    icon: 'badge-check',
+    title: 'Trust Badges',
+    description: "Embeddable trust badges for verified agents. Display an agent's trust tier and verification status on any website or application.",
+  },
+  {
+    icon: 'git-branch',
+    title: 'Attestation Chain',
+    description: 'Full provenance history — who created, promoted, or demoted an agent. Immutable audit trail from creation through every tier change.',
+  },
+  {
+    icon: 'file-check',
+    title: 'Compliance Check',
+    description: 'Verify agent compliance against EU AI Act, ISO 42001, and SOC 2 requirements. Exportable attestation reports for auditors.',
+  },
+];
+
+---
+
+<BaseLayout
+  title="Vorion Verify"
+  description="Instant trust verification for any AI agent. Look up scores, provenance, and compliance in one place."
+>
+    <!-- Hero -->
+      <section class="pt-32 pb-20 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-sm mb-8">
+            <Icon name="shield-check" size={16} class="w-4 h-4" />
+            Coming Soon — Part of the Vorion Stack
+          </div>
+          <h1 class="text-5xl sm:text-7xl font-bold mb-6">
+            <span class="bg-gradient-to-r from-teal-400 to-teal-200 bg-clip-text text-transparent">
+              Verify
+            </span>
+          </h1>
+          <p class="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-6">
+            Instant trust verification for any AI agent.
+            Look up scores, provenance, and compliance in one place.
+          </p>
+
+          <!-- Search Preview -->
+          <div class="max-w-lg mx-auto mb-10">
+            <div class="bg-white/[0.03] border border-white/10 rounded-xl p-1 flex items-center gap-2">
+              <Icon name="search" size={20} class="w-5 h-5 text-white/30 ml-3" />
+              <div class="flex-1 text-left text-white/30 text-sm py-3">
+                car:vorion/governance/sentinel:1.0.0
+              </div>
+              <button class="bg-teal-500/20 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium">
+                Verify
+              </button>
+            </div>
+            <p class="text-xs text-white/30 mt-2">
+              Enter a CAR ID to look up an agent&apos;s trust profile.
+              Verification portal coming soon.
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="https://app.vorion.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white font-medium shadow-lg shadow-teal-500/25 transition-all"
+            >
+              Verify an Agent
+              <Icon name="arrow-right" size={16} class="w-4 h-4" />
+            </a>
+            <a
+              href="https://basis.vorion.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium transition-all"
+            >
+              <Icon name="book-open" size={16} class="w-4 h-4" />
+              API Docs
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="pb-20 px-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          {features.map((feature) => (
+            <div class="bg-white/[0.03] p-6 rounded-xl border border-white/5 hover:border-teal-500/30 transition-colors">
+              <Icon name={feature.icon} class="w-8 h-8 text-teal-400 mb-4" />
+              <h3 class="text-lg font-semibold mb-2">{feature.title}</h3>
+              <p class="text-white/50 text-sm leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+</BaseLayout>

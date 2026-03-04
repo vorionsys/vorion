@@ -1,0 +1,209 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Read directly from KV (self-fetch doesn't work in Cloudflare Pages SSR)
+let stats = null;
+let npmStats = null;
+let platformStatus = null;
+let governance = null;
+
+try {
+  const env = (Astro.locals as any).runtime?.env;
+  const kv = env?.BAI_CC_CACHE;
+  if (kv) {
+    const [statsRaw, npmRaw, statusRaw, govRaw] = await Promise.all([
+      kv.get('dashboard:public-stats'),
+      kv.get('dashboard:npm-stats'),
+      kv.get('dashboard:service-status'),
+      kv.get('dashboard:governance-metrics'),
+    ]);
+    if (statsRaw) stats = JSON.parse(statsRaw);
+    if (npmRaw) npmStats = JSON.parse(npmRaw);
+    if (statusRaw) platformStatus = JSON.parse(statusRaw);
+    if (govRaw) governance = JSON.parse(govRaw);
+  }
+} catch {
+  // Data will be null, show loading state
+}
+
+interface NpmPkg { name: string; label: string; weeklyDownloads: number }
+
+function formatDownloads(count: number): string {
+  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
+  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}k`;
+  return String(count);
+}
+
+// Platform status helpers
+const services = platformStatus?.services ?? [];
+const operationalCount = services.filter((s: any) => s.status === 'operational').length;
+const totalServices = services.length;
+const overallStatus = platformStatus?.overallStatus ?? 'unknown';
+const statusColor = overallStatus === 'operational' ? 'text-emerald-400' : overallStatus === 'degraded' ? 'text-yellow-400' : 'text-red-400';
+const statusDotColor = overallStatus === 'operational' ? 'bg-emerald-500' : overallStatus === 'degraded' ? 'bg-yellow-500' : 'bg-red-500';
+const statusLabel = overallStatus === 'operational' ? 'All Systems Operational' : overallStatus === 'degraded' ? 'Degraded Performance' : 'Unknown';
+---
+
+<Layout title="Public Trust Dashboard">
+  <div class="space-y-8">
+    <section class="text-center py-8">
+      <h1 class="text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
+        Vorion Trust Dashboard
+      </h1>
+      <p class="text-slate-400 max-w-2xl mx-auto">
+        Real-time transparency into AI agent trust scores and governance metrics.
+        Updated every 5 minutes from the Vorion platform.
+      </p>
+      <nav class="flex justify-center gap-4 mt-6">
+        <a href="/agents" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm transition-colors border border-slate-700">
+          View Agents
+        </a>
+        <a href="/governance" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm transition-colors border border-slate-700">
+          Governance Metrics
+        </a>
+      </nav>
+    </section>
+
+    {stats ? (
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <h2 class="text-sm font-medium text-slate-400 mb-2">Total Agents</h2>
+          <p class="text-4xl font-bold text-emerald-400">{stats.agents?.total ?? '—'}</p>
+        </div>
+
+        <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <h2 class="text-sm font-medium text-slate-400 mb-2">Trusted (T4+)</h2>
+          <p class="text-4xl font-bold text-emerald-400">{stats.agents?.trusted ?? '—'}</p>
+        </div>
+
+        <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <h2 class="text-sm font-medium text-slate-400 mb-2">Avg Trust Score</h2>
+          <p class="text-4xl font-bold text-emerald-400">
+            {stats.agents?.avg_score ? Math.round(stats.agents.avg_score) : '—'}
+          </p>
+        </div>
+      </section>
+    ) : (
+      <section class="text-center py-12">
+        <p class="text-slate-400">Loading dashboard data...</p>
+        <p class="text-sm text-slate-500 mt-2">Data syncs every 5 minutes</p>
+      </section>
+    )}
+
+    <!-- Platform Status + Governance Quick Stats -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Platform Status -->
+      <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold">Platform Status</h2>
+          <a href="/health" class="text-xs text-slate-400 hover:text-emerald-400 transition-colors">Details →</a>
+        </div>
+        {totalServices > 0 ? (
+          <div>
+            <div class="flex items-center gap-3 mb-4">
+              <span class={`w-3 h-3 rounded-full ${statusDotColor}`}></span>
+              <span class={`font-semibold ${statusColor}`}>{statusLabel}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-slate-900/50 rounded-lg p-3 text-center">
+                <p class="text-2xl font-bold text-emerald-400">{operationalCount}</p>
+                <p class="text-xs text-slate-500 mt-1">of {totalServices} operational</p>
+              </div>
+              <div class="bg-slate-900/50 rounded-lg p-3 text-center">
+                <p class="text-2xl font-bold text-slate-300">
+                  {totalServices - operationalCount}
+                </p>
+                <p class="text-xs text-slate-500 mt-1">issues detected</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p class="text-slate-400 text-sm">Status data loading...</p>
+        )}
+      </div>
+
+      <!-- Governance Quick Stats -->
+      <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold">Governance Overview</h2>
+          <a href="/governance" class="text-xs text-slate-400 hover:text-emerald-400 transition-colors">Details →</a>
+        </div>
+        {governance && governance.status !== 'syncing' ? (
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-900/50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-slate-300">{governance.totalActions?.toLocaleString() ?? 0}</p>
+              <p class="text-xs text-slate-500 mt-1">total actions (30d)</p>
+            </div>
+            <div class="bg-slate-900/50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-emerald-400">{governance.approvalRate ?? 0}%</p>
+              <p class="text-xs text-slate-500 mt-1">approval rate</p>
+            </div>
+            <div class="bg-slate-900/50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-blue-400">{governance.activePolicies ?? 0}</p>
+              <p class="text-xs text-slate-500 mt-1">active policies</p>
+            </div>
+            <div class="bg-slate-900/50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-slate-300">{governance.avgResponseTimeMs ?? 0}ms</p>
+              <p class="text-xs text-slate-500 mt-1">avg response time</p>
+            </div>
+          </div>
+        ) : (
+          <p class="text-slate-400 text-sm">Governance data loading...</p>
+        )}
+      </div>
+    </section>
+
+    <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+      <h2 class="text-xl font-bold mb-4">Trust Band Distribution</h2>
+      {stats?.trustDistribution ? (
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {stats.trustDistribution.map((band: { band: string; count: number }) => (
+            <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+              <p class="text-2xl font-bold text-emerald-400">{band.count}</p>
+              <p class="text-xs text-slate-400 mt-1">{band.band.replace('_', ' ')}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p class="text-slate-400">Distribution data loading...</p>
+      )}
+    </section>
+
+    <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">npm Downloads</h2>
+        {npmStats?.totalDownloads != null && (
+          <span class="text-sm text-slate-400">
+            {formatDownloads(npmStats.totalDownloads)} total/week
+          </span>
+        )}
+      </div>
+      {npmStats?.packages ? (
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          {(npmStats.packages as NpmPkg[]).map((pkg: NpmPkg) => (
+            <a
+              href={`https://www.npmjs.com/package/${pkg.name}`}
+              target="_blank"
+              rel="noopener"
+              class="text-center p-4 bg-slate-900/50 rounded-lg hover:bg-slate-900/80 transition-colors group"
+            >
+              <p class="text-2xl font-bold text-emerald-400 group-hover:text-emerald-300">
+                {formatDownloads(pkg.weeklyDownloads)}
+              </p>
+              <p class="text-xs text-slate-400 mt-1 truncate">{pkg.label}</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">/week</p>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="text-slate-400">npm download data loading...</p>
+      )}
+    </section>
+
+    <section class="text-center py-8 text-slate-500 text-sm">
+      {stats?.timestamp && (
+        <p>Last updated: {new Date(stats.timestamp).toLocaleString()}</p>
+      )}
+    </section>
+  </div>
+</Layout>

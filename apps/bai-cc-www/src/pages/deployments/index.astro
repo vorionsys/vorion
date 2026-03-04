@@ -1,0 +1,175 @@
+---
+export const prerender = false;
+
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import MetricCard from '../../components/dashboard/MetricCard.astro';
+import DeploymentRow from '../../components/dashboard/DeploymentRow.astro';
+import RefreshIndicator from '../../components/dashboard/RefreshIndicator.astro';
+
+import { cached } from '../../lib/cache.js';
+import { fetchVercelDeployments } from '../../lib/fetchers/vercel-deployments.js';
+import type { VercelDeploymentsResponse } from '../../lib/types.js';
+
+// ---------------------------------------------------------------------------
+// Server-side data fetching
+// ---------------------------------------------------------------------------
+let data: VercelDeploymentsResponse | null = null;
+let fetchError: string | null = null;
+
+try {
+  data = await cached<VercelDeploymentsResponse>('page:vercel', 60, fetchVercelDeployments);
+} catch (err) {
+  fetchError = err instanceof Error ? err.message : 'Unknown error fetching deployment data';
+  console.error('[deployments] Data fetch error:', fetchError);
+}
+
+// ---------------------------------------------------------------------------
+// Computed values
+// ---------------------------------------------------------------------------
+const deployments = data?.deployments ?? [];
+const projects = data?.projects ?? [];
+const totalDeployments = deployments.length;
+const totalProjects = projects.length;
+
+// Sort deployments by most recent first (already should be, but ensure)
+const sortedDeployments = [...deployments].sort(
+  (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+);
+
+// Count by state
+const readyCount = deployments.filter((d) => d.state === 'READY').length;
+const errorCount = deployments.filter((d) => d.state === 'ERROR').length;
+const buildingCount = deployments.filter((d) => d.state === 'BUILDING' || d.state === 'QUEUED').length;
+
+// Metric statuses
+const readyStatus: 'healthy' | 'warning' | 'critical' =
+  errorCount === 0 ? 'healthy' : errorCount <= 1 ? 'warning' : 'critical';
+---
+
+<DashboardLayout title="Deployments" description="Vercel deployment monitoring and history">
+  {/* Error Banner */}
+  {fetchError && (
+    <div class="mb-6 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+      <strong>Data fetch error:</strong> {fetchError}. Deployment data may be stale or unavailable.
+    </div>
+  )}
+
+  {/* Page Header */}
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Deployments</h1>
+      <p class="text-sm text-slate-400 mt-1">Vercel deployment history and status</p>
+    </div>
+    <RefreshIndicator interval={60} />
+  </div>
+
+  {/* Summary Metrics */}
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+    <MetricCard
+      label="Recent Deployments"
+      value={totalDeployments}
+      subtext="last 20"
+    />
+    <MetricCard
+      label="Projects"
+      value={totalProjects}
+      subtext="active"
+    />
+    <MetricCard
+      label="Ready"
+      value={readyCount}
+      subtext="successful"
+      status="healthy"
+    />
+    <MetricCard
+      label="Errors"
+      value={errorCount}
+      subtext="failed"
+      status={readyStatus}
+    />
+    <MetricCard
+      label="In Progress"
+      value={buildingCount}
+      subtext="building / queued"
+      status={buildingCount > 0 ? 'warning' : 'healthy'}
+    />
+  </div>
+
+  {/* Deployments Table */}
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">Recent Deployments</h2>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+      {sortedDeployments.length > 0 ? (
+        sortedDeployments.map((d) => (
+          <DeploymentRow
+            name={d.name}
+            url={d.url}
+            state={d.state}
+            createdAt={d.createdAt}
+            buildDurationMs={d.buildDurationMs}
+            commitMessage={d.meta?.githubCommitMessage}
+            commitSha={d.meta?.githubCommitSha}
+          />
+        ))
+      ) : (
+        <p class="text-sm text-slate-500 p-4">No deployment data available. Ensure VERCEL_TOKEN is configured.</p>
+      )}
+    </div>
+  </section>
+
+  {/* Project Summary */}
+  {projects.length > 0 && (
+    <section class="mb-8">
+      <h2 class="text-lg font-semibold text-white mb-4">Projects</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {projects.map((proj) => {
+          const stateColor =
+            proj.latestState === 'READY' ? 'bg-emerald-500' :
+            proj.latestState === 'ERROR' ? 'bg-red-500' :
+            proj.latestState === 'BUILDING' ? 'bg-amber-500' :
+            'bg-slate-500';
+          return (
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 hover:bg-slate-900 transition-colors">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-semibold text-sm text-white truncate">{proj.name}</h3>
+                <span class="inline-flex items-center gap-1.5">
+                  <span class:list={['w-2 h-2 rounded-full', stateColor]} />
+                  <span class="text-xs text-slate-400">{proj.latestState}</span>
+                </span>
+              </div>
+              {proj.url && (
+                <a
+                  href={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-xs text-slate-500 hover:text-vorion-400 transition-colors truncate block"
+                >
+                  {proj.url.replace('https://', '')}
+                </a>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  )}
+</DashboardLayout>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Client-side auto-refresh: polls /api/vercel.json every 60s
+  // ---------------------------------------------------------------------------
+  const REFRESH_INTERVAL_MS = 60_000;
+
+  async function refreshDeployments() {
+    try {
+      const res = await fetch('/api/vercel.json');
+      if (!res.ok) return;
+      window.location.reload();
+    } catch (err) {
+      console.warn('[deployments] Auto-refresh failed:', err);
+    }
+  }
+
+  setInterval(refreshDeployments, REFRESH_INTERVAL_MS);
+</script>

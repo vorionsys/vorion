@@ -1,0 +1,182 @@
+---
+export const prerender = false;
+
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import MetricCard from '../../components/dashboard/MetricCard.astro';
+import DomainRow from '../../components/dashboard/DomainRow.astro';
+import RefreshIndicator from '../../components/dashboard/RefreshIndicator.astro';
+
+import { cached } from '../../lib/cache.js';
+import { fetchDomainHealth } from '../../lib/fetchers/domains.js';
+import type { DomainHealthResponse } from '../../lib/types.js';
+
+// ---------------------------------------------------------------------------
+// Server-side data fetching
+// ---------------------------------------------------------------------------
+let data: DomainHealthResponse | null = null;
+let fetchError: string | null = null;
+
+try {
+  data = await cached<DomainHealthResponse>('page:domains', 60, fetchDomainHealth);
+} catch (err) {
+  fetchError = err instanceof Error ? err.message : 'Unknown error fetching domain data';
+  console.error('[domains] Data fetch error:', fetchError);
+}
+
+// ---------------------------------------------------------------------------
+// Computed values
+// ---------------------------------------------------------------------------
+const summary = data?.summary ?? { total: 0, up: 0, degraded: 0, down: 0, avgResponseMs: 0 };
+const allDomains = data?.domains ?? [];
+
+const vorionDomains = allDomains.filter((d) => d.org === 'vorion');
+const agentanchorDomains = allDomains.filter((d) => d.org === 'agentanchor');
+
+// Metric card statuses
+const upStatus: 'healthy' | 'warning' | 'critical' =
+  summary.up === summary.total ? 'healthy' : summary.up >= summary.total * 0.75 ? 'warning' : 'critical';
+const degradedStatus: 'healthy' | 'warning' | 'critical' =
+  summary.degraded === 0 ? 'healthy' : 'warning';
+const downStatus: 'healthy' | 'warning' | 'critical' =
+  summary.down === 0 ? 'healthy' : 'critical';
+const latencyStatus: 'healthy' | 'warning' | 'critical' =
+  summary.avgResponseMs < 300 ? 'healthy' : summary.avgResponseMs < 800 ? 'warning' : 'critical';
+---
+
+<DashboardLayout title="Domains" description="Domain health monitoring for all BAI infrastructure">
+  {/* Error Banner */}
+  {fetchError && (
+    <div class="mb-6 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+      <strong>Data fetch error:</strong> {fetchError}. Domain data may be stale or unavailable.
+    </div>
+  )}
+
+  {/* Page Header */}
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Domain Health</h1>
+      <p class="text-sm text-slate-400 mt-1">Real-time monitoring across all infrastructure domains</p>
+    </div>
+    <RefreshIndicator interval={120} />
+  </div>
+
+  {/* Summary Metrics Row */}
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+    <MetricCard
+      label="Total Domains"
+      value={summary.total}
+      subtext="monitored"
+    />
+    <MetricCard
+      label="Up"
+      value={summary.up}
+      subtext="responding"
+      status={upStatus}
+    />
+    <MetricCard
+      label="Degraded"
+      value={summary.degraded}
+      subtext="slow / non-200"
+      status={degradedStatus}
+    />
+    <MetricCard
+      label="Down"
+      value={summary.down}
+      subtext="unreachable"
+      status={downStatus}
+    />
+    <MetricCard
+      label="Avg Latency"
+      value={`${summary.avgResponseMs}ms`}
+      subtext="across all domains"
+      status={latencyStatus}
+    />
+  </div>
+
+  {/* Vorion Infrastructure */}
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-vorion-500"></span>
+      Vorion Infrastructure
+      <span class="text-sm font-normal text-slate-500">({vorionDomains.length} domains)</span>
+    </h2>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+      {/* Column Headers */}
+      <div class="grid grid-cols-12 gap-4 items-center py-2 px-4 text-xs text-slate-500 font-medium border-b border-slate-800">
+        <div class="col-span-4 sm:col-span-3">Domain</div>
+        <div class="col-span-2 sm:col-span-2">Status</div>
+        <div class="col-span-1 sm:col-span-1">Code</div>
+        <div class="col-span-3 sm:col-span-4">Latency</div>
+        <div class="col-span-2 sm:col-span-2 text-right">SSL</div>
+      </div>
+      {vorionDomains.length > 0 ? (
+        vorionDomains.map((d) => (
+          <DomainRow
+            domain={d.domain}
+            label={d.label}
+            status={d.status}
+            statusCode={d.statusCode}
+            responseTimeMs={d.responseTimeMs}
+            sslDaysRemaining={d.sslDaysRemaining}
+          />
+        ))
+      ) : (
+        <p class="text-sm text-slate-500 p-4">No Vorion domain data available.</p>
+      )}
+    </div>
+  </section>
+
+  {/* AgentAnchor Infrastructure */}
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-accent-cyan"></span>
+      AgentAnchor Infrastructure
+      <span class="text-sm font-normal text-slate-500">({agentanchorDomains.length} domains)</span>
+    </h2>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+      {/* Column Headers */}
+      <div class="grid grid-cols-12 gap-4 items-center py-2 px-4 text-xs text-slate-500 font-medium border-b border-slate-800">
+        <div class="col-span-4 sm:col-span-3">Domain</div>
+        <div class="col-span-2 sm:col-span-2">Status</div>
+        <div class="col-span-1 sm:col-span-1">Code</div>
+        <div class="col-span-3 sm:col-span-4">Latency</div>
+        <div class="col-span-2 sm:col-span-2 text-right">SSL</div>
+      </div>
+      {agentanchorDomains.length > 0 ? (
+        agentanchorDomains.map((d) => (
+          <DomainRow
+            domain={d.domain}
+            label={d.label}
+            status={d.status}
+            statusCode={d.statusCode}
+            responseTimeMs={d.responseTimeMs}
+            sslDaysRemaining={d.sslDaysRemaining}
+          />
+        ))
+      ) : (
+        <p class="text-sm text-slate-500 p-4">No AgentAnchor domain data available.</p>
+      )}
+    </div>
+  </section>
+</DashboardLayout>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Client-side auto-refresh: polls /api/domains.json every 120s
+  // ---------------------------------------------------------------------------
+  const REFRESH_INTERVAL_MS = 120_000;
+
+  async function refreshDomains() {
+    try {
+      const res = await fetch('/api/domains.json');
+      if (!res.ok) return;
+      const data = await res.json();
+      // Full page reload on data refresh for domain pages (complex DOM)
+      window.location.reload();
+    } catch (err) {
+      console.warn('[domains] Auto-refresh failed:', err);
+    }
+  }
+
+  setInterval(refreshDomains, REFRESH_INTERVAL_MS);
+</script>

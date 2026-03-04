@@ -429,6 +429,6 @@ Full platform documentation is available at [https://vorion.org/docs](https://vo
 
 ## Links
 
-- **Repository:** [github.com/vorionsys/vorion](https://github.com/vorionsys/vorion/tree/master/packages/atsf-core)
+- **Repository:** [github.com/voriongit/vorion](https://github.com/voriongit/vorion/tree/master/packages/atsf-core)
 - **Homepage:** [vorion.org](https://vorion.org)
-- **Issues:** [github.com/vorionsys/vorion/issues](https://github.com/vorionsys/vorion/issues)
+- **Issues:** [github.com/voriongit/vorion/issues](https://github.com/voriongit/vorion/issues)

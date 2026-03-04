@@ -1,0 +1,145 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+interface Workflow {
+  id: string;
+  name: string;
+  description: string;
+  status: 'success' | 'failure' | 'pending' | 'unknown';
+  conclusion: string | null;
+  runUrl: string | null;
+  updatedAt: string | null;
+}
+
+let workflows: Workflow[] = [];
+let timestamp: string | null = null;
+
+try {
+  const kv = (Astro.locals as any).runtime?.env?.BAI_CC_CACHE;
+  if (kv) {
+    const raw = await kv.get('dashboard:ci-status');
+    if (raw) {
+      const data = JSON.parse(raw);
+      workflows = data.workflows ?? [];
+      timestamp = data.timestamp ?? null;
+    }
+  }
+} catch {
+  // Workflows will be empty
+}
+
+const successCount = workflows.filter(w => w.status === 'success').length;
+const failureCount = workflows.filter(w => w.status === 'failure').length;
+const pendingCount = workflows.filter(w => w.status === 'pending').length;
+const unknownCount = workflows.filter(w => w.status === 'unknown').length;
+
+function statusIcon(status: string): string {
+  if (status === 'success') return '✓';
+  if (status === 'failure') return '✗';
+  if (status === 'pending') return '⟳';
+  return '?';
+}
+
+function statusColor(status: string): string {
+  if (status === 'success') return 'text-emerald-400 bg-emerald-500/10';
+  if (status === 'failure') return 'text-red-400 bg-red-500/10';
+  if (status === 'pending') return 'text-yellow-400 bg-yellow-500/10';
+  return 'text-slate-400 bg-slate-500/10';
+}
+
+function statusDotColor(status: string): string {
+  if (status === 'success') return 'bg-emerald-500';
+  if (status === 'failure') return 'bg-red-500';
+  if (status === 'pending') return 'bg-yellow-500';
+  return 'bg-slate-500';
+}
+---
+
+<Layout title="CI/CD Status | Vorion Dashboard">
+  <div class="space-y-8">
+    <section class="text-center py-8">
+      <h1 class="text-3xl font-bold mb-2">CI/CD Pipeline Status</h1>
+      <p class="text-slate-400">GitHub Actions workflow results for voriongit/vorion</p>
+    </section>
+
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 text-center">
+        <p class="text-4xl font-bold text-emerald-400">{successCount}</p>
+        <p class="text-sm text-slate-400 mt-1">Passing</p>
+      </div>
+      <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 text-center">
+        <p class="text-4xl font-bold text-red-400">{failureCount}</p>
+        <p class="text-sm text-slate-400 mt-1">Failing</p>
+      </div>
+      <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 text-center">
+        <p class="text-4xl font-bold text-yellow-400">{pendingCount}</p>
+        <p class="text-sm text-slate-400 mt-1">Pending</p>
+      </div>
+      <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 text-center">
+        <p class="text-4xl font-bold text-slate-400">{unknownCount}</p>
+        <p class="text-sm text-slate-400 mt-1">Unknown</p>
+      </div>
+    </section>
+
+    {workflows.length > 0 ? (
+      <section class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-700">
+              <th class="text-left py-3 px-6 text-slate-400 font-medium">Workflow</th>
+              <th class="text-left py-3 px-6 text-slate-400 font-medium">Description</th>
+              <th class="text-center py-3 px-6 text-slate-400 font-medium">Status</th>
+              <th class="text-right py-3 px-6 text-slate-400 font-medium">Last Run</th>
+            </tr>
+          </thead>
+          <tbody>
+            {workflows.map((w) => (
+              <tr class="border-b border-slate-700/50 hover:bg-slate-900/30">
+                <td class="py-4 px-6">
+                  <div class="flex items-center gap-3">
+                    <span class={`w-2.5 h-2.5 rounded-full ${statusDotColor(w.status)}`}></span>
+                    {w.runUrl ? (
+                      <a href={w.runUrl} target="_blank" rel="noopener" class="font-medium text-white hover:text-emerald-400 transition-colors">
+                        {w.name}
+                      </a>
+                    ) : (
+                      <span class="font-medium text-white">{w.name}</span>
+                    )}
+                  </div>
+                </td>
+                <td class="py-4 px-6 text-slate-400">{w.description}</td>
+                <td class="py-4 px-6 text-center">
+                  <span class={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusColor(w.status)}`}>
+                    <span>{statusIcon(w.status)}</span>
+                    {w.status === 'success' ? 'Passing' :
+                     w.status === 'failure' ? 'Failing' :
+                     w.status === 'pending' ? 'Running' : 'Unknown'}
+                  </span>
+                </td>
+                <td class="py-4 px-6 text-right text-slate-500 text-xs">
+                  {w.updatedAt ? new Date(w.updatedAt).toLocaleString() : '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    ) : (
+      <section class="text-center py-16 bg-slate-800/30 rounded-xl border border-slate-700">
+        <p class="text-slate-400">Loading CI status...</p>
+        <p class="text-sm text-slate-500 mt-2">Requires GITHUB_TOKEN secret in Cloudflare Workers</p>
+      </section>
+    )}
+
+    <section class="text-center py-4 text-slate-500 text-sm">
+      {timestamp && (
+        <p>Last synced: {new Date(timestamp).toLocaleString()}</p>
+      )}
+      <p class="mt-1">
+        <a href="https://github.com/voriongit/vorion/actions" target="_blank" rel="noopener" class="text-emerald-400 hover:underline">
+          View all workflows on GitHub
+        </a>
+      </p>
+    </section>
+  </div>
+</Layout>

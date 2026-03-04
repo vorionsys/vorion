@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.3] - 2026-02-20
 
 ### Changed
-- Migrated all references from vorionsys to vorionsys scope
+- Migrated all references from voriongit to vorionsys scope
 
 ## [1.0.2] - 2026-02-17
 
@@ -51,8 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full TypeScript type definitions for all interfaces and enums
 - Sub-path export `@vorionsys/basis/kya` for direct KYA module access
 
-[1.0.4]: https://github.com/vorionsys/vorion/compare/basis-v1.0.3...basis-v1.0.4
-[1.0.3]: https://github.com/vorionsys/vorion/compare/basis-v1.0.2...basis-v1.0.3
-[1.0.2]: https://github.com/vorionsys/vorion/compare/basis-v1.0.1...basis-v1.0.2
-[1.0.1]: https://github.com/vorionsys/vorion/compare/basis-v1.0.0...basis-v1.0.1
-[1.0.0]: https://github.com/vorionsys/vorion/releases/tag/basis-v1.0.0
+[1.0.4]: https://github.com/voriongit/vorion/compare/basis-v1.0.3...basis-v1.0.4
+[1.0.3]: https://github.com/voriongit/vorion/compare/basis-v1.0.2...basis-v1.0.3
+[1.0.2]: https://github.com/voriongit/vorion/compare/basis-v1.0.1...basis-v1.0.2
+[1.0.1]: https://github.com/voriongit/vorion/compare/basis-v1.0.0...basis-v1.0.1
+[1.0.0]: https://github.com/voriongit/vorion/releases/tag/basis-v1.0.0

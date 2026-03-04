@@ -292,14 +292,8 @@ describe('AIGateway', () => {
 
   describe('createGateway', () => {
     it('should create gateway with defaults', () => {
-      // createGateway() with no args reads LITELLM_MASTER_KEY from env
-      process.env.LITELLM_MASTER_KEY = 'test-default-key';
-      try {
-        const gw = createGateway();
-        expect(gw).toBeInstanceOf(AIGateway);
-      } finally {
-        delete process.env.LITELLM_MASTER_KEY;
-      }
+      const gw = createGateway();
+      expect(gw).toBeInstanceOf(AIGateway);
     });
 
     it('should create gateway with custom config', () => {

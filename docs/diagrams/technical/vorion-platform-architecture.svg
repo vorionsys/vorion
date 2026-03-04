@@ -1,0 +1,213 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" font-family="Inter, system-ui, sans-serif">
+  <title>Vorion Platform Architecture</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#0f172a"/>
+
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" fill="#f1f5f9" font-size="22" font-weight="700">Vorion Governed AI Execution Platform — System Architecture</text>
+  <text x="600" y="62" text-anchor="middle" fill="#64748b" font-size="12">v1.0 — February 2026</text>
+
+  <!-- ═══ TOP ROW: Standards & Specifications ═══ -->
+  <rect x="30" y="85" width="1140" height="90" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" filter="url(#shadow)"/>
+  <text x="50" y="108" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1.5">OPEN STANDARDS</text>
+
+  <!-- BASIS -->
+  <rect x="50" y="118" width="160" height="45" rx="6" fill="#1a2744" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="130" y="139" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="600">BASIS Standard</text>
+  <text x="130" y="155" text-anchor="middle" fill="#64748b" font-size="9">8-tier trust specification</text>
+
+  <!-- CAR Spec -->
+  <rect x="225" y="118" width="160" height="45" rx="6" fill="#1a2744" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="305" y="139" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="600">CAR Specification</text>
+  <text x="305" y="155" text-anchor="middle" fill="#64748b" font-size="9">Agent identity standard</text>
+
+  <!-- Contracts -->
+  <rect x="400" y="118" width="160" height="45" rx="6" fill="#1a2744" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="480" y="139" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="600">Contracts</text>
+  <text x="480" y="155" text-anchor="middle" fill="#64748b" font-size="9">Shared type validators</text>
+
+  <!-- Shared Constants -->
+  <rect x="575" y="118" width="175" height="45" rx="6" fill="#1a2744" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="662" y="139" text-anchor="middle" fill="#3b82f6" font-size="12" font-weight="600">Shared Constants</text>
+  <text x="662" y="155" text-anchor="middle" fill="#64748b" font-size="9">Canonical tier data</text>
+
+  <!-- OWASP Badge -->
+  <rect x="770" y="118" width="175" height="45" rx="6" fill="#162217" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="857" y="139" text-anchor="middle" fill="#22c55e" font-size="12" font-weight="600">OWASP ASI Mapped</text>
+  <text x="857" y="155" text-anchor="middle" fill="#64748b" font-size="9">ASI01-ASI10 controls</text>
+
+  <!-- NIST Badge -->
+  <rect x="960" y="118" width="160" height="45" rx="6" fill="#2a1a17" stroke="#f97316" stroke-width="1.5"/>
+  <text x="1040" y="139" text-anchor="middle" fill="#f97316" font-size="12" font-weight="600">NIST AI RMF</text>
+  <text x="1040" y="155" text-anchor="middle" fill="#64748b" font-size="9">CAISI aligned</text>
+
+  <!-- ═══ MIDDLE: Core Runtime Packages ═══ -->
+  <rect x="30" y="195" width="1140" height="200" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" filter="url(#shadow)"/>
+  <text x="50" y="218" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1.5">CORE RUNTIME PACKAGES</text>
+
+  <!-- ATSF Core -->
+  <rect x="50" y="230" width="270" height="150" rx="6" fill="#1a2232" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="185" y="252" text-anchor="middle" fill="#8b5cf6" font-size="14" font-weight="700">ATSF Core</text>
+  <text x="185" y="268" text-anchor="middle" fill="#64748b" font-size="10">Agent Trust &amp; Safety Framework</text>
+  <line x1="70" y1="278" x2="300" y2="278" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="296" fill="#c4b5fd" font-size="10">Trust Engine</text>
+  <text x="200" y="296" fill="#64748b" font-size="9">8-tier scoring, decay, recovery</text>
+  <text x="70" y="314" fill="#c4b5fd" font-size="10">Governance Engine</text>
+  <text x="200" y="314" fill="#64748b" font-size="9">Priority rules P0-P6</text>
+  <text x="70" y="332" fill="#c4b5fd" font-size="10">Containment</text>
+  <text x="200" y="332" fill="#64748b" font-size="9">7 levels, auto-escalation</text>
+  <text x="70" y="350" fill="#c4b5fd" font-size="10">Enforcement</text>
+  <text x="200" y="350" fill="#64748b" font-size="9">GREEN/YELLOW/RED decisions</text>
+  <text x="70" y="368" fill="#c4b5fd" font-size="10">Proof Service</text>
+  <text x="200" y="368" fill="#64748b" font-size="9">Ed25519, SHA-256 chain</text>
+
+  <!-- Cognigate -->
+  <rect x="340" y="230" width="250" height="150" rx="6" fill="#1a2232" stroke="#06b6d4" stroke-width="1.5"/>
+  <text x="465" y="252" text-anchor="middle" fill="#06b6d4" font-size="14" font-weight="700">Cognigate</text>
+  <text x="465" y="268" text-anchor="middle" fill="#64748b" font-size="10">Governance Runtime Gateway</text>
+  <line x1="360" y1="278" x2="570" y2="278" stroke="#334155" stroke-width="0.5"/>
+  <text x="360" y="296" fill="#67e8f9" font-size="10">Decision API</text>
+  <text x="470" y="296" fill="#64748b" font-size="9">REST + Webhooks</text>
+  <text x="360" y="314" fill="#67e8f9" font-size="10">HMAC Verification</text>
+  <text x="470" y="314" fill="#64748b" font-size="9">Signed payloads</text>
+  <text x="360" y="332" fill="#67e8f9" font-size="10">Proof Bridge</text>
+  <text x="470" y="332" fill="#64748b" font-size="9">Event → Proof Plane</text>
+  <text x="360" y="350" fill="#67e8f9" font-size="10">SDK (TypeScript)</text>
+  <text x="470" y="350" fill="#64748b" font-size="9">Client library</text>
+
+  <!-- Proof Plane -->
+  <rect x="610" y="230" width="250" height="150" rx="6" fill="#1a2232" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="735" y="252" text-anchor="middle" fill="#22c55e" font-size="14" font-weight="700">Proof Plane</text>
+  <text x="735" y="268" text-anchor="middle" fill="#64748b" font-size="10">Immutable Audit Trail</text>
+  <line x1="630" y1="278" x2="840" y2="278" stroke="#334155" stroke-width="0.5"/>
+  <text x="630" y="296" fill="#86efac" font-size="10">Hash Chain</text>
+  <text x="740" y="296" fill="#64748b" font-size="9">SHA-256 linked records</text>
+  <text x="630" y="314" fill="#86efac" font-size="10">Merkle Aggregation</text>
+  <text x="740" y="314" fill="#64748b" font-size="9">Blockchain anchoring</text>
+  <text x="630" y="332" fill="#86efac" font-size="10">ZK Proofs</text>
+  <text x="740" y="332" fill="#64748b" font-size="9">Pedersen, range, membership</text>
+  <text x="630" y="350" fill="#86efac" font-size="10">Event Types</text>
+  <text x="740" y="350" fill="#64748b" font-size="9">DECISION_MADE, TRUST_*</text>
+
+  <!-- Platform Core -->
+  <rect x="880" y="230" width="270" height="150" rx="6" fill="#1a2232" stroke="#eab308" stroke-width="1.5"/>
+  <text x="1015" y="252" text-anchor="middle" fill="#eab308" font-size="14" font-weight="700">Platform Core</text>
+  <text x="1015" y="268" text-anchor="middle" fill="#64748b" font-size="10">Enterprise Runtime Services</text>
+  <line x1="900" y1="278" x2="1130" y2="278" stroke="#334155" stroke-width="0.5"/>
+  <text x="900" y="296" fill="#fde047" font-size="10">Auth &amp; Identity</text>
+  <text x="1020" y="296" fill="#64748b" font-size="9">JWT, MFA, WebAuthn</text>
+  <text x="900" y="314" fill="#fde047" font-size="10">Security Module</text>
+  <text x="1020" y="314" fill="#64748b" font-size="9">Input validation, CSRF</text>
+  <text x="900" y="332" fill="#fde047" font-size="10">Audit Reporter</text>
+  <text x="1020" y="332" fill="#64748b" font-size="9">Compliance evidence</text>
+  <text x="900" y="350" fill="#fde047" font-size="10">Policy Engine</text>
+  <text x="1020" y="350" fill="#64748b" font-size="9">Semantic governance</text>
+
+  <!-- ═══ BOTTOM LEFT: APIs & Services ═══ -->
+  <rect x="30" y="415" width="550" height="135" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" filter="url(#shadow)"/>
+  <text x="50" y="438" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1.5">APIs &amp; SERVICES</text>
+
+  <rect x="50" y="450" width="120" height="40" rx="4" fill="#172033" stroke="#3b82f6" stroke-width="1"/>
+  <text x="110" y="474" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="600">Cognigate v1</text>
+  <rect x="180" y="450" width="100" height="40" rx="4" fill="#172033" stroke="#3b82f6" stroke-width="1"/>
+  <text x="230" y="474" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="600">Trust v1</text>
+  <rect x="290" y="450" width="100" height="40" rx="4" fill="#172033" stroke="#3b82f6" stroke-width="1"/>
+  <text x="340" y="474" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="600">Logic v1</text>
+  <rect x="400" y="450" width="100" height="40" rx="4" fill="#172033" stroke="#3b82f6" stroke-width="1"/>
+  <text x="450" y="474" text-anchor="middle" fill="#93c5fd" font-size="10" font-weight="600">Platform v1</text>
+
+  <rect x="50" y="498" width="120" height="40" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="110" y="522" text-anchor="middle" fill="#94a3b8" font-size="10">PostgreSQL</text>
+  <rect x="180" y="498" width="100" height="40" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="230" y="522" text-anchor="middle" fill="#94a3b8" font-size="10">Redis</text>
+  <rect x="290" y="498" width="100" height="40" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="340" y="522" text-anchor="middle" fill="#94a3b8" font-size="10">BullMQ</text>
+  <rect x="400" y="498" width="100" height="40" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="450" y="522" text-anchor="middle" fill="#94a3b8" font-size="10">OpenTelemetry</text>
+
+  <!-- ═══ BOTTOM RIGHT: Applications ═══ -->
+  <rect x="600" y="415" width="570" height="135" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" filter="url(#shadow)"/>
+  <text x="620" y="438" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1.5">APPLICATIONS &amp; DOMAINS</text>
+
+  <rect x="620" y="450" width="100" height="35" rx="4" fill="#172033" stroke="#22c55e" stroke-width="1"/>
+  <text x="670" y="472" text-anchor="middle" fill="#86efac" font-size="9" font-weight="600">vorion.org</text>
+  <rect x="730" y="450" width="125" height="35" rx="4" fill="#172033" stroke="#22c55e" stroke-width="1"/>
+  <text x="792" y="472" text-anchor="middle" fill="#86efac" font-size="9" font-weight="600">agentanchorai.com</text>
+  <rect x="865" y="450" width="115" height="35" rx="4" fill="#172033" stroke="#22c55e" stroke-width="1"/>
+  <text x="922" y="472" text-anchor="middle" fill="#86efac" font-size="9" font-weight="600">cognigate.dev</text>
+  <rect x="990" y="450" width="95" height="35" rx="4" fill="#172033" stroke="#22c55e" stroke-width="1"/>
+  <text x="1037" y="472" text-anchor="middle" fill="#86efac" font-size="9" font-weight="600">bai-cc.com</text>
+
+  <rect x="620" y="495" width="100" height="35" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="670" y="517" text-anchor="middle" fill="#94a3b8" font-size="9">Trust Portal</text>
+  <rect x="730" y="495" width="100" height="35" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="780" y="517" text-anchor="middle" fill="#94a3b8" font-size="9">Logic Portal</text>
+  <rect x="840" y="495" width="100" height="35" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="890" y="517" text-anchor="middle" fill="#94a3b8" font-size="9">Kaizen (Learn)</text>
+  <rect x="950" y="495" width="100" height="35" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="1000" y="517" text-anchor="middle" fill="#94a3b8" font-size="9">Dashboard</text>
+  <rect x="1060" y="495" width="90" height="35" rx="4" fill="#172033" stroke="#334155" stroke-width="1"/>
+  <text x="1105" y="517" text-anchor="middle" fill="#94a3b8" font-size="9">CAR ID</text>
+
+  <!-- ═══ BOTTOM: Infrastructure ═══ -->
+  <rect x="30" y="570" width="1140" height="80" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" filter="url(#shadow)"/>
+  <text x="50" y="593" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1.5">INFRASTRUCTURE</text>
+
+  <rect x="50" y="605" width="140" height="35" rx="4" fill="#172033" stroke="#475569" stroke-width="1"/>
+  <text x="120" y="627" text-anchor="middle" fill="#cbd5e1" font-size="10">Cloudflare Pages</text>
+  <rect x="200" y="605" width="140" height="35" rx="4" fill="#172033" stroke="#475569" stroke-width="1"/>
+  <text x="270" y="627" text-anchor="middle" fill="#cbd5e1" font-size="10">Cloudflare Workers</text>
+  <rect x="350" y="605" width="130" height="35" rx="4" fill="#172033" stroke="#475569" stroke-width="1"/>
+  <text x="415" y="627" text-anchor="middle" fill="#cbd5e1" font-size="10">Neon PostgreSQL</text>
+  <rect x="490" y="605" width="110" height="35" rx="4" fill="#172033" stroke="#475569" stroke-width="1"/>
+  <text x="545" y="627" text-anchor="middle" fill="#cbd5e1" font-size="10">Vercel</text>
+  <rect x="610" y="605" width="100" height="35" rx="4" fill="#172033" stroke="#475569" stroke-width="1"/>
+  <text x="660" y="627" text-anchor="middle" fill="#cbd5e1" font-size="10">npm Registry</text>
+  <rect x="720" y="605" width="130" height="35" rx="4" fill="#172033" stroke="#475569" stroke-width="1"/>
+  <text x="785" y="627" text-anchor="middle" fill="#cbd5e1" font-size="10">GitHub Actions</text>
+  <rect x="860" y="605" width="110" height="35" rx="4" fill="#172033" stroke="#475569" stroke-width="1"/>
+  <text x="915" y="627" text-anchor="middle" fill="#cbd5e1" font-size="10">Redis (KV)</text>
+  <rect x="980" y="605" width="140" height="35" rx="4" fill="#172033" stroke="#475569" stroke-width="1"/>
+  <text x="1050" y="627" text-anchor="middle" fill="#cbd5e1" font-size="10">Turbo Build System</text>
+
+  <!-- ═══ Data Flow Arrows ═══ -->
+  <!-- Standards → Core -->
+  <line x1="185" y1="175" x2="185" y2="230" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+  <line x1="465" y1="175" x2="465" y2="230" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+  <line x1="735" y1="175" x2="735" y2="230" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+
+  <!-- Core → APIs -->
+  <line x1="185" y1="380" x2="185" y2="415" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+  <line x1="465" y1="380" x2="340" y2="415" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+
+  <!-- Core → Apps -->
+  <line x1="735" y1="380" x2="800" y2="415" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+  <line x1="1015" y1="380" x2="1015" y2="415" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+
+  <!-- Legend -->
+  <rect x="30" y="670" width="1140" height="120" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="50" y="693" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1.5">LEGEND</text>
+
+  <rect x="50" y="705" width="14" height="14" rx="2" fill="#1a2744" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="72" y="716" fill="#94a3b8" font-size="10">Open Standard</text>
+  <rect x="200" y="705" width="14" height="14" rx="2" fill="#1a2232" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="222" y="716" fill="#94a3b8" font-size="10">Core Framework</text>
+  <rect x="370" y="705" width="14" height="14" rx="2" fill="#1a2232" stroke="#06b6d4" stroke-width="1.5"/>
+  <text x="392" y="716" fill="#94a3b8" font-size="10">Gateway / SDK</text>
+  <rect x="530" y="705" width="14" height="14" rx="2" fill="#1a2232" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="552" y="716" fill="#94a3b8" font-size="10">Audit / Proof</text>
+  <rect x="680" y="705" width="14" height="14" rx="2" fill="#1a2232" stroke="#eab308" stroke-width="1.5"/>
+  <text x="702" y="716" fill="#94a3b8" font-size="10">Enterprise Runtime</text>
+
+  <text x="50" y="745" fill="#64748b" font-size="10">17 npm packages | 6 APIs | 18 domains | 8 trust tiers (T0-T7) | 7 containment levels | 3-tier fluid governance (GREEN/YELLOW/RED)</text>
+  <text x="50" y="763" fill="#475569" font-size="9">Apache-2.0 Licensed | OWASP ASI01-ASI10 Mapped | NIST AI RMF Aligned | Vorion, Inc. 2026</text>
+</svg>

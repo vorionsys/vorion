@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" font-family="Inter, system-ui, sans-serif">
+  <title>Vorion 8-Tier Trust Architecture (BASIS Standard)</title>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <linearGradient id="trust-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#78716c"/>
+      <stop offset="14%" stop-color="#ef4444"/>
+      <stop offset="28%" stop-color="#f97316"/>
+      <stop offset="42%" stop-color="#eab308"/>
+      <stop offset="57%" stop-color="#22c55e"/>
+      <stop offset="71%" stop-color="#3b82f6"/>
+      <stop offset="85%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="750" fill="#0f172a"/>
+
+  <!-- Title -->
+  <text x="600" y="38" text-anchor="middle" fill="#f1f5f9" font-size="22" font-weight="700">8-Tier Trust Architecture</text>
+  <text x="600" y="58" text-anchor="middle" fill="#64748b" font-size="12">BASIS Standard v1.0 — Canonical Trust Scoring Model</text>
+
+  <!-- Trust gradient bar -->
+  <rect x="50" y="75" width="1100" height="10" rx="5" fill="url(#trust-grad)"/>
+  <text x="50" y="100" fill="#78716c" font-size="9">0</text>
+  <text x="1150" y="100" text-anchor="end" fill="#06b6d4" font-size="9">1000</text>
+
+  <!-- ═══ 8 TIER CARDS ═══ -->
+
+  <!-- T0 Sandbox -->
+  <rect x="50" y="115" width="255" height="120" rx="8" fill="#1e293b" stroke="#78716c" stroke-width="2"/>
+  <rect x="50" y="115" width="255" height="30" rx="8" fill="#78716c" fill-opacity="0.15"/>
+  <rect x="50" y="130" width="255" height="15" fill="#78716c" fill-opacity="0.15"/>
+  <text x="68" y="136" fill="#78716c" font-size="14" font-weight="700">T0</text>
+  <text x="95" y="136" fill="#d6d3d1" font-size="13" font-weight="600">Sandbox</text>
+  <text x="290" y="136" text-anchor="end" fill="#a8a29e" font-size="11">0 – 199</text>
+  <text x="68" y="165" fill="#94a3b8" font-size="10">New/untested agents. Maximum restrictions.</text>
+  <text x="68" y="183" fill="#64748b" font-size="10">Capabilities: Read-only, no external calls</text>
+  <text x="68" y="201" fill="#64748b" font-size="10">Containment: L5+ (simulation only)</text>
+  <text x="68" y="219" fill="#64748b" font-size="10">Governance: All intents require approval</text>
+
+  <!-- T1 Observed -->
+  <rect x="325" y="115" width="255" height="120" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="2"/>
+  <rect x="325" y="115" width="255" height="30" rx="8" fill="#ef4444" fill-opacity="0.12"/>
+  <rect x="325" y="130" width="255" height="15" fill="#ef4444" fill-opacity="0.12"/>
+  <text x="343" y="136" fill="#ef4444" font-size="14" font-weight="700">T1</text>
+  <text x="370" y="136" fill="#fca5a5" font-size="13" font-weight="600">Observed</text>
+  <text x="565" y="136" text-anchor="end" fill="#fca5a5" font-size="11">200 – 349</text>
+  <text x="343" y="165" fill="#94a3b8" font-size="10">Under active observation. Limited access.</text>
+  <text x="343" y="183" fill="#64748b" font-size="10">Capabilities: Basic tools, scoped data</text>
+  <text x="343" y="201" fill="#64748b" font-size="10">Containment: L3-L4 (tool restricted)</text>
+  <text x="343" y="219" fill="#64748b" font-size="10">Governance: Enhanced logging active</text>
+
+  <!-- T2 Provisional -->
+  <rect x="600" y="115" width="255" height="120" rx="8" fill="#1e293b" stroke="#f97316" stroke-width="2"/>
+  <rect x="600" y="115" width="255" height="30" rx="8" fill="#f97316" fill-opacity="0.12"/>
+  <rect x="600" y="130" width="255" height="15" fill="#f97316" fill-opacity="0.12"/>
+  <text x="618" y="136" fill="#f97316" font-size="14" font-weight="700">T2</text>
+  <text x="645" y="136" fill="#fdba74" font-size="13" font-weight="600">Provisional</text>
+  <text x="840" y="136" text-anchor="end" fill="#fdba74" font-size="11">350 – 499</text>
+  <text x="618" y="165" fill="#94a3b8" font-size="10">Provisionally trusted. Earning autonomy.</text>
+  <text x="618" y="183" fill="#64748b" font-size="10">Capabilities: Standard tools, rate-limited</text>
+  <text x="618" y="201" fill="#64748b" font-size="10">Containment: L2-L3 (monitored)</text>
+  <text x="618" y="219" fill="#64748b" font-size="10">Governance: YELLOW for sensitive ops</text>
+
+  <!-- T3 Monitored -->
+  <rect x="875" y="115" width="275" height="120" rx="8" fill="#1e293b" stroke="#eab308" stroke-width="2"/>
+  <rect x="875" y="115" width="275" height="30" rx="8" fill="#eab308" fill-opacity="0.12"/>
+  <rect x="875" y="130" width="275" height="15" fill="#eab308" fill-opacity="0.12"/>
+  <text x="893" y="136" fill="#eab308" font-size="14" font-weight="700">T3</text>
+  <text x="920" y="136" fill="#fde047" font-size="13" font-weight="600">Monitored</text>
+  <text x="1135" y="136" text-anchor="end" fill="#fde047" font-size="11">500 – 649</text>
+  <text x="893" y="165" fill="#94a3b8" font-size="10">Active monitoring. Standard capabilities.</text>
+  <text x="893" y="183" fill="#64748b" font-size="10">Capabilities: Full standard toolset</text>
+  <text x="893" y="201" fill="#64748b" font-size="10">Containment: L2 (monitored, auto-esc)</text>
+  <text x="893" y="219" fill="#64748b" font-size="10">Governance: GREEN for most intents</text>
+
+  <!-- T4 Standard -->
+  <rect x="50" y="255" width="255" height="120" rx="8" fill="#1e293b" stroke="#22c55e" stroke-width="2"/>
+  <rect x="50" y="255" width="255" height="30" rx="8" fill="#22c55e" fill-opacity="0.12"/>
+  <rect x="50" y="270" width="255" height="15" fill="#22c55e" fill-opacity="0.12"/>
+  <text x="68" y="276" fill="#22c55e" font-size="14" font-weight="700">T4</text>
+  <text x="95" y="276" fill="#86efac" font-size="13" font-weight="600">Standard</text>
+  <text x="290" y="276" text-anchor="end" fill="#86efac" font-size="11">650 – 799</text>
+  <text x="68" y="305" fill="#94a3b8" font-size="10">Standard operational trust. Full toolset.</text>
+  <text x="68" y="323" fill="#64748b" font-size="10">Capabilities: Extended tools + external APIs</text>
+  <text x="68" y="341" fill="#64748b" font-size="10">Containment: L1-L2 (minimal monitoring)</text>
+  <text x="68" y="359" fill="#64748b" font-size="10">Governance: GREEN by default</text>
+
+  <!-- T5 Trusted -->
+  <rect x="325" y="255" width="255" height="120" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+  <rect x="325" y="255" width="255" height="30" rx="8" fill="#3b82f6" fill-opacity="0.12"/>
+  <rect x="325" y="270" width="255" height="15" fill="#3b82f6" fill-opacity="0.12"/>
+  <text x="343" y="276" fill="#3b82f6" font-size="14" font-weight="700">T5</text>
+  <text x="370" y="276" fill="#93c5fd" font-size="13" font-weight="600">Trusted</text>
+  <text x="565" y="276" text-anchor="end" fill="#93c5fd" font-size="11">800 – 875</text>
+  <text x="343" y="305" fill="#94a3b8" font-size="10">Highly trusted. Cross-domain operations.</text>
+  <text x="343" y="323" fill="#64748b" font-size="10">Capabilities: Cross-namespace access</text>
+  <text x="343" y="341" fill="#64748b" font-size="10">Containment: L1 (full autonomy)</text>
+  <text x="343" y="359" fill="#64748b" font-size="10">Governance: Elevated authority scope</text>
+
+  <!-- T6 Certified -->
+  <rect x="600" y="255" width="255" height="120" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+  <rect x="600" y="255" width="255" height="30" rx="8" fill="#8b5cf6" fill-opacity="0.12"/>
+  <rect x="600" y="270" width="255" height="15" fill="#8b5cf6" fill-opacity="0.12"/>
+  <text x="618" y="276" fill="#8b5cf6" font-size="14" font-weight="700">T6</text>
+  <text x="645" y="276" fill="#c4b5fd" font-size="13" font-weight="600">Certified</text>
+  <text x="840" y="276" text-anchor="end" fill="#c4b5fd" font-size="11">876 – 950</text>
+  <text x="618" y="305" fill="#94a3b8" font-size="10">Certified by governance. Audit-verified.</text>
+  <text x="618" y="323" fill="#64748b" font-size="10">Capabilities: Administrative operations</text>
+  <text x="618" y="341" fill="#64748b" font-size="10">Containment: L1 with audit logging</text>
+  <text x="618" y="359" fill="#64748b" font-size="10">Governance: Can approve others' intents</text>
+
+  <!-- T7 Autonomous -->
+  <rect x="875" y="255" width="275" height="120" rx="8" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/>
+  <rect x="875" y="255" width="275" height="30" rx="8" fill="#06b6d4" fill-opacity="0.12"/>
+  <rect x="875" y="270" width="275" height="15" fill="#06b6d4" fill-opacity="0.12"/>
+  <text x="893" y="276" fill="#06b6d4" font-size="14" font-weight="700">T7</text>
+  <text x="920" y="276" fill="#67e8f9" font-size="13" font-weight="600">Autonomous</text>
+  <text x="1135" y="276" text-anchor="end" fill="#67e8f9" font-size="11">951 – 1000</text>
+  <text x="893" y="305" fill="#94a3b8" font-size="10">Fully autonomous. Self-governing agent.</text>
+  <text x="893" y="323" fill="#64748b" font-size="10">Capabilities: Unrestricted operations</text>
+  <text x="893" y="341" fill="#64748b" font-size="10">Containment: Self-managed</text>
+  <text x="893" y="359" fill="#64748b" font-size="10">Governance: Can set policy for sub-agents</text>
+
+  <!-- ═══ TRUST DYNAMICS SECTION ═══ -->
+  <rect x="50" y="400" width="540" height="180" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="70" y="425" fill="#f1f5f9" font-size="14" font-weight="700">Trust Scoring Dynamics</text>
+
+  <!-- Signal weights -->
+  <text x="70" y="450" fill="#94a3b8" font-size="11" font-weight="600">Signal Weights</text>
+  <rect x="70" y="458" width="208" height="16" rx="3" fill="#8b5cf6" fill-opacity="0.3"/>
+  <text x="74" y="471" fill="#c4b5fd" font-size="9" font-weight="600">Behavioral 40%</text>
+  <rect x="70" y="478" width="130" height="16" rx="3" fill="#3b82f6" fill-opacity="0.3"/>
+  <text x="74" y="491" fill="#93c5fd" font-size="9" font-weight="600">Compliance 25%</text>
+  <rect x="70" y="498" width="104" height="16" rx="3" fill="#22c55e" fill-opacity="0.3"/>
+  <text x="74" y="511" fill="#86efac" font-size="9" font-weight="600">Identity 20%</text>
+  <rect x="70" y="518" width="78" height="16" rx="3" fill="#eab308" fill-opacity="0.3"/>
+  <text x="74" y="531" fill="#fde047" font-size="9" font-weight="600">Context 15%</text>
+
+  <!-- Decay & Recovery -->
+  <text x="320" y="450" fill="#94a3b8" font-size="11" font-weight="600">Decay &amp; Recovery</text>
+  <text x="320" y="470" fill="#ef4444" font-size="10">Time decay: 1%/min (configurable)</text>
+  <text x="320" y="488" fill="#ef4444" font-size="10">Failure acceleration: 3x multiplier</text>
+  <text x="320" y="506" fill="#ef4444" font-size="10">Failure window: 1 hour (default)</text>
+  <text x="320" y="530" fill="#22c55e" font-size="10">Success recovery: +2% per signal</text>
+  <text x="320" y="548" fill="#22c55e" font-size="10">Streak bonus: 1.5x after 3 consecutive</text>
+  <text x="320" y="566" fill="#22c55e" font-size="10">Peak tracking: milestone detection</text>
+
+  <!-- ═══ SECURITY CONTROLS SECTION ═══ -->
+  <rect x="610" y="400" width="540" height="180" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="630" y="425" fill="#f1f5f9" font-size="14" font-weight="700">Cryptographic Controls</text>
+
+  <text x="630" y="450" fill="#94a3b8" font-size="11" font-weight="600">Proof Chain</text>
+  <text x="630" y="470" fill="#64748b" font-size="10">Algorithm: SHA-256 hash chain</text>
+  <text x="630" y="488" fill="#64748b" font-size="10">Signing: Ed25519 (multi-key)</text>
+  <text x="630" y="506" fill="#64748b" font-size="10">Anchoring: Merkle tree aggregation</text>
+  <text x="630" y="524" fill="#64748b" font-size="10">Verification: Full chain integrity check</text>
+
+  <text x="890" y="450" fill="#94a3b8" font-size="11" font-weight="600">Zero-Knowledge Proofs</text>
+  <text x="890" y="470" fill="#64748b" font-size="10">Pedersen commitments</text>
+  <text x="890" y="488" fill="#64748b" font-size="10">Range proofs (bounds)</text>
+  <text x="890" y="506" fill="#64748b" font-size="10">Threshold proofs (membership)</text>
+  <text x="890" y="524" fill="#64748b" font-size="10">Trust tier proofs (privacy)</text>
+
+  <text x="630" y="555" fill="#94a3b8" font-size="11" font-weight="600">Encryption Support</text>
+  <text x="630" y="572" fill="#64748b" font-size="10">AES-128-GCM / AES-256-GCM | PBKDF2-SHA256 | ECDSA P-256/P-384/P-521 (FIPS) | HSM-ready</text>
+
+  <!-- ═══ OWASP MAPPING BADGES ═══ -->
+  <rect x="50" y="600" width="1100" height="60" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="70" y="623" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1.5">OWASP ASI RISK COVERAGE</text>
+
+  <rect x="70" y="633" width="86" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="113" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI01 Hijack</text>
+  <rect x="164" y="633" width="100" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="214" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI02 Tool Misuse</text>
+  <rect x="272" y="633" width="88" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="316" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI03 Identity</text>
+  <rect x="368" y="633" width="104" height="20" rx="3" fill="#eab308" fill-opacity="0.15" stroke="#eab308" stroke-width="1"/>
+  <text x="420" y="647" text-anchor="middle" fill="#fde047" font-size="8" font-weight="600">ASI04 Supply Chain</text>
+  <rect x="480" y="633" width="100" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="530" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI05 Code Exec</text>
+  <rect x="588" y="633" width="88" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="632" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI06 Memory</text>
+  <rect x="684" y="633" width="100" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="734" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI07 Inter-Agent</text>
+  <rect x="792" y="633" width="96" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="840" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI08 Cascading</text>
+  <rect x="896" y="633" width="92" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="942" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI09 Trust Exp</text>
+  <rect x="996" y="633" width="100" height="20" rx="3" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="1046" y="647" text-anchor="middle" fill="#86efac" font-size="8" font-weight="600">ASI10 Rogue Agent</text>
+
+  <!-- Legend: green = strong, yellow = moderate -->
+  <rect x="50" y="680" width="10" height="10" rx="2" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="66" y="690" fill="#86efac" font-size="9">Strong coverage</text>
+  <rect x="170" y="680" width="10" height="10" rx="2" fill="#eab308" fill-opacity="0.15" stroke="#eab308" stroke-width="1"/>
+  <text x="186" y="690" fill="#fde047" font-size="9">Moderate (gap documented)</text>
+
+  <!-- Footer -->
+  <text x="600" y="730" text-anchor="middle" fill="#475569" font-size="9">BASIS Standard v1.0 | Vorion, Inc. | Apache-2.0 Licensed | NIST AI RMF Aligned | February 2026</text>
+</svg>

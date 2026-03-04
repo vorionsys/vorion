@@ -1,21 +1,43 @@
 # Contributing to Vorion
 
-Thank you for your interest in contributing to Vorion. This guide covers everything you need to get started, from local setup through submitting your first pull request.
-
-Vorion is an early-stage project (v0.1) built by a small team. We value every contribution — code, docs, tests, bug reports, and honest feedback all count equally.
+Thank you for your interest in contributing to Vorion! This document provides guidelines and information for partners and contributors.
 
 ---
 
 ## Table of Contents
 
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Development Workflow](#development-workflow)
-- [Code Standards](#code-standards)
-- [Package Guidelines](#package-guidelines)
-- [Reporting Issues](#reporting-issues)
-- [Security Vulnerabilities](#security-vulnerabilities)
-- [License](#license)
+1. [Code of Conduct](#code-of-conduct)
+2. [Getting Started](#getting-started)
+3. [Development Workflow](#development-workflow)
+4. [Coding Standards](#coding-standards)
+5. [Pull Request Process](#pull-request-process)
+6. [Component Guidelines](#component-guidelines)
+7. [Testing Requirements](#testing-requirements)
+8. [Documentation](#documentation)
+9. [Security](#security)
+10. [Partner Program](#partner-program)
+
+---
+
+## Code of Conduct
+
+### Our Pledge
+
+We are committed to providing a welcoming and inclusive environment. All contributors are expected to:
+
+- Be respectful and inclusive
+- Accept constructive criticism gracefully
+- Focus on what is best for the project
+- Show empathy towards others
+
+### Unacceptable Behavior
+
+- Harassment or discrimination
+- Trolling or insulting comments
+- Public or private harassment
+- Publishing others' private information
+
+Report violations to: conduct@vorion.org
 
 ---
 
@@ -23,340 +45,542 @@ Vorion is an early-stage project (v0.1) built by a small team. We value every co
 
 ### Prerequisites
 
-| Tool | Version | Notes |
-|------|---------|-------|
-| Node.js | >= 20 | Required for all packages and apps |
-| npm | >= 10 | Workspace package manager |
-| Python | >= 3.9 | Only required for `car-python` |
-| Git | Latest | Conventional Commits enforced |
+```bash
+# Required
+- Git 2.40+
+- Node.js 20+ (LTS recommended)
+- Python 3.11+ (for Python components)
+- Docker 24+
+- Docker Compose 2.20+
 
-### Clone and Install
+# Recommended
+- VS Code with recommended extensions
+- GitHub CLI (gh)
+```
+
+### Initial Setup
 
 ```bash
-git clone https://github.com/vorionsys/vorion.git
+# 1. Fork the repository on GitHub
+
+# 2. Clone your fork
+git clone https://github.com/YOUR-USERNAME/vorion.git
 cd vorion
+
+# 3. Add upstream remote
+git remote add upstream https://github.com/vorion/vorion.git
+
+# 4. Install dependencies
 npm install
+
+# 5. Copy environment config
+cp configs/environments/.env.example .env
+
+# 6. Verify setup
+npm run verify-setup
 ```
 
-### Build
-
-Builds are orchestrated by [Turborepo](https://turbo.build/) and respect the dependency graph (`contracts` builds before packages that depend on it, etc.).
+### Environment Configuration
 
 ```bash
-npm run build
+# .env file
+VORION_ENV=development
+VORION_LOG_LEVEL=debug
+VORION_DB_HOST=localhost
+VORION_DB_PORT=5432
+VORION_REDIS_HOST=localhost
+VORION_REDIS_PORT=6379
 ```
-
-### Run Tests
-
-```bash
-# Run all tests
-npm run test
-
-# Run tests with coverage gates
-npm run test:coverage
-
-# Type checking only
-npm run typecheck
-```
-
-### Other Useful Commands
-
-```bash
-# Lint all packages
-npm run lint
-
-# Auto-fix lint issues
-npm run lint:fix
-
-# Format with Prettier
-npm run format
-
-# Check formatting without writing
-npm run format:check
-
-# Detect circular dependencies
-npm run check:circular
-```
-
----
-
-## Project Structure
-
-The repository is an npm workspaces monorepo with two top-level directories:
-
-```
-vorion/
-├── packages/        # Publishable libraries and SDKs
-├── apps/            # Deployable applications
-├── docs/            # Specifications (BASIS, ROADMAP)
-├── .github/         # CI workflows, issue templates, PR template
-├── turbo.json       # Turborepo task configuration
-├── eslint.config.mjs
-└── package.json     # Root workspace definition
-```
-
-### Foundation Packages
-
-These are the lowest-level packages. Other packages depend on them, so changes here have the widest impact.
-
-| Package | Purpose |
-|---------|---------|
-| `shared-constants` | Trust tiers (T0-T7), domains, error codes, rate limits |
-| `basis` | BASIS standard implementation, trust factors, KYA (Know Your Agent) |
-| `contracts` | Zod schemas, API contracts, validators — the canonical type layer |
-
-### Core Service Packages
-
-| Package | Purpose |
-|---------|---------|
-| `atsf-core` | Agentic Trust Scoring Framework — trust computation engine |
-| `cognigate` | Policy enforcement client SDK |
-| `runtime` | Orchestration layer (intent pipeline, trust facade, proof committer) |
-| `ai-gateway` | Multi-provider AI routing with circuit breakers and SLA tracking |
-| `proof-plane` | Immutable audit trail with SHA-256 hash chains |
-
-### CAR (Categorical Agentic Registry)
-
-| Package | Purpose |
-|---------|---------|
-| `car-spec` | CAR OpenAPI 3.1.0 specification |
-| `car-client` | TypeScript client SDK |
-| `car-cli` | CLI tool for registry operations |
-| `car-python` | Python client SDK (uses pytest, ruff, mypy) |
-
-### SDKs
-
-| Package | Purpose |
-|---------|---------|
-| `sdk` | Simple governance interface for end users |
-| `council` | 16-agent governance orchestrator |
-
-### Applications
-
-| App | Purpose |
-|-----|---------|
-| `kaizen` | AI learning platform (Next.js) — [learn.vorion.org](https://learn.vorion.org) |
-| `cognigate-api` | Cognigate governance API service (Fastify) — [cognigate.dev](https://cognigate.dev) |
-
-### Dependency Flow
-
-Imports must follow this strict direction, enforced by ESLint:
-
-```
-contracts ← packages ← apps
-```
-
-- `contracts` cannot import from any other package (it is the foundation layer).
-- Packages cannot import from apps.
-- Apps import from packages freely.
 
 ---
 
 ## Development Workflow
 
-### 1. Create a Branch
+### Branch Strategy
 
-Use one of these naming conventions:
+```
+main
+  │
+  ├── develop          # Integration branch
+  │     │
+  │     ├── feature/*  # New features
+  │     ├── bugfix/*   # Bug fixes
+  │     ├── hotfix/*   # Critical fixes
+  │     └── release/*  # Release preparation
+  │
+  └── docs/*           # Documentation only
+```
 
-| Prefix | Use Case | Example |
-|--------|----------|---------|
-| `feature/` | New functionality | `feature/add-trust-decay-hooks` |
-| `fix/` | Bug fixes | `fix/circuit-breaker-timeout` |
-| `docs/` | Documentation only | `docs/update-basis-spec` |
-| `chore/` | Maintenance, deps, CI | `chore/upgrade-vitest` |
-| `test/` | Test-only changes | `test/proof-plane-coverage` |
+### Branch Naming
 
 ```bash
-git checkout -b feature/your-feature-name
+# Features
+feature/BASIS-123-add-constraint-evaluation
+
+# Bug fixes
+bugfix/PROOF-456-fix-hash-calculation
+
+# Hotfixes
+hotfix/SEC-789-patch-vulnerability
+
+# Documentation
+docs/update-api-reference
 ```
 
-### 2. Make Your Changes
-
-- Write or update tests for any behavior changes.
-- Run `npm run build && npm run test` locally before pushing.
-- Run `npm run lint` to catch style issues early.
-
-### 3. Commit with Conventional Commits
-
-All commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat: add trust decay visualization
-fix: resolve race condition in proof committer
-docs: update CAR client usage examples
-test: add coverage for intent pipeline edge cases
-chore: bump vitest to v4
-```
-
-Scope is optional but recommended for clarity in a multi-package repo:
-
-```
-feat(atsf-core): add custom decay profiles
-fix(cognigate): handle null Firebase gracefully
-```
-
-### 4. Push and Open a Pull Request
+### Workflow Steps
 
 ```bash
-git push origin feature/your-feature-name
+# 1. Sync with upstream
+git checkout develop
+git pull upstream develop
+
+# 2. Create feature branch
+git checkout -b feature/BASIS-123-new-feature
+
+# 3. Make changes
+# ... code ...
+
+# 4. Run tests
+npm test
+
+# 5. Commit changes
+git add .
+git commit -m "feat(basis): add constraint evaluation
+
+- Implement constraint parser
+- Add evaluation engine
+- Include unit tests
+
+Refs: BASIS-123"
+
+# 6. Push to your fork
+git push origin feature/BASIS-123-new-feature
+
+# 7. Create Pull Request
+gh pr create --base develop
 ```
-
-Open a PR against `main` using the [pull request template](.github/pull_request_template.md). Your PR should include:
-
-- A description of what changed and why
-- A link to the related issue (if any)
-- Confirmation that tests are added/updated
-- Confirmation that no secrets or sensitive data are included
-
-### 5. CI Checks
-
-All of the following must pass before a PR can be merged:
-
-| Check | What It Does |
-|-------|--------------|
-| **Build, Typecheck & Test** | Builds all packages, runs `tsc`, executes test suites |
-| **Coverage Gates** | Enforces per-package coverage thresholds (see [Coverage Thresholds](#coverage-thresholds)) |
-| **Lint & Typecheck** | ESLint + TypeScript compiler checks |
-| **Circular Dependency Check** | Runs `madge` to detect circular imports across `packages/` |
-| **Gitleaks Scan** | Scans for hardcoded secrets and credentials |
-
-### 6. Review and Merge
-
-- External contributors need one maintainer approval.
-- Maintainers can merge after CI passes.
-- See [GOVERNANCE.md](GOVERNANCE.md) for decision-making details.
 
 ---
 
-## Code Standards
+## Coding Standards
 
-### TypeScript (all packages except `car-python`)
+### General Principles
 
-- **Compiler:** TypeScript 5.x with strict mode
-- **Linting:** ESLint 9 with `@typescript-eslint` and `eslint-plugin-import`
-- **Formatting:** Prettier (run `npm run format` before committing)
-- **Testing:** Vitest with `@vitest/coverage-v8`
-- **Bundling:** tsup for package builds
+- **Clarity over cleverness** - Write readable code
+- **Single responsibility** - One function, one purpose
+- **Defensive programming** - Validate inputs, handle errors
+- **Security first** - Consider security implications
 
-### Python (`car-python` only)
-
-- **Version:** Python >= 3.9
-- **Linting:** ruff
-- **Type checking:** mypy (strict mode)
-- **Testing:** pytest with pytest-asyncio
-- **Dependencies:** httpx, pydantic
-
-### General Rules
-
-- Prefer `const` over `let`; avoid `var`.
-- Prefix unused parameters with `_` (e.g., `_ctx`).
-- Minimize use of `any` — use proper types. Unavoidable uses trigger a lint warning.
-- Use barrel exports (`index.ts`) for each package's public API.
-- Keep imports ordered: builtins, external, `@vorionsys/contracts`, other `@vorionsys/*`, relative. ESLint enforces this automatically.
-
-### Coverage Thresholds
-
-Coverage-gated packages must meet these minimums (enforced in CI):
-
-| Metric | Threshold |
-|--------|-----------|
-| Lines | 60% |
-| Functions | 60% |
-| Statements | 60% |
-| Branches | 50% |
-
-Coverage is checked per-package. Adding tests is one of the most valuable contributions you can make.
-
----
-
-## Package Guidelines
-
-### Adding a New Package
-
-1. Create a directory under `packages/your-package-name/`.
-2. Add a `package.json` with the `@vorionsys/` scope prefix.
-3. Add a `tsconfig.json` extending the root config.
-4. Add a `vitest.config.ts` with coverage configuration.
-5. Add a `src/index.ts` barrel export.
-6. Build with tsup — add a `tsup.config.ts` if needed.
-7. The package is automatically included in the workspace via the `packages/*` glob in the root `package.json`.
-8. Verify the dependency graph: run `npm run check:circular`.
-
-### Import Restrictions
-
-These are enforced by ESLint and will fail CI if violated:
-
-- **`contracts` is the foundation.** It cannot import from any other `@vorionsys/*` package.
-- **Packages cannot import from apps.** The dependency flow is one-directional: `contracts` <- `packages` <- `apps`.
-- **No imports from the legacy `/src/` root directory.** Use `@vorionsys/*` package imports instead.
-
-### Barrel Exports
-
-Every package should re-export its public API through `src/index.ts`. Consumers import from the package name, not deep paths:
+### TypeScript/JavaScript
 
 ```typescript
-// Correct
-import { TrustScore } from '@vorionsys/contracts';
+// File: src/basis/evaluator.ts
 
-// Avoid
-import { TrustScore } from '@vorionsys/contracts/src/canonical/trust-score';
+/**
+ * Evaluates a constraint against an intent context.
+ *
+ * @param constraint - The constraint to evaluate
+ * @param context - The intent context
+ * @returns Evaluation result with details
+ * @throws ConstraintError if constraint is malformed
+ */
+export async function evaluateConstraint(
+  constraint: Constraint,
+  context: IntentContext
+): Promise<EvaluationResult> {
+  // Validate inputs
+  if (!constraint?.id) {
+    throw new ConstraintError('Constraint must have an ID');
+  }
+
+  // Implementation
+  const result = await performEvaluation(constraint, context);
+
+  // Log for audit
+  logger.info('Constraint evaluated', {
+    constraintId: constraint.id,
+    result: result.passed,
+    duration: result.durationMs
+  });
+
+  return result;
+}
+```
+
+### Python
+
+```python
+# File: src/trust_engine/scorer.py
+
+from dataclasses import dataclass
+from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TrustScore:
+    """Represents an entity's trust score."""
+
+    entity_id: str
+    score: int  # 0-1000
+    level: int  # L0-L4
+    components: dict[str, float]
+    updated_at: datetime
+
+
+def calculate_trust_score(
+    entity_id: str,
+    signals: list[TrustSignal]
+) -> TrustScore:
+    """
+    Calculate trust score from behavioral signals.
+
+    Args:
+        entity_id: The entity to score
+        signals: List of trust signals
+
+    Returns:
+        Calculated TrustScore
+
+    Raises:
+        ValueError: If entity_id is invalid
+    """
+    if not entity_id:
+        raise ValueError("entity_id is required")
+
+    # Calculate component scores
+    behavioral = _calculate_behavioral(signals)
+    compliance = _calculate_compliance(signals)
+    identity = _calculate_identity(signals)
+    context = _calculate_context(signals)
+
+    # Weighted combination
+    score = int(
+        behavioral * 0.40 +
+        compliance * 0.25 +
+        identity * 0.20 +
+        context * 0.15
+    )
+
+    logger.info(
+        "Trust score calculated",
+        extra={"entity_id": entity_id, "score": score}
+    )
+
+    return TrustScore(
+        entity_id=entity_id,
+        score=score,
+        level=_score_to_level(score),
+        components={
+            "behavioral": behavioral,
+            "compliance": compliance,
+            "identity": identity,
+            "context": context
+        },
+        updated_at=datetime.utcnow()
+    )
+```
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Files | kebab-case | `constraint-evaluator.ts` |
+| Classes | PascalCase | `ConstraintEvaluator` |
+| Functions | camelCase | `evaluateConstraint()` |
+| Constants | UPPER_SNAKE | `MAX_TRUST_SCORE` |
+| Interfaces | PascalCase + I prefix | `IConstraint` |
+| Types | PascalCase | `EvaluationResult` |
+
+### Package Naming
+
+All new packages should use the `@vorion/` namespace:
+
+```json
+{
+  "name": "@vorion/package-name"
+}
+```
+
+**Note**: The `@vorionsys/atsf-core` package uses a legacy namespace for historical reasons. A rename to `@vorion/atsf-core` is planned for v2.0. When referencing ATSF in documentation:
+- Use `@vorionsys/atsf-core` for current installation instructions
+- Note the planned migration to `@vorion/atsf-core`
+
+### File Structure
+
+```typescript
+// 1. Imports (external, then internal)
+import { Logger } from 'winston';
+import { Constraint } from '../types';
+import { validateConstraint } from './validator';
+
+// 2. Constants
+const MAX_EVALUATION_TIME_MS = 100;
+
+// 3. Types/Interfaces
+interface EvaluationOptions {
+  timeout?: number;
+  strict?: boolean;
+}
+
+// 4. Main exports
+export class ConstraintEvaluator {
+  // ...
+}
+
+// 5. Helper functions (private)
+function normalizeConstraint(c: Constraint): Constraint {
+  // ...
+}
 ```
 
 ---
 
-## Reporting Issues
+## Pull Request Process
 
-### Bug Reports
+### Before Submitting
 
-Use the [Bug Report template](https://github.com/vorionsys/vorion/issues/new?template=bug_report.md). Include:
+- [ ] Code follows style guidelines
+- [ ] All tests pass locally
+- [ ] New tests added for new functionality
+- [ ] Documentation updated
+- [ ] No security vulnerabilities introduced
+- [ ] Commit messages follow convention
 
-- A clear description of the bug
+### PR Template
+
+```markdown
+## Summary
+Brief description of changes
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation
+
+## Related Issues
+Closes #123
+
+## Changes Made
+- Change 1
+- Change 2
+
+## Testing
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing performed
+
+## Screenshots (if applicable)
+
+## Checklist
+- [ ] Self-reviewed code
+- [ ] Added necessary documentation
+- [ ] No new warnings
+- [ ] Security implications considered
+```
+
+### Review Process
+
+1. **Automated Checks** - CI runs tests, linting, security scan
+2. **Code Review** - At least 1 maintainer approval required
+3. **Security Review** - Required for security-sensitive changes
+4. **Documentation Review** - Required for API changes
+
+### Merge Requirements
+
+- All CI checks passing
+- At least 1 approving review
+- No unresolved conversations
+- Branch up to date with base
+
+---
+
+## Component Guidelines
+
+### BASIS (Rule Engine)
+
+```yaml
+# Rule file structure
+namespace: "your-namespace"
+version: "1.0.0"
+description: "Description of rule set"
+
+rules:
+  - id: "rule-001"
+    name: "Human readable name"
+    description: "What this rule does"
+    when:
+      intent_type: "specific_type"
+    evaluate:
+      - condition: "expression"
+        result: "allow|deny|escalate"
+```
+
+**Guidelines:**
+- Rules must be idempotent
+- Include clear error messages
+- Document all conditions
+- Test edge cases
+
+### PROOF (Evidence)
+
+**Guidelines:**
+- Never modify existing proof records
+- Always include timestamps
+- Hash all evidence cryptographically
+- Maintain chain integrity
+
+### Trust Engine
+
+**Guidelines:**
+- Signals must be timestamped
+- Score calculations must be deterministic
+- Document all scoring factors
+- Include decay calculations
+
+---
+
+## Testing Requirements
+
+### Test Coverage
+
+| Component | Minimum Coverage |
+|-----------|------------------|
+| BASIS | 90% |
+| ENFORCE | 90% |
+| PROOF | 95% |
+| Trust Engine | 90% |
+| API | 85% |
+
+### Test Structure
+
+```typescript
+// File: tests/unit/basis/evaluator.test.ts
+
+describe('ConstraintEvaluator', () => {
+  describe('evaluateConstraint', () => {
+    it('should pass when all conditions met', async () => {
+      // Arrange
+      const constraint = createTestConstraint();
+      const context = createTestContext();
+
+      // Act
+      const result = await evaluateConstraint(constraint, context);
+
+      // Assert
+      expect(result.passed).toBe(true);
+      expect(result.evaluatedConditions).toHaveLength(3);
+    });
+
+    it('should fail when condition not met', async () => {
+      // ...
+    });
+
+    it('should throw on invalid constraint', async () => {
+      // ...
+    });
+  });
+});
+```
+
+### Test Types
+
+1. **Unit Tests** - Test individual functions
+2. **Integration Tests** - Test component interactions
+3. **E2E Tests** - Test full workflows
+4. **Performance Tests** - Test under load
+5. **Security Tests** - Test security controls
+
+---
+
+## Documentation
+
+### Code Documentation
+
+- All public APIs must have JSDoc/docstrings
+- Include examples in documentation
+- Document error conditions
+- Keep documentation up to date
+
+### README Updates
+
+When adding features:
+1. Update feature list in README
+2. Add usage examples
+3. Update architecture diagram if needed
+
+### API Documentation
+
+- Use OpenAPI/Swagger for REST APIs
+- Include request/response examples
+- Document error codes
+- Version API documentation
+
+---
+
+## Security
+
+### Security Requirements
+
+- **No secrets in code** - Use environment variables
+- **Input validation** - Validate all inputs
+- **Output encoding** - Encode outputs appropriately
+- **Authentication** - All APIs must be authenticated
+- **Authorization** - Implement least privilege
+- **Logging** - Log security events
+- **Dependencies** - Keep dependencies updated
+
+### Reporting Vulnerabilities
+
+**DO NOT** create public issues for security vulnerabilities.
+
+Email: security@vorion.org
+
+Include:
+- Description of vulnerability
 - Steps to reproduce
-- Expected vs. actual behavior
-- Environment details (OS, Node/Python version, package versions)
-- Relevant logs or error output
-
-### Feature Requests
-
-Use the [Feature Request template](https://github.com/vorionsys/vorion/issues/new?template=feature_request.md). Include:
-
-- The problem your feature would solve
-- Your proposed solution
-- Alternatives you have considered
-
-### Specification Changes (BASIS, ATSF Tiers, CAR Schema)
-
-Changes to core specifications follow a higher bar. See [GOVERNANCE.md](GOVERNANCE.md) for the full process:
-
-1. Open a GitHub Issue describing the change, motivation, and downstream impact.
-2. Allow a minimum 7-day comment period.
-3. Both maintainers must approve.
-4. Implementation PR must include updated spec docs, migration notes (if breaking), and tests.
+- Potential impact
+- Suggested fix (if any)
 
 ---
 
-## Security Vulnerabilities
+## Partner Program
 
-**Do not open public issues for security vulnerabilities.**
+### Partner Tiers
 
-- Email: **security@vorion.org**
-- Initial response target: within 48 hours
-- Critical remediation target: within 7 days
+| Tier | Requirements | Benefits |
+|------|--------------|----------|
+| **Registered** | Sign agreement | Access to repo, basic support |
+| **Certified** | Complete training | Priority support, early access |
+| **Premier** | Dedicated commitment | Direct engineering access |
+| **Strategic** | Joint roadmap | Co-development opportunities |
 
-Include reproduction steps, affected components, and potential impact. See [SECURITY.md](.github/SECURITY.md) for the full policy.
+### Partner Responsibilities
 
----
+- Follow contribution guidelines
+- Maintain code quality
+- Participate in reviews
+- Report issues promptly
+- Protect confidential information
 
-## License
+### Getting Partner Access
 
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file. By submitting a pull request, you agree that your contribution is licensed under the same terms. See [GOVERNANCE.md](GOVERNANCE.md) for additional licensing details.
+1. Contact: partners@agentanchorai.com
+2. Complete partner agreement
+3. Attend onboarding session
+4. Receive repository access
 
 ---
 
 ## Questions?
 
-- Open a [GitHub Discussion](https://github.com/vorionsys/vorion/discussions) for questions and ideas.
-- Check the [Roadmap](docs/ROADMAP.md) to see what is planned.
-- Read the [BASIS Spec](docs/BASIS.md) for the governance standard.
+- **General**: contribute@vorion.org
+- **Partners**: partners@agentanchorai.com
+- **Security**: security@vorion.org
 
-We are a small team and genuinely appreciate every contribution. Thank you for helping build trustworthy AI governance.
+---
+
+Thank you for contributing to Vorion!

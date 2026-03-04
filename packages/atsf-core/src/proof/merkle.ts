@@ -87,32 +87,6 @@ export interface ExternalAnchor {
 }
 
 /**
- * Local Ethereum anchor receipt
- *
- * Represents a locally-recorded anchor receipt for a Merkle root hash.
- * In local/simulated mode the receipt is stored in-memory with a
- * deterministic transaction hash derived from the root hash so that
- * anchoring is reproducible and testable without a live blockchain.
- *
- * @experimental On-chain Ethereum anchoring is not yet implemented.
- *               This receipt is produced by the local simulation layer.
- */
-export interface EthereumAnchorReceipt {
-  /** Deterministic simulated transaction hash (0x-prefixed hex) */
-  transactionHash: string;
-  /** The Merkle root that was anchored */
-  rootHash: string;
-  /** The configured RPC URL (for audit trail) */
-  rpcUrl: string;
-  /** Block number (always 0 in local mode) */
-  blockNumber: number;
-  /** Timestamp when the local anchor was created */
-  anchoredAt: Date;
-  /** Whether this is a simulated (local) anchor */
-  simulated: boolean;
-}
-
-/**
  * Batch aggregation result
  */
 export interface BatchAggregationResult {
@@ -284,6 +258,18 @@ export interface MerkleAggregationConfig {
   };
   /** Signing key for anchors */
   signingKey?: string;
+  /**
+   * Private key (hex) for signing Ethereum anchor transactions.
+   * If not set, falls back to VORION_CHAIN_PRIVATE_KEY env var.
+   * When neither is configured, Ethereum anchoring runs in demo mode
+   * and the method returns null.
+   */
+  ethereumPrivateKey?: string;
+  /**
+   * Number of block confirmations to wait for Ethereum anchors.
+   * Defaults to 2.
+   */
+  ethereumConfirmations?: number;
 }
 
 const DEFAULT_CONFIG: MerkleAggregationConfig = {
@@ -304,7 +290,6 @@ export class MerkleAggregationService {
   private pending: PendingItem[] = [];
   private anchors: Map<string, MerkleAnchor> = new Map();
   private proofsByAnchor: Map<string, Map<string, MerkleProof>> = new Map();
-  private ethereumReceipts: Map<string, EthereumAnchorReceipt> = new Map();
   private anchorTimer: NodeJS.Timeout | null = null;
   private signingKey: nodeCrypto.KeyObject | null = null;
 
@@ -476,20 +461,18 @@ export class MerkleAggregationService {
       }
     }
 
-    // Ethereum (local/simulated — @experimental on-chain support planned for Wave 2)
+    // Ethereum (placeholder)
     if (this.config.externalAnchorServices?.ethereum) {
       try {
         const result = await this.submitEthereumAnchor(
           rootHash,
           this.config.externalAnchorServices.ethereum
         );
-        anchors.push(result);
+        if (result) {
+          anchors.push(result);
+        }
       } catch (error) {
-        logger.error(
-          { error, rpcUrl: this.config.externalAnchorServices.ethereum },
-          'Ethereum anchoring failed — this should not happen in local simulation mode'
-        );
-        throw error;
+        logger.warn({ error }, 'Ethereum anchoring failed');
       }
     }
 
@@ -535,83 +518,141 @@ export class MerkleAggregationService {
   }
 
   /**
-   * Submit Ethereum anchor (local/simulated mode)
+   * Submit Ethereum anchor
    *
-   * Produces a deterministic, locally-stored anchor receipt derived from
-   * the Merkle root hash.  The simulated transaction hash is an HMAC-SHA256
-   * of the root hash keyed by the configured RPC URL, prefixed with `0x`.
-   * This ensures the same root + endpoint always yields the same "tx hash",
-   * making the output reproducible and testable.
+   * When a private key is configured (via config.ethereumPrivateKey or
+   * the VORION_CHAIN_PRIVATE_KEY environment variable), this method signs
+   * and broadcasts a real transaction containing the Merkle root hash in
+   * its calldata, waits for confirmations, and returns the on-chain anchor
+   * reference.
    *
-   * @experimental On-chain Ethereum anchoring requires a live RPC endpoint,
-   *               a funded wallet, and a deployed anchor contract.  This
-   *               simulated path will be replaced once Wave 2 introduces
-   *               the on-chain connector.
-   *
-   * @throws {Error} If the deterministic hash computation fails.
+   * When no private key is available, the method logs a warning and returns
+   * null so callers degrade gracefully (demo / CI mode).
    */
   private async submitEthereumAnchor(
     rootHash: string,
     rpcUrl: string
-  ): Promise<ExternalAnchor> {
-    logger.warn(
-      { rpcUrl, rootHash: rootHash.substring(0, 16) },
-      'Ethereum on-chain anchoring is not yet available — using local simulation. ' +
-        'Configure a live RPC endpoint and anchor contract for production use.'
-    );
+  ): Promise<ExternalAnchor | null> {
+    const privateKey =
+      this.config.ethereumPrivateKey ?? process.env['VORION_CHAIN_PRIVATE_KEY'];
 
-    // Deterministic simulated transaction hash:
-    //   txHash = HMAC-SHA256(key=rpcUrl, data=rootHash)
-    // This is stable across calls with the same inputs and requires no
-    // external dependencies.
-    const txHash =
-      '0x' +
-      nodeCrypto
-        .createHmac('sha256', rpcUrl)
-        .update(rootHash)
-        .digest('hex');
+    if (!privateKey) {
+      logger.warn(
+        { rpcUrl },
+        'DEMO MODE: No Ethereum private key configured (set ethereumPrivateKey ' +
+        'in MerkleAggregationConfig or VORION_CHAIN_PRIVATE_KEY env var). ' +
+        'Skipping real Ethereum anchoring.'
+      );
+      return null;
+    }
 
-    const receipt: EthereumAnchorReceipt = {
-      transactionHash: txHash,
-      rootHash,
-      rpcUrl,
-      blockNumber: 0,
-      anchoredAt: new Date(),
-      simulated: true,
-    };
-
-    // Persist locally so callers can retrieve the receipt later.
-    this.ethereumReceipts.set(txHash, receipt);
+    // Dynamic import so ethers is not a hard dependency
+    let ethers: typeof import('ethers');
+    try {
+      ethers = await import('ethers');
+    } catch {
+      logger.error(
+        'ethers.js v6 is required for Ethereum anchoring. ' +
+        'Install it with: npm install ethers@^6'
+      );
+      return null;
+    }
 
     logger.info(
-      {
-        transactionHash: txHash.substring(0, 18),
-        rootHash: rootHash.substring(0, 16),
-        simulated: true,
-      },
-      'Local Ethereum anchor receipt created'
+      { rpcUrl, rootHash: rootHash.substring(0, 16) + '...' },
+      'Production mode: submitting Merkle root to Ethereum'
     );
 
-    return {
-      type: 'ethereum',
-      reference: txHash,
-      timestamp: receipt.anchoredAt,
-      confirmed: true, // locally confirmed
-    };
-  }
+    try {
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const wallet = new ethers.Wallet(privateKey, provider);
 
-  /**
-   * Retrieve a local Ethereum anchor receipt by its simulated transaction hash.
-   */
-  getEthereumReceipt(transactionHash: string): EthereumAnchorReceipt | undefined {
-    return this.ethereumReceipts.get(transactionHash);
-  }
+      // Encode the Merkle root as calldata: 0x-prefixed bytes32
+      // We send a simple data-carrying transaction (no contract interaction needed)
+      const rootBytes = rootHash.startsWith('0x') ? rootHash : '0x' + rootHash;
 
-  /**
-   * Retrieve all local Ethereum anchor receipts.
-   */
-  getAllEthereumReceipts(): EthereumAnchorReceipt[] {
-    return Array.from(this.ethereumReceipts.values());
+      // Get current fee data for EIP-1559 transactions
+      const feeData = await provider.getFeeData();
+
+      const txRequest: import('ethers').TransactionRequest = {
+        to: await wallet.getAddress(), // self-send; the value is in the data field
+        data: rootBytes,
+        value: 0n,
+        type: 2, // EIP-1559
+        maxFeePerGas: feeData.maxFeePerGas ?? undefined,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas ?? undefined,
+      };
+
+      // Estimate gas for the data payload
+      const gasEstimate = await provider.estimateGas(txRequest);
+      txRequest.gasLimit = (gasEstimate * 120n) / 100n; // 20% buffer
+
+      // Sign and broadcast
+      let sentTx: import('ethers').TransactionResponse;
+      try {
+        sentTx = await wallet.sendTransaction(txRequest);
+      } catch (sendErr: unknown) {
+        const errMsg = (sendErr as Error).message ?? String(sendErr);
+
+        if (errMsg.includes('insufficient funds') || errMsg.includes('INSUFFICIENT_FUNDS')) {
+          logger.error(
+            { address: await wallet.getAddress() },
+            'Insufficient funds for Ethereum anchor transaction'
+          );
+          return null;
+        }
+        if (errMsg.includes('nonce') || errMsg.includes('NONCE_EXPIRED')) {
+          logger.error('Nonce conflict during Ethereum anchoring — retry recommended');
+          return null;
+        }
+        logger.error({ error: errMsg }, 'Failed to send Ethereum anchor transaction');
+        return null;
+      }
+
+      logger.info(
+        { txHash: sentTx.hash },
+        'Ethereum anchor transaction broadcast — waiting for confirmations'
+      );
+
+      // Wait for confirmations
+      const confirmations = this.config.ethereumConfirmations ?? 2;
+      const receipt = await sentTx.wait(confirmations);
+
+      if (!receipt) {
+        logger.error(
+          { txHash: sentTx.hash },
+          'Ethereum anchor transaction returned null receipt'
+        );
+        return null;
+      }
+
+      if (receipt.status === 0) {
+        logger.error(
+          { txHash: sentTx.hash, blockNumber: receipt.blockNumber },
+          'Ethereum anchor transaction reverted'
+        );
+        return null;
+      }
+
+      logger.info(
+        {
+          txHash: receipt.hash,
+          blockNumber: receipt.blockNumber,
+          gasUsed: receipt.gasUsed.toString(),
+        },
+        'Ethereum anchor confirmed on chain'
+      );
+
+      return {
+        type: 'ethereum',
+        reference: receipt.hash,
+        timestamp: new Date(),
+        confirmed: true,
+      };
+    } catch (error) {
+      logger.error({ error }, 'Ethereum anchor submission failed');
+      return null;
+    }
   }
 
   /**
@@ -669,7 +710,6 @@ export class MerkleAggregationService {
     totalProofs: number;
     pendingItems: number;
     externalAnchors: number;
-    ethereumReceipts: number;
   } {
     let totalProofs = 0;
     let externalAnchors = 0;
@@ -687,7 +727,6 @@ export class MerkleAggregationService {
       totalProofs,
       pendingItems: this.pending.length,
       externalAnchors,
-      ethereumReceipts: this.ethereumReceipts.size,
     };
   }
 

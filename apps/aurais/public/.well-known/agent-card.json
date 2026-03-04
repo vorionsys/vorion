@@ -1,0 +1,93 @@
+{
+  "$schema": "https://a2a-protocol.org/schemas/agent-card/v1.0",
+  "schemaVersion": "1.0",
+  "id": "did:web:aurais.net:services:marketplace",
+  "name": "AuraIS Agent Marketplace",
+  "description": "AuraIS is the marketplace and management portal for AI agents governed under the BASIS open standard. Discover, deploy, and monitor AI agents with built-in trust scoring, capability gating, and compliance controls.",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-18T00:00:00Z",
+
+  "provider": {
+    "name": "Vorion",
+    "url": "https://vorion.org",
+    "contact": "agents@vorion.org",
+    "jurisdiction": "US"
+  },
+
+  "interfaces": [
+    {
+      "type": "a2a",
+      "endpoint": "https://api.aurais.net/a2a/v1",
+      "protocol": "https",
+      "port": 443
+    }
+  ],
+
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": true,
+    "extendedAgentCard": false
+  },
+
+  "defaultInputModes": ["json", "text"],
+  "defaultOutputModes": ["json"],
+
+  "skills": [
+    {
+      "id": "agent-discovery",
+      "name": "Agent Discovery",
+      "description": "Search and discover AI agents by capability, trust tier, compliance status, and organizational fit.",
+      "inputModes": ["json", "text"],
+      "outputModes": ["json"]
+    },
+    {
+      "id": "agent-deployment",
+      "name": "Agent Deployment",
+      "description": "Deploy agents with pre-configured governance policies, trust tier assignments, and capability scoping.",
+      "inputModes": ["json"],
+      "outputModes": ["json"]
+    },
+    {
+      "id": "agent-monitoring",
+      "name": "Agent Monitoring",
+      "description": "Real-time monitoring of agent trust scores, capability usage, policy violations, and behavioral drift.",
+      "inputModes": ["json"],
+      "outputModes": ["json"]
+    }
+  ],
+
+  "securitySchemes": {
+    "oauth2": {
+      "type": "oauth2",
+      "flows": {
+        "clientCredentials": {
+          "tokenUrl": "https://auth.aurais.net/oauth/token",
+          "scopes": {
+            "agents:read": "Browse agent marketplace",
+            "agents:deploy": "Deploy agents",
+            "monitoring:read": "Read agent monitoring data"
+          }
+        }
+      }
+    }
+  },
+
+  "security": [
+    { "oauth2": ["agents:read"] }
+  ],
+
+  "governance": {
+    "standard": "BASIS - Baseline Authority for Safe & Interoperable Systems",
+    "standardUrl": "https://basis.vorion.org",
+    "enforcementEngine": "Cognigate",
+    "enforcementUrl": "https://cognigate.dev",
+    "certificationAuthority": "AgentAnchor",
+    "certificationUrl": "https://agentanchorai.com",
+    "pipeline": ["CAR", "INTENT", "ENFORCE", "PROOF", "CHAIN"]
+  },
+
+  "documentationUrl": "https://aurais.net/docs",
+  "iconUrl": "https://aurais.net/icon.png",
+  "privacyPolicyUrl": "https://aurais.net/privacy",
+  "termsOfServiceUrl": "https://aurais.net/terms"
+}

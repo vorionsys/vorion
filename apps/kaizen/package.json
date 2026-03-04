@@ -1,5 +1,5 @@
 {
-  "name": "@vorionsys/kaizen",
+  "name": "@vorion/kaizen",
   "version": "0.1.0",
   "description": "Kaizen - AI Learning Platform (learn.vorion.org)",
   "private": true,
@@ -17,7 +17,6 @@
     "@vercel/analytics": "^1.4.1",
     "ai": "^6.0.23",
     "clsx": "^2.1.1",
-    "firebase": "^11.10.0",
     "gray-matter": "^4.0.3",
     "idb": "^7.1.1",
     "lucide-react": "^0.562.0",

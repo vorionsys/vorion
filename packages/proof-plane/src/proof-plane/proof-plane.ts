@@ -53,7 +53,7 @@ import {
 
 /**
  * Hook manager interface for event notifications
- * (Implemented by @vorionsys/a3i HookManager)
+ * (Implemented by @vorion/a3i HookManager)
  */
 export interface EventHookManager {
   executeEventEmitted(context: {

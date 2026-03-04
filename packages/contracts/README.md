@@ -434,7 +434,7 @@ Full platform documentation is available at [https://vorion.org/docs](https://vo
 
 This package lives in the Vorion monorepo:
 
-[https://github.com/vorionsys/vorion/tree/master/packages/contracts](https://github.com/vorionsys/vorion/tree/master/packages/contracts)
+[https://github.com/voriongit/vorion/tree/master/packages/contracts](https://github.com/voriongit/vorion/tree/master/packages/contracts)
 
 ## License
 

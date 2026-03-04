@@ -1,0 +1,103 @@
+---
+interface Props {
+  interval?: number;
+}
+
+const { interval = 60 } = Astro.props;
+---
+
+<div
+  class="inline-flex items-center gap-2 text-xs text-slate-500"
+  id="refresh-indicator"
+  data-interval={interval}
+>
+  <!-- Refresh icon (spins when refreshing) -->
+  <svg
+    class="w-3.5 h-3.5 transition-transform"
+    id="refresh-icon"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+    />
+  </svg>
+
+  <span id="refresh-text">Updated just now</span>
+</div>
+
+<style>
+  @keyframes spin-refresh {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .refreshing {
+    animation: spin-refresh 1s linear infinite;
+  }
+</style>
+
+<script>
+  function initRefreshIndicator() {
+    const indicator = document.getElementById('refresh-indicator');
+    const icon = document.getElementById('refresh-icon');
+    const text = document.getElementById('refresh-text');
+
+    if (!indicator || !icon || !text) return;
+
+    const interval = parseInt(indicator.dataset.interval || '60', 10);
+    let lastUpdated = Date.now();
+    let refreshTimer: ReturnType<typeof setInterval>;
+
+    function formatElapsed(ms: number): string {
+      const seconds = Math.floor(ms / 1000);
+      if (seconds < 5) return 'Updated just now';
+      if (seconds < 60) return `Updated ${seconds}s ago`;
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `Updated ${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      return `Updated ${hours}h ago`;
+    }
+
+    function updateDisplay() {
+      const elapsed = Date.now() - lastUpdated;
+      text.textContent = formatElapsed(elapsed);
+    }
+
+    function simulateRefresh() {
+      icon.classList.add('refreshing');
+      text.textContent = 'Refreshing...';
+
+      setTimeout(() => {
+        lastUpdated = Date.now();
+        icon.classList.remove('refreshing');
+        updateDisplay();
+      }, 800);
+    }
+
+    // Update display every second
+    setInterval(updateDisplay, 1000);
+
+    // Auto-refresh at the configured interval
+    refreshTimer = setInterval(simulateRefresh, interval * 1000);
+
+    // Allow manual refresh on click
+    indicator.addEventListener('click', () => {
+      simulateRefresh();
+    });
+
+    indicator.style.cursor = 'pointer';
+    indicator.title = 'Click to refresh';
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRefreshIndicator);
+  } else {
+    initRefreshIndicator();
+  }
+</script>

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Trust Configuration Presets for BMAD Agents
- * @module @vorionsys/council/trust/bmad-presets
+ * @module @vorion/council/trust/bmad-presets
  *
  * Trust scoring presets for BMAD agents when integrated into the Vorion
  * trust system. Based on ACI spec canonical presets with BMAD-specific deltas.

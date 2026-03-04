@@ -1,0 +1,299 @@
+---
+import Layout from '../../layouts/Layout.astro';
+export const prerender = true;
+
+const trustTiers = [
+  { name: 'T0 Sandbox', range: '0 – 199', color: 'bg-stone-500', width: 'w-[20%]', text: 'text-stone-400' },
+  { name: 'T1 Observed', range: '200 – 349', color: 'bg-red-500', width: 'w-[15%]', text: 'text-red-400' },
+  { name: 'T2 Provisional', range: '350 – 499', color: 'bg-orange-500', width: 'w-[15%]', text: 'text-orange-400' },
+  { name: 'T3 Monitored', range: '500 – 649', color: 'bg-yellow-500', width: 'w-[15%]', text: 'text-yellow-400' },
+  { name: 'T4 Standard', range: '650 – 799', color: 'bg-green-500', width: 'w-[15%]', text: 'text-green-400' },
+  { name: 'T5 Trusted', range: '800 – 875', color: 'bg-blue-500', width: 'w-[7.5%]', text: 'text-blue-400' },
+  { name: 'T6 Certified', range: '876 – 950', color: 'bg-purple-500', width: 'w-[7.5%]', text: 'text-purple-400' },
+  { name: 'T7 Autonomous', range: '951 – 1000', color: 'bg-cyan-500', width: 'w-[5%]', text: 'text-cyan-400' },
+];
+---
+
+<Layout title="System Architecture | Vorion Dashboard">
+  <div class="space-y-8">
+    <section class="text-center py-8">
+      <h1 class="text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
+        System Architecture
+      </h1>
+      <p class="text-slate-400 max-w-2xl mx-auto">
+        How Vorion's trust engine, governance framework, and edge dashboard work together
+        to provide transparent, real-time AI agent oversight.
+      </p>
+    </section>
+
+    <!-- Platform Core Packages -->
+    <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+      <h2 class="text-xl font-bold mb-6">Platform Packages</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- ATSF Core -->
+        <div class="bg-slate-900/60 rounded-lg p-5 border border-emerald-500/30">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-sm font-bold">A</div>
+            <h3 class="font-semibold text-emerald-400">ATSF Core</h3>
+          </div>
+          <p class="text-sm text-slate-400 mb-4">Agent Trust & Safety Framework — the runtime engine for trust scoring and governance.</p>
+          <ul class="space-y-2 text-sm text-slate-300">
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Trust Engine — score computation + tier promotion
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Governance Engine — rule evaluation + decisions
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Simulation Environment — 21-challenge boot camp
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Fastify API — REST endpoints
+            </li>
+          </ul>
+        </div>
+
+        <!-- Platform Core -->
+        <div class="bg-slate-900/60 rounded-lg p-5 border border-blue-500/30">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 text-sm font-bold">P</div>
+            <h3 class="font-semibold text-blue-400">Platform Core</h3>
+          </div>
+          <p class="text-sm text-slate-400 mb-4">Enterprise platform services — authentication, registry, and cryptographic proof.</p>
+          <ul class="space-y-2 text-sm text-slate-300">
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              Auth — MFA (TOTP) + PIV/CAC smart card
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              Agent Registry — tenant + API key management
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              Proof Chain — hash-chained signed records
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              HSM — PKCS#11 hardware security module
+            </li>
+          </ul>
+        </div>
+
+        <!-- Contracts -->
+        <div class="bg-slate-900/60 rounded-lg p-5 border border-purple-500/30">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm font-bold">C</div>
+            <h3 class="font-semibold text-purple-400">Contracts</h3>
+          </div>
+          <p class="text-sm text-slate-400 mb-4">Shared type definitions, database schemas, and canonical enums across all packages.</p>
+          <ul class="space-y-2 text-sm text-slate-300">
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              Drizzle ORM schemas (PostgreSQL)
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              TrustTier, ControlAction enums
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              Intent, Decision, Agent types
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              BASIS + CAR specification types
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Edge / Dashboard Layer -->
+    <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+      <h2 class="text-xl font-bold mb-6">Edge Dashboard Layer</h2>
+      <p class="text-sm text-slate-400 mb-6">
+        The public dashboard runs on Cloudflare's edge network. A scheduled Worker syncs data from PostgreSQL every 5 minutes
+        into KV, which Astro pages read at request time. This architecture keeps database credentials off the edge and
+        serves cached data in &lt;50ms globally.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-slate-900/60 rounded-lg p-4 border border-slate-600 text-center">
+          <div class="text-2xl mb-2">🗄️</div>
+          <h4 class="font-semibold text-sm">Neon PostgreSQL</h4>
+          <p class="text-xs text-slate-500 mt-1">Source of truth — agents, intents, policies, trust scores</p>
+        </div>
+        <div class="bg-slate-900/60 rounded-lg p-4 border border-orange-500/30 text-center relative">
+          <div class="text-2xl mb-2">⚡</div>
+          <h4 class="font-semibold text-sm text-orange-400">Scheduled Worker</h4>
+          <p class="text-xs text-slate-500 mt-1">5-min cron — syncs stats, health checks, npm, CI</p>
+          <div class="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">→</div>
+        </div>
+        <div class="bg-slate-900/60 rounded-lg p-4 border border-yellow-500/30 text-center relative">
+          <div class="text-2xl mb-2">📦</div>
+          <h4 class="font-semibold text-sm text-yellow-400">Cloudflare KV</h4>
+          <p class="text-xs text-slate-500 mt-1">Edge cache — 300s TTL, 7 data keys</p>
+          <div class="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg">→</div>
+        </div>
+        <div class="bg-slate-900/60 rounded-lg p-4 border border-emerald-500/30 text-center">
+          <div class="text-2xl mb-2">🌐</div>
+          <h4 class="font-semibold text-sm text-emerald-400">Astro SSR</h4>
+          <p class="text-xs text-slate-500 mt-1">Pages + API routes — reads from KV at the edge</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Model -->
+    <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+      <h2 class="text-xl font-bold mb-2">8-Tier Trust Model</h2>
+      <p class="text-sm text-slate-400 mb-6">
+        Every agent starts at T0 (Sandbox) and progresses through tiers as trust signals accumulate.
+        Scores range from 0 to 1000. Higher tiers unlock greater autonomy.
+      </p>
+
+      <!-- Trust scale bar -->
+      <div class="mb-8">
+        <div class="flex h-4 rounded-full overflow-hidden">
+          {trustTiers.map((tier) => (
+            <div class={`${tier.color} ${tier.width} opacity-80 hover:opacity-100 transition-opacity`} title={`${tier.name}: ${tier.range}`}></div>
+          ))}
+        </div>
+        <div class="flex justify-between mt-2 text-xs text-slate-500">
+          <span>0</span>
+          <span>200</span>
+          <span>350</span>
+          <span>500</span>
+          <span>650</span>
+          <span>800</span>
+          <span>876</span>
+          <span>951</span>
+          <span>1000</span>
+        </div>
+      </div>
+
+      <!-- Tier detail grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {trustTiers.map((tier) => (
+          <div class="bg-slate-900/60 rounded-lg p-4 border border-slate-700">
+            <div class="flex items-center gap-2 mb-2">
+              <span class={`w-3 h-3 rounded-full ${tier.color}`}></span>
+              <span class={`font-semibold text-sm ${tier.text}`}>{tier.name}</span>
+            </div>
+            <p class="text-xs text-slate-500">{tier.range}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Data Flow Pipelines -->
+    <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+      <h2 class="text-xl font-bold mb-6">Data Flow Pipelines</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Trust Pipeline -->
+        <div class="bg-slate-900/60 rounded-lg p-5 border border-slate-600">
+          <h3 class="font-semibold text-emerald-400 mb-4">Trust Scoring Pipeline</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">1</span>
+              <span class="text-sm text-slate-300">Agent registers + enters Sandbox (T0)</span>
+            </div>
+            <div class="border-l-2 border-dashed border-slate-700 ml-3 h-2"></div>
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">2</span>
+              <span class="text-sm text-slate-300">Boot Camp — 21 adversarial challenges</span>
+            </div>
+            <div class="border-l-2 border-dashed border-slate-700 ml-3 h-2"></div>
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">3</span>
+              <span class="text-sm text-slate-300">Challenge results → Trust Signals</span>
+            </div>
+            <div class="border-l-2 border-dashed border-slate-700 ml-3 h-2"></div>
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">4</span>
+              <span class="text-sm text-slate-300">Trust Engine computes score → Tier promotion</span>
+            </div>
+            <div class="border-l-2 border-dashed border-slate-700 ml-3 h-2"></div>
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">5</span>
+              <span class="text-sm text-slate-300">Graduation → T0 → T1 transition</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Governance Pipeline -->
+        <div class="bg-slate-900/60 rounded-lg p-5 border border-slate-600">
+          <h3 class="font-semibold text-blue-400 mb-4">Governance Pipeline</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">1</span>
+              <span class="text-sm text-slate-300">Agent submits action request (Intent)</span>
+            </div>
+            <div class="border-l-2 border-dashed border-slate-700 ml-3 h-2"></div>
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">2</span>
+              <span class="text-sm text-slate-300">Governance Engine evaluates against rules</span>
+            </div>
+            <div class="border-l-2 border-dashed border-slate-700 ml-3 h-2"></div>
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">3</span>
+              <span class="text-sm text-slate-300">Decision: approve / escalate / block</span>
+            </div>
+            <div class="border-l-2 border-dashed border-slate-700 ml-3 h-2"></div>
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">4</span>
+              <span class="text-sm text-slate-300">Proof Bridge creates signed record</span>
+            </div>
+            <div class="border-l-2 border-dashed border-slate-700 ml-3 h-2"></div>
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">5</span>
+              <span class="text-sm text-slate-300">Proof Chain — hash-linked, verifiable audit trail</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technology Stack -->
+    <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+      <h2 class="text-xl font-bold mb-4">Technology Stack</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+          <p class="text-sm font-semibold text-slate-300">Runtime</p>
+          <p class="text-xs text-slate-500 mt-1">Node.js + TypeScript</p>
+        </div>
+        <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+          <p class="text-sm font-semibold text-slate-300">Database</p>
+          <p class="text-xs text-slate-500 mt-1">PostgreSQL (Neon) + Drizzle ORM</p>
+        </div>
+        <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+          <p class="text-sm font-semibold text-slate-300">API</p>
+          <p class="text-xs text-slate-500 mt-1">Fastify + REST</p>
+        </div>
+        <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+          <p class="text-sm font-semibold text-slate-300">Edge</p>
+          <p class="text-xs text-slate-500 mt-1">Cloudflare Workers + KV + Astro</p>
+        </div>
+        <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+          <p class="text-sm font-semibold text-slate-300">Monorepo</p>
+          <p class="text-xs text-slate-500 mt-1">Turborepo + npm workspaces</p>
+        </div>
+        <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+          <p class="text-sm font-semibold text-slate-300">Auth</p>
+          <p class="text-xs text-slate-500 mt-1">TOTP MFA + PIV/CAC + HSM</p>
+        </div>
+        <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+          <p class="text-sm font-semibold text-slate-300">Testing</p>
+          <p class="text-xs text-slate-500 mt-1">Vitest (4,665+ tests)</p>
+        </div>
+        <div class="text-center p-4 bg-slate-900/50 rounded-lg">
+          <p class="text-sm font-semibold text-slate-300">CI/CD</p>
+          <p class="text-xs text-slate-500 mt-1">GitHub Actions + Wrangler</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>

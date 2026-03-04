@@ -450,7 +450,7 @@ Full platform documentation is available at [https://vorion.org/docs](https://vo
 
 ## Repository
 
-This package is part of the [Vorion monorepo](https://github.com/vorionsys/vorion) at [`packages/basis`](https://github.com/vorionsys/vorion/tree/master/packages/basis).
+This package is part of the [Vorion monorepo](https://github.com/voriongit/vorion) at [`packages/basis`](https://github.com/voriongit/vorion/tree/master/packages/basis).
 
 ## License
 

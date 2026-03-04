@@ -1,0 +1,121 @@
+---
+import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import IntentRouter from '../components/IntentRouter.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title,
+  description = 'Vorion - Mission Control for AI Agents. Certify, monitor, and govern autonomous agents across every environment.',
+  image = '/og-image.png',
+  type = 'website'
+} = Astro.props;
+
+const siteUrl = 'https://vorion.org';
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+const ogImageURL = new URL(image, siteUrl);
+const fullTitle = title === 'Home' ? 'Vorion - Mission Control for AI Agents' : `${title} | Vorion`;
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Vorion',
+  description: 'Mission Control for AI Agents. Certify, monitor, and govern autonomous agents across every environment.',
+  url: 'https://vorion.org',
+  logo: 'https://vorion.org/favicon.svg',
+  sameAs: [
+    'https://github.com/vorionsys',
+    'https://basis.vorion.org',
+    'https://discord.gg/basis-protocol',
+    'https://x.com/BASISprotocol'
+  ],
+  founder: {
+    '@type': 'Organization',
+    name: 'Vorion'
+  }
+};
+---
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{fullTitle}</title>
+    <meta name="title" content={fullTitle} />
+    <meta name="description" content={description} />
+    <meta name="keywords" content="AI governance, AI trust, AI compliance, autonomous agents, AI oversight, BASIS standard, trust scoring, AI safety, agentic AI, human-in-the-loop" />
+    <meta name="author" content="Vorion" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:site_name" content="Vorion" />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <Analytics />
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+    <div class="flex flex-col min-h-screen">
+      <Nav />
+      <main class="flex-grow">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+    <IntentRouter />
+  </body>
+</html>
+
+<style is:global>
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background-color: rgba(99, 102, 241, 0.3);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #020617;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+</style>

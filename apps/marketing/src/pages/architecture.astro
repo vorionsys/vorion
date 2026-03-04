@@ -1,0 +1,321 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Architecture" description="Technical architecture of Vorion Mission Control for AI Agents">
+  <section class="py-16 sm:py-20">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="max-w-3xl mb-12">
+        <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">Architecture</h1>
+        <p class="text-lg text-slate-400 leading-relaxed">
+          The technical architecture powering AI governance at scale.
+          From trust scoring algorithms to policy enforcement pipelines.
+        </p>
+      </div>
+
+      <!-- Platform Overview -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Platform Overview</h2>
+        <div class="rounded-xl bg-slate-900 border border-slate-800 p-6 font-mono text-sm overflow-x-auto">
+          <pre class="text-slate-400">
+┌─────────────────────────────────────────────────────────────────────┐
+│                        VORION PLATFORM                               │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   USER INTERFACES                                                    │
+│   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐            │
+│   │ AgentAnchor  │   │    Aurais    │   │    Learn     │            │
+│   │  Dashboard   │   │  Assistant   │   │   Vorion     │            │
+│   └──────┬───────┘   └──────┬───────┘   └──────┬───────┘            │
+│          │                  │                  │                     │
+│   ═══════╪══════════════════╪══════════════════╪═════════════════   │
+│          │           API GATEWAY               │                     │
+│   ═══════╪══════════════════╪══════════════════╪═════════════════   │
+│          │                  │                  │                     │
+│   ┌──────▼──────────────────▼──────────────────▼──────────────────┐ │
+│   │                    COGNIGATE RUNTIME                           │ │
+│   │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │ │
+│   │  │   Policy    │  │   Intent    │  │ Enforcement │            │ │
+│   │  │  Evaluator  │  │  Processor  │  │   Engine    │            │ │
+│   │  └─────────────┘  └─────────────┘  └─────────────┘            │ │
+│   └────────────────────────┬───────────────────────────────────────┘ │
+│                            │                                         │
+│   ┌────────────────────────▼───────────────────────────────────────┐ │
+│   │                     ATSF CORE RUNTIME                          │ │
+│   │                                                                 │ │
+│   │  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐   │ │
+│   │  │   Trust   │  │   BASIS   │  │   Proof   │  │ Governance│   │ │
+│   │  │  Engine   │  │  Evaluator│  │   Plane   │  │  Engine   │   │ │
+│   │  └───────────┘  └───────────┘  └───────────┘  └───────────┘   │ │
+│   │                                                                 │ │
+│   │  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐   │ │
+│   │  │Arbitration│  │Containment│  │ Contracts │  │ Provenance│   │ │
+│   │  │  Engine   │  │  System   │  │  (Zod)    │  │  Tracker  │   │ │
+│   │  └───────────┘  └───────────┘  └───────────┘  └───────────┘   │ │
+│   └────────────────────────────────────────────────────────────────┘ │
+│                                                                      │
+│   ┌────────────────────────────────────────────────────────────────┐ │
+│   │                    PERSISTENCE LAYER                            │ │
+│   │  ┌───────────┐  ┌───────────┐  ┌───────────┐                   │ │
+│   │  │  Memory   │  │   File    │  │  Supabase │                   │ │
+│   │  │  Adapter  │  │  Adapter  │  │  Adapter  │                   │ │
+│   │  └───────────┘  └───────────┘  └───────────┘                   │ │
+│   └────────────────────────────────────────────────────────────────┘ │
+│                                                                      │
+│   ┌────────────────────────────────────────────────────────────────┐ │
+│   │                     BASIS STANDARD                              │ │
+│   │           8-Tier Trust Model (T0-T7) Specification v1.0.0       │ │
+│   └────────────────────────────────────────────────────────────────┘ │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘</pre>
+        </div>
+      </section>
+
+      <!-- Three Layers -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">The Three Governance Layers</h2>
+        <p class="text-slate-400 mb-6">
+          Every AI action flows through three governance layers before and after execution:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-xl bg-gradient-to-br from-vorion-500/10 to-transparent border border-slate-800">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-vorion-500/20 flex items-center justify-center text-vorion-400 font-mono text-sm font-bold">1</div>
+              <h3 class="font-semibold text-white">Intent Layer</h3>
+            </div>
+            <p class="text-sm text-slate-400 mb-3">
+              Parses agent requests, classifies action types, surfaces risks, and structures intents for policy evaluation.
+            </p>
+            <ul class="text-xs text-slate-500 space-y-1">
+              <li>Risk classification (LOW to CRITICAL)</li>
+              <li>Prompt injection detection</li>
+              <li>IntentRecord schema validation</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-slate-800">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-mono text-sm font-bold">2</div>
+              <h3 class="font-semibold text-white">Enforce Layer</h3>
+            </div>
+            <p class="text-sm text-slate-400 mb-3">
+              Evaluates trust levels, applies policy rules, and makes ALLOW/DENY/ESCALATE decisions.
+            </p>
+            <ul class="text-xs text-slate-500 space-y-1">
+              <li>Trust tier verification</li>
+              <li>Policy evaluation order</li>
+              <li>Human escalation triggers</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-xl bg-gradient-to-br from-amber-500/10 to-transparent border border-slate-800">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400 font-mono text-sm font-bold">3</div>
+              <h3 class="font-semibold text-white">Proof Layer</h3>
+            </div>
+            <p class="text-sm text-slate-400 mb-3">
+              Creates immutable audit trails with cryptographic hash chains for compliance and accountability.
+            </p>
+            <ul class="text-xs text-slate-500 space-y-1">
+              <li>SHA-256 hash chains</li>
+              <li>7-10 year retention</li>
+              <li>Tamper-evident storage</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Trust Calculation -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Trust Score Calculation</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-white mb-4">Component Weights</h3>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Behavioral</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div class="w-[40%] h-full bg-vorion-500"></div>
+                  </div>
+                  <span class="text-sm text-white font-mono">40%</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Compliance</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div class="w-[25%] h-full bg-emerald-500"></div>
+                  </div>
+                  <span class="text-sm text-white font-mono">25%</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Identity</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div class="w-[20%] h-full bg-amber-500"></div>
+                  </div>
+                  <span class="text-sm text-white font-mono">20%</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Context</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div class="w-[15%] h-full bg-rose-500"></div>
+                  </div>
+                  <span class="text-sm text-white font-mono">15%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-white mb-4">Signal Processing</h3>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-400">•</span>
+                Time-weighted averaging with 7-day half-life
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-400">•</span>
+                Recent signals weighted more heavily
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-400">•</span>
+                Last 1000 signals retained per entity
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-400">•</span>
+                Significant change threshold: 10 points
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Formula -->
+        <div class="p-6 rounded-xl bg-slate-900 border border-slate-800">
+          <h3 class="font-semibold text-white mb-4">Trust Score Formula</h3>
+          <pre class="text-slate-300 text-sm overflow-x-auto"><code>score = round(
+  behavioral × 0.40 × 1000 +
+  compliance × 0.25 × 1000 +
+  identity   × 0.20 × 1000 +
+  context    × 0.15 × 1000
+)
+
+// Clamped to 0-1000 range
+// Each component normalized to 0.0-1.0</code></pre>
+        </div>
+      </section>
+
+      <!-- Trust Levels -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">8-Tier Trust Model (T0-T7)</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="px-4 py-3 text-left text-slate-400 font-medium">Tier</th>
+                <th class="px-4 py-3 text-left text-slate-400 font-medium">Name</th>
+                <th class="px-4 py-3 text-left text-slate-400 font-medium">Score Range</th>
+                <th class="px-4 py-3 text-left text-slate-400 font-medium">Capabilities</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+              <tr>
+                <td class="px-4 py-4"><span class="px-2 py-1 rounded bg-stone-500 text-white font-mono">T0</span></td>
+                <td class="px-4 py-4 text-white">Sandbox</td>
+                <td class="px-4 py-4 text-slate-400 font-mono">0-199</td>
+                <td class="px-4 py-4 text-slate-400">Isolated, no external access, observation only</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-4"><span class="px-2 py-1 rounded bg-red-500 text-white font-mono">T1</span></td>
+                <td class="px-4 py-4 text-white">Observed</td>
+                <td class="px-4 py-4 text-slate-400 font-mono">200-349</td>
+                <td class="px-4 py-4 text-slate-400">Read-only, sandboxed execution, monitored</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-4"><span class="px-2 py-1 rounded bg-orange-500 text-white font-mono">T2</span></td>
+                <td class="px-4 py-4 text-white">Provisional</td>
+                <td class="px-4 py-4 text-slate-400 font-mono">350-499</td>
+                <td class="px-4 py-4 text-slate-400">Basic operations, heavy supervision</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-4"><span class="px-2 py-1 rounded bg-yellow-500 text-black font-mono">T3</span></td>
+                <td class="px-4 py-4 text-white">Monitored</td>
+                <td class="px-4 py-4 text-slate-400 font-mono">500-649</td>
+                <td class="px-4 py-4 text-slate-400">Standard operations with continuous monitoring</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-4"><span class="px-2 py-1 rounded bg-green-500 text-white font-mono">T4</span></td>
+                <td class="px-4 py-4 text-white">Standard</td>
+                <td class="px-4 py-4 text-slate-400 font-mono">650-799</td>
+                <td class="px-4 py-4 text-slate-400">External API access, policy-governed</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-4"><span class="px-2 py-1 rounded bg-blue-500 text-white font-mono">T5</span></td>
+                <td class="px-4 py-4 text-white">Trusted</td>
+                <td class="px-4 py-4 text-slate-400 font-mono">800-875</td>
+                <td class="px-4 py-4 text-slate-400">Cross-agent communication, delegated tasks</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-4"><span class="px-2 py-1 rounded bg-violet-500 text-white font-mono">T6</span></td>
+                <td class="px-4 py-4 text-white">Certified</td>
+                <td class="px-4 py-4 text-slate-400 font-mono">876-950</td>
+                <td class="px-4 py-4 text-slate-400">Admin tasks, agent spawning, minimal oversight</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-4"><span class="px-2 py-1 rounded bg-cyan-500 text-white font-mono">T7</span></td>
+                <td class="px-4 py-4 text-white">Autonomous</td>
+                <td class="px-4 py-4 text-slate-400 font-mono">951-1000</td>
+                <td class="px-4 py-4 text-slate-400">Full autonomy, self-governance, strategic only</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Decay and Recovery -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Decay & Recovery</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-rose-400 mb-4">Trust Decay</h3>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li>• Base decay rate: 1% per interval</li>
+              <li>• Decay interval: 60 seconds</li>
+              <li>• Failure threshold: signal value &lt; 0.3</li>
+              <li>• Accelerated decay: 3x after 2+ failures in 1 hour</li>
+              <li>• Decay formula: <code class="text-rose-400">score × (1 - rate)^periods</code></li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-emerald-400 mb-4">Trust Recovery</h3>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li>• Success threshold: signal value ≥ 0.7</li>
+              <li>• Base recovery rate: 2% per success</li>
+              <li>• Accelerated recovery: 1.5x after 3 consecutive successes</li>
+              <li>• Max recovery per signal: 50 points</li>
+              <li>• Peak score tracking for milestone events</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Related -->
+      <section>
+        <h2 class="text-2xl font-bold text-white mb-4">Deep Dive</h2>
+        <div class="flex flex-wrap gap-4">
+          <a href="/projects/basis" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+            BASIS Standard
+          </a>
+          <a href="/projects/atsf" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+            ATSF Framework
+          </a>
+          <a href="/packages#atsf-core" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+            Implementation Details
+          </a>
+        </div>
+      </section>
+    </div>
+  </section>
+</BaseLayout>

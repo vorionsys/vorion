@@ -40,15 +40,20 @@ export type EvidenceType =
  *
  * These multipliers solve the 1000-event cold-start problem by giving
  * HITL approvals significantly more weight than automated observations.
+ *
+ * IMPORTANT: Multipliers > 1.0 are only applied to POSITIVE evidence.
+ * Negative evidence is never amplified by these multipliers — the tier-scaled
+ * penalty formula (7-10x) is the sole mechanism for negative amplification.
+ * hitl_rejection is listed as 1.0 to make this explicit.
  */
 export const EVIDENCE_TYPE_MULTIPLIERS: Record<EvidenceType, number> = {
   automated: 1.0,
-  hitl_approval: 5.0,    // HITL approval = 5 automated observations
-  hitl_rejection: 5.0,   // HITL rejection impact is also amplified
-  examination: 3.0,      // Formal exams count more
-  audit: 3.0,            // Audits are authoritative
+  hitl_approval: 5.0,    // HITL approval = 5 automated observations (positive only)
+  hitl_rejection: 1.0,   // No extra amplification — tier penalty formula handles negatives
+  examination: 3.0,      // Formal exams count more (positive findings only)
+  audit: 3.0,            // Audits are authoritative (positive findings only)
   sandbox_test: 0.5,     // Sandbox/testnet observations count less (unverified)
-  peer_review: 2.0,      // Cross-agent reviews have moderate weight
+  peer_review: 2.0,      // Cross-agent reviews have moderate weight (positive only)
 };
 
 /**
@@ -232,7 +237,12 @@ export const RISK_PROFILE_WINDOWS: Record<RiskProfile, number> = {
 
 /**
  * Configuration for asymmetric trust dynamics
- * Per ATSF v2.0: "Trust is hard to gain, easy to lose" (10:1 ratio)
+ * Per ATSF v2.0: "Trust is hard to gain, easy to lose" (7-10x ratio, tier-scaled)
+ *
+ * Failure penalty scales linearly from penaltyRatioMin at T0 (Sandbox) to
+ * penaltyRatioMax at T7 (Autonomous). This allows early-stage agents room to
+ * grow while applying strict accountability at higher tiers. A single penalty
+ * mechanism is used — stacking separate penalties is prohibited (double jeopardy).
  */
 export interface TrustDynamicsConfig {
   /**
@@ -243,11 +253,18 @@ export interface TrustDynamicsConfig {
   gainRate: number;
 
   /**
-   * Exponential loss rate for negative evidence
-   * Trust loss formula: delta = -lossRate * current
-   * Default: 0.10 (10x faster than gain)
+   * Minimum failure penalty ratio, applied at T0 (Sandbox)
+   * Effective loss rate = gainRate * penaltyRatioMin
+   * Default: 7 (7x gainRate — lenient for new/recovering agents)
    */
-  lossRate: number;
+  penaltyRatioMin: number;
+
+  /**
+   * Maximum failure penalty ratio, applied at T7 (Autonomous)
+   * Effective loss rate = gainRate * penaltyRatioMax
+   * Default: 10 (10x gainRate — strict for highest-trust agents)
+   */
+  penaltyRatioMax: number;
 
   /**
    * Cooldown period in hours after any trust drop
@@ -270,28 +287,36 @@ export interface TrustDynamicsConfig {
   oscillationWindowHours: number;
 
   /**
-   * Penalty multiplier for outcome reversals
-   * When provisional success becomes final failure
-   * Default: 2.0 (2x normal failure penalty)
-   */
-  reversalPenaltyMultiplier: number;
-
-  /**
    * Minimum trust score threshold for circuit breaker trigger
    * Default: 100 (trust < 100 on 0-1000 scale triggers circuit breaker)
    */
   circuitBreakerThreshold: number;
+
+  /**
+   * Number of failures with the same methodology key within the window
+   * required to trip the circuit breaker.
+   * Default: 3
+   */
+  methodologyFailureThreshold: number;
+
+  /**
+   * Rolling time window in hours for methodology failure detection.
+   * Default: 72 hours (3 days)
+   */
+  methodologyWindowHours: number;
 }
 
 /** Default trust dynamics configuration per ATSF v2.0 */
 export const DEFAULT_TRUST_DYNAMICS: TrustDynamicsConfig = {
   gainRate: 0.01,                    // Logarithmic gain (slow)
-  lossRate: 0.10,                    // Exponential loss (10x faster)
+  penaltyRatioMin: 7,                // T0 loss = 7x gainRate (early-stage leniency)
+  penaltyRatioMax: 10,               // T7 loss = 10x gainRate (strict at full autonomy)
   cooldownHours: 168,                // 7 days after any drop
   oscillationThreshold: 3,           // 3 direction changes triggers alert
   oscillationWindowHours: 24,        // Within 24 hours
-  reversalPenaltyMultiplier: 2.0,    // 2x penalty for reversals
   circuitBreakerThreshold: 100,      // Trust < 100 (on 0-1000 scale) triggers circuit breaker
+  methodologyFailureThreshold: 3,    // 3 same-methodology failures → circuit breaker
+  methodologyWindowHours: 72,        // Within 72 hours (3 days)
 };
 
 /**
@@ -340,6 +365,11 @@ export interface TrustDynamicsState {
   circuitBreakerReason?: string;
   /** When circuit breaker was tripped */
   circuitBreakerTrippedAt?: Date;
+  /**
+   * Recent failure timestamps keyed by methodology key.
+   * Used to detect repeated failures with the same approach.
+   */
+  methodologyFailures: Record<string, Date[]>;
 }
 
 /**

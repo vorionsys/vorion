@@ -155,12 +155,5 @@ export type {
   ProviderExecutor,
 } from './routing/orchestrator.js'
 
-// Degraded-mode metrics
-export {
-  DegradedTracker,
-  degradedTracker,
-} from "./metrics/degraded-tracker.js";
-export type { DegradedMetrics } from "./metrics/degraded-tracker.js";
-
 // Enterprise bundle
 export { createEnterpriseRouting } from './routing/index.js'

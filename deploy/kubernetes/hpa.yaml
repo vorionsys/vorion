@@ -1,0 +1,118 @@
+---
+# Vorion API Horizontal Pod Autoscaler
+# Automatically scales pods based on CPU, memory, and custom metrics
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: vorion-api
+  namespace: vorion
+  labels:
+    app.kubernetes.io/name: vorion
+    app.kubernetes.io/component: hpa
+    app.kubernetes.io/part-of: vorion
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vorion-api
+
+  # Replica bounds
+  minReplicas: 3
+  maxReplicas: 20
+
+  # Scaling metrics
+  metrics:
+    # CPU-based scaling
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+    # Custom metric: requests per second (requires metrics-server + prometheus-adapter)
+    # - type: Pods
+    #   pods:
+    #     metric:
+    #       name: http_requests_per_second
+    #     target:
+    #       type: AverageValue
+    #       averageValue: "1000"
+
+    # Custom metric: request latency p99 (requires prometheus-adapter)
+    # - type: Pods
+    #   pods:
+    #     metric:
+    #       name: http_request_duration_seconds_p99
+    #     target:
+    #       type: AverageValue
+    #       averageValue: "500m"  # 500ms
+
+  # Scaling behavior
+  behavior:
+    # Scale up behavior
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+      selectPolicy: Max
+
+    # Scale down behavior (more conservative)
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+      selectPolicy: Min
+
+---
+# Vertical Pod Autoscaler (VPA) recommendation mode
+# Requires VPA to be installed in the cluster
+# Use 'Off' mode to get recommendations without auto-scaling
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: vorion-api-vpa
+  namespace: vorion
+  labels:
+    app.kubernetes.io/name: vorion
+    app.kubernetes.io/component: vpa
+    app.kubernetes.io/part-of: vorion
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: vorion-api
+  updatePolicy:
+    # Off = recommendations only, Auto = automatic updates
+    updateMode: "Off"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: vorion-api
+        minAllowed:
+          cpu: 100m
+          memory: 128Mi
+        maxAllowed:
+          cpu: 4
+          memory: 4Gi
+        controlledResources:
+          - cpu
+          - memory
+        controlledValues: RequestsAndLimits

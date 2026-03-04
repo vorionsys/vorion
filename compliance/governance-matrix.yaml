@@ -1,0 +1,43 @@
+governance:
+  frameworks:
+    nist_800_53:
+      version: "rev5"
+      controls_mapping: "./compliance/nist/controls.yaml"
+      evidence_collection: "automated"
+      audit_trail: "required"
+    soc2_type2:
+      trust_principles:
+        - "security"
+        - "availability"
+        - "confidentiality"
+      evidence_retention: "12_months"
+      continuous_monitoring: "enabled"
+    gdpr:
+      data_classification: "required"
+      privacy_by_design: "enforced"
+      breach_notification: "automated"
+      dpo_contact: "./compliance/gdpr/dpo.yaml"
+    iso27001:
+      isms_integration: true
+      risk_assessment: "quarterly"
+      incident_response: "./compliance/iso/ir-plan.yaml"
+    fedramp:
+      impact_level: "moderate"
+      continuous_monitoring: "fisma"
+      authorization_boundary: "./compliance/fedramp/boundary.yaml"
+    cmmc:
+      level: 2
+      practice_domains: "all"
+      assessment_scope: "./compliance/cmmc/scope.yaml"
+  cross_cutting:
+    evidence_automation:
+      - "audit_logs"
+      - "access_reviews"
+      - "vulnerability_scans"
+      - "penetration_tests"
+      - "code_reviews"
+    policy_enforcement:
+      - "pre_commit_hooks"
+      - "ci_cd_gates"
+      - "runtime_validation"
+      - "deployment_checks"

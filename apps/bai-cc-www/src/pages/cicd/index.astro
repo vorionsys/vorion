@@ -1,0 +1,225 @@
+---
+export const prerender = false;
+
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import MetricCard from '../../components/dashboard/MetricCard.astro';
+import StatusBadge from '../../components/dashboard/StatusBadge.astro';
+import WorkflowCard from '../../components/dashboard/WorkflowCard.astro';
+import RefreshIndicator from '../../components/dashboard/RefreshIndicator.astro';
+
+import { cached } from '../../lib/cache.js';
+import { fetchCiStatus } from '../../lib/fetchers/github-ci.js';
+import { fetchGithubStats } from '../../lib/fetchers/github-stats.js';
+import type { CiStatusResponse, GithubStatsResponse } from '../../lib/types.js';
+
+// ---------------------------------------------------------------------------
+// Server-side data fetching
+// ---------------------------------------------------------------------------
+let ci: CiStatusResponse | null = null;
+let github: GithubStatsResponse | null = null;
+let fetchError: string | null = null;
+
+try {
+  [ci, github] = await Promise.all([
+    cached<CiStatusResponse>('page:ci', 60, fetchCiStatus),
+    cached<GithubStatsResponse>('page:github', 120, fetchGithubStats),
+  ]);
+} catch (err) {
+  fetchError = err instanceof Error ? err.message : 'Unknown error fetching CI/CD data';
+  console.error('[cicd] Data fetch error:', fetchError);
+}
+
+// ---------------------------------------------------------------------------
+// Computed values
+// ---------------------------------------------------------------------------
+const summary = ci?.summary ?? { total: 0, passing: 0, failing: 0, pending: 0 };
+const workflows = ci?.workflows ?? [];
+const recentCommits = (github?.commits.recent ?? []).slice(0, 20);
+const openPRs = (github?.pullRequests.recent ?? []).filter((pr) => pr.state === 'open');
+
+// Metric card statuses
+const passingStatus: 'healthy' | 'warning' | 'critical' =
+  summary.passing === summary.total ? 'healthy' : summary.passing >= summary.total * 0.5 ? 'warning' : 'critical';
+const failingStatus: 'healthy' | 'warning' | 'critical' =
+  summary.failing === 0 ? 'healthy' : summary.failing <= 1 ? 'warning' : 'critical';
+const pendingStatus: 'healthy' | 'warning' | 'critical' =
+  summary.pending === 0 ? 'healthy' : 'warning';
+
+// Helper: format relative time
+function formatRelativeTime(dateStr: string): string {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHour < 24) return `${diffHour}h ago`;
+  if (diffDay < 30) return `${diffDay}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+---
+
+<DashboardLayout title="CI/CD" description="CI/CD pipeline status and GitHub activity">
+  {/* Error Banner */}
+  {fetchError && (
+    <div class="mb-6 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+      <strong>Data fetch error:</strong> {fetchError}. CI/CD data may be stale or unavailable.
+    </div>
+  )}
+
+  {/* Page Header */}
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">CI/CD Pipeline</h1>
+      <p class="text-sm text-slate-400 mt-1">GitHub Actions workflows and repository activity</p>
+    </div>
+    <RefreshIndicator interval={120} />
+  </div>
+
+  {/* Summary Metrics */}
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+    <MetricCard
+      label="Total Workflows"
+      value={summary.total}
+      subtext="monitored"
+    />
+    <MetricCard
+      label="Passing"
+      value={summary.passing}
+      subtext="workflows"
+      status={passingStatus}
+    />
+    <MetricCard
+      label="Failing"
+      value={summary.failing}
+      subtext="workflows"
+      status={failingStatus}
+    />
+    <MetricCard
+      label="Pending"
+      value={summary.pending}
+      subtext="in progress"
+      status={pendingStatus}
+    />
+    <MetricCard
+      label="Commits (7d)"
+      value={github?.commits.count7d ?? 0}
+      subtext="last 7 days"
+    />
+  </div>
+
+  {/* Workflow Grid */}
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">Workflows</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {workflows.map((w) => (
+        <WorkflowCard
+          name={w.name}
+          description={w.description}
+          status={w.status}
+          runUrl={w.runUrl}
+          updatedAt={w.updatedAt}
+          durationSeconds={w.durationSeconds}
+        />
+      ))}
+      {workflows.length === 0 && (
+        <p class="text-sm text-slate-500 col-span-full">No workflow data available.</p>
+      )}
+    </div>
+  </section>
+
+  {/* Recent Commits */}
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">Recent Commits</h2>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+      {/* Table Header */}
+      <div class="grid grid-cols-12 gap-4 items-center py-2 px-4 text-xs text-slate-500 font-medium border-b border-slate-800">
+        <div class="col-span-2 sm:col-span-1">SHA</div>
+        <div class="col-span-5 sm:col-span-7">Message</div>
+        <div class="col-span-2 sm:col-span-2">Author</div>
+        <div class="col-span-3 sm:col-span-2 text-right">Time</div>
+      </div>
+      {recentCommits.length > 0 ? (
+        recentCommits.map((commit) => (
+          <div class="grid grid-cols-12 gap-4 items-center py-3 px-4 hover:bg-slate-800/50 transition-colors border-b border-slate-800/50 last:border-0">
+            <div class="col-span-2 sm:col-span-1">
+              <span class="font-mono text-xs text-vorion-400">{commit.sha}</span>
+            </div>
+            <div class="col-span-5 sm:col-span-7">
+              <span class="text-sm text-slate-300 truncate block" title={commit.message}>{commit.message}</span>
+            </div>
+            <div class="col-span-2 sm:col-span-2">
+              <span class="text-xs text-slate-400">{commit.author}</span>
+            </div>
+            <div class="col-span-3 sm:col-span-2 text-right">
+              <span class="text-xs text-slate-500" title={commit.date}>{commit.date ? formatRelativeTime(commit.date) : '--'}</span>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p class="text-sm text-slate-500 p-4">No recent commits available.</p>
+      )}
+    </div>
+  </section>
+
+  {/* Open Pull Requests */}
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">
+      Open Pull Requests
+      <span class="text-sm font-normal text-slate-500 ml-2">({openPRs.length})</span>
+    </h2>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+      {/* Table Header */}
+      <div class="grid grid-cols-12 gap-4 items-center py-2 px-4 text-xs text-slate-500 font-medium border-b border-slate-800">
+        <div class="col-span-1 sm:col-span-1">#</div>
+        <div class="col-span-6 sm:col-span-7">Title</div>
+        <div class="col-span-2 sm:col-span-2">Author</div>
+        <div class="col-span-3 sm:col-span-2 text-right">Created</div>
+      </div>
+      {openPRs.length > 0 ? (
+        openPRs.map((pr) => (
+          <div class="grid grid-cols-12 gap-4 items-center py-3 px-4 hover:bg-slate-800/50 transition-colors border-b border-slate-800/50 last:border-0">
+            <div class="col-span-1 sm:col-span-1">
+              <span class="font-mono text-xs text-purple-400">#{pr.number}</span>
+            </div>
+            <div class="col-span-6 sm:col-span-7">
+              <span class="text-sm text-slate-300 truncate block" title={pr.title}>{pr.title}</span>
+            </div>
+            <div class="col-span-2 sm:col-span-2">
+              <span class="text-xs text-slate-400">{pr.author}</span>
+            </div>
+            <div class="col-span-3 sm:col-span-2 text-right">
+              <span class="text-xs text-slate-500" title={pr.createdAt}>{formatRelativeTime(pr.createdAt)}</span>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p class="text-sm text-slate-500 p-4">No open pull requests.</p>
+      )}
+    </div>
+  </section>
+</DashboardLayout>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Client-side auto-refresh: polls /api/ci.json every 120s
+  // ---------------------------------------------------------------------------
+  const REFRESH_INTERVAL_MS = 120_000;
+
+  async function refreshCicd() {
+    try {
+      const res = await fetch('/api/ci.json');
+      if (!res.ok) return;
+      // Reload page to reflect new data (tables + workflow cards are complex)
+      window.location.reload();
+    } catch (err) {
+      console.warn('[cicd] Auto-refresh failed:', err);
+    }
+  }
+
+  setInterval(refreshCicd, REFRESH_INTERVAL_MS);
+</script>

@@ -1,137 +1,85 @@
 /**
- * Vorion Quickstart Example
+ * Vorion SDK Quickstart Example
  *
- * Demonstrates the core SDK workflow:
- *   1. Create a Vorion client (local or remote mode)
- *   2. Register an agent with capabilities
- *   3. Submit an intent (request an action)
- *   4. Check the agent's trust score
- *   5. View the proof record (audit trail)
+ * This example demonstrates using the SDK in local mode (in-memory).
+ * Perfect for testing and development without a running cognigate-api.
  *
- * Run:  npx tsx examples/quickstart.ts
+ * Run: npm run quickstart
  */
 
-import { Vorion, createVorion } from '@vorionsys/sdk';
-import type { VorionConfig, AgentOptions, ActionResult, TrustInfo } from '@vorionsys/sdk';
+import { Vorion } from '@vorionsys/sdk';
 
-// ---------------------------------------------------------------------------
-// 1. Create a Vorion client
-// ---------------------------------------------------------------------------
+async function main() {
+  console.log('🚀 Vorion SDK Quickstart\n');
 
-// Local mode -- everything runs in-memory, no API server required.
-// This is ideal for development, testing, and learning the API.
-const vorion = createVorion({ localMode: true });
+  // Create SDK in local mode (default when no apiEndpoint)
+  const vorion = new Vorion({ localMode: true });
 
-// For production, use remote mode pointing at your Cognigate API:
-//
-// const vorion = createVorion({
-//   apiEndpoint: process.env.VORION_API_ENDPOINT ?? 'http://localhost:3000',
-//   apiKey:      process.env.VORION_API_KEY      ?? 'vorion-dev-key-12345',
-// });
+  console.log(`Mode: ${vorion.isLocalMode() ? 'Local (in-memory)' : 'Remote'}\n`);
 
-async function main(): Promise<void> {
-  // -------------------------------------------------------------------------
-  // 2. Health check
-  // -------------------------------------------------------------------------
-  const health = await vorion.healthCheck();
-  console.log('Health check:', health);
-  // => { status: 'healthy', version: 'local' }
-
-  // -------------------------------------------------------------------------
-  // 3. Register an agent
-  // -------------------------------------------------------------------------
-  // Every AI agent that participates in Vorion governance must be registered.
-  // You declare its identity, human-readable name, and the capabilities it
-  // is allowed to request.
+  // Register an AI agent
   const agent = await vorion.registerAgent({
-    agentId: 'invoice-bot-001',
-    name: 'Invoice Processing Bot',
-    capabilities: ['read:documents', 'write:invoices', 'read:finance'],
-    observationTier: 'GRAY_BOX', // default observation level
+    agentId: 'quickstart-agent',
+    name: 'Quickstart Demo Agent',
+    capabilities: ['read:*', 'write:documents'],
   });
 
-  console.log(`\nRegistered agent: ${agent.getName()} (${agent.getId()})`);
-  console.log('Capabilities:', agent.getCapabilities());
+  console.log(`✅ Agent registered: ${agent.getName()} (${agent.getId()})`);
+  console.log(`   Capabilities: ${agent.getCapabilities().join(', ')}\n`);
 
-  // -------------------------------------------------------------------------
-  // 4. Submit an intent (request permission to perform an action)
-  // -------------------------------------------------------------------------
-  // Before performing any action, the agent asks the governance system
-  // whether the action is allowed. The system evaluates trust score,
-  // capabilities, and policy rules, then returns a decision.
-  const readResult: ActionResult = await agent.requestAction({
+  // Check initial trust
+  let trust = await agent.getTrustInfo();
+  console.log(`📊 Initial Trust:`);
+  console.log(`   Score: ${trust.score}/1000`);
+  console.log(`   Tier: T${trust.tierNumber} (${trust.tierName})\n`);
+
+  // Request permission to read a file
+  console.log('📖 Requesting: read documents/report.pdf');
+  const readResult = await agent.requestAction({
     type: 'read',
-    resource: 'documents/quarterly-report.pdf',
+    resource: 'documents/report.pdf',
   });
 
-  console.log('\n--- Action Request: read documents ---');
-  console.log('Allowed:', readResult.allowed);
-  console.log('Decision tier:', readResult.tier);   // GREEN, YELLOW, or RED
-  console.log('Reason:', readResult.reason);
-  console.log('Proof ID:', readResult.proofId);     // unique audit trail ID
-  if (readResult.constraints) {
-    console.log('Constraints:', readResult.constraints);
+  console.log(`   Allowed: ${readResult.allowed}`);
+  console.log(`   Decision: ${readResult.tier}`);
+  console.log(`   Reason: ${readResult.reason}`);
+  console.log(`   Proof ID: ${readResult.proofId}`);
+  if (readResult.constraints?.length) {
+    console.log(`   Constraints: ${readResult.constraints.join(', ')}`);
   }
+  console.log();
 
-  // -------------------------------------------------------------------------
-  // 5. Report the outcome
-  // -------------------------------------------------------------------------
-  // After completing (or failing) an action, report the outcome back.
-  // This feeds the trust scoring system and adjusts the agent's score.
+  // Report success to improve trust
   if (readResult.allowed) {
-    // Simulate successful action completion
     await agent.reportSuccess('read');
-    console.log('\nReported success for "read" action.');
+    console.log('✅ Reported successful action\n');
   }
 
-  // -------------------------------------------------------------------------
-  // 6. Try an action the agent does NOT have capability for
-  // -------------------------------------------------------------------------
-  const deleteResult: ActionResult = await agent.requestAction({
+  // Try an action without capability
+  console.log('🔒 Requesting: delete users/admin (no capability)');
+  const deleteResult = await agent.requestAction({
     type: 'delete',
-    resource: 'finance/records',
+    resource: 'users/admin',
   });
 
-  console.log('\n--- Action Request: delete finance records ---');
-  console.log('Allowed:', deleteResult.allowed);    // false
-  console.log('Reason:', deleteResult.reason);       // "Missing capability: ..."
+  console.log(`   Allowed: ${deleteResult.allowed}`);
+  console.log(`   Decision: ${deleteResult.tier}`);
+  console.log(`   Reason: ${deleteResult.reason}\n`);
 
-  // -------------------------------------------------------------------------
-  // 7. Check the agent's trust score
-  // -------------------------------------------------------------------------
-  const trustInfo: TrustInfo = await agent.getTrustInfo();
+  // Check trust after actions
+  trust = await agent.getTrustInfo();
+  console.log(`📊 Final Trust:`);
+  console.log(`   Score: ${trust.score}/1000`);
+  console.log(`   Tier: T${trust.tierNumber} (${trust.tierName})\n`);
 
-  console.log('\n--- Trust Info ---');
-  console.log('Score:', trustInfo.score, '/ 1000');
-  console.log('Tier:', trustInfo.tierName, `(T${trustInfo.tierNumber})`);
-  console.log('Observation tier:', trustInfo.observationTier);
-
-  // -------------------------------------------------------------------------
-  // 8. View action history (local proof trail)
-  // -------------------------------------------------------------------------
+  // Show action history
   const history = agent.getActionHistory();
+  console.log(`📜 Action History (${history.length} actions):`);
+  history.forEach((h, i) => {
+    console.log(`   ${i + 1}. ${h.action} - ${h.allowed ? '✅' : '❌'}`);
+  });
 
-  console.log('\n--- Action History ---');
-  for (const entry of history) {
-    console.log(
-      `  ${entry.action}: ${entry.allowed ? 'ALLOWED' : 'DENIED'} ` +
-      `at ${new Date(entry.timestamp).toISOString()}`
-    );
-  }
-
-  // -------------------------------------------------------------------------
-  // 9. Retrieve the agent later by ID
-  // -------------------------------------------------------------------------
-  const retrieved = vorion.getAgent('invoice-bot-001');
-  if (retrieved) {
-    console.log('\nRetrieved agent by ID:', retrieved.getName());
-  }
-
-  console.log('\nAll registered agents:', vorion.getAllAgents().map(a => a.getId()));
-  console.log('\nDone. The agent completed the full governance lifecycle.');
+  console.log('\n✨ Quickstart complete!');
 }
 
-main().catch((err) => {
-  console.error('Quickstart failed:', err);
-  process.exit(1);
-});
+main().catch(console.error);

@@ -50,13 +50,13 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vorionsys/vorion.git",
+    "url": "git+https://github.com/voriongit/vorion.git",
     "directory": "packages/sdk"
   },
   "bugs": {
-    "url": "https://github.com/vorionsys/vorion/issues"
+    "url": "https://github.com/voriongit/vorion/issues"
   },
-  "homepage": "https://github.com/vorionsys/vorion/tree/main/packages/sdk#readme",
+  "homepage": "https://github.com/voriongit/vorion/tree/main/packages/sdk#readme",
   "keywords": [
     "ai",
     "agent",

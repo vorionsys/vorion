@@ -4,8 +4,11 @@ import { useState } from 'react';
 import { PenLine, Upload, Cloud, CloudOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useSubmissions, useFirebaseStatus, useLexiconMutations } from '@/lib/supabase-hooks';
+import { useSubmissions, useSupabaseStatus, useLexiconMutations } from '@/lib/supabase-hooks';
 import type { KnowledgeLevel } from '@/types';
+
+// Backwards-compat alias
+const useFirebaseStatus = useSupabaseStatus;
 
 interface NeuralLinkProps {
   onSubmit?: (data: { term: string; definition: string; level: KnowledgeLevel }) => void;
@@ -22,7 +25,7 @@ export function NeuralLink({ onSubmit }: NeuralLinkProps) {
   const [submitMode, setSubmitMode] = useState<SubmitMode>('submission');
   const [success, setSuccess] = useState(false);
 
-  const firebaseStatus = useFirebaseStatus();
+  const connectionStatus = useFirebaseStatus();
   const { submitTerm } = useSubmissions();
   const { addTerm, isSubmitting, submitError, clearError } = useLexiconMutations();
 
@@ -79,7 +82,7 @@ export function NeuralLink({ onSubmit }: NeuralLinkProps) {
           </h2>
 
           {/* Connection Status */}
-          {firebaseStatus.connected ? (
+          {connectionStatus.connected ? (
             <span className="flex items-center gap-1 text-xs text-emerald-500 font-mono">
               <Cloud className="w-3 h-3" />
               CONNECTED
@@ -87,7 +90,7 @@ export function NeuralLink({ onSubmit }: NeuralLinkProps) {
           ) : (
             <span className="flex items-center gap-1 text-xs text-amber-500 font-mono">
               <CloudOff className="w-3 h-3" />
-              {firebaseStatus.configured ? 'OFFLINE' : 'LOCAL MODE'}
+              {connectionStatus.configured ? 'OFFLINE' : 'LOCAL MODE'}
             </span>
           )}
         </div>
@@ -113,7 +116,7 @@ export function NeuralLink({ onSubmit }: NeuralLinkProps) {
         )}
 
         {/* Mode Selector */}
-        {firebaseStatus.connected && (
+        {connectionStatus.connected && (
           <div className="mb-6 flex gap-2">
             <Button
               type="button"
@@ -202,11 +205,11 @@ export function NeuralLink({ onSubmit }: NeuralLinkProps) {
         </form>
 
         <p className="text-xs text-gray-500 mt-4 text-center">
-          {firebaseStatus.connected
+          {connectionStatus.connected
             ? submitMode === 'submission'
               ? 'Terms will be reviewed before appearing in the lexicon.'
               : 'Terms will be added directly to the cloud lexicon.'
-            : 'Enable Firebase to sync terms to the cloud.'}
+            : 'Enable Supabase to sync terms to the cloud.'}
         </p>
       </div>
     </div>

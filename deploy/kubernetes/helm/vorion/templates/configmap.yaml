@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vorion.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vorion.labels" . | nindent 4 }}
+data:
+  DB_HOST: {{ .Values.config.database.host | quote }}
+  DB_PORT: {{ .Values.config.database.port | quote }}
+  DB_NAME: {{ .Values.config.database.name | quote }}
+  DB_SSL_MODE: {{ .Values.config.database.sslMode | quote }}
+  DB_POOL_MIN: {{ .Values.config.database.poolMin | quote }}
+  DB_POOL_MAX: {{ .Values.config.database.poolMax | quote }}
+  REDIS_HOST: {{ .Values.config.redis.host | quote }}
+  REDIS_PORT: {{ .Values.config.redis.port | quote }}
+  REDIS_DB: {{ .Values.config.redis.db | quote }}
+  REDIS_KEY_PREFIX: {{ .Values.config.redis.keyPrefix | quote }}
+  API_VERSION: {{ .Values.config.api.version | quote }}
+  API_PREFIX: {{ .Values.config.api.prefix | quote }}
+  API_REQUEST_TIMEOUT: {{ .Values.config.api.requestTimeout | quote }}
+  API_BODY_SIZE_LIMIT: {{ .Values.config.api.bodySizeLimit | quote }}
+  RATE_LIMIT_WINDOW_MS: {{ .Values.config.rateLimit.windowMs | quote }}
+  RATE_LIMIT_MAX_REQUESTS: {{ .Values.config.rateLimit.maxRequests | quote }}

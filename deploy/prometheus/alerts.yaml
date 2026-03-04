@@ -1,0 +1,404 @@
+# Vorion Prometheus Alert Rules
+# PrometheusRule resource for Kubernetes Prometheus Operator
+#
+# Deployment:
+#   kubectl apply -f deploy/prometheus/alerts.yaml -n monitoring
+#
+# These rules monitor the Vorion platform for:
+# - Infrastructure health (database, Redis, circuit breakers)
+# - Performance metrics (latency, error rates)
+# - Resource utilization (memory, connection pools)
+# - Business metrics (intent approval rates, escalations)
+#
+# Severity levels:
+# - critical: Immediate action required, pages on-call
+# - warning: Needs attention within hours
+# - info: Informational, for awareness
+#
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: vorion-alerts
+  namespace: vorion
+  labels:
+    app: vorion
+    prometheus: vorion
+    role: alert-rules
+spec:
+  groups:
+    # =========================================================================
+    # Infrastructure Alerts
+    # =========================================================================
+    - name: vorion.infrastructure
+      interval: 30s
+      rules:
+        # Database Pool Alerts
+        - alert: VorionDatabasePoolHighUtilization
+          expr: vorion_database_pool_utilization > 80
+          for: 5m
+          labels:
+            severity: warning
+            category: infrastructure
+            team: platform
+            component: database
+          annotations:
+            summary: "Database connection pool utilization is high"
+            description: >-
+              The database connection pool is {{ $value | humanize }}% utilized.
+              This may indicate the need to increase pool size or optimize queries.
+              Consider reviewing slow queries and connection usage patterns.
+            runbook_url: "https://runbooks.example.com/vorion/database-pool-high"
+            dashboard_url: "https://grafana.example.com/d/vorion-database"
+
+        - alert: VorionDatabasePoolCritical
+          expr: vorion_database_pool_utilization > 95
+          for: 1m
+          labels:
+            severity: critical
+            category: infrastructure
+            team: platform
+            component: database
+          annotations:
+            summary: "Database connection pool is critically full"
+            description: >-
+              The database connection pool is {{ $value | humanize }}% utilized.
+              New connections may be rejected. Immediate action required.
+            runbook_url: "https://runbooks.example.com/vorion/database-pool-critical"
+
+        - alert: VorionDatabaseConnectionsWaiting
+          expr: vorion_database_pool_waiting > 5
+          for: 2m
+          labels:
+            severity: warning
+            category: infrastructure
+            team: platform
+            component: database
+          annotations:
+            summary: "Clients are waiting for database connections"
+            description: >-
+              {{ $value }} clients are waiting for database connections.
+              This indicates connection starvation and may cause request timeouts.
+            runbook_url: "https://runbooks.example.com/vorion/database-waiting"
+
+        # Redis Alerts
+        - alert: VorionRedisConnectionFailures
+          expr: increase(vorion_redis_connection_errors_total[5m]) > 5
+          for: 1m
+          labels:
+            severity: critical
+            category: infrastructure
+            team: platform
+            component: redis
+          annotations:
+            summary: "Redis connection errors detected"
+            description: >-
+              Redis connection errors are occurring ({{ $value | humanize }} errors in 5m).
+              This may affect caching, rate limiting, and distributed locking.
+              Check Redis server health and network connectivity.
+            runbook_url: "https://runbooks.example.com/vorion/redis-connection-failures"
+
+        - alert: VorionRedisUnhealthy
+          expr: vorion_redis_connections_active == 0
+          for: 1m
+          labels:
+            severity: critical
+            category: infrastructure
+            team: platform
+            component: redis
+          annotations:
+            summary: "Redis is unhealthy or unavailable"
+            description: >-
+              Redis health check is failing. This will cause degraded performance
+              and potential failures in caching, rate limiting, and distributed operations.
+            runbook_url: "https://runbooks.example.com/vorion/redis-unhealthy"
+
+        # Circuit Breaker Alerts
+        - alert: VorionCircuitBreakerOpen
+          expr: vorion_circuit_breaker_state == 1
+          for: 30s
+          labels:
+            severity: warning
+            category: infrastructure
+            team: platform
+            component: circuit-breaker
+          annotations:
+            summary: "Circuit breaker is open for {{ $labels.service }}"
+            description: >-
+              A circuit breaker has opened for service {{ $labels.service }},
+              indicating repeated failures. Requests are being rejected to prevent
+              cascading failures. Investigate the underlying service health.
+            runbook_url: "https://runbooks.example.com/vorion/circuit-breaker-open"
+
+        - alert: VorionCircuitBreakerStuckOpen
+          expr: vorion_circuit_breaker_state == 1
+          for: 10m
+          labels:
+            severity: critical
+            category: infrastructure
+            team: platform
+            component: circuit-breaker
+          annotations:
+            summary: "Circuit breaker stuck open for {{ $labels.service }}"
+            description: >-
+              Circuit breaker for {{ $labels.service }} has been open for over 10 minutes.
+              This indicates a persistent issue. Manual intervention may be required.
+            runbook_url: "https://runbooks.example.com/vorion/circuit-breaker-stuck"
+
+    # =========================================================================
+    # Performance Alerts
+    # =========================================================================
+    - name: vorion.performance
+      interval: 30s
+      rules:
+        # Request Latency Alerts
+        - alert: VorionHighRequestLatencyP99
+          expr: histogram_quantile(0.99, sum(rate(vorion_api_request_duration_seconds_bucket[5m])) by (le)) > 5
+          for: 5m
+          labels:
+            severity: warning
+            category: performance
+            team: platform
+            component: api
+          annotations:
+            summary: "API request latency P99 is high"
+            description: >-
+              The 99th percentile of API request latency is {{ $value | humanizeDuration }}.
+              This exceeds the 5 second threshold and indicates potential performance issues.
+            runbook_url: "https://runbooks.example.com/vorion/high-latency-p99"
+
+        - alert: VorionCriticalRequestLatencyP99
+          expr: histogram_quantile(0.99, sum(rate(vorion_api_request_duration_seconds_bucket[5m])) by (le)) > 10
+          for: 2m
+          labels:
+            severity: critical
+            category: performance
+            team: platform
+            component: api
+          annotations:
+            summary: "API request latency P99 is critically high"
+            description: >-
+              The 99th percentile of API request latency is {{ $value | humanizeDuration }}.
+              Users are experiencing significant delays. Immediate investigation required.
+            runbook_url: "https://runbooks.example.com/vorion/critical-latency-p99"
+
+        # Error Rate Alerts
+        - alert: VorionHighErrorRate
+          expr: |
+            (
+              sum(rate(vorion_api_requests_total{status_code=~"5.."}[5m]))
+              /
+              sum(rate(vorion_api_requests_total[5m]))
+            ) * 100 > 1
+          for: 5m
+          labels:
+            severity: warning
+            category: performance
+            team: platform
+            component: api
+          annotations:
+            summary: "API error rate exceeds 1%"
+            description: >-
+              The API error rate is {{ $value | humanize }}% of total requests.
+              Review error logs and recent deployments.
+            runbook_url: "https://runbooks.example.com/vorion/high-error-rate"
+
+        - alert: VorionCriticalErrorRate
+          expr: |
+            (
+              sum(rate(vorion_api_requests_total{status_code=~"5.."}[5m]))
+              /
+              sum(rate(vorion_api_requests_total[5m]))
+            ) * 100 > 5
+          for: 2m
+          labels:
+            severity: critical
+            category: performance
+            team: platform
+            component: api
+          annotations:
+            summary: "API error rate exceeds 5%"
+            description: >-
+              The API error rate is {{ $value | humanize }}% of total requests.
+              This is a critical situation requiring immediate attention.
+            runbook_url: "https://runbooks.example.com/vorion/critical-error-rate"
+
+        # Intent Processing Alerts
+        - alert: VorionIntentProcessingSlow
+          expr: histogram_quantile(0.95, sum(rate(vorion_intent_processing_duration_seconds_bucket[5m])) by (le)) > 30
+          for: 5m
+          labels:
+            severity: warning
+            category: performance
+            team: platform
+            component: intent
+          annotations:
+            summary: "Intent processing is slow"
+            description: >-
+              Intent processing time P95 is {{ $value | humanizeDuration }}.
+              This exceeds the 30 second threshold and may affect user experience.
+            runbook_url: "https://runbooks.example.com/vorion/intent-processing-slow"
+
+    # =========================================================================
+    # Resource Alerts
+    # =========================================================================
+    - name: vorion.resources
+      interval: 30s
+      rules:
+        # Memory Alerts
+        - alert: VorionHighMemoryUsage
+          expr: |
+            (vorion_memory_usage_bytes{type="heap_used"} / vorion_memory_usage_bytes{type="heap_total"}) * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+            category: resource
+            team: platform
+            component: memory
+          annotations:
+            summary: "Memory usage exceeds 85%"
+            description: >-
+              Heap memory usage is {{ $value | humanize }}%.
+              This may lead to increased garbage collection and potential OOM errors.
+            runbook_url: "https://runbooks.example.com/vorion/high-memory-usage"
+
+        - alert: VorionCriticalMemoryUsage
+          expr: |
+            (vorion_memory_usage_bytes{type="heap_used"} / vorion_memory_usage_bytes{type="heap_total"}) * 100 > 95
+          for: 1m
+          labels:
+            severity: critical
+            category: resource
+            team: platform
+            component: memory
+          annotations:
+            summary: "Memory usage exceeds 95%"
+            description: >-
+              Heap memory usage is {{ $value | humanize }}%.
+              OOM errors are imminent. Immediate action required.
+            runbook_url: "https://runbooks.example.com/vorion/critical-memory-usage"
+
+    # =========================================================================
+    # Business Metrics Alerts
+    # =========================================================================
+    - name: vorion.business
+      interval: 1m
+      rules:
+        # Intent Approval Rate
+        - alert: VorionIntentApprovalRateDrop
+          expr: |
+            (
+              sum(rate(vorion_intent_submissions_total{status="approved"}[1h]))
+              /
+              sum(rate(vorion_intent_submissions_total[1h]))
+            ) < 0.8 * avg_over_time(
+              (
+                sum(rate(vorion_intent_submissions_total{status="approved"}[1h]))
+                /
+                sum(rate(vorion_intent_submissions_total[1h]))
+              )[24h:1h]
+            )
+          for: 15m
+          labels:
+            severity: warning
+            category: business
+            team: product
+            component: intent
+          annotations:
+            summary: "Intent approval rate has dropped significantly"
+            description: >-
+              The intent approval rate has dropped by more than 20% compared to the 24h baseline.
+              This may indicate policy issues, trust score problems, or system malfunction.
+            runbook_url: "https://runbooks.example.com/vorion/approval-rate-drop"
+
+        # Escalation Alerts
+        - alert: VorionEscalationBacklog
+          expr: vorion_pending_escalations > 50
+          for: 30m
+          labels:
+            severity: warning
+            category: business
+            team: operations
+            component: escalation
+          annotations:
+            summary: "Escalation backlog is growing"
+            description: >-
+              There are {{ $value }} pending escalations.
+              This may indicate understaffing or process issues.
+            runbook_url: "https://runbooks.example.com/vorion/escalation-backlog"
+
+        - alert: VorionEscalationSLABreachRisk
+          expr: |
+            histogram_quantile(0.95, sum(rate(vorion_escalation_resolution_time_seconds_bucket[1h])) by (le)) > 3600
+          for: 15m
+          labels:
+            severity: warning
+            category: business
+            team: operations
+            component: escalation
+          annotations:
+            summary: "Escalations at risk of SLA breach"
+            description: >-
+              Escalation resolution time P95 is {{ $value | humanizeDuration }}.
+              Escalations are approaching their SLA timeout.
+            runbook_url: "https://runbooks.example.com/vorion/escalation-sla-risk"
+
+        # Trust Engine Alerts
+        - alert: VorionLowTrustCalculations
+          expr: |
+            rate(vorion_trust_score_calculations_total[5m]) < 0.5 * avg_over_time(rate(vorion_trust_score_calculations_total[5m])[1h:5m])
+          for: 15m
+          labels:
+            severity: info
+            category: business
+            team: platform
+            component: trust-engine
+          annotations:
+            summary: "Trust score calculations have dropped significantly"
+            description: >-
+              The rate of trust score calculations has dropped by more than 50%.
+              This may indicate issues with the trust engine or upstream data.
+            runbook_url: "https://runbooks.example.com/vorion/low-trust-calculations"
+
+    # =========================================================================
+    # SLO-based Alerts (optional, for SLO monitoring)
+    # =========================================================================
+    - name: vorion.slo
+      interval: 1m
+      rules:
+        - alert: VorionAvailabilitySLOAtRisk
+          expr: |
+            (
+              1 - (
+                sum(rate(vorion_api_requests_total{status_code=~"5.."}[6h]))
+                /
+                sum(rate(vorion_api_requests_total[6h]))
+              )
+            ) < 0.999
+          for: 5m
+          labels:
+            severity: warning
+            category: slo
+            team: platform
+            slo: availability
+          annotations:
+            summary: "Availability SLO at risk"
+            description: >-
+              Current availability over 6 hours is {{ $value | humanizePercentage }}.
+              The 99.9% availability SLO is at risk.
+            runbook_url: "https://runbooks.example.com/vorion/availability-slo"
+
+        - alert: VorionLatencySLOAtRisk
+          expr: |
+            histogram_quantile(0.95, sum(rate(vorion_api_request_duration_seconds_bucket[6h])) by (le)) > 1
+          for: 5m
+          labels:
+            severity: warning
+            category: slo
+            team: platform
+            slo: latency
+          annotations:
+            summary: "Latency SLO at risk"
+            description: >-
+              P95 latency over 6 hours is {{ $value | humanizeDuration }}.
+              The 1 second P95 latency SLO is at risk.
+            runbook_url: "https://runbooks.example.com/vorion/latency-slo"

@@ -1,0 +1,816 @@
+{
+  "metadata": {
+    "title": "Cognigate NIST SP 800-53 Rev 5 Moderate Baseline - Implementation Descriptions (Part 1)",
+    "description": "Specific implementation descriptions for NIST 800-53 Rev 5 Moderate baseline controls: AC, AU, AT, CA, CM, CP families",
+    "version": "1.0.0",
+    "created": "2026-02-19",
+    "system": "Cognigate Engine (Vorion)",
+    "baseline": "NIST SP 800-53 Rev 5 Moderate (SP 800-53B)",
+    "families_covered": ["AC", "AU", "AT", "CA", "CM", "CP"]
+  },
+  "implementations": {
+    "ac-1": {
+      "title": "Policy and Procedures",
+      "description": "Cognigate implements access control policy through the BASIS Policy Engine (app/core/policy_engine.py), which enforces expression-based constraints across three default policy sets: basis-core-security, basis-data-protection, and basis-risk-thresholds. Policy versioning is maintained through Git-tracked ADR documentation (17 ADRs) and the PolicyEngine.load_policies_from_file() method supports YAML/JSON policy definitions. Access control procedures are enforced at the API boundary through API key authentication on all /v1/* endpoints and X-Admin-Key requirements on administrative endpoints (/v1/admin/*). Policy review and update is triggered by configuration mutations tracked in the PROOF ledger. The policy engine supports programmatic registration (register_policy/unregister_policy), file-based loading, and default policy initialization during application lifespan startup in app/main.py.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides the policy enforcement mechanism and three default BASIS policies. The consumer organization is responsible for defining organization-specific access control policies beyond the default BASIS policy set, establishing review cadence, and maintaining policy documentation."
+    },
+    "ac-2": {
+      "title": "Account Management",
+      "description": "Account management is implemented through the Agent Management system (app/routers/agents.py) via /v1/agents endpoints. Entity registration creates identity records with Ed25519 key pairs (app/core/signatures.py) and assigns initial trust scores based on observation tier: BLACK_BOX (score 100, T0 Sandbox), GRAY_BOX (score 200, T1 Observed), WHITE_BOX (score 350, T2 Provisional). Agent lifecycle operations include registration (POST /v1/agents), listing (GET /v1/agents), detail retrieval (GET /v1/agents/{id}), update (PATCH /v1/agents/{id}), and revocation (DELETE /v1/agents/{id}). Revoked agents are soft-deleted (isRevoked=true) and blocked from further operations. API key management (app/routers/auth_keys.py) provides key creation with SHA-256 hashing (raw keys never stored), listing, and revocation via /v1/auth/keys endpoints. Entity halt functionality via the circuit breaker (app/core/circuit_breaker.py) enables immediate account suspension through /v1/admin/entity/halt and cascade halt for parent-child agent trees via /v1/admin/entity/cascade-halt.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate manages AI agent accounts and API keys with full lifecycle support. The consumer organization is responsible for defining account management policies, provisioning human administrator accounts, and establishing account review schedules."
+    },
+    "ac-2.1": {
+      "title": "Account Management | Automated System Account Management",
+      "description": "Automated account management is implemented through the trust decay system with a 182-day half-life (trust_decay_rate: 0.01 in app/config.py). Agent accounts that do not produce positive trust signals automatically decay toward T0 Sandbox tier. The velocity tracker (app/core/velocity.py) automatically throttles entities exceeding rate limits, and the circuit breaker automatically halts entities exceeding violation thresholds (entity_violation_threshold: 10 in CircuitConfig). Observation ceilings enforce maximum tier caps: BLACK_BOX agents cannot exceed T2, GRAY_BOX cannot exceed T4, limiting privilege accumulation. Trust signal history is maintained per agent via /v1/trust/{agent_id}/history for audit review.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Fully automated through trust decay, velocity tracking, and circuit breaker entity management."
+    },
+    "ac-2.2": {
+      "title": "Account Management | Automated Temporary and Emergency Account Management",
+      "description": "Temporary account management is implemented through agent expiration in the registration system (app/routers/agents.py). Each registered agent receives an expiresAt timestamp (default: 24 hours from admission). Emergency accounts are managed through the circuit breaker's manual halt/reset capabilities (app/routers/admin.py) and trust revocation endpoint (POST /v1/trust/{agent_id}/revoke), which immediately sets trust score to 0 and marks the agent as revoked.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides expiration and emergency revocation mechanisms. Consumer organization must establish procedures for temporary account creation and emergency account protocols."
+    },
+    "ac-2.3": {
+      "title": "Account Management | Disable Accounts",
+      "description": "Account disabling is implemented through multiple mechanisms: (1) Agent revocation via DELETE /v1/agents/{agent_id} sets isRevoked=true, preventing further operations; (2) Entity halt via POST /v1/admin/entity/halt adds the entity to the halted_entities set in the circuit breaker, blocking all requests; (3) Trust revocation via POST /v1/trust/{agent_id}/revoke sets score to 0 and tier to T0_SANDBOX; (4) API key deletion via DELETE /v1/auth/keys/{key_id} permanently removes the authentication credential. Disabled accounts are logged via structlog with entity_halted or admin_entity_halt events.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides multiple disable mechanisms. Consumer organization defines conditions under which accounts are disabled and retention periods."
+    },
+    "ac-2.4": {
+      "title": "Account Management | Automated Audit Actions",
+      "description": "All account management actions are automatically recorded in the PROOF ledger (app/db/proof_repository.py) as immutable, hash-chained records with Ed25519 signatures. The evidence mapper (app/core/evidence_mapper.py) automatically maps TRUST_DELTA events to NIST 800-53 AC-2 compliance evidence. Trust signal recording (POST /v1/trust/{agent_id}/signal) logs every trust adjustment with type, source, weight, delta, context, and timestamp. The circuit breaker logs entity_halted and entity_unhalted events with structlog JSON formatting for SIEM integration.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Fully automated audit logging through the PROOF chain and evidence mapper."
+    },
+    "ac-3": {
+      "title": "Access Enforcement",
+      "description": "Access enforcement is implemented through the ENFORCE layer (app/routers/enforce.py), which is the central policy decision point for all agent actions. Every action request passes through a multi-layer enforcement pipeline: (1) Circuit Breaker check - system-wide halt verification; (2) Velocity Cap check - L0 burst, L1 sustained, L2 hourly/daily rate limits per trust tier; (3) Policy Evaluation via PolicyEngine.evaluate() - expression-based constraint checking against loaded policies. The ENFORCE endpoint (POST /v1/enforce) returns one of four verdicts: allow, deny, escalate, or modify. Critical violations result in immediate denial, high violations trigger escalation requiring human approval, and medium/low violations permit with audit logging. Administrative endpoints are protected by X-Admin-Key authentication with constant-time comparison (secrets.compare_digest) in app/core/auth.py, returning HTTP 401 for missing keys and HTTP 403 for invalid keys.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Cognigate provides comprehensive access enforcement as its core function. Every agent action is subject to policy evaluation before execution."
+    },
+    "ac-4": {
+      "title": "Information Flow Enforcement",
+      "description": "Information flow enforcement is implemented through the capability taxonomy and data classification system. The INTENT layer (app/routers/intent.py) classifies data types involved in each action (pii_email, credentials, pii_ssn) and the ENFORCE layer evaluates data flow constraints through the basis-data-protection policy. The policy constraint 'pii-requires-l2' blocks PII access for entities below T2 Provisional trust level. The constraint 'credentials-audit' requires audit logging for any credential access. CORS middleware in app/main.py controls cross-origin information flows. GZip compression middleware (minimum_size=500) processes all responses uniformly. The gateway proxy (app/routers/gateway.py) enforces information flow boundaries between Cognigate and external AgentAnchor services.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate enforces data classification-based flow controls through policy constraints. Consumer organization defines additional data flow policies specific to their information types."
+    },
+    "ac-5": {
+      "title": "Separation of Duties",
+      "description": "Separation of duties is enforced through the architectural separation of the INTENT, ENFORCE, and PROOF layers. The INTENT layer (app/routers/intent.py) analyzes and normalizes goals but cannot execute them. The ENFORCE layer (app/routers/enforce.py) evaluates policies but does not perform the analyzed actions. The PROOF layer (app/routers/proof.py) records decisions immutably but cannot modify enforcement outcomes. The AI Critic (app/core/critic.py) provides independent adversarial evaluation separate from the planning function (Planner + Critic pattern). Administrative operations require separate X-Admin-Key authentication distinct from agent API keys. Trust signal recording and trust scoring are separated from enforcement decisions.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate enforces architectural separation of duties across its pipeline layers. Consumer organization establishes role-based separation for human administrators."
+    },
+    "ac-6": {
+      "title": "Least Privilege",
+      "description": "Least privilege is enforced through the 8-tier trust model (T0 Sandbox through T7 Autonomous) defined in app/constants_bridge.py. Each trust tier unlocks progressively more capabilities, with lower tiers having strict restrictions. The basis-core-security policy enforces 'no-shell-low-trust' (shell execution requires T3+ Monitored trust level) and 'no-delete-without-approval' (file deletion always requires human approval). Rigor modes (STRICT for T0-T2, STANDARD for T3-T4, LITE for T5-T7) in app/routers/enforce.py apply proportional scrutiny based on trust level. Velocity limits in app/core/velocity.py scale with trust tier (T0: 2 actions/second, T7: 500 actions/second). Observation ceilings (BLACK_BOX: max T2, GRAY_BOX: max T4, WHITE_BOX: max T7) prevent excessive privilege accumulation.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Least privilege is a core architectural principle of Cognigate, enforced through trust tiers, capability gates, velocity caps, and rigor modes."
+    },
+    "ac-6.1": {
+      "title": "Least Privilege | Authorize Access to Security Functions",
+      "description": "Access to security functions is restricted through X-Admin-Key authentication (app/core/auth.py) required on all /v1/admin/* endpoints. Security-critical operations including circuit breaker halt/reset (POST /v1/admin/circuit/halt, /reset), entity halt/unhalt (POST /v1/admin/entity/halt, /unhalt), cascade halt (POST /v1/admin/entity/cascade-halt), velocity throttle/unthrottle (POST /v1/admin/velocity/throttle, /unthrottle), and compliance monitoring triggers (POST /v1/compliance/monitor/trigger) all require admin authentication. The admin API key is configured via the ADMIN_API_KEY environment variable with a production default warning ('CHANGE_ME_IN_PRODUCTION').",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate restricts security function access to authenticated administrators. Consumer organization must configure strong admin API keys and limit key distribution."
+    },
+    "ac-6.2": {
+      "title": "Least Privilege | Non-Privileged Access for Nonsecurity Functions",
+      "description": "Non-security functions are accessible without admin privileges. Public endpoints including /health, /health/live, /ready, /status, /docs, /redoc, and all /v1/compliance/health/* endpoints operate without authentication. Agent operations (/v1/agents, /v1/trust, /v1/intent, /v1/enforce, /v1/proof) use standard API key authentication distinct from admin keys. The optional_admin_key dependency in app/core/auth.py allows endpoints to offer enhanced functionality for admins while providing base functionality for non-privileged users.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Cognigate separates privileged and non-privileged access across all endpoints."
+    },
+    "ac-6.5": {
+      "title": "Least Privilege | Privileged Accounts",
+      "description": "Privileged access is restricted to the X-Admin-Key authentication mechanism (app/core/auth.py). Only holders of the admin API key can execute privileged operations including system halt, entity management, and velocity control. The verify_admin_key dependency uses constant-time comparison (secrets.compare_digest) to prevent timing attacks against the admin key. Failed admin authentication attempts are logged as admin_auth_missing_key or admin_auth_invalid_key events. The admin key is never logged or exposed in API responses.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides a single privileged access mechanism with timing-attack resistance. Consumer organization defines policies for admin key distribution and rotation."
+    },
+    "ac-6.9": {
+      "title": "Least Privilege | Log Use of Privileged Functions",
+      "description": "All privileged function usage is logged through structlog JSON-formatted logging. Admin circuit breaker operations generate admin_circuit_halt and admin_circuit_reset log events. Entity management generates admin_entity_halt, admin_entity_unhalt, and admin_cascade_halt events. Velocity control generates admin_throttle and admin_unthrottle events. Each log event includes the operation performed, target entity, reason, and timestamp in structured JSON format suitable for SIEM aggregation.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "All privileged function invocations are automatically logged with structured JSON output."
+    },
+    "ac-6.10": {
+      "title": "Least Privilege | Prohibit Non-Privileged Users from Executing Privileged Functions",
+      "description": "Non-privileged users are prohibited from executing privileged functions through the FastAPI Depends(verify_admin_key) dependency injection pattern. All admin router endpoints in app/routers/admin.py require this dependency, which returns HTTP 401 (AuthError) if no key is provided and HTTP 403 (ForbiddenError) if an invalid key is provided. The compliance monitor trigger endpoint also requires admin authentication. Non-admin users cannot access circuit breaker controls, entity halt/unhalt, or velocity throttle operations.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Enforced at the framework level through FastAPI dependency injection - cannot be bypassed by non-privileged callers."
+    },
+    "ac-7": {
+      "title": "Unsuccessful Logon Attempts",
+      "description": "Unsuccessful access attempts are managed through the velocity tracking system (app/core/velocity.py) and circuit breaker (app/core/circuit_breaker.py). The velocity tracker enforces per-entity rate limits across four tiers: L0 burst (per-second), L1 sustained (per-minute), L2 hourly, and L2 daily. Entities exceeding rate limits are automatically blocked with a retry-after duration. The circuit breaker tracks entity_violations and automatically halts entities exceeding the violation threshold (entity_violation_threshold: 10). Invalid admin API key attempts return HTTP 403 and are logged as admin_auth_invalid_key events. The injection_threshold (2 attempts) in the circuit breaker triggers a system-wide halt when injection attacks are detected.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Automated lockout through velocity caps and circuit breaker entity halt. Configurable thresholds via CircuitConfig."
+    },
+    "ac-8": {
+      "title": "System Use Notification",
+      "description": "System use notification is provided through the API documentation system. The FastAPI application in app/main.py serves OpenAPI documentation at /docs and /redoc with a comprehensive description of the BASIS governance pipeline, security layers, and usage terms. The landing page (GET /) displays system identification including 'Cognigate Engine' with version, Apache 2.0 license terms, and links to the BASIS standard. The /status endpoint returns machine-readable service identification. The API description explicitly states the enforcement pipeline: 'Every agent action passes through INTENT, ENFORCE, and PROOF before it touches the world.'",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides system identification and usage documentation. Consumer organization is responsible for implementing specific system use notification banners and consent mechanisms for their deployment."
+    },
+    "ac-11": {
+      "title": "Device Lock",
+      "description": "Device lock is implemented at the session level through API key expiration and agent expiration mechanisms. Registered agents receive an expiresAt timestamp (default: 24 hours). API keys do not include built-in session timeout, but the access_token_expire_minutes setting (30 minutes) in app/config.py provides session expiration capability. The circuit breaker's auto_reset_seconds (300 seconds) provides automatic session re-establishment after system halts.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate is an API service rather than an interactive terminal. Session locking is implemented through token expiration. Consumer organization implements device lock at their user-facing application layer."
+    },
+    "ac-11.1": {
+      "title": "Device Lock | Pattern-Hiding Displays",
+      "description": "Pattern-hiding is implemented in the API key management system (app/routers/auth_keys.py). API keys are stored as SHA-256 hashes (_hash_key function) and are never displayed after initial creation. The key listing endpoint (GET /v1/auth/keys) returns only metadata (keyId, name, scopes, createdAt, lastUsedAt) without the key value. The creation response includes a warning: 'Store this key securely. It will not be shown again.' Admin API keys are never included in any API response or log output.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Sensitive authentication credentials are never re-displayed after initial creation."
+    },
+    "ac-12": {
+      "title": "Session Termination",
+      "description": "Session termination is implemented through multiple mechanisms: (1) Agent expiration via expiresAt timestamp in registration; (2) API key revocation via DELETE /v1/auth/keys/{key_id}; (3) Agent revocation via DELETE /v1/agents/{agent_id}; (4) Trust revocation via POST /v1/trust/{agent_id}/revoke setting score to 0; (5) Entity halt via POST /v1/admin/entity/halt blocking all requests; (6) System-wide halt via POST /v1/admin/circuit/halt. The access_token_expire_minutes configuration (default: 30) controls token lifetime. The circuit breaker auto-reset (auto_reset_seconds: 300) provides automatic session re-establishment after safety halts.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides multiple session termination mechanisms. Consumer organization establishes session termination policies and timeout values."
+    },
+    "ac-14": {
+      "title": "Permitted Actions Without Identification or Authentication",
+      "description": "Cognigate permits specific actions without authentication: (1) Health checks: GET /health, GET /health/live, GET /ready; (2) Status page: GET /status; (3) Documentation: GET /docs, GET /redoc, GET /openapi.json; (4) Compliance health monitoring: GET /v1/compliance/health, /v1/compliance/dashboard, /v1/compliance/snapshot; (5) Reference data: GET /v1/reference/tiers, /v1/reference/capabilities, /v1/reference/errors. All enforcement operations (INTENT, ENFORCE, PROOF) and administrative operations require authentication. Unauthenticated endpoints are read-only and expose no sensitive data.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate explicitly identifies which actions are permitted without authentication. Consumer organization documents these in their security authorization package."
+    },
+    "ac-17": {
+      "title": "Remote Access",
+      "description": "All Cognigate access is remote via HTTPS API. CORS middleware in app/main.py controls cross-origin access (currently allow_origins=['*'], configured per deployment). All API endpoints are served over HTTPS when deployed on Vercel or behind a TLS-terminating reverse proxy. Rate limiting via the velocity tracker (app/core/velocity.py) enforces per-entity access limits across three tiers (L0 burst, L1 sustained, L2 quota). Admin remote access requires X-Admin-Key header authentication with constant-time comparison. The gateway_timeout_ms setting (30000ms) prevents hanging remote connections.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate enforces rate-limited, authenticated remote access. Consumer organization configures CORS origins, TLS certificates, and network-level access controls for their deployment."
+    },
+    "ac-17.1": {
+      "title": "Remote Access | Monitoring and Control",
+      "description": "Remote access monitoring is implemented through the velocity tracker (app/core/velocity.py) which tracks all entity actions with timestamps, counts, and rate calculations. The circuit breaker (app/core/circuit_breaker.py) monitors system-wide request patterns including high_risk_ratio, block_ratio, tripwire_triggers, and injection_attempts. The admin status endpoint (GET /v1/admin/status) provides real-time system health including tracked entities, security layer status, and circuit breaker metrics. The compliance health endpoint (GET /v1/compliance/health) monitors control health across 9 frameworks in real-time. Structlog JSON logging captures all API access for external SIEM analysis.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides comprehensive remote access monitoring. Consumer organization integrates logs with their SIEM and establishes monitoring procedures."
+    },
+    "ac-17.2": {
+      "title": "Remote Access | Protection of Confidentiality and Integrity Using Encryption",
+      "description": "Confidentiality and integrity of remote access is protected through HTTPS/TLS encryption enforced at the deployment layer (Vercel edge network or reverse proxy). All proof records are signed with Ed25519 digital signatures (app/core/signatures.py) providing end-to-end integrity. The SHA-256 hash chain in the PROOF layer ensures record integrity is verifiable independently of transport security. API key authentication uses SHA-256 hashing for storage and secrets.compare_digest for comparison, preventing timing-based key extraction. GZip compression middleware (minimum_size=500) is applied after encryption.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides application-level integrity through cryptographic signatures. TLS encryption is provided by the hosting infrastructure (Vercel, cloud provider, or reverse proxy)."
+    },
+    "ac-17.4": {
+      "title": "Remote Access | Privileged Commands and Access",
+      "description": "Privileged remote commands are restricted to X-Admin-Key authenticated endpoints. All administrative operations (circuit breaker halt/reset, entity halt/unhalt, cascade halt, velocity throttle/unthrottle) require the admin API key and are logged with operation-specific structured log events. The compliance monitoring trigger (POST /v1/compliance/monitor/trigger) also requires admin authentication. Each privileged command execution is recorded with the admin operation type, target entity, reason, and timestamp.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate restricts and documents privileged remote access. Consumer organization authorizes remote privileged access and maintains access records."
+    },
+    "ac-18": {
+      "title": "Wireless Access",
+      "description": "Cognigate is a cloud SaaS application accessed exclusively via HTTPS API. Wireless access controls are inherited from the cloud infrastructure provider (Vercel/AWS) and the consumer organization's network architecture. Cognigate does not directly manage wireless access points or wireless network infrastructure.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "Wireless infrastructure controls are the responsibility of the cloud provider and consumer organization's network team. Cognigate operates at the application layer."
+    },
+    "ac-18.1": {
+      "title": "Wireless Access | Authentication and Encryption",
+      "description": "Wireless authentication and encryption are inherited from the cloud infrastructure provider. Cognigate enforces application-layer authentication via API keys and admin keys regardless of the underlying network transport.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "Inherited from cloud infrastructure provider."
+    },
+    "ac-19": {
+      "title": "Access Control for Mobile Devices",
+      "description": "Cognigate is a cloud SaaS API service. Mobile device access controls are inherited from the consumer organization's mobile device management policies. Cognigate enforces the same API authentication and rate limiting regardless of the client device type.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "Mobile device management is the responsibility of the consumer organization. Cognigate applies uniform access controls regardless of device type."
+    },
+    "ac-19.5": {
+      "title": "Access Control for Mobile Devices | Full Device or Container-Based Encryption",
+      "description": "Mobile device encryption is inherited from the consumer organization's mobile device management policies. Cognigate does not store data on mobile devices.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "Inherited from consumer organization's mobile device management."
+    },
+    "ac-20": {
+      "title": "Use of External Systems",
+      "description": "External system usage is controlled through the gateway proxy (app/routers/gateway.py) which mediates all connections to the AgentAnchor platform. The gateway includes timeout controls (gateway_timeout_ms: 30000), circuit breaker protection (gateway_circuit_breaker_threshold: 5), and proxies only to whitelisted domains (compliance, council, observer, truth-chain, academy, orchestrator, webhooks, dashboard). The AI Critic (app/core/critic.py) connects to external AI providers (Anthropic, OpenAI, Google, xAI) with configurable API keys and model selection. All external connections are logged for audit.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate controls and monitors external system connections through the gateway and critic subsystems. Consumer organization establishes policies for approved external systems."
+    },
+    "ac-20.1": {
+      "title": "Use of External Systems | Limits on Authorized Use",
+      "description": "External system usage is limited through configuration controls. The gateway proxy only accepts connections to predefined AgentAnchor API domains. The critic provider is configured through the critic_provider setting with explicit API key requirements per provider. The gateway circuit breaker threshold (5 failures) automatically disables external connections when reliability degrades. External API timeouts (gateway_timeout_ms: 30000) prevent resource exhaustion from slow external systems.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate limits external system connections to configured endpoints. Consumer organization defines acceptable use policies for external systems."
+    },
+    "ac-20.2": {
+      "title": "Use of External Systems | Portable Storage Devices — Restricted Use",
+      "description": "Cognigate is a cloud SaaS application and does not interact with portable storage devices. This control is not applicable to the Cognigate runtime.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "Cloud SaaS application — portable storage device controls are the responsibility of the consumer organization and cloud infrastructure provider."
+    },
+    "ac-21": {
+      "title": "Information Sharing",
+      "description": "Information sharing controls are implemented through data classification in the INTENT layer and enforced by the ENFORCE layer. The intent analysis (app/routers/intent.py) automatically classifies data types (pii_email, credentials, pii_ssn) and the basis-data-protection policy enforces sharing constraints: PII requires T2+ trust, credential access requires audit logging. The PROOF chain records all information sharing decisions with cryptographic integrity, providing non-repudiation. The evidence mapper (app/core/evidence_mapper.py) generates compliance records for each sharing decision across 7 frameworks.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate classifies and controls information sharing through policy enforcement. Consumer organization defines specific sharing agreements and authorized recipients."
+    },
+    "ac-22": {
+      "title": "Publicly Accessible Content",
+      "description": "Publicly accessible content is controlled through endpoint authentication requirements. Unauthenticated endpoints serve only system operational data: health status, compliance posture, reference data (trust tiers, capabilities, error codes), API documentation, and the landing page. No agent data, proof records, enforcement decisions, or trust scores are accessible without authentication. The robots.txt (app/main.py) controls search engine indexing. The sitemap.xml lists only public documentation pages.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate restricts publicly accessible content to operational and documentation endpoints. Consumer organization reviews and authorizes what content is publicly accessible in their deployment."
+    },
+
+    "au-1": {
+      "title": "Policy and Procedures",
+      "description": "Audit and accountability policy is implemented through the PROOF layer (app/routers/proof.py, app/db/proof_repository.py), which maintains an immutable, cryptographically-signed audit chain. The audit policy is codified in the evidence mapper (app/core/evidence_mapper.py) which defines retention periods per framework: NIST 800-53 (7 years), EU AI Act (10 years), SOC 2 (5 years), GDPR (6 years). Audit procedures are enforced automatically — every INTENT, ENFORCE, and PROOF operation generates structured log records via structlog with ISO timestamps, log levels, and JSON formatting. The proof chain records 6+ event types: INTENT_RECEIVED, DECISION_MADE, TRUST_DELTA, EXECUTION_STARTED, EXECUTION_COMPLETED, EXECUTION_FAILED, TRIPWIRE_TRIGGERED, CIRCUIT_BREAKER_OPEN, CIRCUIT_BREAKER_CLOSE, VELOCITY_EXCEEDED, CRITIC_VERDICT.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides the audit mechanism and retention enforcement. Consumer organization establishes audit review procedures and assigns audit responsibilities."
+    },
+    "au-2": {
+      "title": "Event Logging",
+      "description": "Event logging is comprehensive across all Cognigate subsystems. The PROOF chain captures: intent submissions (INTENT_RECEIVED), enforcement decisions (DECISION_MADE), trust changes (TRUST_DELTA), execution lifecycle (EXECUTION_STARTED/COMPLETED/FAILED), security events (TRIPWIRE_TRIGGERED), system halts (CIRCUIT_BREAKER_OPEN/CLOSE), rate limit violations (VELOCITY_EXCEEDED), and AI evaluations (CRITIC_VERDICT). Each event is recorded with entity_id, action_type, decision (allowed/denied/escalated/modified), inputs_hash, outputs_hash, chain position, and Ed25519 signature. Structlog (configured in app/main.py) provides additional operational logging with ISO timestamps, log levels, and structured JSON output. The control health engine (app/core/control_health.py) monitors AU-2 compliance in real-time.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Comprehensive event logging is a core architectural component. All governance pipeline events are automatically logged without requiring consumer configuration."
+    },
+    "au-3": {
+      "title": "Content of Audit Records",
+      "description": "Audit records in the PROOF chain (app/models/proof.py) contain: proof_id (unique identifier), chain_position (sequential order), intent_id (associated intent), verdict_id (enforcement decision reference), entity_id (acting entity), action_type (event classification), decision (allowed/denied/escalated/modified), inputs_hash (SHA-256 of inputs), outputs_hash (SHA-256 of outputs), previous_hash (chain linkage), hash (record integrity), signature (Ed25519 digital signature), created_at (UTC timestamp), and metadata (extensible context). Structlog entries include log level, logger name, ISO timestamp, and structured key-value pairs. The evidence mapper enriches events with framework-specific context for NIST, EU AI Act, ISO 42001, SOC 2, NIST AI RMF, CMMC, and GDPR.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Audit record content exceeds NIST requirements by including cryptographic integrity fields, SHA-256 hash chain verification, and multi-framework compliance mapping."
+    },
+    "au-3.1": {
+      "title": "Content of Audit Records | Additional Audit Information",
+      "description": "Additional audit information is captured through the metadata field in ProofRecord (app/models/proof.py), which accepts extensible key-value pairs. The evidence mapper (app/core/evidence_mapper.py) adds framework-specific metadata including intent_id, verdict_id, entity_id, decision, and chain_position to every ControlEvidence record. The critic verdict (app/core/critic.py) adds AI-generated risk analysis including judgment, confidence, risk_adjustment, hidden_risks, reasoning, and concerns. Trust signal history records type, source, weight, delta, context, and timestamp for each signal.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Extensible metadata architecture supports arbitrary additional audit information."
+    },
+    "au-4": {
+      "title": "Audit Log Storage Capacity",
+      "description": "Audit log storage is managed through the database layer (app/db/database.py) supporting PostgreSQL (production via DATABASE_URL/Neon) and SQLite (development). The ProofRecordDB model (app/db/models.py) uses indexed columns for efficient querying (proof_id, chain_position, intent_id, verdict_id, entity_id, decision, hash, created_at). Pagination is supported through offset/limit parameters in ProofQuery (limit: 1-1000 records per query). The evidence mapper defines retention periods per framework: 7 years for NIST 800-53, 10 years for EU AI Act. Database scaling is handled by the PostgreSQL provider (Neon serverless PostgreSQL on Vercel).",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides indexed, paginated audit storage. Storage capacity management is shared with the database infrastructure provider."
+    },
+    "au-5": {
+      "title": "Response to Audit Logging Process Failures",
+      "description": "Audit logging process failure response is implemented through fault-tolerant initialization in app/main.py. Each subsystem (async logger, database, cache, signatures, policy engine) initializes independently within try/except blocks. If the database initialization fails, it is logged as database_init_failed but does not prevent the application from starting. The async log queue (app/core/async_logger.py) provides buffered logging that survives transient failures. The circuit breaker trips on system anomalies, which includes logging subsystem degradation as part of overall system health assessment. The health endpoint (GET /health) reports subsystem status including database connectivity with latency measurements.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides fault-tolerant audit logging with degradation detection. Consumer organization establishes alerting and escalation procedures for audit logging failures."
+    },
+    "au-6": {
+      "title": "Audit Record Review, Analysis, and Reporting",
+      "description": "Audit record review is supported through multiple query interfaces: (1) Proof chain query API (GET /v1/proof) with filters by entity_id, intent_id, verdict_id, decision, date range, and pagination; (2) Proof chain statistics (GET /v1/proof/stats) providing total records, chain length, records by decision type, and chain integrity status; (3) Compliance dashboard (GET /v1/compliance/dashboard) aggregating compliance metrics across 9 frameworks; (4) Trust signal history (GET /v1/trust/{agent_id}/history) for per-agent audit review; (5) Circuit breaker trip history (GET /v1/admin/circuit/history) for security event analysis; (6) Velocity statistics (GET /v1/admin/velocity/{entity_id}) for rate limit analysis. All endpoints return JSON for integration with external SIEM and reporting tools.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides comprehensive audit query APIs. Consumer organization establishes review frequency, assigns reviewers, and defines reporting requirements."
+    },
+    "au-6.1": {
+      "title": "Audit Record Review, Analysis, and Reporting | Automated Process Integration",
+      "description": "Automated audit analysis is implemented through the evidence mapper (app/core/evidence_mapper.py) which automatically maps proof chain events to compliance controls across 7 frameworks without manual intervention. The control health engine (app/core/control_health.py) performs real-time compliance health computation based on subsystem state. The compliance dashboard endpoint (GET /v1/compliance/dashboard) provides automated aggregation of compliance metrics. The circuit breaker (app/core/circuit_breaker.py) performs automated analysis of request patterns (high_risk_ratio, block_ratio, tripwire_triggers) and triggers system-level responses when thresholds are exceeded.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Automated compliance mapping and health monitoring operate continuously without manual intervention."
+    },
+    "au-6.3": {
+      "title": "Audit Record Review, Analysis, and Reporting | Correlate Audit Record Repositories",
+      "description": "Audit record correlation is implemented through the unified proof chain which links all events via chain_position and previous_hash fields. Each proof record references its associated intent_id and verdict_id, enabling correlation between intent analysis, enforcement decisions, and execution outcomes. The evidence mapper correlates proof events to compliance controls across 7 frameworks simultaneously. The entity_id field enables cross-referencing all actions by a single agent across the entire proof chain. Trust signal history provides temporal correlation of behavioral patterns.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "The hash-chained proof ledger provides inherent correlation through cryptographic linkage."
+    },
+    "au-7": {
+      "title": "Audit Record Reduction and Report Generation",
+      "description": "Audit record reduction is supported through the ProofQuery model (app/models/proof.py) which provides filtering by entity_id, intent_id, verdict_id, decision type, date range, with configurable limit (1-1000) and offset. The proof statistics endpoint (GET /v1/proof/stats) provides summary reduction including total records, chain length, records_by_decision breakdown, and chain integrity status. The compliance dashboard (GET /v1/compliance/dashboard) generates aggregate reports with per-framework compliance percentages, control counts by status (compliant/degraded/non_compliant/unknown), and recent alerts.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides query-based audit reduction and summary reporting. Consumer organization may implement additional reporting formats for their compliance needs."
+    },
+    "au-7.1": {
+      "title": "Audit Record Reduction and Report Generation | Automatic Processing",
+      "description": "Automatic audit processing is implemented through the evidence mapper (app/core/evidence_mapper.py) which processes every proof chain event and automatically generates compliance evidence records. The control health engine (app/core/control_health.py) automatically computes health status for 60+ controls across 9 frameworks. The compliance snapshot endpoint (GET /v1/compliance/snapshot) generates point-in-time reports with unique snapshot IDs. The framework evidence export endpoint (GET /v1/compliance/evidence/export/{framework}) exports all evidence for auditor consumption.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Fully automated evidence generation, health computation, and report generation."
+    },
+    "au-8": {
+      "title": "Time Stamps",
+      "description": "Timestamps are generated using Python's datetime.utcnow() and datetime.now(tz=timezone.utc) for all audit records. The ProofRecord model (app/models/proof.py) records created_at with UTC timestamps. Structlog is configured with TimeStamper(fmt='iso') in app/main.py for ISO 8601 formatted timestamps on all log entries. The health endpoint reports uptime_seconds using time.monotonic() for drift-resistant uptime tracking. Trust signal records, agent registrations, and all database records include datetime timestamps with index support for temporal queries.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate generates UTC timestamps for all audit records. Time synchronization with authoritative sources (NTP) is managed by the hosting infrastructure."
+    },
+    "au-9": {
+      "title": "Protection of Audit Information",
+      "description": "Audit information is protected through the immutable SHA-256 hash chain. Each proof record includes a previous_hash field linking to the prior record, creating a tamper-evident chain where any modification invalidates all subsequent records. Ed25519 digital signatures (app/core/signatures.py) provide non-repudiation — the signature_manager signs each proof record with a private key that can be loaded from file (PEM), environment variable (base64-encoded), or generated ephemerally. The chain integrity verification endpoint (verify_chain_integrity in app/db/proof_repository.py) validates the entire chain from genesis hash (64 zeros) through every subsequent record. Admin authentication (X-Admin-Key) restricts access to audit management operations.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Cryptographic integrity protection is a core architectural feature of the PROOF layer."
+    },
+    "au-9.4": {
+      "title": "Protection of Audit Information | Access by Subset of Privileged Users",
+      "description": "Access to audit management functions is restricted to X-Admin-Key holders. The compliance monitoring trigger (POST /v1/compliance/monitor/trigger) requires admin authentication. Proof chain verification is available through the stats endpoint but chain modification is architecturally impossible due to the immutable hash chain design. The circuit breaker trip history (GET /v1/admin/circuit/history) is only accessible with admin authentication. Read access to proof records (GET /v1/proof) is available to authenticated API users but write access is controlled by the internal proof chain append-only architecture.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Audit information is append-only by design. Administrative access to audit management is restricted to admin key holders."
+    },
+    "au-10": {
+      "title": "Non-Repudiation",
+      "description": "Non-repudiation is provided through Ed25519 digital signatures (app/core/signatures.py). The SignatureManager generates Ed25519 key pairs (128-bit security, 64-byte signatures) and signs each proof record with deterministic serialization (json.dumps with sort_keys=True). The sign_proof_record function creates signatures over the canonical JSON representation of record data. The verify_proof_signature function validates signatures using the public key. Signatures are base64-encoded and stored in the signature field of each ProofRecordDB (app/db/models.py). The public key can be exported via get_public_key_pem() for external verification. Key loading supports file-based (PEM), environment variable (base64), and ephemeral generation modes.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Ed25519 signatures provide cryptographic non-repudiation for all proof chain records."
+    },
+    "au-11": {
+      "title": "Audit Record Retention",
+      "description": "Audit record retention is defined in the evidence mapper (app/core/evidence_mapper.py) with framework-specific retention periods: NIST 800-53 (7 years), EU AI Act (10 years), ISO 42001 (7 years), SOC 2 (5 years), NIST AI RMF (7 years), CMMC (7 years), GDPR (6 years). Each ControlEvidence record includes a retention_expires timestamp calculated from the framework's retention policy. The proof chain database uses PostgreSQL in production (Neon serverless) with no automatic purging — records are retained until explicit deletion. The hash chain architecture ensures that record deletion would invalidate chain integrity, effectively enforcing retention through cryptographic constraints.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate defines and enforces framework-specific retention periods. Consumer organization manages database storage capacity for the defined retention periods."
+    },
+    "au-12": {
+      "title": "Audit Record Generation",
+      "description": "Audit record generation occurs at all three pipeline stages. The INTENT layer (app/routers/intent.py) generates records for intent submissions including tripwire triggers and critic verdicts. The ENFORCE layer (app/routers/enforce.py) generates records for policy evaluation decisions including velocity violations and circuit breaker blocks. The PROOF layer (app/routers/proof.py) generates the immutable proof chain records with hash chains and signatures. The async log queue (app/core/async_logger.py) provides non-blocking audit record generation. The evidence mapper automatically generates compliance evidence records from proof chain events across 7 frameworks. The control health engine (app/core/control_health.py) reports AU-12 as 'compliant' when all three layers (intent, enforce, proof) are active.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Audit record generation is automatic and comprehensive across all pipeline layers."
+    },
+    "au-12.1": {
+      "title": "Audit Record Generation | System-Wide and Time-Correlated Audit Trail",
+      "description": "A system-wide, time-correlated audit trail is maintained through the proof chain (app/db/proof_repository.py). All proof records are sequentially ordered by chain_position with UTC timestamps (created_at), enabling time-correlated analysis across the entire system. The hash chain (previous_hash -> hash linkage) establishes cryptographic ordering that cannot be rearranged. The proof query API supports date range filtering (start_date, end_date) for temporal analysis. Structlog timestamps are synchronized across all subsystems using TimeStamper(fmt='iso'). The evidence mapper (app/core/evidence_mapper.py) generates time-stamped compliance evidence from proof events, creating a correlated compliance audit trail.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "The hash-chained proof ledger provides an inherently time-correlated, system-wide audit trail."
+    },
+    "au-12.3": {
+      "title": "Audit Record Generation | Changes by Authorized Individuals",
+      "description": "Changes to audit record generation configuration require admin authentication (X-Admin-Key). Policy engine modifications that affect what events are logged require admin access. The compliance monitoring trigger (POST /v1/compliance/monitor/trigger) requires admin authentication. All configuration changes are tracked through structured logging with admin-specific log events (admin_circuit_halt, admin_circuit_reset, etc.). The policy engine supports register_policy/unregister_policy operations which are logged but restricted to programmatic access with appropriate authorization.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Audit configuration changes require admin authorization. Consumer organization establishes change management procedures for audit configuration."
+    },
+
+    "at-1": {
+      "title": "Policy and Procedures",
+      "description": "Cognigate supports awareness and training policy through comprehensive API documentation (/docs, /redoc), interactive developer tools (/tools/calculator, /tools/errors, /tools/sdks, /tools/playground), and the landing page which explains the BASIS governance pipeline (BASIS -> CAR -> INTENT -> ENFORCE -> PROOF). The trust calculator allows administrators to explore the T0-T7 trust model interactively. The error codes reference provides searchable documentation for 38+ enforcement error codes. SDK quickstart guides are available for TypeScript, Python, Go, and cURL.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides extensive technical documentation and training tools. The consumer organization is responsible for establishing security awareness and training programs, defining training schedules, and maintaining training records."
+    },
+    "at-2": {
+      "title": "Literacy Training and Awareness",
+      "description": "Security awareness content is embedded in Cognigate's documentation and developer tools. The API documentation (/docs) includes security layer descriptions (tripwires, paranoia mode, critic, circuit breaker, velocity caps). The error codes reference (/tools/errors) educates developers on security enforcement behavior. The trust calculator (/tools/calculator) helps administrators understand trust tier implications. The playground (/tools/playground) allows testing the full pipeline to understand security enforcement behavior before production deployment.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides security literacy content through its developer tools. Consumer organization establishes formal awareness training programs for their users."
+    },
+    "at-2.2": {
+      "title": "Literacy Training and Awareness | Insider Threat",
+      "description": "Insider threat awareness is inherent in Cognigate's adversarial security design. The AI Critic (app/core/critic.py) operates on an 'ASSUME BAD INTENT until proven otherwise' principle, looking for euphemisms, scope creep, and dangerous tool combinations. The tripwire system (app/core/tripwires.py) detects credential theft patterns (cat_shadow, export_ssh_keys), privilege escalation (chmod_world_writable, chown_root), and history destruction (history_clear). The circuit breaker entity misbehavior detection tracks per-entity violations and automatically halts entities showing suspicious patterns.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate's adversarial design addresses insider threat detection. Consumer organization establishes insider threat awareness training programs."
+    },
+    "at-2.3": {
+      "title": "Literacy Training and Awareness | Social Engineering and Mining",
+      "description": "Social engineering detection is implemented through the INTENT layer's paranoia mode (app/routers/intent.py), which detects euphemisms that may indicate social engineering attempts. Euphemism keywords ('clear', 'clean', 'organize', 'tidy', 'archive', 'free up', 'sanitize') combined with system paths trigger critical risk scores (0.95). The AI Critic evaluates requests for 'euphemisms or obfuscation' and 'what is the WORST interpretation of this request.' The tripwire system detects curl-pipe-bash patterns (curl_bash) which are common social engineering attack vectors.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate detects social engineering patterns in agent requests. Consumer organization provides social engineering awareness training to human users."
+    },
+    "at-3": {
+      "title": "Role-Based Training",
+      "description": "Role-based training content is provided through tier-specific documentation. The trust tier reference (/v1/reference/tiers) documents the 8-tier trust model with per-tier capabilities, velocity limits, and rigor modes. The capabilities reference (/v1/reference/capabilities) documents 100+ capabilities across 8 namespaces. The rate limits reference (/v1/reference/rate-limits) documents per-tier API limits. SDK quickstart guides (/tools/sdks) provide role-appropriate integration guidance for developers in TypeScript, Python, Go, and cURL.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides role-specific technical documentation. Consumer organization establishes formal role-based security training programs with completion tracking."
+    },
+    "at-4": {
+      "title": "Training Records",
+      "description": "Training record management is not directly implemented within Cognigate. Cognigate provides the trust signal history (GET /v1/trust/{agent_id}/history) which records behavioral learning for AI agents, analogous to training records for automated entities. The proof chain maintains a complete record of all agent interactions that can serve as evidence of system usage and behavioral patterns.",
+      "implementation_status": "planned",
+      "responsibility": "shared",
+      "remarks": "Training record management for human users is the responsibility of the consumer organization's HR and training management systems. Cognigate records agent behavioral history as an analogue for automated entity training."
+    },
+
+    "ca-1": {
+      "title": "Policy and Procedures",
+      "description": "Assessment, authorization, and monitoring policy is implemented through the compliance monitoring framework (app/routers/compliance.py, app/core/control_health.py). The ControlHealthEngine provides real-time assessment of 60+ controls across 9 frameworks (NIST 800-53, EU AI Act, ISO 42001, SOC 2, NIST AI RMF, CMMC 2.0, GDPR, Singapore PDPA, Japan APPI). The compliance health endpoint (GET /v1/compliance/health) serves as the continuous monitoring policy implementation. Authorization procedures are enforced through the ENFORCE layer's multi-level evaluation pipeline. Assessment procedures include chain integrity verification (verify_chain_integrity), subsystem health checks, and framework-specific control evaluations.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides the continuous monitoring and assessment framework. Consumer organization establishes assessment schedules, authorization boundaries, and monitoring review procedures."
+    },
+    "ca-2": {
+      "title": "Control Assessments",
+      "description": "Control assessment is implemented through the ControlHealthEngine (app/core/control_health.py) which computes real-time health status by inspecting live subsystem state. Assessment methods include: (1) Circuit breaker state inspection for AC-2, AC-3, SI-4 controls; (2) Policy engine evaluation for AC-3, AC-6, CM-3 controls; (3) Signature manager initialization check for AU-9, AU-10, SC-12, SC-13 controls; (4) Velocity tracker state for AC-7 controls; (5) Tripwire pattern count for SI-3, RA-5 controls. The compliance health endpoint (GET /v1/compliance/health) returns ComplianceHealthResponse with overall_status, per-framework breakdowns, per-control health status, and active alerts. The compliance snapshot endpoint (GET /v1/compliance/snapshot) generates point-in-time assessment reports.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides automated control assessment through live subsystem monitoring. Consumer organization conducts periodic independent assessments and maintains assessment plans."
+    },
+    "ca-2.1": {
+      "title": "Control Assessments | Independent Assessors",
+      "description": "Independent assessment capability is built into the architecture through separation of the assessment engine from the enforcement engine. The AI Critic (app/core/critic.py) provides independent adversarial evaluation of enforcement decisions, functioning as an independent assessor within the system. The critic uses a separate AI provider (configurable: Anthropic, OpenAI, Google, xAI) from the planning function, ensuring independence. The compliance health endpoints are publicly accessible (no admin key required) enabling external independent assessors to verify control status.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate supports independent assessment through architectural separation and public compliance APIs. Consumer organization engages independent assessors for formal security assessments."
+    },
+    "ca-3": {
+      "title": "Information Exchange",
+      "description": "Information exchange is controlled through the gateway proxy (app/routers/gateway.py) which mediates all external system connections. The gateway supports whitelisted domains (compliance, council, observer, truth-chain, academy, orchestrator, webhooks, dashboard) with timeout controls (gateway_timeout_ms: 30000) and circuit breaker protection (gateway_circuit_breaker_threshold: 5). CORS middleware (app/main.py) controls cross-origin information exchange. All information exchanges are logged for audit via structlog JSON formatting. The AI Critic exchanges data with external AI providers under configurable API key authentication.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate controls and monitors information exchanges. Consumer organization establishes interconnection security agreements and authorizes specific information exchanges."
+    },
+    "ca-5": {
+      "title": "Plan of Action and Milestones",
+      "description": "Plan of action and milestones (POA&M) tracking is supported through the compliance alert system. The ControlHealthEngine (app/core/control_health.py) generates ControlAlert objects for controls in 'degraded' or 'non_compliant' status, including control_id, framework, issue description, and severity (high for non_compliant, medium for degraded). The compliance dashboard (GET /v1/compliance/dashboard) surfaces recent_alerts (up to 20) for remediation tracking. The framework-specific health endpoints (GET /v1/compliance/health/{framework}) provide detailed per-control status with issues and remediation guidance.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate identifies findings and generates remediation alerts. Consumer organization maintains the formal POA&M document and tracks remediation milestones."
+    },
+    "ca-6": {
+      "title": "Authorization",
+      "description": "System authorization is supported through the compliance monitoring framework which provides continuous evidence of security posture. The compliance snapshot (GET /v1/compliance/snapshot) generates point-in-time authorization evidence with overall_status (compliant/degraded/non_compliant), per-framework breakdowns, and active alerts. The proof chain provides an immutable record of all enforcement decisions for authorization review. The compliance dashboard provides aggregate metrics including overall_compliance_pct across all frameworks.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides continuous authorization evidence through compliance monitoring. The consumer organization's authorizing official makes authorization decisions based on Cognigate's evidence and the organization's risk tolerance."
+    },
+    "ca-7": {
+      "title": "Continuous Monitoring",
+      "description": "Continuous monitoring is a core Cognigate capability implemented through the ControlHealthEngine (app/core/control_health.py). The CA-7 health endpoint (GET /v1/compliance/health) computes real-time health for 60+ controls across 9 frameworks by inspecting live subsystem state: circuit breaker (state, metrics, halted entities), policy engine (loaded policies), signature manager (key initialization), velocity tracker (entity count), and tripwire patterns. The compliance dashboard (GET /v1/compliance/dashboard) provides aggregate monitoring with per-framework compliance percentages and recent alerts. TRIGGER_EVENTS (policy_reload, agent_spawn, key_rotation, config_mutation, circuit_breaker_trip/reset, proof_chain_verification) define events that trigger re-evaluation. The status page (/status) auto-refreshes every 30 seconds for real-time monitoring. The evidence mapper continuously generates compliance evidence from proof chain events.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Continuous monitoring is a core Cognigate architectural feature. The control health engine monitors 9 frameworks in real-time without requiring consumer configuration."
+    },
+    "ca-7.1": {
+      "title": "Continuous Monitoring | Independent Assessment",
+      "description": "Independent continuous assessment is supported through the publicly accessible compliance endpoints. The compliance health (GET /v1/compliance/health), dashboard (GET /v1/compliance/dashboard), and snapshot (GET /v1/compliance/snapshot) endpoints do not require authentication, enabling independent monitoring tools to continuously assess compliance posture. The AI Critic (app/core/critic.py) provides independent adversarial assessment of each enforcement decision from a separate AI provider.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides public compliance APIs for independent monitoring. Consumer organization engages independent assessors for continuous monitoring oversight."
+    },
+    "ca-7.4": {
+      "title": "Continuous Monitoring | Risk Monitoring",
+      "description": "Risk monitoring is implemented through multiple real-time mechanisms: (1) The circuit breaker (app/core/circuit_breaker.py) monitors high_risk_ratio and triggers system halts when 10% of actions are high-risk; (2) The velocity tracker monitors action rates and detects abnormal velocity patterns; (3) The INTENT layer calculates real-time risk scores (0.0-1.0) with paranoia mode and critic analysis; (4) The ENFORCE layer applies risk-proportional scrutiny through rigor modes (STRICT/STANDARD/LITE); (5) The control health engine monitors compliance risk across 9 frameworks; (6) Trust scoring tracks behavioral risk through 182-day decay and signal-based adjustments.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Multi-layer real-time risk monitoring is a core architectural feature."
+    },
+    "ca-8": {
+      "title": "Penetration Testing",
+      "description": "Penetration testing support is implemented through the CI/CD pipeline which includes Semgrep SAST (static application security testing), CodeQL analysis, Gitleaks secret detection, and pip-audit dependency vulnerability scanning. The tripwire system (app/core/tripwires.py) includes 25+ patterns that simulate penetration test detection scenarios including SQL injection (drop_table, truncate_table, delete_all), reverse shells (reverse_shell_bash, netcat_shell, netcat_exec_shell), privilege escalation (chmod_world_writable, chown_root), and malware delivery (curl_bash, download_execute). The adversarial test suite (tests/test_adversarial.py) performs automated adversarial testing against the governance pipeline.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate includes SAST, adversarial testing, and attack pattern detection. Consumer organization conducts formal penetration testing against their Cognigate deployment."
+    },
+    "ca-9": {
+      "title": "Internal System Connections",
+      "description": "Internal system connections are managed through the application architecture. Database connectivity (app/db/database.py) uses SQLAlchemy async engine with connection pooling to PostgreSQL/SQLite. Redis cache connectivity (app/core/cache.py) is optional with graceful degradation (redis_enabled: false by default). The gateway proxy (app/routers/gateway.py) manages connections to the AgentAnchor API. Internal subsystem communication (policy engine, circuit breaker, velocity tracker, signature manager) uses in-process function calls with no network overhead. The health endpoint (GET /health) monitors all internal connections with latency measurements for database and cache subsystems.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate documents and monitors all internal system connections. Consumer organization authorizes internal connections as part of their system authorization."
+    },
+
+    "cm-1": {
+      "title": "Policy and Procedures",
+      "description": "Configuration management policy is implemented through the policy engine (app/core/policy_engine.py) which supports versioned policy sets loaded from YAML/JSON files (load_policies_from_file) or programmatic registration (register_policy). Three default policies (basis-core-security, basis-data-protection, basis-risk-thresholds) are loaded during application startup via load_default_policies(). Configuration is managed through Pydantic Settings (app/config.py) which loads from environment variables and .env files with type validation. The CI/CD pipeline includes Semgrep, CodeQL, Gitleaks, and pip-audit for configuration security. Application configuration includes explicit production warnings ('CHANGE_ME_IN_PRODUCTION' for secret_key and admin_api_key).",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides configuration management through typed settings, policy versioning, and CI/CD scanning. Consumer organization establishes CM procedures and change management workflows."
+    },
+    "cm-2": {
+      "title": "Baseline Configuration",
+      "description": "Baseline configuration is defined in app/config.py through the Settings class with typed defaults for all configuration parameters. Key baseline settings include: app_version (0.2.0), api_prefix (/v1), default_trust_level (1), trust_decay_rate (0.01), log_level (INFO), log_format (json), gateway_timeout_ms (30000), critic_temperature (0.3), critic_enabled (true), cache_ttl_policy_results (60s), cache_ttl_trust_scores (300s). The three default BASIS policies constitute the policy baseline. The CircuitConfig dataclass (app/core/circuit_breaker.py) defines security baseline thresholds: high_risk_threshold (0.10), tripwire_cascade_count (3), injection_threshold (2), auto_reset_seconds (300). The velocity limits per trust tier (VELOCITY_LIMITS_BY_TRUST) define the rate limit baseline.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides a documented baseline configuration. Consumer organization maintains baseline documentation and approves deviations."
+    },
+    "cm-2.2": {
+      "title": "Baseline Configuration | Automation Support for Accuracy and Currency",
+      "description": "Configuration accuracy is enforced through Pydantic Settings type validation (app/config.py) which automatically validates environment variables against typed schema definitions. The SettingsConfigDict specifies env_file='.env' for environment file loading with case_sensitive=False normalization. The @lru_cache decorator on get_settings() ensures configuration consistency within a process. The policy engine validates policy structure during parsing (_parse_policy) and rejects malformed policies with logged warnings.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Automated configuration validation through Pydantic typed settings. Consumer organization manages configuration deployment automation."
+    },
+    "cm-2.3": {
+      "title": "Baseline Configuration | Retention of Previous Configurations",
+      "description": "Previous configurations are retained through Git version control for code-tracked configurations and the proof chain for runtime configuration changes. Policy mutations that affect enforcement behavior are recorded in the PROOF ledger. The evidence mapper maps configuration change events to CM-3 compliance controls. Environment variable configurations are managed through the deployment platform (Vercel environment variables, .env files) which may provide version history depending on the platform.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Code-level configurations are Git-versioned. Runtime configuration history depends on the deployment platform. Consumer organization maintains configuration baselines and change history."
+    },
+    "cm-3": {
+      "title": "Configuration Change Control",
+      "description": "Configuration change control is implemented through multiple mechanisms: (1) Policy engine changes are logged - register_policy and unregister_policy operations emit structured log events; (2) Administrative configuration changes (circuit breaker halt/reset, entity management, velocity throttle) require X-Admin-Key authentication and are logged with operation-specific events; (3) The CI/CD pipeline (GitHub Actions) enforces code review and automated testing (85%+ coverage) before configuration changes are deployed; (4) Semgrep SAST, CodeQL, and Gitleaks scan all code changes for security issues; (5) The control health engine (app/core/control_health.py) monitors CM-3 compliance by verifying policy engine state, reporting 'compliant' when policies are loaded and 'degraded' on policy_drift.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate enforces authenticated, logged configuration changes. Consumer organization establishes change control board procedures and approval workflows."
+    },
+    "cm-3.1": {
+      "title": "Configuration Change Control | Automated Documentation, Notification, and Prohibition of Changes",
+      "description": "Automated change documentation is provided through structured logging of all configuration mutations. The policy engine logs 'Registered policy: {id}' for every policy registration. Admin operations generate operation-specific log events with full context. The CI/CD pipeline automatically runs test suites (85%+ coverage) and security scans (Semgrep, CodeQL, Gitleaks, pip-audit) on every proposed change, prohibiting merges that fail quality gates.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Automated documentation through logging and CI/CD enforcement. Consumer organization configures notification recipients and change prohibition rules."
+    },
+    "cm-3.2": {
+      "title": "Configuration Change Control | Testing, Validation, and Documentation of Changes",
+      "description": "Configuration changes are tested through the CI/CD pipeline which enforces 85%+ test coverage with comprehensive test suites including: test_policy_engine.py, test_circuit_breaker.py, test_velocity.py, test_auth.py, test_signatures.py, test_tripwires.py, test_critic.py, test_enforce.py, test_intent.py, test_proof_repository.py, test_compliance.py, test_adversarial.py, test_chaos.py, test_invariants.py, test_property.py, and test_regressions.py. Semgrep SAST validates security patterns. The conftest.py provides test fixtures and mock configurations for isolated testing.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Comprehensive automated testing validates all configuration changes. Consumer organization validates changes in staging environments before production deployment."
+    },
+    "cm-4": {
+      "title": "Impact Analyses",
+      "description": "Impact analysis is supported through the CI/CD pipeline which runs comprehensive security scans (Semgrep SAST, CodeQL) and test suites on every change. The INTENT layer's risk analysis (app/routers/intent.py) can be applied to evaluate the impact of proposed configuration changes. The AI Critic (app/core/critic.py) provides adversarial impact analysis of proposed actions. The compliance health engine monitors control health in real-time, enabling impact assessment of configuration changes on compliance posture.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides automated impact analysis through CI/CD and compliance monitoring. Consumer organization conducts formal impact analysis for significant configuration changes."
+    },
+    "cm-5": {
+      "title": "Access Restrictions for Change",
+      "description": "Access restrictions for configuration changes are enforced through X-Admin-Key authentication on all administrative endpoints (app/core/auth.py). Policy engine modifications require programmatic access with appropriate authorization. The CI/CD pipeline enforces code review requirements before changes are deployed. The admin API key (ADMIN_API_KEY environment variable) controls access to circuit breaker, entity management, and velocity control operations. The control health engine (app/core/control_health.py) monitors CM-5 compliance by verifying policy engine state and admin authentication status.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Administrative access restrictions are enforced at the API level. Consumer organization manages admin key distribution and code review permissions."
+    },
+    "cm-6": {
+      "title": "Configuration Settings",
+      "description": "Configuration settings are centrally managed in app/config.py through Pydantic Settings with environment variable loading. Security-relevant settings include: admin_api_key (default: 'CHANGE_ME_IN_PRODUCTION'), secret_key (default: 'CHANGE_ME_IN_PRODUCTION'), signature_enabled (true), critic_enabled (true), redis_enabled (false), log_level (INFO), log_format (json). The CircuitConfig in app/core/circuit_breaker.py defines security thresholds. The VELOCITY_LIMITS_BY_TRUST in app/core/velocity.py defines per-tier rate limits. All settings are documented with type annotations and descriptions. Production deployment warnings flag insecure defaults.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides documented, typed configuration with production warnings. Consumer organization configures settings appropriate for their security requirements."
+    },
+    "cm-6.1": {
+      "title": "Configuration Settings | Automated Management, Application, and Verification",
+      "description": "Automated configuration management is provided through Pydantic Settings (app/config.py) which automatically loads, validates, and caches configuration from environment variables. The @lru_cache decorator on get_settings() ensures consistent application of settings. The lifespan manager in app/main.py automatically applies configuration during startup (database initialization, cache connection, signature initialization, policy engine loading). The health endpoint (GET /health) automatically verifies subsystem configuration (database connectivity, cache status, signature key loading).",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Fully automated configuration management through Pydantic Settings and lifespan initialization."
+    },
+    "cm-7": {
+      "title": "Least Functionality",
+      "description": "Least functionality is enforced through the modular router architecture in app/main.py. Each functional area (intent, enforce, proof, admin, agents, trust, auth_keys, reference, tools, gateway, compliance) is isolated in its own router module with specific prefix and tag. Only necessary endpoints are exposed. The policy engine loads only default policies during startup, with additional policies requiring explicit loading via load_policies_from_file(). Redis cache is disabled by default (redis_enabled: false) with graceful degradation. The critic provider only initializes when an API key is configured. Debug mode is disabled by default (debug: false).",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate follows least functionality by disabling optional features by default. Consumer organization disables unnecessary modules for their deployment."
+    },
+    "cm-7.1": {
+      "title": "Least Functionality | Periodic Review",
+      "description": "Periodic review of system functionality is supported through the compliance dashboard (GET /v1/compliance/dashboard) which provides a comprehensive view of active controls, compliance status, and system capabilities. The admin status endpoint (GET /v1/admin/status) reports security layer status for all six layers (L0_burst, L1_sustained, L2_quota, L3_tripwires, L4_critic, L5_circuit_breaker). The policy listing endpoint (GET /v1/enforce/policies) shows all loaded policies for review. The CI/CD pipeline's pip-audit scan reviews dependencies for unnecessary or vulnerable packages.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides visibility into active functionality. Consumer organization establishes periodic review schedules and procedures."
+    },
+    "cm-7.2": {
+      "title": "Least Functionality | Prevent Program Execution",
+      "description": "Program execution prevention is implemented through the tripwire system (app/core/tripwires.py) which blocks 25+ patterns of dangerous program execution including fork bombs (fork_bomb_bash, fork_bomb_function), remote script execution (curl_bash, download_execute), and reverse shells (reverse_shell_bash, netcat_shell, netcat_exec_shell). The basis-core-security policy constraint 'no-shell-low-trust' prevents shell execution for entities below T3 trust level. The ENFORCE layer blocks any action that triggers critical policy violations.",
+      "implementation_status": "implemented",
+      "responsibility": "provided",
+      "remarks": "Deterministic program execution prevention through tripwire patterns and policy constraints."
+    },
+    "cm-8": {
+      "title": "System Component Inventory",
+      "description": "System component inventory is maintained through the application architecture documentation and API endpoint registry. The OpenAPI specification (GET /openapi.json) provides a machine-readable inventory of all API endpoints, data models, and dependencies. The app/main.py include_router statements document all active modules. The requirements.txt/pyproject.toml document all software dependencies. The agent registry (GET /v1/agents) provides an inventory of all registered AI agent entities. The reference endpoints (/v1/reference/*) document trust tiers, capabilities, error codes, rate limits, and products.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate maintains a software component inventory through OpenAPI specs and dependency manifests. Consumer organization maintains the system boundary inventory."
+    },
+    "cm-8.1": {
+      "title": "System Component Inventory | Updates During Installation and Removal",
+      "description": "Component inventory updates are managed through the CI/CD pipeline. Dependency changes are tracked in requirements.txt/pyproject.toml with pip-audit scanning for vulnerabilities on every change. Agent registration (POST /v1/agents) and revocation (DELETE /v1/agents/{agent_id}) automatically update the entity inventory. API key creation (POST /v1/auth/keys) and deletion (DELETE /v1/auth/keys/{key_id}) update the credential inventory. The OpenAPI specification is automatically regenerated on every deployment.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate automatically updates inventories during component changes. Consumer organization maintains deployment-level inventory documentation."
+    },
+    "cm-8.3": {
+      "title": "System Component Inventory | Automated Unauthorized Component Detection",
+      "description": "Unauthorized component detection is implemented through: (1) Semgrep SAST scans detect unauthorized code patterns; (2) Gitleaks scans detect leaked secrets in code; (3) pip-audit scans detect vulnerable dependencies; (4) The tripwire system detects unauthorized program execution patterns; (5) The circuit breaker detects unauthorized behavior through entity violation tracking. The compliance health engine monitors component health and raises alerts for non_compliant components.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Automated detection through CI/CD scanning and runtime monitoring. Consumer organization establishes authorized component baseline and detection procedures."
+    },
+    "cm-9": {
+      "title": "Configuration Management Plan",
+      "description": "The configuration management plan is documented through the application architecture in app/config.py (all configurable settings), the policy engine (app/core/policy_engine.py) design, and the CI/CD pipeline configuration. Configuration items include: application settings (Settings class), security thresholds (CircuitConfig), velocity limits (VELOCITY_LIMITS_BY_TRUST), policy definitions (default policies), and trust tier definitions (TIER_THRESHOLDS). Change control is enforced through GitHub Actions CI/CD with required testing and security scanning.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate's configuration architecture serves as the technical CM plan. Consumer organization creates the formal CM plan document integrating Cognigate's configuration with organizational CM processes."
+    },
+    "cm-10": {
+      "title": "Software Usage Restrictions",
+      "description": "Software usage restrictions are enforced through the Apache 2.0 license for Cognigate itself. Dependency licensing is tracked through the requirements manifest. The pip-audit tool in the CI/CD pipeline scans for known vulnerabilities in dependencies. The tripwire system prevents execution of unauthorized software patterns. The policy engine can be configured to restrict specific tool usage through custom policies.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate enforces open-source licensing and dependency scanning. Consumer organization establishes software usage policies and license compliance procedures."
+    },
+    "cm-11": {
+      "title": "User-Installed Software",
+      "description": "User-installed software control is implemented through the policy engine's tool restriction capabilities. The basis-core-security policy constraint 'no-shell-low-trust' prevents unauthorized software installation through shell execution for entities below T3 trust level. The 'no-delete-without-approval' constraint prevents unauthorized software removal. The tripwire system blocks download-and-execute patterns (download_execute) and remote script execution (curl_bash). The capability taxonomy restricts which tools each agent can use based on trust tier.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate controls agent-installed software through policy enforcement and tripwires. Consumer organization manages user-installed software policies at the operating system level."
+    },
+    "cm-12": {
+      "title": "Information Location",
+      "description": "Information location is documented through the database architecture (app/db/database.py, app/db/models.py). Proof records are stored in the proof_records table with indexed fields for efficient location (proof_id, chain_position, entity_id, intent_id, verdict_id, decision, created_at). Chain state is tracked in the chain_state table. Database location is configurable via DATABASE_URL environment variable, supporting PostgreSQL (production) and SQLite (development). Redis cache location is configured via redis_url. Signature keys can be located at signature_key_path or in the signature_private_key environment variable.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate documents information storage locations through configuration. Consumer organization maintains data mapping documentation for their deployment."
+    },
+
+    "cp-1": {
+      "title": "Policy and Procedures",
+      "description": "Contingency planning policy is implemented through Cognigate's fault-tolerant architecture. The lifespan manager (app/main.py) implements independent subsystem initialization with try/except blocks — each subsystem (database, cache, signatures, policy engine, async logger) initializes independently, and failures in one do not prevent others from starting. The circuit breaker (app/core/circuit_breaker.py) provides autonomous recovery through CLOSED/OPEN/HALF_OPEN state transitions with auto_reset_seconds (300). Redis cache operates with graceful degradation (redis_enabled: false by default). The health endpoint hierarchy (/health, /health/live, /ready) supports Kubernetes liveness and readiness probes for orchestrated recovery.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides fault-tolerant architecture and self-recovery mechanisms. Consumer organization establishes the formal contingency plan, recovery procedures, and business continuity documentation."
+    },
+    "cp-2": {
+      "title": "Contingency Plan",
+      "description": "Cognigate's contingency capabilities include: (1) Autonomous circuit breaker recovery (auto_reset_at computed as current time + auto_reset_seconds) with HALF_OPEN testing phase allowing half_open_requests (3) before full CLOSED recovery; (2) Graceful degradation when Redis cache is unavailable; (3) Independent subsystem startup ensuring partial availability during component failures; (4) Database fallback from PostgreSQL to SQLite for development/emergency scenarios; (5) Signature system operating without private key (signatures disabled but system continues); (6) Multiple AI critic providers with automatic fallback (Anthropic -> OpenAI -> Google -> xAI).",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides built-in resilience and recovery mechanisms. Consumer organization develops the formal contingency plan including roles, responsibilities, recovery time objectives, and recovery point objectives."
+    },
+    "cp-2.1": {
+      "title": "Contingency Plan | Coordinate with Related Plans",
+      "description": "Cognigate's compliance monitoring framework (app/core/control_health.py) monitors control health across 9 regulatory frameworks simultaneously, enabling coordinated contingency response across compliance domains. The compliance dashboard (GET /v1/compliance/dashboard) provides a unified view of system health for coordinated planning. The gateway proxy coordinates with the AgentAnchor platform for distributed contingency scenarios.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides multi-framework health visibility for coordinated planning. Consumer organization coordinates contingency plans with related organizational plans."
+    },
+    "cp-2.3": {
+      "title": "Contingency Plan | Resume Mission-Essential Functions",
+      "description": "Mission-essential function resumption is supported through the circuit breaker recovery mechanism. The HALF_OPEN state (app/core/circuit_breaker.py) allows limited requests (half_open_requests: 3) to test system recovery before full resumption. Manual reset via POST /v1/admin/circuit/reset enables administrator-initiated recovery. Entity-level recovery via POST /v1/admin/entity/unhalt restores individual agent operations. The health endpoint hierarchy supports orchestrated restarts with /health/live (process alive) and /ready (service ready) probes.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate supports graduated recovery of mission-essential functions. Consumer organization defines mission-essential functions and recovery priorities."
+    },
+    "cp-2.8": {
+      "title": "Contingency Plan | Identify Critical Assets",
+      "description": "Critical assets are identified through the system architecture: (1) The proof chain database (PostgreSQL) containing the immutable audit trail; (2) Ed25519 signing keys for non-repudiation; (3) Policy definitions (three default BASIS policies); (4) Configuration settings (admin API key, database URL, API keys); (5) Agent registry with trust scores and capabilities. The health endpoint (GET /health) monitors critical subsystem health (database, cache, signatures). The compliance dashboard identifies critical control health across all frameworks.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate identifies and monitors its critical assets. Consumer organization maintains a comprehensive critical asset inventory including Cognigate within their system boundary."
+    },
+    "cp-3": {
+      "title": "Contingency Training",
+      "description": "Contingency training support is provided through Cognigate's interactive developer tools. The playground (/tools/playground) allows administrators to test the full governance pipeline (INTENT -> ENFORCE -> PROOF) in a safe environment. The trust calculator (/tools/calculator) enables exploration of trust tier implications during contingency scenarios. The error codes reference (/tools/errors) documents 38+ error scenarios for incident response training. The admin API documentation covers circuit breaker halt/reset, entity halt/unhalt, and velocity control procedures.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides training tools for contingency procedures. Consumer organization establishes formal contingency training programs with schedule, content, and completion tracking."
+    },
+    "cp-4": {
+      "title": "Contingency Plan Testing",
+      "description": "Contingency plan testing is supported through comprehensive test suites including: test_circuit_breaker.py (circuit breaker state transitions, auto-reset, entity halt/unhalt, cascade halt), test_chaos.py (chaos engineering scenarios), test_adversarial.py (adversarial attack scenarios), and test_regressions.py (regression testing). The circuit breaker's manual_trip and manual_reset functions enable controlled contingency testing via admin endpoints. The compliance monitoring trigger (POST /v1/compliance/monitor/trigger) allows on-demand compliance health verification during contingency exercises.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides automated and manual testing capabilities for contingency scenarios. Consumer organization conducts formal contingency plan testing exercises."
+    },
+    "cp-4.1": {
+      "title": "Contingency Plan Testing | Coordinate with Related Plans",
+      "description": "Coordinated contingency testing is supported through the multi-framework compliance monitoring. The compliance health endpoint (GET /v1/compliance/health) provides real-time health across 9 frameworks during testing exercises. The admin status endpoint (GET /v1/admin/status) provides comprehensive system health for coordination with infrastructure teams. The gateway health check (GET /v1/gateway/status) monitors external system availability during contingency exercises.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides health monitoring APIs for coordinated testing. Consumer organization coordinates testing with related organizational plans."
+    },
+    "cp-6": {
+      "title": "Alternate Storage Site",
+      "description": "Alternate storage is supported through the database configuration flexibility. Cognigate supports PostgreSQL (production, configured via DATABASE_URL), SQLite (development/emergency fallback), and Vercel serverless with Neon PostgreSQL for cloud deployments. The DATABASE_URL environment variable allows redirecting storage to alternate sites without code changes. Ed25519 signing keys can be loaded from file (signature_key_path), environment variable (signature_private_key in base64), or generated ephemerally, enabling key recovery at alternate sites.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate supports flexible database configuration for alternate storage. Consumer organization establishes and maintains alternate storage sites with appropriate geographic separation."
+    },
+    "cp-6.1": {
+      "title": "Alternate Storage Site | Separation from Primary Site",
+      "description": "Separation from primary storage is supported through the DATABASE_URL configuration which can point to geographically separated PostgreSQL instances. Neon serverless PostgreSQL provides built-in replication capabilities. The proof chain's hash-based integrity verification enables chain validation after transfer to alternate storage.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate's database portability supports alternate site separation. Cloud infrastructure provider and consumer organization manage geographic separation."
+    },
+    "cp-6.3": {
+      "title": "Alternate Storage Site | Accessibility",
+      "description": "Alternate storage accessibility is supported through Cognigate's database abstraction layer (app/db/database.py) which transparently connects to any PostgreSQL instance via DATABASE_URL. The health endpoint (GET /health) includes database connectivity checks with latency measurement, enabling automated failover detection. The readiness probe (GET /ready) indicates when the service is ready to accept requests after storage migration.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate supports automated database failover detection. Consumer organization ensures alternate storage site accessibility during contingency events."
+    },
+    "cp-7": {
+      "title": "Alternate Processing Site",
+      "description": "Alternate processing is supported through Cognigate's stateless architecture and containerized deployment. The Vercel deployment model provides automatic scaling across global edge locations. The application state is externalized to the database (PostgreSQL via DATABASE_URL) and optional cache (Redis via redis_url), enabling any instance to process requests. The /v1/admin/circuit/reset endpoint enables rapid recovery at alternate processing sites. The lifespan manager handles independent subsystem initialization for clean startup at new sites.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate's stateless architecture supports deployment at alternate processing sites. Consumer organization establishes alternate processing site agreements and procedures."
+    },
+    "cp-7.1": {
+      "title": "Alternate Processing Site | Separation from Primary Site",
+      "description": "Processing site separation is supported through Cognigate's cloud-native deployment architecture. Vercel provides multi-region deployment capabilities. The stateless application design allows deployment at geographically separated sites without data synchronization concerns beyond the database. The DATABASE_URL and redis_url configurations enable independent site-specific infrastructure.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate supports multi-region deployment. Cloud infrastructure provider manages geographic separation of processing sites."
+    },
+    "cp-7.2": {
+      "title": "Alternate Processing Site | Accessibility",
+      "description": "Alternate processing site accessibility is ensured through the health check hierarchy: /health/live (liveness probe), /ready (readiness probe), and /health (full health check with subsystem status). These endpoints support Kubernetes and serverless health monitoring for automated failover. The circuit breaker's manual_reset enables rapid recovery at alternate sites.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides health probes for automated failover. Consumer organization ensures alternate site accessibility through network and infrastructure configuration."
+    },
+    "cp-7.3": {
+      "title": "Alternate Processing Site | Priority of Service",
+      "description": "Priority of service at alternate sites is supported through the trust tier system which prioritizes high-trust entities. The velocity cap system (app/core/velocity.py) allocates more resources to higher-trust entities (T7: 500 actions/second vs T0: 2 actions/second), providing inherent service prioritization during capacity-constrained recovery scenarios.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Trust-tier-based resource allocation provides implicit service prioritization. Consumer organization establishes formal priority of service agreements."
+    },
+    "cp-8": {
+      "title": "Telecommunications Services",
+      "description": "Telecommunications services for Cognigate are provided by the cloud infrastructure platform (Vercel edge network, AWS). Cognigate operates as a cloud SaaS application and does not manage telecommunications infrastructure directly. The HTTPS API interface operates over standard internet connections provided by the cloud hosting platform.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "Telecommunications services are inherited from the cloud infrastructure provider. Consumer organization ensures adequate telecommunications connectivity to the cloud service."
+    },
+    "cp-8.1": {
+      "title": "Telecommunications Services | Priority of Service Provisions",
+      "description": "Priority of telecommunications service provisions are inherited from the cloud infrastructure provider (Vercel/AWS). Cognigate does not manage telecommunications priority directly.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "Inherited from cloud infrastructure provider."
+    },
+    "cp-8.2": {
+      "title": "Telecommunications Services | Single Points of Failure",
+      "description": "Single points of failure in telecommunications are managed by the cloud infrastructure provider. Cognigate's stateless architecture and multi-region deployment capability reduce application-level single points of failure.",
+      "implementation_status": "not_applicable",
+      "responsibility": "inherited",
+      "remarks": "Inherited from cloud infrastructure provider. Cognigate's architecture minimizes application-level single points of failure."
+    },
+    "cp-9": {
+      "title": "System Backup",
+      "description": "System backup is supported through the database layer. PostgreSQL instances (Neon serverless) provide automated backups. The proof chain's hash-based integrity enables backup verification through chain integrity checks (verify_chain_integrity in app/db/proof_repository.py). Configuration backup is managed through Git version control for code and environment variable management for runtime settings. Ed25519 signing keys can be exported via export_private_key_pem() for secure key backup. The chain_state table tracks the current chain position and last hash for backup consistency verification.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate supports database backup verification and key export. Consumer organization establishes backup schedules, retention, and testing procedures."
+    },
+    "cp-9.1": {
+      "title": "System Backup | Testing Reliability and Integrity",
+      "description": "Backup reliability testing is supported through the proof chain integrity verification (verify_chain_integrity in app/db/proof_repository.py) which validates the entire chain from genesis hash through all records, checking previous_hash linkage and chain_position sequencing. This verification can be run against backup databases to confirm integrity. The health endpoint database connectivity check verifies database accessibility and responsiveness.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides chain integrity verification for backup validation. Consumer organization establishes backup testing schedules and procedures."
+    },
+    "cp-9.8": {
+      "title": "System Backup | Cryptographic Protection",
+      "description": "Cryptographic protection of backups is provided at multiple levels: (1) The proof chain records are individually signed with Ed25519 digital signatures; (2) Each record includes SHA-256 hash integrity; (3) The chain linkage provides tamper-evidence across the entire backup. Database-level encryption is provided by the PostgreSQL infrastructure (Neon provides encryption at rest). Transport encryption is provided by TLS for database connections.",
+      "implementation_status": "partially_implemented",
+      "responsibility": "shared",
+      "remarks": "Application-level cryptographic integrity is provided by the proof chain. Storage-level encryption is provided by the database infrastructure."
+    },
+    "cp-10": {
+      "title": "System Recovery and Reconstitution",
+      "description": "System recovery is implemented through the circuit breaker recovery mechanism (CLOSED -> OPEN -> HALF_OPEN -> CLOSED) with automatic recovery testing (half_open_requests: 3 test requests before full recovery). Manual recovery via POST /v1/admin/circuit/reset enables administrator-initiated reconstitution. Entity-level recovery via POST /v1/admin/entity/unhalt restores individual agents. The lifespan manager (app/main.py) handles clean startup with independent subsystem initialization. Database reconstitution is supported through proof chain integrity verification which detects any data corruption after recovery. The health endpoint hierarchy (/health/live, /ready, /health) supports orchestrated recovery verification.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Cognigate provides automated and manual recovery mechanisms. Consumer organization establishes recovery procedures, priorities, and acceptance criteria."
+    },
+    "cp-10.2": {
+      "title": "System Recovery and Reconstitution | Transaction Recovery",
+      "description": "Transaction recovery is supported through the proof chain's sequential ordering (chain_position) and hash linkage (previous_hash). If the chain is interrupted, the last valid chain position can be identified through verify_chain_integrity. The chain_state table (app/db/models.py) maintains the last_hash and chain_length for recovery point identification. Database transaction integrity is managed by PostgreSQL's ACID properties. The async session management in app/db/database.py provides proper transaction handling with flush and commit semantics.",
+      "implementation_status": "implemented",
+      "responsibility": "shared",
+      "remarks": "Proof chain integrity and database ACID properties support transaction recovery. Consumer organization establishes transaction recovery procedures."
+    }
+  }
+}

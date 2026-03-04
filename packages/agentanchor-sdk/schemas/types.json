@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentanchor.dev/schemas/types.json",
+  "title": "Agent Anchor Types",
+  "description": "Core type definitions for Agent Anchor SDK",
+  "definitions": {
+    "DomainCode": {
+      "type": "string",
+      "enum": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"],
+      "description": "Domain classification codes"
+    },
+    "CapabilityLevel": {
+      "type": "integer",
+      "enum": [0, 1, 2, 3, 4],
+      "description": "Agent capability levels (L0-L4)"
+    },
+    "TrustTier": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7,
+      "description": "Trust tier (T0-T7)"
+    },
+    "AgentState": {
+      "type": "string",
+      "enum": ["provisioned", "active", "suspended", "revoked", "archived"],
+      "description": "Agent lifecycle states"
+    },
+    "AttestationType": {
+      "type": "string",
+      "enum": ["behavioral", "identity", "security", "compliance", "external"],
+      "description": "Types of attestations"
+    },
+    "ACI": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+\\.[a-z0-9-]+:[A-Z]+-L[0-4]@\\d+\\.\\d+\\.\\d+",
+      "description": "Categorical Agentic Registry"
+    },
+    "SemVer": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.-]+)?(\\+[a-zA-Z0-9.-]+)?$",
+      "description": "Semantic version string"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp"
+    },
+    "Agent": {
+      "type": "object",
+      "required": ["aci", "organization", "agentClass", "domains", "level", "version", "state"],
+      "properties": {
+        "aci": { "$ref": "#/definitions/ACI" },
+        "organization": { "type": "string" },
+        "agentClass": { "type": "string" },
+        "domains": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/DomainCode" }
+        },
+        "level": { "$ref": "#/definitions/CapabilityLevel" },
+        "version": { "$ref": "#/definitions/SemVer" },
+        "state": { "$ref": "#/definitions/AgentState" },
+        "metadata": { "type": "object" },
+        "createdAt": { "$ref": "#/definitions/Timestamp" },
+        "updatedAt": { "$ref": "#/definitions/Timestamp" }
+      }
+    },
+    "TrustScore": {
+      "type": "object",
+      "required": ["aci", "score", "tier", "computedAt"],
+      "properties": {
+        "aci": { "$ref": "#/definitions/ACI" },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "tier": { "$ref": "#/definitions/TrustTier" },
+        "factors": { "$ref": "#/definitions/TrustFactors" },
+        "computedAt": { "$ref": "#/definitions/Timestamp" }
+      }
+    },
+    "TrustFactors": {
+      "type": "object",
+      "properties": {
+        "behavioral": { "type": "number", "minimum": 0, "maximum": 1 },
+        "historical": { "type": "number", "minimum": 0, "maximum": 1 },
+        "security": { "type": "number", "minimum": 0, "maximum": 1 },
+        "compliance": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "Attestation": {
+      "type": "object",
+      "required": ["id", "aci", "type", "outcome", "action", "createdAt"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "aci": { "$ref": "#/definitions/ACI" },
+        "type": { "$ref": "#/definitions/AttestationType" },
+        "outcome": { "type": "string", "enum": ["success", "failure"] },
+        "action": { "type": "string" },
+        "metadata": { "type": "object" },
+        "createdAt": { "$ref": "#/definitions/Timestamp" }
+      }
+    },
+    "RegisterAgentOptions": {
+      "type": "object",
+      "required": ["organization", "agentClass", "domains", "level", "version"],
+      "properties": {
+        "organization": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "agentClass": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "domains": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/DomainCode" },
+          "minItems": 1
+        },
+        "level": { "$ref": "#/definitions/CapabilityLevel" },
+        "version": { "$ref": "#/definitions/SemVer" },
+        "metadata": { "type": "object" }
+      }
+    },
+    "SubmitAttestationOptions": {
+      "type": "object",
+      "required": ["aci", "type", "outcome", "action"],
+      "properties": {
+        "aci": { "$ref": "#/definitions/ACI" },
+        "type": { "$ref": "#/definitions/AttestationType" },
+        "outcome": { "type": "string", "enum": ["success", "failure"] },
+        "action": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    },
+    "A2AInvokeOptions": {
+      "type": "object",
+      "required": ["targetAci", "action"],
+      "properties": {
+        "targetAci": { "$ref": "#/definitions/ACI" },
+        "action": { "type": "string" },
+        "params": { "type": "object" },
+        "timeoutMs": { "type": "integer", "default": 30000 },
+        "async": { "type": "boolean", "default": false }
+      }
+    },
+    "A2AInvokeResult": {
+      "type": "object",
+      "required": ["requestId", "success"],
+      "properties": {
+        "requestId": { "type": "string" },
+        "success": { "type": "boolean" },
+        "result": { "type": "object" },
+        "error": { "$ref": "#/definitions/A2AError" },
+        "metrics": { "$ref": "#/definitions/A2AMetrics" },
+        "trustChain": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/A2AChainLink" }
+        }
+      }
+    },
+    "A2AError": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    },
+    "A2AMetrics": {
+      "type": "object",
+      "properties": {
+        "durationMs": { "type": "integer" },
+        "subCallCount": { "type": "integer" }
+      }
+    },
+    "A2AChainLink": {
+      "type": "object",
+      "required": ["aci", "tier", "action", "timestamp"],
+      "properties": {
+        "aci": { "$ref": "#/definitions/ACI" },
+        "tier": { "$ref": "#/definitions/TrustTier" },
+        "action": { "type": "string" },
+        "timestamp": { "$ref": "#/definitions/Timestamp" }
+      }
+    },
+    "A2AEndpoint": {
+      "type": "object",
+      "required": ["aci", "capabilities", "actions", "status"],
+      "properties": {
+        "aci": { "$ref": "#/definitions/ACI" },
+        "capabilities": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/A2AAction" }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["healthy", "unhealthy", "unknown"]
+        }
+      }
+    },
+    "A2AAction": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "minTier": { "$ref": "#/definitions/TrustTier" },
+        "streaming": { "type": "boolean" }
+      }
+    },
+    "APIResponse": {
+      "type": "object",
+      "required": ["success"],
+      "properties": {
+        "success": { "type": "boolean" },
+        "data": { "type": "object" },
+        "error": { "$ref": "#/definitions/APIError" },
+        "meta": { "$ref": "#/definitions/ResponseMeta" }
+      }
+    },
+    "APIError": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "details": { "type": "object" }
+      }
+    },
+    "ResponseMeta": {
+      "type": "object",
+      "properties": {
+        "requestId": { "type": "string" },
+        "timestamp": { "$ref": "#/definitions/Timestamp" },
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "cursor": { "type": "string" },
+            "hasMore": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}

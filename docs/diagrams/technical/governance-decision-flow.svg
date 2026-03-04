@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" font-family="Inter, system-ui, sans-serif">
+  <title>Vorion Governance Decision Flow</title>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e"/>
+    </marker>
+    <marker id="arr-yellow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#eab308"/>
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="700" fill="#0f172a"/>
+
+  <!-- Title -->
+  <text x="600" y="38" text-anchor="middle" fill="#f1f5f9" font-size="22" font-weight="700">Governance Decision Flow</text>
+  <text x="600" y="58" text-anchor="middle" fill="#64748b" font-size="12">Agent Intent → Policy Evaluation → Fluid Decision → Execution / Containment</text>
+
+  <!-- ═══ STEP 1: Agent Intent ═══ -->
+  <rect x="50" y="90" width="180" height="70" rx="8" fill="#1a2232" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="140" y="120" text-anchor="middle" fill="#c4b5fd" font-size="13" font-weight="700">1. Agent Intent</text>
+  <text x="140" y="140" text-anchor="middle" fill="#64748b" font-size="10">Action request submitted</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="230" y1="125" x2="280" y2="125" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ═══ STEP 2: Identity Check ═══ -->
+  <rect x="285" y="90" width="180" height="70" rx="8" fill="#1a2232" stroke="#3b82f6" stroke-width="2"/>
+  <text x="375" y="115" text-anchor="middle" fill="#93c5fd" font-size="13" font-weight="700">2. Identity Check</text>
+  <text x="375" y="133" text-anchor="middle" fill="#64748b" font-size="10">CAR-ID verification</text>
+  <text x="375" y="148" text-anchor="middle" fill="#64748b" font-size="10">Trust tier lookup (T0-T7)</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="465" y1="125" x2="515" y2="125" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ═══ STEP 3: Policy Evaluation ═══ -->
+  <rect x="520" y="80" width="220" height="90" rx="8" fill="#1a2232" stroke="#eab308" stroke-width="2"/>
+  <text x="630" y="108" text-anchor="middle" fill="#fde047" font-size="13" font-weight="700">3. Policy Evaluation</text>
+  <text x="630" y="128" text-anchor="middle" fill="#64748b" font-size="10">Governance Engine evaluates</text>
+  <text x="630" y="143" text-anchor="middle" fill="#64748b" font-size="10">rules P0→P6 in priority order</text>
+  <text x="630" y="158" text-anchor="middle" fill="#64748b" font-size="10">Authority &amp; scope validation</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="740" y1="125" x2="790" y2="125" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ═══ STEP 4: Fluid Decision (Diamond) ═══ -->
+  <polygon points="900,75 1010,125 900,175 790,125" fill="#1a2232" stroke="#f1f5f9" stroke-width="2"/>
+  <text x="900" y="120" text-anchor="middle" fill="#f1f5f9" font-size="12" font-weight="700">4. Fluid</text>
+  <text x="900" y="136" text-anchor="middle" fill="#f1f5f9" font-size="12" font-weight="700">Decision</text>
+
+  <!-- ═══ THREE PATHS FROM DECISION ═══ -->
+
+  <!-- GREEN path (down-left) -->
+  <line x1="855" y1="175" x2="250" y2="250" stroke="#22c55e" stroke-width="2" marker-end="url(#arr-green)"/>
+  <rect x="40" y="240" width="420" height="180" rx="8" fill="#0f2918" stroke="#22c55e" stroke-width="2"/>
+  <text x="250" y="268" text-anchor="middle" fill="#22c55e" font-size="16" font-weight="700">GREEN — Approved</text>
+  <text x="250" y="290" text-anchor="middle" fill="#86efac" font-size="11">Proceed with constraints</text>
+  <line x1="60" y1="302" x2="440" y2="302" stroke="#1a4d2e" stroke-width="0.5"/>
+  <text x="60" y="322" fill="#a7f3d0" font-size="11" font-weight="600">Constraints Applied:</text>
+  <text x="60" y="342" fill="#86efac" font-size="10">allowedTools: [scoped to intent]</text>
+  <text x="60" y="360" fill="#86efac" font-size="10">dataScopes: [namespace-limited]</text>
+  <text x="60" y="378" fill="#86efac" font-size="10">rateLimits: [per-resource window]</text>
+  <text x="60" y="396" fill="#86efac" font-size="10">maxExecutionTime: [bounded]</text>
+  <text x="60" y="414" fill="#86efac" font-size="10">reversibility: required for destructive ops</text>
+
+  <!-- YELLOW path (down-center) -->
+  <line x1="900" y1="175" x2="690" y2="250" stroke="#eab308" stroke-width="2" marker-end="url(#arr-yellow)"/>
+  <rect x="480" y="240" width="420" height="180" rx="8" fill="#2a2510" stroke="#eab308" stroke-width="2"/>
+  <text x="690" y="268" text-anchor="middle" fill="#eab308" font-size="16" font-weight="700">YELLOW — Refine</text>
+  <text x="690" y="290" text-anchor="middle" fill="#fde047" font-size="11">Requires human review or scope change</text>
+  <line x1="500" y1="302" x2="880" y2="302" stroke="#4d3f0a" stroke-width="0.5"/>
+  <text x="500" y="322" fill="#fef08a" font-size="11" font-weight="600">Refinement Actions:</text>
+  <text x="500" y="342" fill="#fde047" font-size="10">REDUCE_SCOPE — Narrow the intent</text>
+  <text x="500" y="360" fill="#fde047" font-size="10">ADD_CONSTRAINTS — Accept restrictions</text>
+  <text x="500" y="378" fill="#fde047" font-size="10">REQUEST_APPROVAL — Human sign-off</text>
+  <text x="500" y="396" fill="#fde047" font-size="10">PROVIDE_CONTEXT — Additional justification</text>
+  <text x="500" y="414" fill="#fde047" font-size="10">DECOMPOSE — Break into smaller intents</text>
+
+  <!-- RED path (down-right) -->
+  <line x1="945" y1="175" x2="1080" y2="250" stroke="#ef4444" stroke-width="2" marker-end="url(#arr-red)"/>
+  <rect x="920" y="240" width="250" height="180" rx="8" fill="#2a1010" stroke="#ef4444" stroke-width="2"/>
+  <text x="1045" y="268" text-anchor="middle" fill="#ef4444" font-size="16" font-weight="700">RED — Denied</text>
+  <text x="1045" y="290" text-anchor="middle" fill="#fca5a5" font-size="11">Hard policy violation</text>
+  <line x1="940" y1="302" x2="1150" y2="302" stroke="#4d1010" stroke-width="0.5"/>
+  <text x="940" y="322" fill="#fecaca" font-size="11" font-weight="600">Denial Reasons:</text>
+  <text x="940" y="342" fill="#fca5a5" font-size="10">P0 hard_disqualifier match</text>
+  <text x="940" y="360" fill="#fca5a5" font-size="10">Trust tier insufficient</text>
+  <text x="940" y="378" fill="#fca5a5" font-size="10">Authority expired/invalid</text>
+  <text x="940" y="396" fill="#fca5a5" font-size="10">Scope violation</text>
+  <text x="940" y="414" fill="#fca5a5" font-size="11" font-weight="600">Action: Containment escalation</text>
+
+  <!-- ═══ BOTTOM: Post-Decision ═══ -->
+
+  <!-- GREEN → Execute -->
+  <line x1="250" y1="420" x2="250" y2="460" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <rect x="120" y="465" width="260" height="55" rx="6" fill="#1a2232" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="250" y="490" text-anchor="middle" fill="#86efac" font-size="12" font-weight="600">Execute with Monitoring</text>
+  <text x="250" y="508" text-anchor="middle" fill="#64748b" font-size="10">Trust signals recorded → Proof emitted</text>
+
+  <!-- YELLOW → Re-evaluate or upgrade -->
+  <line x1="690" y1="420" x2="690" y2="460" stroke="#eab308" stroke-width="1.5" marker-end="url(#arr-yellow)"/>
+  <rect x="560" y="465" width="260" height="55" rx="6" fill="#1a2232" stroke="#eab308" stroke-width="1.5"/>
+  <text x="690" y="490" text-anchor="middle" fill="#fde047" font-size="12" font-weight="600">Refine &amp; Re-evaluate</text>
+  <text x="690" y="508" text-anchor="middle" fill="#64748b" font-size="10">Agent adjusts → Returns to step 3</text>
+
+  <!-- Arrow YELLOW back to step 3 -->
+  <path d="M 820 492 Q 1050 492 1050 400 Q 1050 200 630 170" fill="none" stroke="#eab308" stroke-width="1" stroke-dasharray="5 3" marker-end="url(#arr-yellow)"/>
+
+  <!-- RED → Containment -->
+  <line x1="1045" y1="420" x2="1045" y2="460" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arr-red)"/>
+  <rect x="920" y="465" width="250" height="55" rx="6" fill="#1a2232" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="1045" y="490" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="600">Containment Escalation</text>
+  <text x="1045" y="508" text-anchor="middle" fill="#64748b" font-size="10">Trust decay 3x · Level increase</text>
+
+  <!-- ═══ PROOF PLANE (bottom bar) ═══ -->
+  <rect x="50" y="545" width="1100" height="55" rx="8" fill="#0f2918" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="600" y="570" text-anchor="middle" fill="#22c55e" font-size="13" font-weight="700">Proof Plane — Immutable Audit Trail</text>
+  <text x="600" y="590" text-anchor="middle" fill="#86efac" font-size="10">Every decision emits a hash-chained, Ed25519-signed DECISION_MADE event · Chain integrity verifiable · Merkle-aggregated for anchoring</text>
+
+  <!-- Arrows to proof plane -->
+  <line x1="250" y1="520" x2="250" y2="545" stroke="#22c55e" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="690" y1="520" x2="690" y2="545" stroke="#22c55e" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="1045" y1="520" x2="1045" y2="545" stroke="#22c55e" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- ═══ CONTAINMENT SCALE (bottom) ═══ -->
+  <text x="50" y="630" fill="#94a3b8" font-size="11" font-weight="600" letter-spacing="1.5">PROGRESSIVE CONTAINMENT LEVELS</text>
+  <rect x="50" y="640" width="143" height="28" rx="4" fill="#22c55e" fill-opacity="0.2" stroke="#22c55e" stroke-width="1"/>
+  <text x="121" y="658" text-anchor="middle" fill="#86efac" font-size="9" font-weight="600">L1 Full Autonomy</text>
+  <rect x="200" y="640" width="125" height="28" rx="4" fill="#22c55e" fill-opacity="0.15" stroke="#22c55e" stroke-width="1"/>
+  <text x="262" y="658" text-anchor="middle" fill="#86efac" font-size="9" font-weight="600">L2 Monitored</text>
+  <rect x="332" y="640" width="138" height="28" rx="4" fill="#eab308" fill-opacity="0.15" stroke="#eab308" stroke-width="1"/>
+  <text x="401" y="658" text-anchor="middle" fill="#fde047" font-size="9" font-weight="600">L3 Tool Restricted</text>
+  <rect x="477" y="640" width="138" height="28" rx="4" fill="#eab308" fill-opacity="0.2" stroke="#eab308" stroke-width="1"/>
+  <text x="546" y="658" text-anchor="middle" fill="#fde047" font-size="9" font-weight="600">L4 Human-in-Loop</text>
+  <rect x="622" y="640" width="138" height="28" rx="4" fill="#f97316" fill-opacity="0.15" stroke="#f97316" stroke-width="1"/>
+  <text x="691" y="658" text-anchor="middle" fill="#fdba74" font-size="9" font-weight="600">L5 Simulation Only</text>
+  <rect x="767" y="640" width="110" height="28" rx="4" fill="#ef4444" fill-opacity="0.15" stroke="#ef4444" stroke-width="1"/>
+  <text x="822" y="658" text-anchor="middle" fill="#fca5a5" font-size="9" font-weight="600">L6 Read Only</text>
+  <rect x="884" y="640" width="100" height="28" rx="4" fill="#ef4444" fill-opacity="0.25" stroke="#ef4444" stroke-width="2"/>
+  <text x="934" y="658" text-anchor="middle" fill="#fca5a5" font-size="9" font-weight="700">L7 HALTED</text>
+
+  <!-- Arrow showing escalation direction -->
+  <line x1="1000" y1="654" x2="1120" y2="654" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arr-red)"/>
+  <text x="1060" y="648" text-anchor="middle" fill="#fca5a5" font-size="8">escalation</text>
+
+  <!-- Footer -->
+  <text x="600" y="692" text-anchor="middle" fill="#475569" font-size="9">Vorion Governed AI Execution Platform | Apache-2.0 | February 2026</text>
+</svg>

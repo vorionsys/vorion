@@ -1,0 +1,10 @@
+{
+  "requestId": "req_test_001",
+  "totalCost": 0,
+  "totalTime": 0,
+  "compliancePassed": true,
+  "qaPassed": true,
+  "errorCount": 2,
+  "iterationCount": 1,
+  "timestamp": 1772477081595
+}

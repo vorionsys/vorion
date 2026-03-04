@@ -62,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fastify-based governance API server (`createServer`, `startServer`)
 - Comprehensive test suite (401+ tests)
 
-[0.2.2]: https://github.com/vorionsys/vorion/compare/atsf-core-v0.2.1...atsf-core-v0.2.2
-[0.2.1]: https://github.com/vorionsys/vorion/compare/atsf-core-v0.2.0...atsf-core-v0.2.1
-[0.2.0]: https://github.com/vorionsys/vorion/compare/atsf-core-v0.1.0...atsf-core-v0.2.0
-[0.1.0]: https://github.com/vorionsys/vorion/releases/tag/atsf-core-v0.1.0
+[0.2.2]: https://github.com/voriongit/vorion/compare/atsf-core-v0.2.1...atsf-core-v0.2.2
+[0.2.1]: https://github.com/voriongit/vorion/compare/atsf-core-v0.2.0...atsf-core-v0.2.1
+[0.2.0]: https://github.com/voriongit/vorion/compare/atsf-core-v0.1.0...atsf-core-v0.2.0
+[0.1.0]: https://github.com/voriongit/vorion/releases/tag/atsf-core-v0.1.0

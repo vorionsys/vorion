@@ -1,4 +1,4 @@
-# @vorionsys/car-client
+# @vorion/car-client
 
 TypeScript client SDK for the **Categorical Agentic Registry (CAR)** -- the unique agent identity, registration, and provenance system within the Vorion platform.
 
@@ -8,18 +8,18 @@ The **Categorical Agentic Registry (CAR)** is Vorion's **identity layer** for AI
 
 CAR is the **identity registry** that the **Phase 6 Trust Engine** (ATSF/Cognigate) relies on. The trust engine implements five architectural decisions (Q1-Q5) governing how agents earn trust, assume roles, inherit presets, and maintain auditable provenance -- all keyed to CAR IDs. The trust model is governed by **BASIS** (Baseline Authority for Safe & Interoperable Systems), an independent standards body that defines the canonical trust tiers, role matrices, and compliance ceilings. In short: **CAR answers "WHO is this agent?"** while **ATSF/Cognigate answers "HOW MUCH do we trust this agent?"**
 
-This SDK (`@vorionsys/car-client`) provides a type-safe TypeScript client for programmatic access to the CAR identity APIs -- registering agents, tracking provenance, managing the full agent identity lifecycle, and evaluating role permissions. It also re-exports convenience wrappers for trust engine operations (ceiling checks, gaming alerts) that reference CAR-registered agents.
+This SDK (`@vorion/car-client`) provides a type-safe TypeScript client for programmatic access to the CAR identity APIs -- registering agents, tracking provenance, managing the full agent identity lifecycle, and evaluating role permissions. It also re-exports convenience wrappers for trust engine operations (ceiling checks, gaming alerts) that reference CAR-registered agents.
 
 ## Installation
 
 ```bash
-npm install @vorionsys/car-client
+npm install @vorion/car-client
 ```
 
 ## Quick Start
 
 ```typescript
-import { createCARClient } from '@vorionsys/car-client'
+import { createCARClient } from '@vorion/car-client'
 
 // Create a client connected to the CAR API
 const client = createCARClient({
@@ -70,7 +70,7 @@ if (result.evaluation.finalDecision === 'ALLOW') {
 Every agent in CAR has immutable provenance. Register a new agent identity or track derivation from existing agents:
 
 ```typescript
-import { createCARClient } from '@vorionsys/car-client'
+import { createCARClient } from '@vorion/car-client'
 
 const client = createCARClient({
   baseUrl: 'https://api.agentanchorai.com',
@@ -236,7 +236,7 @@ await client.updateGamingAlertStatus(
 ### Local Development
 
 ```typescript
-import { createLocalCARClient } from '@vorionsys/car-client'
+import { createLocalCARClient } from '@vorion/car-client'
 
 // Connect to a local CAR API with debug logging enabled
 const client = createLocalCARClient(3000)
@@ -366,7 +366,7 @@ All request types have companion Zod schemas for runtime validation:
 ### Error Handling
 
 ```typescript
-import { CARError } from '@vorionsys/car-client'
+import { CARError } from '@vorion/car-client'
 
 try {
   await client.evaluateRoleGate(request)
@@ -385,7 +385,7 @@ try {
 
 ## Trust Tiers
 
-> **Architectural note:** Trust tiers are computed by the trust engine (ATSF/Cognigate) at runtime, not stored in the CAR identity. CAR does not assign or track trust scores. This table is included as a developer reference because the `@vorionsys/car-client` SDK re-exports trust tier constants and utility functions (e.g., `getTierFromScore`) as a convenience for consumers who need both identity and trust data.
+> **Architectural note:** Trust tiers are computed by the trust engine (ATSF/Cognigate) at runtime, not stored in the CAR identity. CAR does not assign or track trust scores. This table is included as a developer reference because the `@vorion/car-client` SDK re-exports trust tier constants and utility functions (e.g., `getTierFromScore`) as a convenience for consumers who need both identity and trust data.
 
 | Tier | Label | Score Range | Description |
 |------|-------|-------------|-------------|
@@ -414,7 +414,7 @@ try {
 
 ## Compliance Frameworks
 
-> **Architectural note:** Compliance ceiling enforcement is a trust engine concept. The trust engine (ATSF/Cognigate) caps trust scores based on regulatory frameworks for CAR-registered agents. These constants are re-exported by the `@vorionsys/car-client` SDK for developer convenience.
+> **Architectural note:** Compliance ceiling enforcement is a trust engine concept. The trust engine (ATSF/Cognigate) caps trust scores based on regulatory frameworks for CAR-registered agents. These constants are re-exported by the `@vorion/car-client` SDK for developer convenience.
 
 | Framework | Max Trust Score | Description |
 |-----------|----------------|-------------|
@@ -425,7 +425,7 @@ try {
 
 ## Provenance Modifiers
 
-> **Architectural note:** Provenance modifiers are trust engine inputs, not CAR identity fields. When CAR records an agent's creation type (FRESH, CLONED, etc.), the trust engine (ATSF/Cognigate) applies these modifiers to compute the agent's initial trust score. The modifiers are re-exported by the `@vorionsys/car-client` SDK for developer convenience.
+> **Architectural note:** Provenance modifiers are trust engine inputs, not CAR identity fields. When CAR records an agent's creation type (FRESH, CLONED, etc.), the trust engine (ATSF/Cognigate) applies these modifiers to compute the agent's initial trust score. The modifiers are re-exported by the `@vorion/car-client` SDK for developer convenience.
 
 | Creation Type | Trust Modifier | Description |
 |---------------|---------------|-------------|
@@ -441,6 +441,6 @@ Apache-2.0. See [LICENSE](./LICENSE) for details.
 
 ## Links
 
-- [Repository](https://github.com/vorionsys/vorion)
-- [Package directory](https://github.com/vorionsys/vorion/tree/main/packages/car-client)
-- [Issue tracker](https://github.com/vorionsys/vorion/issues)
+- [Repository](https://github.com/voriongit/vorion)
+- [Package directory](https://github.com/voriongit/vorion/tree/main/packages/car-client)
+- [Issue tracker](https://github.com/voriongit/vorion/issues)

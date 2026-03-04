@@ -1,0 +1,84 @@
+---
+import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
+import DashboardNav from '../components/DashboardNav.astro';
+import DashboardFooter from '../components/DashboardFooter.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'BAI Command Center - Internal IT/DevOps Dashboard',
+} = Astro.props;
+
+const fullTitle = title === 'Dashboard' ? 'BAI Command Center' : `${title} | BAI Command Center`;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <Analytics />
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+    <div class="flex flex-col min-h-screen">
+      <DashboardNav />
+      <main class="flex-grow p-6">
+        <slot />
+      </main>
+      <DashboardFooter />
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background-color: rgba(99, 102, 241, 0.3);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #020617;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1e293b #020617;
+  }
+</style>

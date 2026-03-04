@@ -1,0 +1,136 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Read governance metrics directly from KV (self-fetch doesn't work in CF Pages SSR)
+let governance = null;
+try {
+  const kv = (Astro.locals as any).runtime?.env?.BAI_CC_CACHE;
+  if (kv) {
+    const raw = await kv.get('dashboard:governance-metrics');
+    if (raw) governance = JSON.parse(raw);
+  }
+} catch {
+  // Governance data will be null
+}
+---
+
+<Layout title="Governance Metrics | Vorion Dashboard">
+  <div class="space-y-8">
+    <section class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold">Governance Metrics</h1>
+        <p class="text-slate-400 mt-2">Platform-wide governance and compliance metrics</p>
+      </div>
+      <a href="/" class="text-slate-400 hover:text-white transition-colors">
+        ← Back to Dashboard
+      </a>
+    </section>
+
+    {governance ? (
+      <>
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h2 class="text-sm font-medium text-slate-400 mb-2">Total Actions</h2>
+            <p class="text-3xl font-bold">{governance.totalActions?.toLocaleString() ?? '—'}</p>
+            <p class="text-xs text-slate-500 mt-1">Last 30 days</p>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h2 class="text-sm font-medium text-slate-400 mb-2">Approved</h2>
+            <p class="text-3xl font-bold text-emerald-400">{governance.approvedActions?.toLocaleString() ?? '—'}</p>
+            <p class="text-xs text-emerald-500 mt-1">
+              {governance.approvalRate ? `${governance.approvalRate}% approval rate` : '—'}
+            </p>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h2 class="text-sm font-medium text-slate-400 mb-2">Escalated</h2>
+            <p class="text-3xl font-bold text-yellow-400">{governance.escalatedActions?.toLocaleString() ?? '—'}</p>
+            <p class="text-xs text-yellow-500 mt-1">
+              {governance.escalationRate ? `${governance.escalationRate}% escalation rate` : '—'}
+            </p>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h2 class="text-sm font-medium text-slate-400 mb-2">Blocked</h2>
+            <p class="text-3xl font-bold text-red-400">{governance.blockedActions?.toLocaleString() ?? '—'}</p>
+            <p class="text-xs text-red-500 mt-1">
+              {governance.blockRate ? `${governance.blockRate}% block rate` : '—'}
+            </p>
+          </div>
+        </section>
+
+        <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <h2 class="text-xl font-bold mb-4">Policy Compliance</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-slate-400">Active Policies</span>
+                <span class="font-bold">{governance.activePolicies ?? 0}</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2">
+                <div class="bg-emerald-500 h-2 rounded-full" style="width: 100%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-slate-400">Compliance Rate</span>
+                <span class="font-bold text-emerald-400">{governance.complianceRate ?? 0}%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2">
+                <div class="bg-emerald-500 h-2 rounded-full" style={`width: ${governance.complianceRate ?? 0}%`}></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-slate-400">Avg Response Time</span>
+                <span class="font-bold">{governance.avgResponseTimeMs ?? 0}ms</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: 80%"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+          {governance.recentActivity?.length > 0 ? (
+            <div class="space-y-3">
+              {governance.recentActivity.slice(0, 10).map((activity: any) => (
+                <div class="flex items-center justify-between py-2 border-b border-slate-700 last:border-0">
+                  <div class="flex items-center gap-3">
+                    <div class={`w-2 h-2 rounded-full ${
+                      activity.status === 'approved' ? 'bg-emerald-500' :
+                      activity.status === 'escalated' ? 'bg-yellow-500' :
+                      'bg-red-500'
+                    }`}></div>
+                    <span class="text-sm">{activity.action ?? 'Action'}</span>
+                  </div>
+                  <span class="text-xs text-slate-500">
+                    {activity.timestamp ? new Date(activity.timestamp).toLocaleString() : '—'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p class="text-slate-400 text-center py-4">No recent activity</p>
+          )}
+        </section>
+      </>
+    ) : (
+      <section class="text-center py-16 bg-slate-800/30 rounded-xl border border-slate-700">
+        <p class="text-slate-400">Loading governance metrics...</p>
+        <p class="text-sm text-slate-500 mt-2">Data syncs every 5 minutes</p>
+      </section>
+    )}
+
+    <section class="text-center py-4 text-slate-500 text-sm">
+      {governance?.timestamp && (
+        <p>Last updated: {new Date(governance.timestamp).toLocaleString()}</p>
+      )}
+    </section>
+  </div>
+</Layout>

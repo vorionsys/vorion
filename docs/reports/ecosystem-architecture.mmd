@@ -1,0 +1,57 @@
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#4c6ef5', 'primaryTextColor': '#fff', 'primaryBorderColor': '#364fc7', 'lineColor': '#868e96', 'secondaryColor': '#1b1b3a', 'tertiaryColor': '#1b1b3a'}}}%%
+graph TB
+    subgraph DOMAINS["Public Domains"]
+        D1["vorion.org"]
+        D2["agentanchorai.com"]
+        D3["status.agentanchorai.com"]
+        D4["bai-cc.com"]
+        D5["basis.vorion.org"]
+        D6["aci.vorion.org"]
+        D7["learn.vorion.org"]
+        D8["aurais.net"]
+        D9["cognigate.dev"]
+    end
+
+    subgraph VERCEL["Vercel Platform — 10 apps"]
+        V1["marketing<br/>(Astro SSG)<br/>7 pages"]
+        V2["agentanchor-www<br/>(Next.js SSG)<br/>5 pages"]
+        V3["agentanchor<br/>(Next.js SSR)<br/>73 pages + 29 APIs"]
+        V4["status-www<br/>(Next.js SSG)<br/>1 page + 1 API"]
+        V5["bai-cc-www<br/>(Astro SSG)<br/>13 pages"]
+        V6["basis-docs<br/>(Docusaurus)<br/>19 pages"]
+        V7["aci-docs<br/>(Docusaurus)<br/>13 pages"]
+        V8["kaizen<br/>(Next.js SSR)<br/>15 pages"]
+        V9["aurais<br/>(Next.js SSR)<br/>24 pages"]
+        V10["vorion-admin<br/>(Next.js SSR)<br/>10 pages"]
+    end
+
+    subgraph CF["Cloudflare Platform"]
+        C1["bai-cc-dashboard<br/>(Astro SSR)<br/>6 pages + 12 APIs"]
+        C2["KV: BAI_CC_CACHE<br/>7 cached keys"]
+    end
+
+    subgraph FLY["Fly.io"]
+        F1["cognigate-api<br/>(Fastify)<br/>7 endpoints"]
+    end
+
+    subgraph SELF["Self-Hosted"]
+        S1["api<br/>(Fastify)<br/>10 agent commands"]
+    end
+
+    D1 --> V1
+    D2 --> V2
+    D2 --> V3
+    D3 --> V4
+    D4 --> V5
+    D4 -.->|"⚠ DNS mismatch — SSR broken"| C1
+    D5 --> V6
+    D6 --> V7
+    D7 --> V8
+    D8 --> V9
+    D9 --> F1
+
+    C1 --> C2
+
+    style C1 fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style D4 fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style F1 fill:#ffa94d,stroke:#e67700,color:#000

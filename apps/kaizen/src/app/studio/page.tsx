@@ -1,24 +1,24 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  limit,
-  doc,
-  deleteDoc,
-  updateDoc,
-  setDoc,
-  serverTimestamp,
-  increment
-} from 'firebase/firestore';
-import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import { User } from '@supabase/supabase-js';
 import { X } from 'lucide-react';
 
-import { getFirebaseDb, getFirebaseAuth, isFirebaseConfigured, APP_ID } from '@/lib/studio/firebase';
+import {
+  isStudioConfigured,
+  getStudioClient,
+  APP_ID,
+  signInAnonymous,
+  subscribeToMessages,
+  subscribeToAgents,
+  subscribeToMetrics,
+  addMessage,
+  addAgent,
+  deleteAgent,
+  updateAgentXP,
+  updateMetrics,
+} from '@/lib/studio/supabase-studio';
+import type { StudioMessage } from '@/lib/studio/supabase-studio';
 import {
   FACTIONS,
   CONTENT_TYPES,
@@ -38,15 +38,14 @@ function StudioUnconfigured() {
         </div>
         <h1 className="text-2xl font-bold text-white mb-3">Studio Not Configured</h1>
         <p className="text-gray-400 mb-6">
-          The Agent Studio requires Firebase and Gemini API keys to run agent simulations.
+          The Agent Studio requires Supabase and Gemini API keys to run agent simulations.
           These environment variables are not currently set.
         </p>
         <div className="bg-white/5 rounded-xl border border-white/10 p-4 text-left text-sm mb-6">
           <p className="text-gray-500 mb-2">Required environment variables:</p>
           <code className="text-xs text-orange-400 block space-y-1">
-            <span className="block">NEXT_PUBLIC_FIREBASE_API_KEY</span>
-            <span className="block">NEXT_PUBLIC_FIREBASE_PROJECT_ID</span>
-            <span className="block">NEXT_PUBLIC_FIREBASE_APP_ID</span>
+            <span className="block">NEXT_PUBLIC_SUPABASE_URL</span>
+            <span className="block">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>
             <span className="block">NEXT_PUBLIC_GEMINI_API_KEY</span>
           </code>
         </div>
@@ -59,6 +58,21 @@ function StudioUnconfigured() {
       </div>
     </div>
   );
+}
+
+/** Map a StudioMessage row to the factions.ts Message interface */
+function toMessage(sm: StudioMessage): Message {
+  return {
+    id: sm.id,
+    author: sm.author,
+    faction: sm.faction,
+    role: sm.role,
+    content: sm.content,
+    contentType: sm.contentType,
+    level: sm.level,
+    status: sm.status,
+    timestamp: sm.created_at ? new Date(sm.created_at) : new Date(),
+  };
 }
 
 export default function StudioPage() {
@@ -80,7 +94,7 @@ export default function StudioPage() {
   const [filterFaction, setFilterFaction] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const configured = isFirebaseConfigured();
+  const configured = isStudioConfigured();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const pulseIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -96,64 +110,66 @@ export default function StudioPage() {
     }, ...prev].slice(0, 40));
   }, []);
 
-  // Auth & Listeners
+  // Auth — Supabase anonymous sign-in + auth state listener
   useEffect(() => {
     if (!configured) return;
-    const auth = getFirebaseAuth();
+    const client = getStudioClient();
+    if (!client) return;
 
     const initAuth = async () => {
       try {
-        await signInAnonymously(auth);
+        await signInAnonymous();
       } catch (err) {
         console.error('Auth failure', err);
-        addLog('AUTH', `Firebase auth failed: ${(err as Error).message}`, 'error');
+        addLog('AUTH', `Supabase auth failed: ${(err as Error).message}`, 'error');
       }
     };
 
     initAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
-    return () => unsubscribe();
-  }, [configured, addLog]);
 
-  useEffect(() => {
-    if (!user || !configured) return;
-
-    const db = getFirebaseDb();
-    const globalRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'metrics', 'network_health');
-
-    const unsubscribeGlobal = onSnapshot(globalRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setGlobalState({
-          entropy: typeof data.entropy === 'number' ? data.entropy : 50,
-          slope: typeof data.slope === 'string' ? data.slope : 'neutral',
-        });
-      } else {
-        setDoc(globalRef, { entropy: 50, slope: 'neutral', totalActions: 0 });
-      }
-    });
-
-    const msgQuery = query(
-      collection(db, 'artifacts', APP_ID, 'public', 'data', 'scratchpad'),
-      orderBy('timestamp', 'desc'),
-      limit(100)
-    );
-
-    const unsubscribeMsgs = onSnapshot(msgQuery, (snapshot) => {
-      setMessages(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Message)).reverse());
-    });
-
-    const agentQuery = collection(db, 'artifacts', APP_ID, 'public', 'data', 'active_agents');
-    const unsubscribeAgents = onSnapshot(agentQuery, (snapshot) => {
-      setAgents(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Agent)));
+    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
     });
 
     return () => {
-      unsubscribeGlobal();
-      unsubscribeMsgs();
-      unsubscribeAgents();
+      subscription.unsubscribe();
     };
-  }, [user]);
+  }, [configured, addLog]);
+
+  // Realtime subscriptions — messages, agents, metrics
+  useEffect(() => {
+    if (!user || !configured) return;
+
+    const unsubMessages = subscribeToMessages((studioMessages) => {
+      setMessages(studioMessages.map(toMessage));
+    });
+
+    const unsubAgents = subscribeToAgents((studioAgents) => {
+      setAgents(studioAgents.map(sa => ({
+        id: sa.id,
+        name: sa.name,
+        role: sa.role,
+        faction: sa.faction,
+        ability: sa.ability,
+        level: sa.level,
+        xp: sa.xp,
+        trustScore: sa.trustScore,
+      })));
+    });
+
+    const unsubMetrics = subscribeToMetrics((metrics) => {
+      setGlobalState({
+        entropy: metrics.entropy,
+        slope: metrics.slope,
+      });
+    });
+
+    return () => {
+      unsubMessages();
+      unsubAgents();
+      unsubMetrics();
+    };
+  }, [user, configured]);
 
   // Auto Pulse
   useEffect(() => {
@@ -176,16 +192,11 @@ export default function StudioPage() {
     }
   }, [messages, activeTab]);
 
-  const updateEntropy = async (change: number) => {
+  const updateEntropyDelta = async (change: number) => {
     if (!user) return;
-    const db = getFirebaseDb();
-    const globalRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'metrics', 'network_health');
     const newEntropy = Math.max(0, Math.min(100, (globalState.entropy || 50) + change));
-    await updateDoc(globalRef, {
-      entropy: newEntropy,
-      slope: change > 0 ? 'rising' : 'falling',
-      totalActions: increment(1),
-    });
+    const slope = change > 0 ? 'rising' : 'falling';
+    await updateMetrics(newEntropy, slope);
   };
 
   const submitDirective = async (e: React.FormEvent) => {
@@ -193,9 +204,8 @@ export default function StudioPage() {
     if (!directorInput.trim() || !user) return;
 
     addLog('DIRECTOR', `Injecting mandate: "${directorInput}"`, 'safe');
-    const db = getFirebaseDb();
 
-    await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'scratchpad'), {
+    await addMessage({
       author: 'SYSTEM_DIRECTOR',
       faction: 'ADMIN',
       role: 'OVERSEER',
@@ -203,7 +213,6 @@ export default function StudioPage() {
       contentType: 'Signal',
       level: 99,
       status: 'CLEAN',
-      timestamp: serverTimestamp(),
     });
 
     setDirectorInput('');
@@ -281,8 +290,7 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
         }
       }
 
-      const db = getFirebaseDb();
-      await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'scratchpad'), {
+      await addMessage({
         author: String(agent.name),
         faction: String(agent.faction),
         role: String(agent.role),
@@ -290,13 +298,10 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
         contentType: detectedType,
         level: Number(agent.level || 1),
         status,
-        timestamp: serverTimestamp(),
       });
 
-      await updateEntropy(entropyDelta);
-      await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'active_agents', agent.id), {
-        xp: increment(25),
-      });
+      await updateEntropyDelta(entropyDelta);
+      await updateAgentXP(agent.id, 25);
     } catch (err) {
       addLog('CRITICAL', String((err as Error).message), 'error');
     }
@@ -310,8 +315,7 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
     const name = `${cls.name.split('-')[0]}_${Math.floor(Math.random() * 999)}`;
 
     try {
-      const db = getFirebaseDb();
-      await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'active_agents'), {
+      await addAgent({
         name,
         role: cls.name,
         faction: factionKey,
@@ -319,7 +323,6 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
         level: 1,
         xp: 0,
         trustScore: cls.baseTrust,
-        createdAt: serverTimestamp(),
       });
       addLog('ANCHOR', `Node Authenticated: ${name}`, factionKey === 'VORION' ? 'safe' : 'info');
     } finally {
@@ -333,10 +336,9 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
     addLog('ANCHOR', `Deploying ${factionKey} tactical batch...`, 'info');
 
     try {
-      const db = getFirebaseDb();
       const promises = FACTIONS[factionKey].classes.map(cls => {
         const name = `${cls.name.split('-')[0]}_${Math.floor(Math.random() * 999)}`;
-        return addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'active_agents'), {
+        return addAgent({
           name,
           role: cls.name,
           faction: factionKey,
@@ -344,7 +346,6 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
           level: 1,
           xp: 0,
           trustScore: cls.baseTrust,
-          createdAt: serverTimestamp(),
         });
       });
       await Promise.all(promises);
@@ -358,8 +359,7 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
 
   const banAgent = async (id: string) => {
     if (!user) return;
-    const db = getFirebaseDb();
-    await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'active_agents', id));
+    await deleteAgent(id);
     addLog('GOVERNANCE', 'Node purged.', 'error');
     setConfirmBan(null);
   };
@@ -564,7 +564,7 @@ IMPORTANT: Start response with tag: [Art], [Poetry], [Story], [Book], [Article],
         {!user && (
           <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center">
             <p className="text-yellow-400 text-sm font-mono">
-              Authenticating with Firebase... Agent controls will be enabled once connected.
+              Authenticating with Supabase... Agent controls will be enabled once connected.
             </p>
           </div>
         )}

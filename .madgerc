@@ -1,0 +1,13 @@
+{
+  "detectiveOptions": {
+    "ts": {
+      "skipTypeImports": true
+    }
+  },
+  "fileExtensions": ["ts", "tsx"],
+  "excludeRegExp": [
+    ".*\\.test\\.ts$",
+    ".*\\.spec\\.ts$",
+    "node_modules"
+  ]
+}

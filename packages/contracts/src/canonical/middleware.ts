@@ -6,7 +6,7 @@
  * These types unify various implementations across the codebase into a single
  * source of truth.
  *
- * @module @vorionsys/contracts/canonical/middleware
+ * @module @vorion/contracts/canonical/middleware
  */
 
 import { z } from 'zod';

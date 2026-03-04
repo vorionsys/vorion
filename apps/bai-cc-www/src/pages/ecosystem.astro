@@ -1,0 +1,376 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { products, domains, packages, apis, wiring } from '../data/ecosystem-status';
+
+const statusColors: Record<string, string> = {
+  GA: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  BETA: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  ALPHA: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  DEV: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+  STABLE: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  PREVIEW: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+};
+
+const vorionProducts = products.filter(p => p.org === 'vorion');
+const anchorProducts = products.filter(p => p.org === 'agentanchor');
+const publishedPkgs = packages.filter(p => p.published);
+const internalPkgs = packages.filter(p => !p.published);
+
+const wiringCategories = [...new Set(wiring.map(w => w.category))];
+const totalWiring = wiring.length;
+const doneWiring = wiring.filter(w => w.done).length;
+const wiringPct = Math.round((doneWiring / totalWiring) * 100);
+
+const totalDomains = domains.length;
+const deployedDomains = domains.filter(d => d.deployed).length;
+
+// Per-category wiring stats for progress bars
+const categoryStats = wiringCategories.map(cat => {
+  const items = wiring.filter(w => w.category === cat);
+  const done = items.filter(w => w.done).length;
+  const total = items.length;
+  const pct = Math.round((done / total) * 100);
+  return { category: cat, done, total, pct };
+});
+
+const categoryColors: Record<string, string> = {
+  Standards: 'from-emerald-500 to-emerald-400',
+  Packages: 'from-blue-500 to-blue-400',
+  Integration: 'from-violet-500 to-violet-400',
+  Deployment: 'from-amber-500 to-amber-400',
+  'CI/CD': 'from-cyan-500 to-cyan-400',
+};
+
+const categoryDotColors: Record<string, string> = {
+  Standards: 'bg-emerald-500',
+  Packages: 'bg-blue-500',
+  Integration: 'bg-violet-500',
+  Deployment: 'bg-amber-500',
+  'CI/CD': 'bg-cyan-500',
+};
+---
+
+<BaseLayout title="Ecosystem" description="Full ecosystem status — products, domains, packages, APIs, and wiring checklist">
+  <section class="py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Header -->
+      <div class="max-w-3xl mb-12">
+        <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">Ecosystem Status</h1>
+        <p class="text-lg text-slate-400 leading-relaxed">
+          Single source of truth for what's built, what's wired, and what needs work.
+          Updated from <code class="text-sm bg-slate-800 px-2 py-0.5 rounded">apps/bai-cc-www/src/data/ecosystem-status.ts</code>
+        </p>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="text-2xl font-bold text-white">{products.length}</span>
+          </div>
+          <div class="text-sm text-slate-400 mt-1">Products</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span class={`inline-flex rounded-full h-2 w-2 ${deployedDomains === totalDomains ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+            <span class="text-2xl font-bold text-white">{deployedDomains}/{totalDomains}</span>
+          </div>
+          <div class="text-sm text-slate-400 mt-1">Domains Deployed</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span class={`inline-flex rounded-full h-2 w-2 ${publishedPkgs.length === packages.length ? 'bg-emerald-500' : 'bg-blue-500'}`}></span>
+            <span class="text-2xl font-bold text-white">{publishedPkgs.length}/{packages.length}</span>
+          </div>
+          <div class="text-sm text-slate-400 mt-1">Packages Published</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span class={`inline-flex rounded-full h-2 w-2 ${wiringPct === 100 ? 'bg-emerald-500' : wiringPct >= 80 ? 'bg-blue-500' : 'bg-amber-500'}`}></span>
+            <span class="text-2xl font-bold text-white">{wiringPct}%</span>
+          </div>
+          <div class="text-sm text-slate-400 mt-1">Wiring Complete</div>
+        </div>
+      </div>
+
+      <!-- Overall Wiring Progress -->
+      <div class="mb-16 p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-medium text-white">Ecosystem Wiring</h3>
+          <span class="text-sm text-slate-400">{doneWiring}/{totalWiring} complete</span>
+        </div>
+        <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden mb-4">
+          <div
+            class="h-full bg-gradient-to-r from-vorion-500 to-accent-cyan rounded-full transition-all"
+            style={`width: ${wiringPct}%`}
+          />
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          {categoryStats.map(cs => (
+            <div class="flex items-center gap-2">
+              <span class={`flex-shrink-0 w-2 h-2 rounded-full ${categoryDotColors[cs.category] || 'bg-slate-500'}`}></span>
+              <span class="text-xs text-slate-400">{cs.category}</span>
+              <span class={`text-xs font-medium ${cs.pct === 100 ? 'text-emerald-400' : 'text-slate-500'}`}>{cs.pct}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- CI/CD Status Badges -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">CI/CD Pipeline</h2>
+        <div class="flex flex-wrap gap-3 p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/ci.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/ci.yml/badge.svg" alt="CI" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/ci-python.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/ci-python.yml/badge.svg" alt="Python CI" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/secrets-scan.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/secrets-scan.yml/badge.svg" alt="Secrets Scan" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/deploy.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/deploy.yml/badge.svg" alt="Deploy" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/schema-check.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/schema-check.yml/badge.svg" alt="Schema Drift Check" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/publish-packages.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/publish-packages.yml/badge.svg" alt="Publish Packages" />
+          </a>
+        </div>
+      </div>
+
+      <!-- Section 1: Products -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Products</h2>
+
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Vorion (Open Source)</h3>
+        <div class="overflow-x-auto mb-8">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Product</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Status</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Category</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">URL</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">npm</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vorionProducts.map(p => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-medium text-white">{p.name}</td>
+                  <td class="py-3 px-4">
+                    <span class={`inline-block px-2 py-0.5 rounded text-xs font-medium border ${statusColors[p.status]}`}>{p.status}</span>
+                  </td>
+                  <td class="py-3 px-4 text-slate-400">{p.category}</td>
+                  <td class="py-3 px-4">
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" class="text-vorion-400 hover:underline">{p.url.replace('https://', '')}</a>
+                  </td>
+                  <td class="py-3 px-4 text-slate-500 font-mono text-xs">{p.npmPackage || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Agent Anchor (Commercial)</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Product</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Status</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Category</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">URL</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">npm</th>
+              </tr>
+            </thead>
+            <tbody>
+              {anchorProducts.map(p => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-medium text-white">{p.name}</td>
+                  <td class="py-3 px-4">
+                    <span class={`inline-block px-2 py-0.5 rounded text-xs font-medium border ${statusColors[p.status]}`}>{p.status}</span>
+                  </td>
+                  <td class="py-3 px-4 text-slate-400">{p.category}</td>
+                  <td class="py-3 px-4">
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" class="text-accent-cyan hover:underline">{p.url.replace('https://', '')}</a>
+                  </td>
+                  <td class="py-3 px-4 text-slate-500 font-mono text-xs">{p.npmPackage || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Domain Wiring -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Domain Wiring</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Domain</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Purpose</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">App Dir</th>
+                <th class="text-center py-3 px-4 text-slate-400 font-medium">Code</th>
+                <th class="text-center py-3 px-4 text-slate-400 font-medium">Deployed</th>
+                <th class="text-center py-3 px-4 text-slate-400 font-medium">DNS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {domains.map(d => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-mono text-xs text-white">{d.domain}</td>
+                  <td class="py-3 px-4 text-slate-400">{d.purpose}</td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-500">{d.appDir || '—'}</td>
+                  <td class="py-3 px-4 text-center">{d.hasCodebase ? '✓' : '—'}</td>
+                  <td class="py-3 px-4 text-center">{d.deployed ? '✓' : '—'}</td>
+                  <td class="py-3 px-4 text-center">{d.dnsConfigured ? '✓' : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 3: Packages -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Packages</h2>
+
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Published ({publishedPkgs.length})</h3>
+        <div class="overflow-x-auto mb-8">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Package</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Version</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Source</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">npm</th>
+              </tr>
+            </thead>
+            <tbody>
+              {publishedPkgs.map(p => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-mono text-xs text-white">{p.name}</td>
+                  <td class="py-3 px-4 text-slate-400">{p.version}</td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-500">{p.sourceDir}</td>
+                  <td class="py-3 px-4">
+                    {p.npmUrl ? (
+                      <a href={p.npmUrl} target="_blank" rel="noopener noreferrer" class="text-vorion-400 hover:underline text-xs">View</a>
+                    ) : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Internal ({internalPkgs.length})</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Package</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Version</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {internalPkgs.map(p => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-mono text-xs text-white">{p.name}</td>
+                  <td class="py-3 px-4 text-slate-400">{p.version}</td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-500">{p.sourceDir}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 4: APIs -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">API Endpoints</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Service</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Version</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Status</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Production</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Staging</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apis.map(a => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-medium text-white">{a.service}</td>
+                  <td class="py-3 px-4 text-slate-400">{a.version}</td>
+                  <td class="py-3 px-4">
+                    <span class={`inline-block px-2 py-0.5 rounded text-xs font-medium border ${statusColors[a.status]}`}>{a.status}</span>
+                  </td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-400">{a.productionUrl.replace('https://', '')}</td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-500">{a.stagingUrl?.replace('https://', '') || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 5: Wiring Checklist -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-2">Wiring Checklist</h2>
+        <p class="text-slate-400 mb-8">
+          <span class="text-white font-medium">{doneWiring}/{totalWiring}</span> items complete ({wiringPct}%)
+        </p>
+
+        {categoryStats.map(cs => {
+          const items = wiring.filter(w => w.category === cs.category);
+          const gradient = categoryColors[cs.category] || 'from-slate-500 to-slate-400';
+          const dotColor = categoryDotColors[cs.category] || 'bg-slate-500';
+          return (
+            <div class="mb-8">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="flex items-center gap-2 text-sm font-medium text-white">
+                  <span class={`w-2 h-2 rounded-full ${dotColor}`}></span>
+                  {cs.category}
+                </h3>
+                <span class={`text-xs font-medium ${cs.pct === 100 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                  {cs.done}/{cs.total} ({cs.pct}%)
+                </span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-800 rounded-full mb-3 overflow-hidden">
+                <div
+                  class={`h-full bg-gradient-to-r ${gradient} rounded-full transition-all`}
+                  style={`width: ${cs.pct}%`}
+                />
+              </div>
+              <div class="space-y-2">
+                {items.map(item => (
+                  <div class="flex items-center gap-3 py-2 px-4 rounded-lg bg-slate-900/30 border border-slate-800/50">
+                    <span class={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-xs ${item.done ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-600'}`}>
+                      {item.done ? '✓' : ' '}
+                    </span>
+                    <span class={item.done ? 'text-slate-400' : 'text-white'}>{item.description}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+    </div>
+  </section>
+</BaseLayout>

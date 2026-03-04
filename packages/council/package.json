@@ -59,11 +59,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vorionsys/vorion.git",
+    "url": "git+https://github.com/voriongit/vorion.git",
     "directory": "packages/council"
   },
   "bugs": {
-    "url": "https://github.com/vorionsys/vorion/issues"
+    "url": "https://github.com/voriongit/vorion/issues"
   },
   "homepage": "https://vorion.org",
   "engines": {

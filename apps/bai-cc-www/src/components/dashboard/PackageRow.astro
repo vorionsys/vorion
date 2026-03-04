@@ -1,0 +1,74 @@
+---
+interface Props {
+  name: string;
+  label: string;
+  latestVersion: string;
+  weeklyDownloads: number;
+  lastPublished: string | null;
+}
+
+const { name, label, latestVersion, weeklyDownloads, lastPublished } = Astro.props;
+
+function formatNumber(num: number): string {
+  return num.toLocaleString('en-US');
+}
+
+function formatRelativeTime(dateStr: string | null): string {
+  if (!dateStr) return 'Unknown';
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+  const diffWeek = Math.floor(diffDay / 7);
+  const diffMonth = Math.floor(diffDay / 30);
+
+  if (diffSec < 60) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHour < 24) return `${diffHour}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  if (diffWeek < 5) return `${diffWeek}w ago`;
+  if (diffMonth < 12) return `${diffMonth}mo ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+const formattedDownloads = formatNumber(weeklyDownloads);
+const relativeTime = formatRelativeTime(lastPublished);
+---
+
+<div class="grid grid-cols-12 gap-4 items-center py-3 px-4 rounded-lg hover:bg-slate-800/50 transition-colors border-b border-slate-800/50 last:border-0">
+  <!-- Package name -->
+  <div class="col-span-5 sm:col-span-4 min-w-0">
+    <div class="font-mono text-sm text-vorion-400 truncate" title={name}>
+      {name}
+    </div>
+    <div class="text-xs text-slate-500 truncate">{label}</div>
+  </div>
+
+  <!-- Version badge -->
+  <div class="col-span-2 sm:col-span-2">
+    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-vorion-500/10 text-vorion-400 border border-vorion-500/20">
+      v{latestVersion}
+    </span>
+  </div>
+
+  <!-- Weekly downloads -->
+  <div class="col-span-3 sm:col-span-3">
+    <div class="flex items-center gap-1.5 text-sm text-slate-300">
+      <svg class="w-3.5 h-3.5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      </svg>
+      <span class="font-mono text-xs tabular-nums">{formattedDownloads}</span>
+      <span class="text-xs text-slate-500 hidden sm:inline">/wk</span>
+    </div>
+  </div>
+
+  <!-- Last published -->
+  <div class="col-span-2 sm:col-span-3 text-right">
+    <span class="text-xs text-slate-500" title={lastPublished || undefined}>
+      {relativeTime}
+    </span>
+  </div>
+</div>

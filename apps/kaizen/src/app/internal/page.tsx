@@ -1,15 +1,50 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase-client';
+
+/**
+ * Supabase table: studio_tasks
+ *
+ * CREATE TABLE studio_tasks (
+ *   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+ *   text          TEXT NOT NULL,
+ *   status        TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
+ *   solution_link TEXT,
+ *   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+ *   completed_at  TIMESTAMPTZ
+ * );
+ */
+
+const STUDIO_TASKS_TABLE = 'studio_tasks';
 
 interface Task {
   id: string;
   text: string;
   status: 'pending' | 'completed';
   solutionLink?: string;
-  createdAt?: { seconds: number };
-  completedAt?: { seconds: number };
+  createdAt?: string;
+  completedAt?: string;
+}
+
+/** Fallback seed data when Supabase is not configured */
+const FALLBACK_TASKS: Task[] = [
+  { id: '1', text: 'Integrate shared-constants across all packages', status: 'completed', solutionLink: 'github.com/vorionsys/vorion/commit/5b03b63', createdAt: new Date().toISOString() },
+  { id: '2', text: 'Update GitHub READMEs with ecosystem info', status: 'pending', createdAt: new Date().toISOString() },
+  { id: '3', text: 'Deploy Cognigate API to production', status: 'pending', createdAt: new Date().toISOString() },
+  { id: '4', text: 'Implement @vorion/security package', status: 'pending', createdAt: new Date().toISOString() },
+];
+
+function rowToTask(row: Record<string, unknown>): Task {
+  return {
+    id: row.id as string,
+    text: row.text as string,
+    status: (row.status as 'pending' | 'completed') || 'pending',
+    solutionLink: (row.solution_link as string) || undefined,
+    createdAt: row.created_at as string | undefined,
+    completedAt: row.completed_at as string | undefined,
+  };
 }
 
 export default function VorionDevLog() {
@@ -19,31 +54,99 @@ export default function VorionDevLog() {
   const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
   const [solutionLink, setSolutionLink] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [useCloud, setUseCloud] = useState(false);
 
-  // TODO: Replace with actual Firebase initialization
-  // For now using local state - integrate with your Firebase config
-  useEffect(() => {
-    // Simulated initial data - replace with Firebase listener
-    const initialTasks: Task[] = [
-      { id: '1', text: 'Integrate shared-constants across all packages', status: 'completed', solutionLink: 'github.com/vorionsys/vorion/commit/5b03b63', createdAt: { seconds: Date.now() / 1000 } },
-      { id: '2', text: 'Update GitHub READMEs with ecosystem info', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
-      { id: '3', text: 'Deploy Cognigate API to production', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
-      { id: '4', text: 'Implement @vorionsys/security package', status: 'pending', createdAt: { seconds: Date.now() / 1000 } },
-    ];
-    setTasks(initialTasks);
-    setIsLoading(false);
+  // Fetch tasks from Supabase or fall back to local state
+  const fetchTasks = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setTasks(FALLBACK_TASKS);
+      setIsLoading(false);
+      setUseCloud(false);
+      return;
+    }
+
+    const client = getSupabaseClient();
+    if (!client) {
+      setTasks(FALLBACK_TASKS);
+      setIsLoading(false);
+      setUseCloud(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await client
+        .from(STUDIO_TASKS_TABLE)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setTasks(data.map(rowToTask));
+        setUseCloud(true);
+      } else {
+        // Table exists but is empty — use it for writes going forward
+        setTasks([]);
+        setUseCloud(true);
+      }
+    } catch {
+      // Table may not exist yet — fall back to local
+      console.warn('studio_tasks table not available, using local fallback');
+      setTasks(FALLBACK_TASKS);
+      setUseCloud(false);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const handleAddTask = () => {
+  useEffect(() => {
+    fetchTasks();
+
+    // Set up realtime subscription if Supabase is configured
+    if (!isSupabaseConfigured()) return;
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    const channel = client
+      .channel('studio-tasks')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: STUDIO_TASKS_TABLE },
+        () => {
+          fetchTasks();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [fetchTasks]);
+
+  const handleAddTask = async () => {
     if (!newTaskInput.trim()) return;
 
+    if (useCloud) {
+      const client = getSupabaseClient();
+      if (client) {
+        const { error } = await client
+          .from(STUDIO_TASKS_TABLE)
+          .insert({ text: newTaskInput.trim(), status: 'pending' });
+
+        if (!error) {
+          setNewTaskInput('');
+          return; // Realtime will update the list
+        }
+      }
+    }
+
+    // Local fallback
     const newTask: Task = {
       id: Date.now().toString(),
       text: newTaskInput.trim(),
       status: 'pending',
-      createdAt: { seconds: Date.now() / 1000 },
+      createdAt: new Date().toISOString(),
     };
-
     setTasks(prev => [newTask, ...prev]);
     setNewTaskInput('');
   };
@@ -60,15 +163,34 @@ export default function VorionDevLog() {
     setSolutionLink('');
   };
 
-  const submitCompletion = () => {
+  const submitCompletion = async () => {
     if (!completingTaskId) return;
 
+    if (useCloud) {
+      const client = getSupabaseClient();
+      if (client) {
+        const { error } = await client
+          .from(STUDIO_TASKS_TABLE)
+          .update({
+            status: 'completed',
+            solution_link: solutionLink || 'N/A',
+            completed_at: new Date().toISOString(),
+          })
+          .eq('id', completingTaskId);
+
+        if (!error) {
+          closeModal();
+          return; // Realtime will update the list
+        }
+      }
+    }
+
+    // Local fallback
     setTasks(prev => prev.map(task =>
       task.id === completingTaskId
-        ? { ...task, status: 'completed' as const, solutionLink: solutionLink || 'N/A', completedAt: { seconds: Date.now() / 1000 } }
+        ? { ...task, status: 'completed' as const, solutionLink: solutionLink || 'N/A', completedAt: new Date().toISOString() }
         : task
     ));
-
     closeModal();
   };
 
@@ -257,8 +379,10 @@ export default function VorionDevLog() {
               <p className="text-[#888888] text-sm">Live Engineering & Strategy Tasks</p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs font-mono text-green-500">SYSTEM ONLINE</span>
+              <div className={`w-2 h-2 rounded-full animate-pulse ${useCloud ? 'bg-green-500' : 'bg-amber-500'}`} />
+              <span className={`text-xs font-mono ${useCloud ? 'text-green-500' : 'text-amber-500'}`}>
+                {useCloud ? 'CLOUD SYNCED' : 'LOCAL MODE'}
+              </span>
             </div>
           </div>
 

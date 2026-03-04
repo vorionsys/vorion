@@ -1,0 +1,293 @@
+---
+# Vorion Helm Chart - Default Values
+# This file contains the default configuration values for the Vorion chart.
+
+# Global settings
+global:
+  # Image pull secrets for private registries
+  imagePullSecrets: []
+  # Storage class for persistent volumes
+  storageClass: ""
+
+# Number of replicas
+replicaCount: 3
+
+# Container image configuration
+image:
+  repository: vorion/api
+  pullPolicy: IfNotPresent
+  # Overrides the image tag (default is appVersion)
+  tag: ""
+
+# Image pull secrets
+imagePullSecrets: []
+
+# Override chart name
+nameOverride: ""
+fullnameOverride: ""
+
+# ServiceAccount configuration
+serviceAccount:
+  # Create a service account
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # Name of the service account (generated if not set)
+  name: ""
+  # Auto-mount API credentials
+  automountServiceAccountToken: false
+
+# Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/path: "/metrics"
+
+# Pod labels
+podLabels: {}
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+# Container security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  metricsPort: 9090
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: api.vorion.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: vorion-api-tls
+      hosts:
+        - api.vorion.example.com
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+    ephemeral-storage: 100Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+    ephemeral-storage: 50Mi
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+  # maxUnavailable: 1
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity rules
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: vorion
+              app.kubernetes.io/component: api
+          topologyKey: kubernetes.io/hostname
+
+# Topology spread constraints
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: vorion
+
+# Liveness probe
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Readiness probe
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Startup probe
+startupProbe:
+  httpGet:
+    path: /health/live
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 30
+  successThreshold: 1
+
+# Environment configuration
+env:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  LOG_FORMAT: json
+  PORT: "3000"
+  METRICS_PORT: "9090"
+
+# ConfigMap values (non-sensitive)
+config:
+  # Database settings
+  database:
+    host: postgresql.vorion.svc.cluster.local
+    port: "5432"
+    name: vorion
+    sslMode: require
+    poolMin: "5"
+    poolMax: "20"
+
+  # Redis settings
+  redis:
+    host: redis.vorion.svc.cluster.local
+    port: "6379"
+    db: "0"
+    keyPrefix: "vorion:"
+
+  # API settings
+  api:
+    version: v1
+    prefix: /api
+    requestTimeout: "30000"
+    bodySizeLimit: 10mb
+
+  # Rate limiting
+  rateLimit:
+    windowMs: "60000"
+    maxRequests: "100"
+
+# Secrets configuration
+secrets:
+  # Create secrets (set to false if using external secrets)
+  create: true
+  # External secret name (if not creating)
+  existingSecret: ""
+  # Secret values (use external secrets management in production)
+  values:
+    dbUser: ""
+    dbPassword: ""
+    redisPassword: ""
+    jwtSecret: ""
+    jwtRefreshSecret: ""
+    encryptionKey: ""
+    sessionSecret: ""
+
+# Network policies
+networkPolicy:
+  enabled: true
+  # Allow ingress from these namespace labels
+  ingressNamespaceSelector:
+    kubernetes.io/metadata.name: ingress-nginx
+  # Allow prometheus scraping from monitoring namespace
+  prometheusNamespace: monitoring
+
+# Extra volumes
+extraVolumes: []
+
+# Extra volume mounts
+extraVolumeMounts: []
+
+# Init containers
+initContainers:
+  waitForDependencies:
+    enabled: true
+    image: busybox:1.36
+
+# PostgreSQL subchart configuration
+postgresql:
+  enabled: false
+  auth:
+    username: vorion
+    database: vorion
+    existingSecret: vorion-secrets
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+
+# Redis subchart configuration
+redis:
+  enabled: false
+  auth:
+    enabled: true
+    existingSecret: vorion-secrets
+    existingSecretPasswordKey: REDIS_PASSWORD
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi

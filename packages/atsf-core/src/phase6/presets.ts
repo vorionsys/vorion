@@ -632,7 +632,7 @@ export async function initializeVorionPresets(service: PresetService): Promise<v
       context: 0.05,
     },
     'Vorion platform default for T4+ agents in regulated environments',
-    '@vorionsys/platform'
+    '@vorion/platform'
   );
 
   // Balanced autonomy preset (for general use)
@@ -643,7 +643,7 @@ export async function initializeVorionPresets(service: PresetService): Promise<v
     'basis:preset:balanced',
     undefined, // Use BASIS balanced weights exactly
     'Vorion platform default for general-purpose agents',
-    '@vorionsys/platform'
+    '@vorion/platform'
   );
 
   // Performance-focused preset (emphasizes capability)
@@ -660,7 +660,7 @@ export async function initializeVorionPresets(service: PresetService): Promise<v
       context: 0.10,
     },
     'Vorion platform default for compute-intensive agents',
-    '@vorionsys/platform'
+    '@vorion/platform'
   );
 
   logger.info('Vorion reference presets initialized');

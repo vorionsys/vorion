@@ -1,0 +1,115 @@
+name: Mutation Testing
+
+on:
+  schedule:
+    # Weekly: every Sunday at 02:00 UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to mutate (contracts, platform-core, or all)'
+        required: false
+        default: 'all'
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # TypeScript Mutation Testing (Stryker)
+  # ============================================================================
+  stryker:
+    name: Stryker Mutation (TypeScript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npx turbo build --filter=@vorionsys/contracts --filter=@vorionsys/platform-core
+
+      - name: Run Stryker
+        run: npx stryker run
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_KEY }}
+
+      - name: Upload Stryker report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stryker-report
+          path: reports/mutation/
+          retention-days: 30
+
+      - name: Post mutation score summary
+        if: always()
+        run: |
+          echo "## Stryker Mutation Testing Results" >> $GITHUB_STEP_SUMMARY
+          if [ -f reports/mutation/mutation.json ]; then
+            SCORE=$(node -e "const r=require('./reports/mutation/mutation.json'); console.log(r.mutationScore?.toFixed(1) || 'N/A')")
+            echo "Mutation Score: **${SCORE}%**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Report not generated." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ============================================================================
+  # Python Mutation Testing (mutmut)
+  # ============================================================================
+  mutmut:
+    name: mutmut Mutation (Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ../cognigate
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: vorionsys/cognigate
+          path: cognigate
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: cognigate
+        run: |
+          pip install -e ".[dev]"
+          pip install mutmut
+
+      - name: Run mutmut on core modules
+        working-directory: cognigate
+        run: |
+          mutmut run \
+            --paths-to-mutate=app/core/circuit_breaker.py,app/core/velocity.py,app/core/tripwires.py,app/core/signatures.py \
+            --tests-dir=tests/ \
+            --runner="python -m pytest -x --tb=no -q" \
+            || true
+
+      - name: Generate results
+        working-directory: cognigate
+        run: |
+          mutmut results > mutmut-results.txt 2>&1 || true
+          echo "## mutmut Mutation Testing Results" >> $GITHUB_STEP_SUMMARY
+          cat mutmut-results.txt >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload mutmut results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutmut-report
+          path: cognigate/mutmut-results.txt
+          retention-days: 30

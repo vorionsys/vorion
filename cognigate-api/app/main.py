@@ -1,0 +1,266 @@
+"""
+Cognigate Engine - Main FastAPI Application
+
+The operational engine that enforces the BASIS standard for AI agent governance.
+"""
+
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+from pathlib import Path
+
+import structlog
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, Response
+
+from app.config import get_settings
+from app.routers import enforce, intent, proof, health, admin
+from app.core.cache import cache_manager
+from app.core.async_logger import async_log_queue
+from app.core.signatures import signature_manager
+from app.core.policy_engine import policy_engine
+from app.core.redis_velocity import redis_velocity_backend
+from app.core.trust_service import trust_service
+from app.core.agentanchor_trust import create_agentanchor_provider
+from app.db import init_db, close_db
+
+# Configure structured logging
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        structlog.processors.JSONRenderer(),
+    ],
+    wrapper_class=structlog.stdlib.BoundLogger,
+    context_class=dict,
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
+
+logger = structlog.get_logger()
+settings = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Application lifespan manager."""
+    logger.info(
+        "cognigate_starting",
+        version=settings.app_version,
+        environment=settings.environment,
+    )
+    # Initialize async logger
+    await async_log_queue.start()
+    # Initialize database
+    await init_db()
+    # Initialize Redis cache
+    await cache_manager.connect()
+    # Initialize signature manager
+    if settings.signature_enabled:
+        signature_manager.initialize(
+            key_path=settings.signature_key_path or None
+        )
+    # Initialize policy engine with default policies
+    policy_engine.load_default_policies()
+
+    # Load YAML policy files from policies/ directory
+    policies_dir = Path(__file__).parent.parent / "policies"
+    if policies_dir.exists():
+        yaml_files = sorted(policies_dir.glob("*.yaml")) + sorted(policies_dir.glob("*.yml"))
+        for yaml_file in yaml_files:
+            try:
+                loaded = policy_engine.load_policies_from_file(str(yaml_file))
+                logger.info("yaml_policies_loaded", file=yaml_file.name, count=loaded)
+            except Exception as e:
+                logger.error("yaml_policy_load_error", file=yaml_file.name, error=str(e))
+    else:
+        logger.info("no_policies_directory", path=str(policies_dir))
+
+    # Initialize Redis velocity backend (graceful degradation)
+    if settings.redis_enabled:
+        redis_ok = await redis_velocity_backend.connect(settings.redis_url)
+        if redis_ok:
+            logger.info("redis_velocity_backend_connected")
+        else:
+            logger.info("redis_velocity_backend_unavailable", fallback="in-memory")
+
+    # Wire AgentAnchor trust provider if configured
+    aa_provider = create_agentanchor_provider()
+    if aa_provider:
+        trust_service.set_remote_provider(aa_provider)
+        logger.info("agentanchor_trust_provider_active")
+
+    # Validate secrets in non-development environments
+    settings.validate_production_secrets()
+
+    logger.info("policy_engine_initialized", policies=len(policy_engine.list_policies()))
+    yield
+    # Cleanup
+    await redis_velocity_backend.disconnect()
+    await cache_manager.disconnect()
+    await close_db()
+    await async_log_queue.stop()
+    logger.info("cognigate_shutdown")
+
+
+# Create FastAPI application
+app = FastAPI(
+    title=settings.app_name,
+    description="""
+## Cognigate Engine
+
+The operational engine that enforces the **BASIS** standard for AI agent governance.
+
+### Core Endpoints
+
+- **INTENT** (`/v1/intent`) - Normalize and validate agent intentions
+- **ENFORCE** (`/v1/enforce`) - Evaluate intentions against BASIS policies
+- **PROOF** (`/v1/proof`) - Generate and verify cryptographic evidence
+
+### The Stack
+
+```
+BASIS sets the rules.
+INTENT figures out the goal.
+ENFORCE stops the bad stuff.
+PROOF shows the receipts.
+```
+
+Powered by **VORION** - The Steward of Safe Autonomous Systems.
+    """,
+    version=settings.app_version,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+    lifespan=lifespan,
+)
+
+# CORS middleware - Define who can access the brain
+origins = [
+    "http://localhost:3000",              # Local Frontend
+    "https://vorion.org",                 # Production Frontend
+    "https://www.vorion.org",             # Production Redirect
+    "https://cognigate.dev",              # Dev Portal
+    "https://agentanchorai.com",          # AgentAnchor Marketing
+    "https://app.agentanchorai.com",      # AgentAnchor Platform
+    "https://trust.agentanchorai.com",    # Trust Portal
+    "https://logic.agentanchorai.com",    # Logic Portal
+    "https://aurais.agentanchorai.com",   # Aurais Assistant
+    "https://bai-cc.com",                 # BAI Command Center
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Admin-Key", "X-API-Key"],
+)
+
+# Compression middleware - Reduces JSON response sizes by 60-80%
+# Only compresses responses larger than 500 bytes
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
+# Include routers
+app.include_router(health.router, tags=["Health"])
+app.include_router(intent.router, prefix=settings.api_prefix, tags=["Intent"])
+app.include_router(enforce.router, prefix=settings.api_prefix, tags=["Enforce"])
+app.include_router(proof.router, prefix=settings.api_prefix, tags=["Proof"])
+app.include_router(admin.router, prefix=settings.api_prefix, tags=["Admin"])
+
+
+# Mount static files
+static_path = Path(__file__).parent.parent / "static"
+if static_path.exists():
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Serve favicon."""
+    favicon_path = static_path / "favicon.png"
+    if favicon_path.exists():
+        return FileResponse(str(favicon_path), media_type="image/png")
+    return FileResponse(str(favicon_path))
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    """Serve the landing page."""
+    index_path = static_path / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path), media_type="text/html")
+    # Fallback to docs if landing page doesn't exist
+    return HTMLResponse(
+        content='<html><head><meta http-equiv="refresh" content="0;url=/docs"></head></html>',
+        status_code=200,
+    )
+
+
+@app.get("/status", include_in_schema=False)
+async def status_page():
+    """Serve the system status page."""
+    status_path = static_path / "status.html"
+    if status_path.exists():
+        return FileResponse(str(status_path), media_type="text/html")
+    # Fallback to health endpoint if status page doesn't exist
+    return HTMLResponse(
+        content='<html><head><meta http-equiv="refresh" content="0;url=/health"></head></html>',
+        status_code=200,
+    )
+
+
+@app.get("/robots.txt", include_in_schema=False)
+async def robots():
+    """Serve robots.txt for search engine crawlers."""
+    content = """User-agent: *
+Allow: /
+
+Sitemap: https://cognigate.dev/sitemap.xml
+"""
+    return PlainTextResponse(content=content, media_type="text/plain")
+
+
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap():
+    """Serve sitemap.xml for search engines."""
+    from datetime import datetime
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://cognigate.dev/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://cognigate.dev/docs</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://cognigate.dev/status</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cognigate.dev/redoc</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>
+"""
+    return Response(content=content, media_type="application/xml")

@@ -1,0 +1,451 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const packages = [
+  {
+    name: '@vorionsys/basis',
+    version: '1.0.0',
+    description: 'Baseline Authority for Safe & Interoperable Systems. The open standard for AI agent governance.',
+    license: 'Apache-2.0',
+    npm: 'npm install @vorionsys/basis',
+    href: 'https://www.npmjs.com/package/@vorionsys/basis',
+    icon: 'shield',
+    color: 'from-cyan-500 to-blue-500',
+    borderColor: 'hover:border-cyan-500/40',
+    badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  },
+  {
+    name: '@vorionsys/platform-core',
+    version: '0.1.0',
+    description: 'Core business logic for trust engine, governance, enforcement, and proof systems. 15+ subsystems.',
+    license: 'Apache-2.0',
+    npm: 'npm install @vorionsys/platform-core',
+    href: 'https://www.npmjs.com/package/@vorionsys/platform-core',
+    icon: 'cpu',
+    color: 'from-indigo-500 to-purple-500',
+    borderColor: 'hover:border-indigo-500/40',
+    badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  },
+  {
+    name: '@vorionsys/vorion-sdk',
+    version: '0.1.0',
+    description: 'Official SDK for Vorion - agent registry, trust scoring, and attestations.',
+    license: 'Apache-2.0',
+    npm: 'npm install @vorionsys/vorion-sdk',
+    href: 'https://www.npmjs.com/package/@vorionsys/vorion-sdk',
+    icon: 'fingerprint',
+    color: 'from-violet-500 to-fuchsia-500',
+    borderColor: 'hover:border-violet-500/40',
+    badgeColor: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+  },
+  {
+    name: '@vorionsys/proof-plane',
+    version: '0.1.0',
+    description: 'Immutable audit trail for AI agent operations. Events, proof generation, and verification.',
+    license: 'Apache-2.0',
+    npm: 'npm install @vorionsys/proof-plane',
+    href: 'https://www.npmjs.com/package/@vorionsys/proof-plane',
+    icon: 'layers',
+    color: 'from-emerald-500 to-teal-500',
+    borderColor: 'hover:border-emerald-500/40',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  },
+  {
+    name: '@vorionsys/runtime',
+    version: '0.1.0',
+    description: 'Orchestration layer for AI agent governance. Trust facade, intent pipeline, proof committer.',
+    license: 'Apache-2.0',
+    npm: 'npm install @vorionsys/runtime',
+    href: 'https://www.npmjs.com/package/@vorionsys/runtime',
+    icon: 'network',
+    color: 'from-amber-500 to-orange-500',
+    borderColor: 'hover:border-amber-500/40',
+    badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  },
+  {
+    name: '@vorionsys/sdk',
+    version: '0.1.0',
+    description: 'Simple interface for AI agent governance. The easiest way to add trust to your agents.',
+    license: 'Apache-2.0',
+    npm: 'npm install @vorionsys/sdk',
+    href: 'https://www.npmjs.com/package/@vorionsys/sdk',
+    icon: 'boxes',
+    color: 'from-rose-500 to-pink-500',
+    borderColor: 'hover:border-rose-500/40',
+    badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+  },
+];
+
+const specifications = [
+  {
+    name: 'BASIS Standard',
+    description: 'Open governance standard for AI agents. The rules every system must follow. (CC BY 4.0)',
+    href: 'https://basis.vorion.org',
+    icon: 'scale',
+    color: 'from-cyan-500 to-blue-600',
+  },
+  {
+    name: 'CAR Specification',
+    description: 'Categorical Agentic Registry — TypeScript types and contracts that implement the BASIS standard.',
+    href: 'https://npmjs.com/package/@vorionsys/car-spec',
+    icon: 'fingerprint',
+    color: 'from-indigo-500 to-violet-600',
+  },
+  {
+    name: 'ATSF Framework',
+    description: '46-layer Agentic Trust Scoring Framework for comprehensive behavioral assessment and trust quantification.',
+    href: 'https://atsf.vorion.org',
+    icon: 'layers',
+    color: 'from-purple-500 to-fuchsia-600',
+  },
+];
+
+const architectureLayers = [
+  { layer: '@vorionsys/sdk', desc: 'Simple, high-level interface. The fastest way to add governance to your agents.', color: 'bg-gradient-to-r from-cyan-500 to-blue-500' },
+  { layer: '@vorionsys/runtime', desc: 'Orchestration layer. Trust facade, intent pipeline, and proof committer working together.', color: 'bg-gradient-to-r from-blue-500 to-indigo-500' },
+  { layer: '@vorionsys/platform-core', desc: 'Core business logic. 15+ subsystems including trust engine, governance, and enforcement.', color: 'bg-gradient-to-r from-indigo-500 to-violet-500' },
+  { layer: '@vorionsys/proof-plane', desc: 'Immutable audit trail. Cryptographic proof generation and verification for every action.', color: 'bg-gradient-to-r from-violet-500 to-purple-500' },
+  { layer: '@vorionsys/basis', desc: 'The foundational standard. Defines the 4-layer governance protocol that everything builds on.', color: 'bg-gradient-to-r from-purple-500 to-fuchsia-500' },
+];
+
+const ecosystem = [
+  { name: 'vorion.org', tagline: 'Governance for the Autonomous Age', href: 'https://vorion.org', color: 'bg-cyan-500/10 border-cyan-500/20 hover:border-cyan-500/40', textColor: 'text-cyan-400' },
+  { name: 'vorion.org', tagline: 'Mission Control for AI Agents', href: 'https://vorion.org', color: 'bg-indigo-500/10 border-indigo-500/20 hover:border-indigo-500/40', textColor: 'text-indigo-400' },
+  { name: 'cognigate.dev', tagline: 'Open Enforcement Engine', href: 'https://cognigate.dev', color: 'bg-violet-500/10 border-violet-500/20 hover:border-violet-500/40', textColor: 'text-violet-400' },
+  { name: 'learn.vorion.org', tagline: 'Agentic AI Knowledge Base', href: 'https://learn.vorion.org', color: 'bg-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40', textColor: 'text-emerald-400' },
+  { name: 'basis.vorion.org', tagline: 'BASIS Standard Documentation', href: 'https://basis.vorion.org', color: 'bg-amber-500/10 border-amber-500/20 hover:border-amber-500/40', textColor: 'text-amber-400' },
+];
+---
+
+<BaseLayout
+  title="Vorion Open Source"
+  description="Infrastructure for trustworthy AI agents. Open standards, open tools, open governance."
+>
+      <!-- Hero Section -->
+      <section class="pt-32 pb-20 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-cyan-400 text-sm font-medium">
+            <span class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+            6 Published Packages on npm
+          </div>
+
+          <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
+            Vorion<br />
+            <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">Open Source</span>
+          </h1>
+
+          <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Infrastructure for trustworthy AI agents. Open standards, open tools, open governance.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="#packages"
+              class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg font-semibold transition shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 inline-flex items-center justify-center gap-2"
+            >
+              <Icon name="package" size={20} class="w-5 h-5" />
+              Explore Packages
+            </a>
+            <a
+              href="https://github.com/vorionsys"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg font-semibold transition inline-flex items-center justify-center gap-2"
+            >
+              <Icon name="github" size={20} class="w-5 h-5" />
+              View on GitHub
+            </a>
+          </div>
+
+          <!-- Quick stats -->
+          <div class="mt-16 pt-8 border-t border-white/5">
+            <div class="flex flex-wrap justify-center gap-10 text-gray-500">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-white">6</div>
+                <div class="text-sm font-medium">npm Packages</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-white">3</div>
+                <div class="text-sm font-medium">Open Specs</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-white">Apache-2.0</div>
+                <div class="text-sm font-medium">License</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-white">TypeScript</div>
+                <div class="text-sm font-medium">First</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Published Packages Section -->
+      <section id="packages" class="py-20 bg-white/[0.02] border-y border-white/5">
+        <div class="max-w-7xl mx-auto px-4">
+          <div class="max-w-3xl mx-auto text-center mb-16">
+            <div class="inline-flex items-center gap-2 mb-4 px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-cyan-400 text-sm font-medium">
+              <Icon name="package" size={16} class="w-4 h-4" />
+              Published on npm
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Published Packages</h2>
+            <p class="text-lg text-gray-400">
+              Production-ready packages for AI agent governance. Install from npm and start building trusted agents today.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {packages.map((pkg) => (
+              <div class={`bg-white/[0.03] rounded-2xl border border-white/10 ${pkg.borderColor} transition-all duration-300 hover:bg-white/[0.05] group`}>
+                <div class="p-6">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class={`w-12 h-12 rounded-xl bg-gradient-to-br ${pkg.color} flex items-center justify-center shadow-lg`}>
+                      <Icon name={pkg.icon} class="w-6 h-6 text-white" />
+                    </div>
+                    <span class={`text-xs font-mono px-2.5 py-1 rounded-full border ${pkg.badgeColor}`}>
+                      v{pkg.version}
+                    </span>
+                  </div>
+                  <h3 class="text-lg font-semibold text-white mb-2 font-mono">{pkg.name}</h3>
+                  <p class="text-gray-400 text-sm leading-relaxed mb-4">{pkg.description}</p>
+                  <div class="bg-black/40 rounded-lg px-4 py-3 font-mono text-sm text-gray-300 flex items-center justify-between gap-2 mb-4 border border-white/5">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                      <Icon name="terminal" size={16} class="w-4 h-4 text-gray-500 shrink-0" />
+                      <span class="truncate">{pkg.npm}</span>
+                    </div>
+                    <Icon name="copy" size={16} class="w-4 h-4 text-gray-500 shrink-0" />
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500 flex items-center gap-1.5">
+                      <Icon name="scale" size={14} class="w-3.5 h-3.5" />
+                      {pkg.license}
+                    </span>
+                    <a
+                      href={pkg.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-sm text-cyan-400 hover:text-cyan-300 transition inline-flex items-center gap-1 font-medium"
+                    >
+                      View on npm
+                      <Icon name="external-link" size={14} class="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <!-- Quick install -->
+          <div class="mt-12 max-w-2xl mx-auto">
+            <div class="bg-black/40 rounded-xl p-5 border border-white/10">
+              <div class="flex items-center gap-2 mb-3 text-gray-500 text-sm">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="ml-2">Quick Start</span>
+              </div>
+              <pre class="font-mono text-sm text-gray-300 overflow-x-auto">{`# Install the SDK for the simplest integration
+npm install @vorionsys/sdk
+
+# Or install individual packages
+npm install @vorionsys/basis
+npm install @vorionsys/platform-core
+npm install @vorionsys/runtime`}</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Specifications Section -->
+      <section id="specifications" class="py-20">
+        <div class="max-w-7xl mx-auto px-4">
+          <div class="max-w-3xl mx-auto text-center mb-16">
+            <div class="inline-flex items-center gap-2 mb-4 px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-sm font-medium">
+              <Icon name="book-open" size={16} class="w-4 h-4" />
+              Open Standards
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Specifications</h2>
+            <p class="text-lg text-gray-400">
+              Open specifications that define how AI agents should be governed, classified, and scored.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {specifications.map((spec) => (
+              <a
+                href={spec.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group bg-white/[0.03] p-8 rounded-2xl border border-white/10 hover:border-indigo-500/40 transition-all duration-300 hover:bg-white/[0.05]"
+              >
+                <div class={`w-14 h-14 rounded-xl bg-gradient-to-br ${spec.color} flex items-center justify-center shadow-lg mb-6`}>
+                  <Icon name={spec.icon} class="w-7 h-7 text-white" />
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-3">{spec.name}</h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-4">{spec.description}</p>
+                <div class="flex items-center gap-1.5 text-indigo-400 text-sm font-medium group-hover:text-indigo-300 transition">
+                  Read Specification
+                  <Icon name="arrow-right" size={16} class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- Architecture Overview -->
+      <section class="py-20 bg-white/[0.02] border-y border-white/5">
+        <div class="max-w-7xl mx-auto px-4">
+          <div class="max-w-3xl mx-auto text-center mb-16">
+            <div class="inline-flex items-center gap-2 mb-4 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-gray-300 text-sm font-medium">
+              <Icon name="git-branch" size={16} class="w-4 h-4" />
+              Architecture
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">How It Fits Together</h2>
+            <p class="text-lg text-gray-400">
+              The Vorion open source stack is modular by design. Use what you need, extend what you want.
+            </p>
+          </div>
+
+          <div class="max-w-4xl mx-auto">
+            <div class="relative">
+              <div class="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/50 via-indigo-500/30 to-purple-500/50"></div>
+              {architectureLayers.map((item, i) => (
+                <div class="relative flex items-start gap-6 pb-8 last:pb-0">
+                  <div class={`relative z-10 w-16 h-16 ${item.color} rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+                    {i + 1}
+                  </div>
+                  <div class="flex-1 pt-2">
+                    <h3 class="text-lg font-semibold text-white mb-1 font-mono">{item.layer}</h3>
+                    <p class="text-gray-400">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ecosystem Section -->
+      <section id="ecosystem" class="py-20">
+        <div class="max-w-7xl mx-auto px-4">
+          <div class="max-w-3xl mx-auto text-center mb-16">
+            <div class="inline-flex items-center gap-2 mb-4 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm font-medium">
+              <Icon name="globe" size={16} class="w-4 h-4" />
+              Ecosystem
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">The Vorion Ecosystem</h2>
+            <p class="text-lg text-gray-400">
+              A complete ecosystem for AI agent governance - from standards to platforms to education.
+            </p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {ecosystem.map((site) => (
+              <a
+                href={site.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class={`group p-6 rounded-2xl border transition-all duration-300 ${site.color}`}
+              >
+                <div class="flex items-center justify-between mb-3">
+                  <Icon name="globe" size={20} class={`w-5 h-5 ${site.textColor}`} />
+                  <Icon name="external-link" size={16} class="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition" />
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-1">{site.name}</h3>
+                <p class="text-gray-400 text-sm">{site.tagline}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- Community Section -->
+      <section class="py-20 bg-cyan-500/5 border-y border-cyan-500/10">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+          <div class="inline-flex items-center gap-2 mb-4 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-gray-300 text-sm font-medium">
+            <Icon name="users" size={16} class="w-4 h-4" />
+            Community
+          </div>
+          <h2 class="text-3xl font-bold text-white mb-4">Join the Community</h2>
+          <p class="text-gray-400 mb-10 max-w-2xl mx-auto">
+            Contribute to open source AI governance. Star repos, submit PRs, propose specs, or just say hello.
+          </p>
+
+          <div class="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
+            <!-- GitHub -->
+            <a
+              href="https://github.com/vorionsys"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group bg-white/5 p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300"
+            >
+              <Icon name="github" class="w-8 h-8 text-white mb-3 mx-auto" />
+              <h3 class="text-lg font-semibold text-white mb-1">GitHub</h3>
+              <p class="text-gray-400 text-sm mb-3">github.com/vorionsys</p>
+              <span class="text-cyan-400 text-sm font-medium inline-flex items-center gap-1">
+                Browse Repos
+                <Icon name="chevron-right" size={16} class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </a>
+
+            <!-- Discord -->
+            <a
+              href="https://discord.gg/basis-protocol"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group bg-white/5 p-6 rounded-2xl border border-white/10 hover:border-[#5865F2]/40 transition-all duration-300"
+            >
+              <Icon name="discord" class="w-8 h-8 text-[#5865F2] mb-3 mx-auto" />
+              <h3 class="text-lg font-semibold text-white mb-1">Discord</h3>
+              <p class="text-gray-400 text-sm mb-3">discord.gg/basis-protocol</p>
+              <span class="text-[#5865F2] text-sm font-medium inline-flex items-center gap-1">
+                Join Server
+                <Icon name="chevron-right" size={16} class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </a>
+
+            <!-- License -->
+            <div class="bg-white/5 p-6 rounded-2xl border border-white/10">
+              <Icon name="scale" class="w-8 h-8 text-emerald-400 mb-3 mx-auto" />
+              <h3 class="text-lg font-semibold text-white mb-1">Apache-2.0</h3>
+              <p class="text-gray-400 text-sm mb-3">Open source license</p>
+              <span class="text-emerald-400 text-sm font-medium inline-flex items-center gap-1">
+                <Icon name="heart" size={14} class="w-3.5 h-3.5" />
+                Free forever
+              </span>
+            </div>
+          </div>
+
+          <!-- Contributing CTA -->
+          <div class="bg-white/5 rounded-2xl border border-white/10 p-8 max-w-2xl mx-auto">
+            <h3 class="text-xl font-semibold text-white mb-3">Start Contributing</h3>
+            <p class="text-gray-400 mb-6">
+              Every contribution matters - from fixing a typo to proposing a new standard. Check out our repositories and find something that interests you.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href="https://github.com/vorionsys"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg font-medium transition inline-flex items-center justify-center gap-2"
+              >
+                <Icon name="github" size={20} class="w-5 h-5" />
+                View Repositories
+              </a>
+              <a
+                href="https://discord.gg/basis-protocol"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-6 py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg font-medium transition inline-flex items-center justify-center gap-2"
+              >
+                <Icon name="zap" size={20} class="w-5 h-5" />
+                Join Discussion
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+</BaseLayout>

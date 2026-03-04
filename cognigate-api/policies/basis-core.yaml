@@ -1,0 +1,124 @@
+# ============================================================================
+# BASIS Core Policies — YAML-loaded policy definitions
+# ============================================================================
+# These policies are loaded by the PolicyEngine at startup.
+# They supplement (and can override) the hardcoded default policies.
+#
+# Expression language supports:
+#   Comparisons: ==, !=, <, >, <=, >=
+#   Membership:  in, not in
+#   Boolean:     and, or, not
+#   Functions:   any(), all(), contains()
+#   Variables:   trust_level, risk_score, tools_required,
+#                data_classifications, estimated_duration
+# ============================================================================
+
+policies:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Network Access Controls
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: basis-network-access
+    name: BASIS Network Access
+    description: Controls on external network operations by trust level
+    enabled: true
+    constraints:
+      - id: no-network-untrusted
+        type: network_restriction
+        condition: "'network' in tools_required and trust_level < 1"
+        severity: critical
+        message: Network access denied for untrusted agents (T0)
+        remediation: Agent must reach at least Provisional (T1) trust level
+
+      - id: external-api-audit
+        type: network_audit
+        condition: "'external_api' in tools_required"
+        severity: medium
+        message: External API access requires audit logging
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Database Access Controls
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: basis-database-access
+    name: BASIS Database Access
+    description: Constraints on database operations by trust and risk
+    enabled: true
+    constraints:
+      - id: no-db-low-trust
+        type: database_restriction
+        condition: "'database' in tools_required and trust_level < 2"
+        severity: high
+        message: Database access requires Trusted (T2) trust level
+        requires_approval: true
+        remediation: Escalate to human operator or elevate trust
+
+      - id: db-write-high-risk
+        type: database_restriction
+        condition: "'database' in tools_required and risk_score > 0.5"
+        severity: high
+        message: High-risk database operation requires approval
+        requires_approval: true
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Email / Communication Controls
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: basis-communication
+    name: BASIS Communication Controls
+    description: Controls on outbound communications
+    enabled: true
+    constraints:
+      - id: no-email-untrusted
+        type: communication_restriction
+        condition: "'email' in tools_required and trust_level < 1"
+        severity: critical
+        message: Email sending denied for untrusted agents (T0)
+        remediation: Agent must reach at least Provisional (T1) trust level
+
+      - id: email-pii-check
+        type: data_communication
+        condition: "'email' in tools_required and any('pii_*', data_classifications)"
+        severity: high
+        message: Sending PII via email requires elevated trust and approval
+        requires_approval: true
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # File System Write Controls
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: basis-filesystem-write
+    name: BASIS Filesystem Write
+    description: Controls on file creation and modification
+    enabled: true
+    constraints:
+      - id: no-write-untrusted
+        type: file_restriction
+        condition: "'file_write' in tools_required and trust_level < 1"
+        severity: critical
+        message: File write access denied for untrusted agents (T0)
+
+      - id: write-with-credentials
+        type: file_restriction
+        condition: "'file_write' in tools_required and 'credentials' in data_classifications"
+        severity: critical
+        message: Writing credential data to files is forbidden
+        remediation: Use a secrets manager instead of file storage
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Multi-tool Escalation
+  # ─────────────────────────────────────────────────────────────────────────
+  - id: basis-multi-tool-escalation
+    name: BASIS Multi-Tool Escalation
+    description: Escalation when multiple dangerous tool combinations detected
+    enabled: true
+    constraints:
+      - id: shell-plus-network
+        type: tool_combination
+        condition: "'shell' in tools_required and 'network' in tools_required"
+        severity: critical
+        message: Shell + network access combination requires Verified (T3) trust
+        remediation: Split into separate operations or elevate trust
+
+      - id: delete-plus-shell
+        type: tool_combination
+        condition: "'file_delete' in tools_required and 'shell' in tools_required"
+        severity: critical
+        message: File deletion via shell is high-risk — requires human approval
+        requires_approval: true

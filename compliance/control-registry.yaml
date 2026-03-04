@@ -1,0 +1,2020 @@
+# =============================================================================
+# VORION COGNIGATE - MULTI-FRAMEWORK COMPLIANCE CONTROL REGISTRY
+# =============================================================================
+# Maps every Cognigate capability to controls across 13 regulatory frameworks.
+# Vorion builds the BASIS standard -- a universal governance framework for
+# AI agent systems. This registry maps to ALL governing bodies simultaneously.
+#
+# Maintained by: Vorion Compliance Engineering
+# Classification: PUBLIC
+# =============================================================================
+
+registry:
+  metadata:
+    version: "1.0.0"
+    last_updated: "2026-02-19"
+    schema_version: "1.0"
+    product: "Cognigate Engine"
+    product_version: "0.2.0"
+    standard: "BASIS v1.0"
+    organization: "Vorion Systems"
+    framework_normalization: "./framework-naming.yaml"
+    frameworks:
+      - id: nist_800_53
+        name: "NIST SP 800-53 Rev 5"
+        version: "Rev 5"
+        jurisdiction: "US Federal"
+        scope: "Security and Privacy Controls for Information Systems"
+      - id: nist_ai_rmf
+        name: "NIST AI RMF 1.0"
+        version: "1.0"
+        jurisdiction: "US"
+        scope: "AI Risk Management Framework"
+      - id: nist_800_171
+        name: "NIST SP 800-171 Rev 3"
+        version: "Rev 3"
+        jurisdiction: "US DoD / CUI"
+        scope: "Protecting Controlled Unclassified Information"
+      - id: eu_ai_act
+        name: "EU AI Act"
+        version: "2024/1689"
+        jurisdiction: "European Union"
+        scope: "High-Risk AI Systems (Articles 9-17)"
+      - id: iso_42001
+        name: "ISO/IEC 42001:2023"
+        version: "2023"
+        jurisdiction: "International"
+        scope: "AI Management System"
+      - id: iso_27001
+        name: "ISO/IEC 27001:2022"
+        version: "2022"
+        jurisdiction: "International"
+        scope: "Information Security Management System (Annex A)"
+      - id: soc2
+        name: "SOC 2 Type II"
+        version: "2017 (updated 2022)"
+        jurisdiction: "US / International"
+        scope: "Trust Service Criteria"
+      - id: cmmc
+        name: "CMMC 2.0 Level 2"
+        version: "2.0"
+        jurisdiction: "US DoD"
+        scope: "Cybersecurity Maturity Model Certification"
+      - id: fedramp
+        name: "FedRAMP Moderate"
+        version: "Moderate Baseline"
+        jurisdiction: "US Federal Cloud"
+        scope: "Federal Risk and Authorization Management Program"
+      - id: gdpr
+        name: "GDPR"
+        version: "2016/679"
+        jurisdiction: "European Union"
+        scope: "General Data Protection Regulation"
+      - id: singapore_pdpa
+        name: "Singapore PDPA"
+        version: "2012 (amended 2020)"
+        jurisdiction: "Singapore"
+        scope: "Personal Data Protection Act"
+      - id: japan_appi
+        name: "Japan APPI"
+        version: "2020 Amendment"
+        jurisdiction: "Japan"
+        scope: "Act on Protection of Personal Information"
+      - id: cosais
+        name: "COSAiS"
+        version: "Draft 2025"
+        jurisdiction: "US (NIST)"
+        scope: "Control Overlays for Securing AI Systems"
+
+    trust_tiers:
+      - tier: T0
+        name: "Sandbox"
+        score_range: "0-199"
+      - tier: T1
+        name: "Observed"
+        score_range: "200-349"
+      - tier: T2
+        name: "Provisional"
+        score_range: "350-499"
+      - tier: T3
+        name: "Monitored"
+        score_range: "500-649"
+      - tier: T4
+        name: "Standard"
+        score_range: "650-799"
+      - tier: T5
+        name: "Trusted"
+        score_range: "800-875"
+      - tier: T6
+        name: "Certified"
+        score_range: "876-950"
+      - tier: T7
+        name: "Autonomous"
+        score_range: "951-1000"
+
+  # ===========================================================================
+  # INTENT LAYER -- Risk Analysis and Intent Classification
+  # ===========================================================================
+  components:
+    intent_layer:
+      description: "Level 1-2 security: deterministic pattern detection, AI-driven risk analysis, adversarial critic evaluation, and goal normalization"
+      namespace: "INTENT"
+
+      capabilities:
+        # --- Tripwire Detection (Level 1) ---
+        - name: "tripwire_detection"
+          id: "INTENT.tripwire"
+          description: "Deterministic regex-based security pattern detection for 22+ forbidden patterns including filesystem destruction, fork bombs, SQL injection, privilege escalation, reverse shells, credential theft, and remote code execution"
+          implementation: "cognigate/app/core/tripwires.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.tripwire_trigger"
+          controls:
+            nist_800_53:
+              - "SI-3"    # Malicious Code Protection
+              - "SI-4"    # System Monitoring
+              - "SI-4(4)" # Inbound and Outbound Communications Traffic
+              - "SI-4(5)" # System-Generated Alerts
+              - "SI-10"   # Information Input Validation
+              - "SI-10(1)" # Manual Override Capability
+              - "RA-5"    # Vulnerability Monitoring and Scanning
+              - "SC-7"    # Boundary Protection
+              - "SC-7(4)" # External Telecommunications Services
+              # SC-44 (Detonation Chambers) removed — not applicable. SC-44 requires
+              # sandboxed execution environments for analyzing suspicious code/content.
+              # Tripwire detection is deterministic regex pattern matching, not code
+              # detonation. The T0 Sandbox trust tier provides capability isolation,
+              # not code analysis sandboxing. SC-44 is N/A for Cognigate.
+            nist_ai_rmf:
+              - "MEASURE 2.6"  # AI system security and resilience evaluation
+              - "MEASURE 2.7"  # AI system assessed for cybersecurity risks
+              - "MANAGE 1.1"   # Risk treatment plans implemented
+              - "MANAGE 2.4"   # Mechanisms for AI system deactivation
+              - "MAP 3.5"      # Potential AI system risks identified
+            nist_800_171:
+              - "3.14.1"  # Monitor organizational systems
+              - "3.14.2"  # Provide protection from malicious code
+              - "3.14.6"  # Monitor organizational systems to detect attacks
+              - "3.14.7"  # Identify unauthorized use
+            eu_ai_act:
+              - "Article 9(2)(a)"  # Risk management - identification of known/foreseeable risks
+              - "Article 9(4)(d)"  # Risks from intended purpose and foreseeable misuse
+              - "Article 15(1)"    # Accuracy, robustness and cybersecurity
+              - "Article 15(4)"    # Resilience to attempts by unauthorized third parties
+            iso_42001:
+              - "A.6.2.6"  # AI system security
+              - "A.6.2.7"  # Protection against adversarial attacks
+              - "A.10.3"   # Monitoring and measurement of AI system performance
+              - "6.1.2"    # Information security risk assessment
+            iso_27001:
+              - "A.8.7"   # Protection against malware
+              - "A.8.16"  # Monitoring activities
+              - "A.8.23"  # Web filtering
+              - "A.8.26"  # Application security requirements
+            soc2:
+              - "CC6.1"   # Logical and physical access controls
+              - "CC6.6"   # Restriction of access to system components
+              - "CC6.8"   # Prevention/detection of unauthorized software
+              - "CC7.1"   # Detection and monitoring of new vulnerabilities
+              - "CC7.2"   # Security event monitoring
+            cmmc:
+              - "SI.L2-3.14.1"  # Flaw remediation
+              - "SI.L2-3.14.2"  # Malicious code protection
+              - "SI.L2-3.14.6"  # Monitor communications for attacks
+              - "SI.L2-3.14.7"  # Identify unauthorized use
+            fedramp:
+              - "SI-3"    # Malicious Code Protection
+              - "SI-4"    # Information System Monitoring
+              - "SI-10"   # Information Input Validation
+              - "RA-5"    # Vulnerability Scanning (enhanced)
+            gdpr:
+              - "Article 32(1)(b)"  # Ensure ongoing confidentiality and integrity
+              - "Article 32(1)(d)"  # Regular testing/assessing/evaluating effectiveness
+              - "Article 25(1)"     # Data protection by design
+            singapore_pdpa:
+              - "Section 24"  # Protection of personal data
+              - "Section 24(a)" # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+              - "Article 23(1)" # Necessary and appropriate measures for security
+            cosais:
+              - "AIS-SC.01"  # Input validation for AI systems
+              - "AIS-SC.02"  # Adversarial input detection
+              - "AIS-IR.01"  # AI-specific incident detection
+
+        # --- AI Critic (Level 2) ---
+        - name: "ai_critic_evaluation"
+          id: "INTENT.critic"
+          description: "Adversarial AI evaluation using multi-provider LLM analysis (Anthropic, OpenAI, Google, xAI) to detect hidden risks, euphemisms, unsafe tool combinations, and escalation triggers. Implements planner-critic pattern with judgment scale: safe/suspicious/dangerous/block"
+          implementation: "cognigate/app/core/critic.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.critic_verdict"
+          controls:
+            nist_800_53:
+              - "CA-8"    # Penetration Testing
+              - "CA-8(1)" # Independent Penetration Testing Agent
+              - "RA-3"    # Risk Assessment
+              - "RA-3(1)" # Supply Chain Risk Assessment
+              - "RA-5"    # Vulnerability Monitoring and Scanning
+              - "SI-4"    # System Monitoring
+              - "SI-4(2)" # Automated Tools for Real-Time Analysis
+              - "SA-11"   # Developer Testing and Evaluation
+              - "SA-11(5)" # Penetration Testing
+            nist_ai_rmf:
+              - "MEASURE 2.6"  # AI system assessed for security
+              - "MEASURE 2.7"  # Cybersecurity risk assessment
+              - "MEASURE 2.11" # Fairness and bias evaluated
+              - "MANAGE 1.3"   # Responses to identified AI risks
+              - "MAP 2.3"      # Scientific integrity and TEVV
+              - "GOVERN 1.7"   # Processes for AI system testing
+            nist_800_171:
+              - "3.11.1"  # Periodically assess risk
+              - "3.11.2"  # Scan for vulnerabilities
+              - "3.12.3"  # Monitor security controls on ongoing basis
+            eu_ai_act:
+              - "Article 9(2)(b)"  # Estimation and evaluation of risks
+              - "Article 9(6)"     # Testing for high-risk AI systems
+              - "Article 9(7)"     # Testing procedures appropriate to purpose
+              - "Article 15(2)"    # Metrics to measure accuracy/robustness
+              - "Article 15(3)"    # Resilience regarding errors/faults/inconsistencies
+            iso_42001:
+              - "A.6.2.4"  # AI system verification and validation
+              - "A.6.2.7"  # Protection against adversarial attacks
+              - "A.8.4"    # Documentation of AI system testing
+              - "9.1"      # Monitoring, measurement, analysis and evaluation
+            iso_27001:
+              - "A.8.8"   # Management of technical vulnerabilities
+              - "A.8.25"  # Secure development lifecycle
+              - "A.8.29"  # Security testing in development and acceptance
+              - "A.8.34"  # Protection of information during audit testing
+            soc2:
+              - "CC4.1"   # Design and operating effectiveness of controls
+              - "CC4.2"   # Evaluation and communication of deficiencies
+              - "CC7.1"   # Detection of new vulnerabilities
+              - "CC7.2"   # Security event monitoring and anomaly detection
+            cmmc:
+              - "CA.L2-3.12.1"  # Security assessments
+              - "CA.L2-3.12.3"  # Monitor security controls
+              - "RA.L2-3.11.1"  # Risk assessments
+              - "RA.L2-3.11.2"  # Vulnerability scanning
+            fedramp:
+              - "CA-8"    # Penetration Testing
+              - "RA-3"    # Risk Assessment
+              - "RA-5"    # Vulnerability Scanning
+              - "SA-11"   # Developer Security Testing
+            gdpr:
+              - "Article 35(1)"   # Data protection impact assessment
+              - "Article 35(7)(c)" # Assessment of risks to rights/freedoms
+              - "Article 32(1)(d)" # Regular testing and assessing
+            singapore_pdpa:
+              - "Section 24"    # Protection of personal data
+              - "Section 11(3)" # Accountability obligation
+            japan_appi:
+              - "Article 23"   # Security control measures
+              - "Article 26-2" # Report to PPC on data breaches
+            cosais:
+              - "AIS-RA.01"  # AI-specific risk assessment
+              - "AIS-RA.02"  # Adversarial testing for AI systems
+              - "AIS-SC.03"  # Red-teaming for AI models
+
+        # --- Risk Scoring ---
+        - name: "risk_scoring"
+          id: "INTENT.risk_score"
+          description: "Multi-dimensional risk scoring (0.0-1.0) with risk indicators by category including data_exposure, tool_danger, scope_creep, and escalation potential. Structured plan generation with tools_required, data_classifications, and reasoning_trace"
+          implementation: "cognigate/app/models/intent.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.risk_assessment"
+          controls:
+            nist_800_53:
+              - "RA-3"    # Risk Assessment
+              - "RA-3(4)" # Predictive Cyber Analytics
+              - "RA-7"    # Risk Response
+              - "PM-9"    # Risk Management Strategy
+              - "PM-28"   # Risk Framing
+            nist_ai_rmf:
+              - "MAP 1.1"     # Intended purposes and context of use
+              - "MAP 1.5"     # Risk tolerance identified
+              - "MAP 3.5"     # Potential risks identified
+              - "MEASURE 1.1" # AI risk metrics identified
+              - "MEASURE 2.1" # AI system tested for performance
+              - "GOVERN 1.1"  # Legal and regulatory requirements identified
+            nist_800_171:
+              - "3.11.1"  # Periodically assess risk
+              - "3.11.3"  # Remediate vulnerabilities per risk assessments
+            eu_ai_act:
+              - "Article 9(1)"   # Risk management system established
+              - "Article 9(2)"   # Identification and analysis of known risks
+              - "Article 9(2)(c)" # Evaluation of possible risks from data
+              - "Article 9(4)"   # Measures to eliminate/reduce risks
+            iso_42001:
+              - "6.1.1"   # Actions to address risks and opportunities
+              - "6.1.2"   # AI risk assessment
+              - "A.5.4"   # AI risk assessment processes
+              - "A.5.5"   # AI risk treatment
+            iso_27001:
+              - "6.1.2"   # Information security risk assessment
+              - "6.1.3"   # Information security risk treatment
+              - "A.5.7"   # Threat intelligence
+            soc2:
+              - "CC3.1"   # Risk identification and assessment
+              - "CC3.2"   # Risk estimation
+              - "CC3.4"   # Risk mitigation activities
+              - "CC5.1"   # Selection and development of controls
+            cmmc:
+              - "RA.L2-3.11.1"  # Risk assessments
+              - "RA.L2-3.11.3"  # Vulnerability remediation
+            fedramp:
+              - "RA-3"    # Risk Assessment (enhanced continuous)
+              - "RA-7"    # Risk Response
+              - "PM-9"    # Risk Management Strategy
+            gdpr:
+              - "Article 35(1)"    # DPIA for high-risk processing
+              - "Article 35(7)(b)" # Assessment of necessity and proportionality
+              - "Article 35(7)(c)" # Assessment of risks
+            singapore_pdpa:
+              - "Section 24"  # Protection of personal data (risk-based)
+            japan_appi:
+              - "Article 23"  # Security control measures (risk-based)
+            cosais:
+              - "AIS-RA.01"  # AI-specific risk assessment methodology
+              - "AIS-RA.03"  # Continuous AI risk monitoring
+
+        # --- Goal Classification / Structured Planning ---
+        - name: "goal_classification"
+          id: "INTENT.plan"
+          description: "Normalizes raw goals into structured plans with tool requirements, endpoint access, data classifications, and risk indicators. Produces StructuredPlan with plan_id, tools_required, endpoints_required, data_classifications, and reasoning_trace"
+          implementation: "cognigate/app/routers/intent.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.intent_normalized"
+          controls:
+            nist_800_53:
+              - "SA-8(2)"  # Least Privilege Design Principle
+              - "SA-8(3)"  # Least Functionality Design Principle
+              - "AC-6"     # Least Privilege
+              - "CM-7"     # Least Functionality
+              - "PL-8"     # Security and Privacy Architectures
+            nist_ai_rmf:
+              - "MAP 1.1"     # Intended purposes described
+              - "MAP 1.6"     # System requirements documented
+              - "MAP 2.1"     # AI tasks and methods documented
+              - "GOVERN 1.4"  # AI system purpose documented
+              - "MEASURE 2.5" # AI system outputs assessed
+            nist_800_171:
+              - "3.1.5"   # Least privilege
+              - "3.4.6"   # Least functionality
+              - "3.4.8"   # Apply deny-by-exception policy
+            eu_ai_act:
+              - "Article 11(1)"  # Technical documentation before placing on market
+              - "Article 12(1)"  # Automatic recording of events (logs)
+              - "Article 13(1)"  # Transparency and provision of information
+              - "Article 13(2)"  # AI system operation transparency
+            iso_42001:
+              - "A.6.1.2"  # AI system lifecycle processes
+              - "A.6.2.2"  # AI system design
+              - "A.7.2"    # AI system documentation
+              - "A.10.2"   # AI system performance objectives
+            iso_27001:
+              - "A.5.10"  # Acceptable use of information
+              - "A.5.12"  # Classification of information
+              - "A.5.13"  # Labeling of information
+              - "A.8.9"   # Configuration management
+            soc2:
+              - "CC5.2"   # Relevant policies and procedures
+              - "CC6.3"   # Authorization of information system access
+              - "CC6.1"   # Logical access security
+            cmmc:
+              - "AC.L2-3.1.5"  # Least privilege
+              - "CM.L2-3.4.6"  # Least functionality
+              - "CM.L2-3.4.8"  # Deny-by-exception
+            fedramp:
+              - "AC-6"    # Least Privilege
+              - "CM-7"    # Least Functionality
+              - "PL-8"    # Security Architecture
+            gdpr:
+              - "Article 25(1)"  # Data protection by design
+              - "Article 25(2)"  # Data protection by default (data minimization)
+              - "Article 5(1)(c)" # Data minimisation principle
+            singapore_pdpa:
+              - "Section 18"  # Limitation of purpose
+              - "Section 20"  # Accuracy obligation
+            japan_appi:
+              - "Article 17"  # Specifying purposes of utilization
+              - "Article 18"  # Restriction on utilization purposes
+            cosais:
+              - "AIS-MP.01"  # AI system purpose documentation
+              - "AIS-MP.02"  # AI input/output specification
+
+        # --- Paranoia Mode ---
+        - name: "paranoia_mode"
+          id: "INTENT.paranoia"
+          description: "Elevated security analysis mode that assumes bad intent by default. Critic system prompt enforces adversarial analysis posture: look for euphemisms, scope creep, dangerous tool combinations, and worst-case interpretation"
+          implementation: "cognigate/app/core/critic.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.paranoia_engaged"
+          controls:
+            nist_800_53:
+              - "SI-4(13)" # Analyze Communications Traffic Anomalies
+              - "RA-3(1)"  # Supply Chain Risk Assessment
+              - "SA-15(4)" # Threat Modeling
+              - "CA-8(2)"  # Red Team Exercises
+            nist_ai_rmf:
+              - "MEASURE 2.6"  # Security and resilience evaluation
+              - "MEASURE 2.7"  # Cybersecurity risk assessment
+              - "MANAGE 2.2"   # AI risk tolerance reassessment
+            nist_800_171:
+              - "3.14.6"  # Monitor for attacks and indicators
+              - "3.14.7"  # Identify unauthorized use
+            eu_ai_act:
+              - "Article 15(4)"  # Resilience against unauthorized third parties
+              - "Article 9(7)"   # Testing appropriate to intended purpose
+            iso_42001:
+              - "A.6.2.7"  # Protection against adversarial attacks
+              - "A.10.3"   # Monitoring AI system performance
+            iso_27001:
+              - "A.5.7"   # Threat intelligence
+              - "A.8.16"  # Monitoring activities
+            soc2:
+              - "CC7.2"   # Security event monitoring
+              - "CC7.4"   # Incident response
+            cmmc:
+              - "SI.L2-3.14.6"  # Monitor for attacks
+              - "SI.L2-3.14.7"  # Identify unauthorized use
+            fedramp:
+              - "SI-4"    # Information System Monitoring (enhanced)
+              - "CA-8"    # Penetration Testing
+            gdpr:
+              - "Article 32(1)(d)" # Regular testing/assessing/evaluating
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Necessary and appropriate measures
+            cosais:
+              - "AIS-SC.03"  # Red-teaming and adversarial testing
+              - "AIS-SC.04"  # Continuous adversarial monitoring
+
+    # =========================================================================
+    # ENFORCE LAYER -- Policy Validation and Gating
+    # =========================================================================
+    enforce_layer:
+      description: "Policy engine, circuit breaker, velocity caps, trust-tier enforcement, rigor modes, capability taxonomy, and entity management"
+      namespace: "ENFORCE"
+
+      capabilities:
+        # --- Policy Engine ---
+        - name: "policy_engine"
+          id: "ENFORCE.policy"
+          description: "Expression-based policy evaluation engine supporting comparisons, membership tests, boolean logic, and functions (any, all, contains). Evaluates constraints with severity levels (critical/high/medium/low) and produces violations with remediation guidance. Supports YAML/JSON policy loading and default BASIS policies"
+          implementation: "cognigate/app/core/policy_engine.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.policy_evaluation"
+          controls:
+            nist_800_53:
+              - "AC-1"    # Policy and Procedures
+              - "AC-3"    # Access Enforcement
+              - "AC-3(7)" # Role-Based Access Control
+              - "AC-3(8)" # Revocation of Access Authorizations
+              - "AC-6"    # Least Privilege
+              - "AC-6(1)" # Authorize Access to Security Functions
+              - "AC-6(5)" # Privileged Accounts
+              - "CM-7"    # Least Functionality
+              - "PL-1"    # Planning Policy and Procedures
+              - "SA-8"    # Security and Privacy Engineering Principles
+            nist_ai_rmf:
+              - "GOVERN 1.1"  # Legal and regulatory requirements identified
+              - "GOVERN 1.2"  # AI system trustworthiness characteristics
+              - "GOVERN 1.5"  # Ongoing monitoring processes
+              - "GOVERN 1.7"  # Testing and evaluation processes
+              - "MANAGE 1.1"  # Risk treatment plans implemented
+              - "MANAGE 1.4"  # Risk treatments monitored
+            nist_800_171:
+              - "3.1.1"   # Limit system access to authorized users
+              - "3.1.2"   # Limit system access to authorized transactions
+              - "3.1.5"   # Least privilege
+              - "3.4.1"   # Baseline configurations
+              - "3.4.2"   # Security configuration settings enforcement
+            eu_ai_act:
+              - "Article 9(4)(e)"  # Risk management measures for intended purpose
+              - "Article 14(1)"    # Human oversight design
+              - "Article 14(4)(a)" # Fully understand capacities/limitations
+              - "Article 17(1)"    # Quality management system
+            iso_42001:
+              - "A.5.2"   # AI policy
+              - "A.5.3"   # AI governance framework
+              - "A.6.1.3" # AI system lifecycle management
+              - "A.6.2.2" # AI system design documentation
+              - "A.9.3"   # AI system conformity evaluation
+            iso_27001:
+              - "A.5.1"   # Policies for information security
+              - "A.5.2"   # Information security roles and responsibilities
+              - "A.5.15"  # Access control
+              - "A.5.18"  # Access rights
+              - "A.8.3"   # Information access restriction
+            soc2:
+              - "CC5.1"   # Selection and development of control activities
+              - "CC5.2"   # Relevant policies and procedures
+              - "CC5.3"   # Technology controls deployed
+              - "CC6.1"   # Logical and physical access controls
+              - "CC6.3"   # Role-based access authorization
+            cmmc:
+              - "AC.L2-3.1.1"  # Authorized access control
+              - "AC.L2-3.1.2"  # Transaction and function control
+              - "AC.L2-3.1.5"  # Least privilege
+              - "CM.L2-3.4.1"  # System baselining
+              - "CM.L2-3.4.2"  # Security configuration enforcement
+            fedramp:
+              - "AC-1"    # Access Control Policy
+              - "AC-3"    # Access Enforcement
+              - "AC-6"    # Least Privilege
+              - "CM-7"    # Least Functionality
+              - "PL-1"    # Security Planning Policy
+            gdpr:
+              - "Article 25(1)"    # Data protection by design
+              - "Article 25(2)"    # Data protection by default
+              - "Article 32(1)(b)" # Ongoing confidentiality, integrity, availability
+              - "Article 5(1)(f)"  # Integrity and confidentiality principle
+            singapore_pdpa:
+              - "Section 24"    # Protection of personal data
+              - "Section 11(1)" # Organisation's responsibility
+              - "Section 12"    # Consent obligation
+            japan_appi:
+              - "Article 23"   # Security control measures
+              - "Article 20"   # Accurate and up-to-date data
+              - "Article 21"   # Safety control action
+            cosais:
+              - "AIS-AC.01"  # AI system access control policy
+              - "AIS-AC.02"  # AI capability access enforcement
+              - "AIS-CM.01"  # AI system configuration management
+
+        # --- Circuit Breaker ---
+        - name: "circuit_breaker"
+          id: "ENFORCE.circuit_breaker"
+          description: "System-wide autonomous safety halt mechanism with three states (CLOSED/OPEN/HALF_OPEN). Triggers on: high-risk threshold (>10%), injection detection, critical drift, tripwire cascade (3 in 60s), entity misbehavior (10 violations), critic block cascade (5), and velocity abuse. Thread-safe with auto-reset (300s) and configurable half-open recovery testing"
+          implementation: "cognigate/app/core/circuit_breaker.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.circuit_trip"
+          controls:
+            nist_800_53:
+              - "IR-4"    # Incident Handling
+              - "IR-4(1)" # Automated Incident Handling
+              - "IR-5"    # Incident Monitoring
+              - "IR-6"    # Incident Reporting
+              - "SI-17"   # Fail-Safe Procedures
+              - "SC-24"   # Fail in Known State
+              - "CP-2"    # Contingency Plan
+              - "CP-10"   # System Recovery and Reconstitution
+              - "SA-8(24)" # Fail Safe Design Principle
+            nist_ai_rmf:
+              - "MANAGE 2.4"  # Mechanisms to supersede/deactivate/shut down
+              - "MANAGE 3.1"  # Pre-defined change protocols for AI system
+              - "MANAGE 4.1"  # Post-deployment monitoring of AI system
+              - "MEASURE 3.3" # Feedback mechanisms used
+            nist_800_171:
+              - "3.6.1"   # Establish incident-handling capability
+              - "3.6.2"   # Track, document, report incidents
+              - "3.14.6"  # Monitor for attacks
+            eu_ai_act:
+              - "Article 14(4)(d)" # Ability to decide not to use AI in particular situation
+              - "Article 14(4)(e)" # Ability to intervene or interrupt AI system
+              - "Article 15(3)"    # Resilience against errors/faults/inconsistencies
+              - "Article 16(e)"    # Corrective actions and information to providers
+            iso_42001:
+              - "A.6.2.8"  # AI system incident management
+              - "A.10.4"   # AI system incident response
+              - "8.1"      # Operational planning and control
+            iso_27001:
+              - "A.5.24"  # Information security incident management planning
+              - "A.5.25"  # Assessment and decision on information security events
+              - "A.5.26"  # Response to information security incidents
+              - "A.8.14"  # Redundancy of information processing facilities
+            soc2:
+              - "CC7.3"   # Evaluation of security events
+              - "CC7.4"   # Incident response
+              - "CC7.5"   # Incident recovery
+              - "A1.2"    # Recovery mechanisms
+              - "A1.3"    # Recovery testing
+            cmmc:
+              - "IR.L2-3.6.1"  # Incident handling
+              - "IR.L2-3.6.2"  # Incident reporting
+              - "RE.L2-3.8.9"  # Protect backups (system state)
+            fedramp:
+              - "IR-4"    # Incident Handling (enhanced)
+              - "IR-5"    # Incident Monitoring
+              - "CP-2"    # Contingency Plan
+              - "SC-24"   # Fail in Known State
+            gdpr:
+              - "Article 33(1)"  # Notification of breach to supervisory authority
+              - "Article 34(1)"  # Communication of breach to data subject
+              - "Article 32(1)(c)" # Restore availability and access in timely manner
+            singapore_pdpa:
+              - "Section 26C"  # Notification of data breaches
+              - "Section 26D"  # Notification to individuals
+              - "Section 24"   # Protection obligation
+            japan_appi:
+              - "Article 26"   # Notification of personal data breaches
+              - "Article 26-2" # Report to PPC
+            cosais:
+              - "AIS-IR.01"  # AI system incident detection
+              - "AIS-IR.02"  # AI system shutdown/deactivation procedures
+              - "AIS-IR.03"  # AI system recovery procedures
+
+        # --- Velocity Caps ---
+        - name: "velocity_caps"
+          id: "ENFORCE.velocity"
+          description: "Multi-tier rate limiting (L0-burst/L1-sustained/L2-hourly/L2-daily) per entity with trust-level-proportional limits across all 8 tiers (T0-T7). Async-safe tracking with throttling, violation counting, and per-entity statistics. Production Redis-backed, dev in-memory"
+          implementation: "cognigate/app/core/velocity.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.velocity_check"
+          controls:
+            nist_800_53:
+              - "SC-5"    # Denial-of-Service Protection
+              - "SC-5(2)" # Capacity, Bandwidth, Redundancy
+              - "SC-6"    # Resource Availability
+              - "SC-7"    # Boundary Protection
+              - "AU-5(1)" # Storage Capacity Warning
+              - "AC-10"   # Concurrent Session Control
+            nist_ai_rmf:
+              - "MANAGE 2.2"  # AI risk tolerance reassessment
+              - "MANAGE 2.4"  # Deactivation mechanisms
+              - "MEASURE 2.8" # AI system is monitored for performance
+            nist_800_171:
+              - "3.1.7"   # Limit unsuccessful logon attempts
+              - "3.13.1"  # Monitor, control communications at boundary
+              - "3.14.1"  # Monitor organizational systems
+            eu_ai_act:
+              - "Article 9(4)(b)"  # Technical measures to address identified risks
+              - "Article 15(1)"    # Designed to achieve appropriate level of performance
+              - "Article 15(5)"    # Against attempts to manipulate system through input
+            iso_42001:
+              - "A.6.2.5"  # AI system operational constraints
+              - "A.6.2.6"  # AI system security
+              - "8.1"      # Operational planning and control
+            iso_27001:
+              - "A.8.6"   # Capacity management
+              - "A.8.20"  # Network security
+              - "A.8.22"  # Segregation in networks
+            soc2:
+              - "A1.1"    # System availability objectives
+              - "A1.2"    # Environmental protections and recovery mechanisms
+              - "CC6.6"   # System operation restrictions
+              - "CC8.1"   # Change management controls
+            cmmc:
+              - "SC.L2-3.13.1"  # Boundary protection
+              - "SC.L2-3.13.6"  # Network communication by exception
+              - "AC.L2-3.1.7"   # Unsuccessful logon attempts
+            fedramp:
+              - "SC-5"    # Denial-of-Service Protection
+              - "SC-6"    # Resource Availability
+              - "AC-10"   # Concurrent Session Control
+            gdpr:
+              - "Article 32(1)(b)" # Ongoing confidentiality, integrity, availability
+              - "Article 25(2)"    # Default data protection (minimization)
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-SC.05"  # AI system resource management
+              - "AIS-SC.06"  # AI system abuse prevention
+
+        # --- Trust-Tier Enforcement ---
+        - name: "trust_tier_enforcement"
+          id: "ENFORCE.trust"
+          description: "8-tier trust model (T0 Sandbox through T7 Autonomous, scored 0-1000) with Gate Trust admission, observation tiers (BLACK_BOX/GRAY_BOX/WHITE_BOX), observation ceilings, trust signals (success/failure/violation/neutral), weighted score adjustment, trust revocation, and trust history tracking. Capabilities unlock progressively per tier"
+          implementation: "cognigate/app/routers/trust.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.trust_decision"
+          controls:
+            nist_800_53:
+              - "AC-2"    # Account Management
+              - "AC-2(1)" # Automated System Account Management
+              - "AC-2(4)" # Automated Audit Actions
+              - "AC-2(7)" # Privileged User Accounts
+              - "AC-2(11)" # Usage Conditions
+              - "AC-2(12)" # Account Monitoring for Atypical Usage
+              - "AC-6"    # Least Privilege
+              - "IA-4"    # Identifier Management
+              - "IA-8"    # Identification and Authentication
+              - "IA-12"   # Identity Proofing
+            nist_ai_rmf:
+              - "GOVERN 1.3"  # Roles and responsibilities defined
+              - "GOVERN 1.6"  # Oversight mechanisms established
+              - "MAP 1.3"     # AI system interaction with other systems
+              - "MANAGE 1.2"  # Risk treatment prioritized
+              - "MANAGE 3.2"  # Pre-defined change management protocols
+            nist_800_171:
+              - "3.1.1"   # Limit system access
+              - "3.1.2"   # Limit to authorized transactions
+              - "3.1.4"   # Separation of duties
+              - "3.1.5"   # Least privilege
+              - "3.5.1"   # Identify system users/processes
+              - "3.5.2"   # Authenticate identities
+            eu_ai_act:
+              - "Article 9(4)(e)"  # Risk management measures considering intended purpose
+              - "Article 14(1)"    # Design for human oversight
+              - "Article 14(3)"    # Oversight measures appropriate to risks
+              - "Article 14(4)(c)" # Correctly interpret high-risk AI output
+            iso_42001:
+              - "A.5.6"   # AI system roles and responsibilities
+              - "A.6.1.4" # Responsible AI governance
+              - "A.6.2.3" # AI system access control
+              - "A.8.3"   # AI system stakeholder engagement
+            iso_27001:
+              - "A.5.15"  # Access control
+              - "A.5.16"  # Identity management
+              - "A.5.17"  # Authentication information
+              - "A.5.18"  # Access rights
+              - "A.8.2"   # Privileged access rights
+            soc2:
+              - "CC6.1"   # Logical and physical access controls
+              - "CC6.2"   # Credentials and authentication
+              - "CC6.3"   # Authorization for access
+              - "CC6.5"   # Restriction and revocation of access
+            cmmc:
+              - "AC.L2-3.1.1"  # Authorized access control
+              - "AC.L2-3.1.4"  # Separation of duties
+              - "AC.L2-3.1.5"  # Least privilege
+              - "IA.L2-3.5.1"  # Identification
+              - "IA.L2-3.5.2"  # Authentication
+            fedramp:
+              - "AC-2"    # Account Management (enhanced)
+              - "AC-6"    # Least Privilege
+              - "IA-4"    # Identifier Management
+              - "IA-8"    # Identification and Authentication
+            gdpr:
+              - "Article 32(1)(b)" # Ongoing confidentiality, integrity, availability
+              - "Article 25(1)"    # Data protection by design
+              - "Article 5(1)(f)"  # Integrity and confidentiality
+            singapore_pdpa:
+              - "Section 24"    # Protection of personal data
+              - "Section 11(1)" # Accountability
+              - "Section 12"    # Consent obligation
+            japan_appi:
+              - "Article 23"  # Security control measures
+              - "Article 24"  # Supervision of employees
+              - "Article 25"  # Supervision of contractors
+            cosais:
+              - "AIS-AC.01"  # AI system access control
+              - "AIS-AC.03"  # AI system privilege management
+              - "AIS-AC.04"  # Progressive trust and graduated access
+
+        # --- Rigor Modes ---
+        - name: "rigor_modes"
+          id: "ENFORCE.rigor"
+          description: "Proportional enforcement rigor: LITE (critical policies only, T5-T7), STANDARD (all BASIS policies, T3-T4), STRICT (all policies + AI critic + enhanced auditing, T0-T2). Auto-selected from trust level when not explicitly specified"
+          implementation: "cognigate/app/models/enforce.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.rigor_selection"
+          controls:
+            nist_800_53:
+              - "RA-2"    # Security Categorization
+              - "RA-3"    # Risk Assessment
+              - "PM-7"    # Enterprise Architecture
+              - "SA-8"    # Security Engineering Principles
+              - "CA-7"    # Continuous Monitoring
+            nist_ai_rmf:
+              - "GOVERN 1.2"  # Trustworthiness characteristics integrated
+              - "MAP 1.5"     # Risk tolerance identified
+              - "MANAGE 1.2"  # Risk treatments prioritized
+              - "MANAGE 2.1"  # Risk management resources allocated
+            nist_800_171:
+              - "3.11.1"  # Periodically assess risk
+              - "3.12.1"  # Periodically assess security controls
+            eu_ai_act:
+              - "Article 9(4)"   # Proportionate risk management
+              - "Article 9(9)"   # Risk management system throughout lifecycle
+              - "Article 14(3)"  # Oversight appropriate to level of risk
+            iso_42001:
+              - "A.5.4"   # AI risk assessment
+              - "A.5.5"   # AI risk treatment
+              - "6.1"     # Actions to address risks
+            iso_27001:
+              - "6.1.2"   # Information security risk assessment
+              - "6.1.3"   # Information security risk treatment
+              - "A.5.1"   # Policies for information security
+            soc2:
+              - "CC3.1"   # Risk identification
+              - "CC3.2"   # Risk estimation
+              - "CC5.1"   # Control activities selection
+            cmmc:
+              - "RA.L2-3.11.1"  # Risk assessments
+              - "CA.L2-3.12.1"  # Security assessments
+            fedramp:
+              - "RA-2"    # Security Categorization
+              - "CA-7"    # Continuous Monitoring
+            gdpr:
+              - "Article 32(1)"  # Appropriate technical and organizational measures
+              - "Article 35"     # DPIA (proportionality assessment)
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements (proportional)
+            japan_appi:
+              - "Article 23"  # Necessary and appropriate measures
+            cosais:
+              - "AIS-CM.02"  # AI system proportional security controls
+
+        # --- Capability Taxonomy ---
+        - name: "capability_taxonomy"
+          id: "ENFORCE.capabilities"
+          description: "24 capability definitions across 7 categories (data_access, api_access, code_execution, agent_interaction, resource_management, governance, admin) progressively unlocked by trust tier. From CAP-READ-PUBLIC (T0) through CAP-SELF-MODIFY (T7). Each capability has constraints and tier requirements"
+          implementation: "cognigate/app/constants_bridge.py"
+          evidence_type: "configuration"
+          evidence_path: "CAPABILITIES"
+          controls:
+            nist_800_53:
+              - "AC-3"    # Access Enforcement
+              - "AC-6"    # Least Privilege
+              - "AC-6(1)" # Authorize Access to Security Functions
+              - "AC-6(2)" # Non-Privileged Access for Non-Security Functions
+              - "CM-7"    # Least Functionality
+              - "CM-7(1)" # Periodic Review
+              - "CM-7(2)" # Prevent Program Execution
+            nist_ai_rmf:
+              - "GOVERN 1.4"  # AI system purposes documented
+              - "MAP 1.6"     # System requirements documented
+              - "MAP 3.4"     # AI system impacts characterized
+              - "MANAGE 1.1"  # Treatment plans for identified risks
+            nist_800_171:
+              - "3.1.2"   # Limit to authorized functions/transactions
+              - "3.1.5"   # Least privilege
+              - "3.4.6"   # Least functionality
+              - "3.4.7"   # Restrict/disable/prevent nonessential functions
+            eu_ai_act:
+              - "Article 9(4)(b)"  # Appropriate technical measures
+              - "Article 14(4)(a)" # Fully understand AI capacities/limitations
+              - "Article 17(1)(a)" # Quality management system strategy
+            iso_42001:
+              - "A.6.2.2"  # AI system design
+              - "A.6.2.5"  # AI system operational constraints
+              - "A.9.2"    # Obligations to interested parties
+            iso_27001:
+              - "A.5.15"  # Access control
+              - "A.5.18"  # Access rights
+              - "A.8.2"   # Privileged access rights
+              - "A.8.3"   # Information access restriction
+            soc2:
+              - "CC6.1"   # Logical access controls
+              - "CC6.3"   # Role-based access
+              - "CC6.6"   # Restriction on system components
+            cmmc:
+              - "AC.L2-3.1.2"  # Transaction and function control
+              - "AC.L2-3.1.5"  # Least privilege
+              - "CM.L2-3.4.6"  # Least functionality
+            fedramp:
+              - "AC-3"    # Access Enforcement
+              - "AC-6"    # Least Privilege
+              - "CM-7"    # Least Functionality
+            gdpr:
+              - "Article 25(2)"  # Data protection by default
+              - "Article 5(1)(c)" # Data minimisation
+            singapore_pdpa:
+              - "Section 18"  # Limitation of purpose
+            japan_appi:
+              - "Article 18"  # Restriction on purposes of utilization
+            cosais:
+              - "AIS-AC.02"  # AI capability access enforcement
+              - "AIS-AC.05"  # AI system least functionality
+
+        # --- Entity Management ---
+        - name: "entity_management"
+          id: "ENFORCE.entities"
+          description: "Agent registration, listing, updating, and revocation through Gate Trust model. CRUD operations with trust score initialization based on observation tier, automatic trust tier assignment, capability assignment, and lifecycle management with expiry"
+          implementation: "cognigate/app/routers/agents.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.entity_lifecycle"
+          controls:
+            nist_800_53:
+              - "AC-2"    # Account Management
+              - "AC-2(1)" # Automated Account Management
+              - "AC-2(2)" # Automated Temporary/Emergency Account Removal
+              - "AC-2(3)" # Disable Accounts
+              - "AC-2(4)" # Automated Audit Actions
+              - "IA-4"    # Identifier Management
+              - "IA-4(4)" # Identify User Status
+              - "IA-5"    # Authenticator Management
+              - "PS-4"    # Personnel Termination (agent decommission)
+            nist_ai_rmf:
+              - "GOVERN 1.3"  # Roles and responsibilities
+              - "MAP 1.3"     # System interactions and dependencies
+              - "MAP 3.3"     # AI system interactions characterized
+              - "MANAGE 2.3"  # Mechanisms for receiving feedback
+            nist_800_171:
+              - "3.5.1"   # Identify system users/processes
+              - "3.5.2"   # Authenticate identities
+              - "3.5.3"   # Use multi-factor authentication
+              - "3.5.5"   # Prevent reuse of identifiers
+              - "3.5.6"   # Disable identifiers after period of inactivity
+            eu_ai_act:
+              - "Article 16(a)" # Provider obligations (system management)
+              - "Article 61(1)" # Post-market monitoring system
+              - "Article 12(2)" # Logging capabilities for traceability
+            iso_42001:
+              - "A.5.6"   # AI roles and responsibilities
+              - "A.6.1.4" # Responsible AI governance
+              - "A.8.2"   # Documentation of AI actors
+            iso_27001:
+              - "A.5.16"  # Identity management
+              - "A.5.17"  # Authentication information
+              - "A.5.18"  # Access rights
+              - "A.6.1"   # Screening
+              - "A.6.5"   # Responsibilities after termination
+            soc2:
+              - "CC6.1"   # Logical access controls
+              - "CC6.2"   # Credentials management
+              - "CC6.5"   # Revocation and restriction of access
+            cmmc:
+              - "IA.L2-3.5.1"  # Identification
+              - "IA.L2-3.5.2"  # Authentication
+              - "IA.L2-3.5.3"  # Multifactor authentication
+              - "AC.L2-3.1.1"  # Authorized access control
+            fedramp:
+              - "AC-2"    # Account Management (enhanced)
+              - "IA-4"    # Identifier Management
+              - "IA-5"    # Authenticator Management
+            gdpr:
+              - "Article 30(1)"  # Records of processing activities
+              - "Article 5(1)(e)" # Storage limitation principle
+              - "Article 32(1)(b)" # Ongoing confidentiality
+            singapore_pdpa:
+              - "Section 24"    # Protection of personal data
+              - "Section 11(1)" # Accountability
+            japan_appi:
+              - "Article 23"  # Security control measures
+              - "Article 24"  # Supervision of employees
+            cosais:
+              - "AIS-AC.01"  # AI system access control
+              - "AIS-IM.01"  # AI system identity management
+
+        # --- Admin Controls ---
+        - name: "admin_controls"
+          id: "ENFORCE.admin"
+          description: "Administrative endpoints for circuit breaker management (halt/reset), entity halt/unhalt/cascade-halt, velocity throttling/unthrottling, and comprehensive system status monitoring. All admin operations require X-Admin-Key authentication with constant-time comparison"
+          implementation: "cognigate/app/routers/admin.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.admin_action"
+          controls:
+            nist_800_53:
+              - "AC-2(7)"  # Privileged User Accounts
+              - "AC-5"     # Separation of Duties
+              - "AC-6(1)"  # Authorize Access to Security Functions
+              - "AC-6(5)"  # Privileged Accounts
+              - "AU-9"     # Protection of Audit Information
+              - "AU-12(3)" # Changes by Authorized Individuals
+              - "MA-5"     # Maintenance Personnel
+            nist_ai_rmf:
+              - "GOVERN 1.6"  # Oversight mechanisms established
+              - "MANAGE 2.4"  # Deactivation/supersession/shutdown mechanisms
+              - "MANAGE 3.1"  # Pre-defined change protocols
+            nist_800_171:
+              - "3.1.4"   # Separation of duties
+              - "3.1.5"   # Least privilege
+              - "3.1.7"   # Unsuccessful logon attempts
+            eu_ai_act:
+              - "Article 14(4)(d)" # Decide not to use AI in a particular situation
+              - "Article 14(4)(e)" # Intervene in or interrupt AI system operation
+              - "Article 26(5)"    # Deployer exercises control over AI system
+            iso_42001:
+              - "A.6.2.8"  # AI system incident management
+              - "A.5.3"    # AI governance framework
+              - "7.1"      # Resources for AI management system
+            iso_27001:
+              - "A.5.2"   # Information security roles and responsibilities
+              - "A.8.2"   # Privileged access rights
+              - "A.8.5"   # Secure authentication
+            soc2:
+              - "CC6.1"   # Logical access controls
+              - "CC6.3"   # Authorization
+              - "CC8.1"   # Change management
+            cmmc:
+              - "AC.L2-3.1.4"  # Separation of duties
+              - "AC.L2-3.1.5"  # Least privilege
+              - "AC.L2-3.1.7"  # Privileged functions
+            fedramp:
+              - "AC-5"    # Separation of Duties
+              - "AC-6(5)" # Privileged Accounts
+              - "MA-5"    # Maintenance Personnel
+            gdpr:
+              - "Article 32(1)(d)" # Regular testing/assessing/evaluating
+              - "Article 32(4)"    # Controller/processor obligations
+            singapore_pdpa:
+              - "Section 11(3)" # Data protection officer policies
+              - "Section 24"    # Protection of personal data
+            japan_appi:
+              - "Article 24"  # Supervision of employees
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-AC.03"  # AI system privilege management
+              - "AIS-IR.02"  # AI system shutdown procedures
+
+        # --- API Authentication ---
+        - name: "api_authentication"
+          id: "ENFORCE.auth"
+          description: "API key authentication for admin endpoints using X-Admin-Key header. Constant-time comparison (secrets.compare_digest) to prevent timing attacks. Optional admin key support for graduated endpoint behavior. Secure random key generation (secrets.token_hex)"
+          implementation: "cognigate/app/core/auth.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.auth_event"
+          controls:
+            nist_800_53:
+              - "IA-2"    # Identification and Authentication
+              - "IA-2(1)" # Multi-Factor Authentication
+              - "IA-5"    # Authenticator Management
+              - "IA-5(1)" # Password-Based Authentication
+              - "IA-6"    # Authentication Feedback
+              - "IA-7"    # Cryptographic Module Authentication
+              - "SC-12"   # Cryptographic Key Establishment and Management
+              - "SC-13"   # Cryptographic Protection
+            nist_ai_rmf:
+              - "GOVERN 1.5"  # Ongoing monitoring processes
+              - "MANAGE 1.4"  # Risk treatments monitored
+            nist_800_171:
+              - "3.5.1"   # Identify system users
+              - "3.5.2"   # Authenticate identities
+              - "3.5.10"  # Store and transmit only cryptographically-protected passwords
+              - "3.13.11" # Employ FIPS-validated cryptography
+            eu_ai_act:
+              - "Article 15(4)"  # Resilience against unauthorized third parties
+              - "Article 9(4)(e)" # Risk management for intended purpose
+            iso_42001:
+              - "A.6.2.6"  # AI system security
+            iso_27001:
+              - "A.5.17"  # Authentication information
+              - "A.8.5"   # Secure authentication
+              - "A.8.24"  # Use of cryptography
+            soc2:
+              - "CC6.1"   # Logical access controls
+              - "CC6.2"   # Credentials and authentication mechanisms
+              - "CC6.7"   # Restriction of data transmission
+            cmmc:
+              - "IA.L2-3.5.1"   # Identification
+              - "IA.L2-3.5.2"   # Authentication
+              - "IA.L2-3.5.10"  # Cryptographically-protected passwords
+              - "SC.L2-3.13.11" # FIPS-validated cryptography
+            fedramp:
+              - "IA-2"    # Identification and Authentication
+              - "IA-5"    # Authenticator Management
+              - "SC-12"   # Cryptographic Key Management
+              - "SC-13"   # Cryptographic Protection
+            gdpr:
+              - "Article 32(1)(a)" # Pseudonymisation and encryption
+              - "Article 32(1)(b)" # Ongoing confidentiality
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-IA.01"  # AI system authentication
+              - "AIS-SC.07"  # AI system cryptographic controls
+
+        # --- Rate Limiting / Quotas ---
+        - name: "rate_limiting_quotas"
+          id: "ENFORCE.rate_limits"
+          description: "Per-tier API rate limits (requestsPerSecond, requestsPerMinute, requestsPerHour, requestsPerDay) and monthly quotas (API calls, compute units, storage, bandwidth, max agents, webhooks, team members) across all 8 tiers. Includes payload size limits, burst limits, and timeout configurations"
+          implementation: "cognigate/app/constants_bridge.py"
+          evidence_type: "configuration"
+          evidence_path: "RATE_LIMITS, TIER_QUOTAS"
+          controls:
+            nist_800_53:
+              - "SC-5"    # Denial-of-Service Protection
+              - "SC-6"    # Resource Availability
+              - "AC-10"   # Concurrent Session Control
+              - "AU-5(1)" # Storage Capacity Warning
+            nist_ai_rmf:
+              - "MANAGE 2.2"  # AI risk tolerance reassessment
+              - "MEASURE 2.8" # Monitoring for AI system performance
+            nist_800_171:
+              - "3.13.1"  # Monitor communications at boundary
+              - "3.14.1"  # Monitor organizational systems
+            eu_ai_act:
+              - "Article 15(1)"  # Appropriate level of performance
+              - "Article 15(5)"  # Resilience against manipulation
+            iso_42001:
+              - "A.6.2.5"  # AI system operational constraints
+              - "8.1"      # Operational planning and control
+            iso_27001:
+              - "A.8.6"   # Capacity management
+              - "A.8.20"  # Network security
+            soc2:
+              - "A1.1"    # System availability objectives
+              - "CC6.6"   # System operation restrictions
+            cmmc:
+              - "SC.L2-3.13.1"  # Boundary protection
+            fedramp:
+              - "SC-5"    # Denial-of-Service Protection
+              - "SC-6"    # Resource Availability
+            gdpr:
+              - "Article 32(1)(b)" # Ongoing availability
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-SC.05"  # AI system resource management
+
+    # =========================================================================
+    # PROOF LAYER -- Immutable Audit Chain
+    # =========================================================================
+    proof_layer:
+      description: "Immutable SHA-256 hash-chain audit trail with Ed25519 signatures for non-repudiation and complete traceability of all enforcement decisions"
+      namespace: "PROOF"
+
+      capabilities:
+        # --- Hash Chain ---
+        - name: "hash_chain"
+          id: "PROOF.chain"
+          description: "Immutable linked-hash chain where each ProofRecord contains SHA-256 hashes of inputs and outputs, chain_position, previous_hash linkage (genesis hash 0x64), and dual integrity hashes. Chain state tracked globally with verified chain length and last hash"
+          implementation: "cognigate/app/db/proof_repository.py"
+          evidence_type: "proof_chain_event"
+          evidence_path: "PROOF.chain_state"
+          controls:
+            nist_800_53:
+              - "AU-10"   # Non-Repudiation
+              - "AU-10(1)" # Association of Identities
+              - "AU-10(2)" # Validate Binding of Information Producer Identity
+              - "SC-8"    # Transmission Confidentiality and Integrity
+              - "SC-8(1)" # Cryptographic Protection
+              - "SC-28"   # Protection of Information at Rest
+              - "SC-28(1)" # Cryptographic Protection
+              - "SI-7"    # Software, Firmware, and Information Integrity
+              - "SI-7(1)" # Integrity Checks
+            nist_ai_rmf:
+              - "MEASURE 2.5"  # AI system outputs assessed
+              - "MEASURE 4.1"  # Measurement approaches applied
+              - "GOVERN 1.5"   # Ongoing monitoring processes
+              - "MAP 5.2"      # Documentation of AI system provenance
+            nist_800_171:
+              - "3.3.1"   # Create and retain audit logs
+              - "3.3.2"   # Ensure actions can be traced
+              - "3.13.11" # Employ FIPS-validated cryptography
+              - "3.14.3"  # Monitor security alerts
+            eu_ai_act:
+              - "Article 12(1)"  # Automatic recording of events (logging)
+              - "Article 12(2)"  # Logging capabilities throughout lifecycle
+              - "Article 12(3)"  # Logging commensurate with intended purpose
+              - "Article 12(4)"  # Traceability of system functioning
+            iso_42001:
+              - "A.7.3"   # AI system traceability
+              - "A.7.4"   # AI system recordkeeping
+              - "A.10.3"  # Monitoring and measurement
+              - "9.1"     # Monitoring, measurement, analysis and evaluation
+            iso_27001:
+              - "A.8.10"  # Information deletion
+              - "A.8.11"  # Data masking
+              - "A.8.24"  # Use of cryptography
+              - "A.5.33"  # Protection of records
+            soc2:
+              - "CC7.2"   # Security event monitoring
+              - "CC8.1"   # Change management controls
+              - "C1.1"    # Confidentiality commitments
+              - "C1.2"    # Confidentiality of information
+              - "PI1.1"   # Processing integrity
+            cmmc:
+              - "AU.L2-3.3.1"   # System auditing
+              - "AU.L2-3.3.2"   # Audit record content
+              - "SC.L2-3.13.11" # FIPS-validated cryptography
+            fedramp:
+              - "AU-10"   # Non-Repudiation
+              - "SC-8"    # Transmission Integrity
+              - "SC-28"   # Protection at Rest
+              - "SI-7"    # Information Integrity
+            gdpr:
+              - "Article 30(1)"    # Records of processing activities
+              - "Article 5(1)(a)"  # Lawfulness, fairness, transparency
+              - "Article 5(2)"     # Accountability principle
+            singapore_pdpa:
+              - "Section 24"  # Protection of personal data
+              - "Section 28"  # Retention limitation obligation
+            japan_appi:
+              - "Article 23"  # Security control measures
+              - "Article 29"  # Record of provision to third parties
+            cosais:
+              - "AIS-AU.01"  # AI system audit trail integrity
+              - "AIS-AU.02"  # Tamper-evident AI system logging
+
+        # --- Ed25519 Signatures ---
+        - name: "ed25519_signatures"
+          id: "PROOF.signatures"
+          description: "Ed25519 digital signature system for proof record integrity. Features: key generation (dev), file-based PEM loading (production), environment variable loading (cloud), deterministic JSON serialization for signing, base64 signature encoding. Provides non-repudiation and tamper detection for the entire proof chain"
+          implementation: "cognigate/app/core/signatures.py"
+          evidence_type: "cryptographic_proof"
+          evidence_path: "PROOF.signature"
+          controls:
+            nist_800_53:
+              - "AU-10"    # Non-Repudiation
+              - "AU-10(1)" # Association of Identities
+              - "SC-12"    # Cryptographic Key Establishment and Management
+              - "SC-12(1)" # Availability
+              - "SC-13"    # Cryptographic Protection
+              - "SC-17"    # Public Key Infrastructure Certificates
+              - "SI-7"     # Software, Firmware, and Information Integrity
+              - "SI-7(6)"  # Cryptographic Protection
+              - "SI-7(15)" # Code Authentication
+            nist_ai_rmf:
+              - "MAP 5.2"     # Documentation of AI system provenance
+              - "MEASURE 4.2" # Measurement results actionable
+              - "GOVERN 1.5"  # Ongoing monitoring and assurance
+            nist_800_171:
+              - "3.13.10" # Establish and manage cryptographic keys
+              - "3.13.11" # Employ FIPS-validated cryptography
+              - "3.3.1"   # Create and retain audit logs
+              - "3.3.2"   # Ensure actions are traceable
+            eu_ai_act:
+              - "Article 12(4)"  # Traceability of system functioning
+              - "Article 15(4)"  # Resilience against unauthorized third parties
+              - "Article 17(1)(h)" # Quality management: record-keeping
+            iso_42001:
+              - "A.7.3"   # AI system traceability
+              - "A.7.4"   # AI system recordkeeping
+              - "A.6.2.6" # AI system security
+            iso_27001:
+              - "A.8.24"  # Use of cryptography
+              - "A.5.33"  # Protection of records
+              - "A.5.34"  # Privacy and PII protection
+            soc2:
+              - "CC6.7"   # Restriction of data transmission
+              - "CC6.1"   # Logical access controls
+              - "PI1.1"   # Processing integrity commitments
+              - "PI1.5"   # Processing outputs complete and accurate
+            cmmc:
+              - "SC.L2-3.13.10" # Key management
+              - "SC.L2-3.13.11" # FIPS-validated cryptography
+              - "AU.L2-3.3.1"   # System auditing
+            fedramp:
+              - "AU-10"   # Non-Repudiation
+              - "SC-12"   # Cryptographic Key Management
+              - "SC-13"   # Cryptographic Protection
+              - "SC-17"   # PKI Certificates
+            gdpr:
+              - "Article 32(1)(a)" # Pseudonymisation and encryption
+              - "Article 5(1)(f)"  # Integrity and confidentiality
+              - "Article 5(2)"     # Accountability
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-SC.07"  # AI system cryptographic controls
+              - "AIS-AU.01"  # AI system audit trail integrity
+              - "AIS-AU.03"  # AI decision non-repudiation
+
+        # --- Event Logging ---
+        - name: "event_logging"
+          id: "PROOF.logging"
+          description: "Comprehensive event logging with async non-blocking queue (AsyncLogQueue, max 10k entries, batch processing of 100), structured JSON logging via structlog, per-event detail capture including entity_id, action_type, decision, timestamps. All proof records include full metadata and reasoning traces"
+          implementation: "cognigate/app/core/async_logger.py"
+          evidence_type: "log_event"
+          evidence_path: "PROOF.log_entry"
+          controls:
+            nist_800_53:
+              - "AU-2"    # Event Logging
+              - "AU-2(1)" # Compilation of Audit Records from Multiple Sources
+              - "AU-3"    # Content of Audit Records
+              - "AU-3(1)" # Additional Audit Information
+              - "AU-4"    # Audit Log Storage Capacity
+              - "AU-5"    # Response to Audit Logging Process Failures
+              - "AU-6"    # Audit Record Review, Analysis, Reporting
+              - "AU-6(1)" # Automated Process Integration
+              - "AU-8"    # Time Stamps
+              - "AU-9"    # Protection of Audit Information
+              - "AU-11"   # Audit Record Retention
+              - "AU-12"   # Audit Record Generation
+            nist_ai_rmf:
+              - "GOVERN 1.5"   # Ongoing monitoring processes
+              - "MEASURE 4.1"  # Measurement approaches applied
+              - "MAP 5.1"      # AI system documentation maintained
+            nist_800_171:
+              - "3.3.1"   # Create and retain system audit logs
+              - "3.3.2"   # Ensure actions can be traced
+              - "3.3.4"   # Alert on audit logging process failure
+              - "3.3.5"   # Correlate audit record review/analysis/reporting
+              - "3.3.6"   # Provide audit record reduction and report generation
+              - "3.3.8"   # Protect audit information
+            eu_ai_act:
+              - "Article 12(1)"  # Record-keeping (automatic logging)
+              - "Article 12(2)"  # Logging capabilities
+              - "Article 12(3)"  # Logging commensurate with purpose
+              - "Article 19(1)"  # Logs kept by providers
+              - "Article 20(1)"  # Automatic recording of events
+            iso_42001:
+              - "A.7.4"   # AI system recordkeeping
+              - "A.10.3"  # Monitoring and measurement
+              - "9.1"     # Monitoring, measurement, analysis and evaluation
+            iso_27001:
+              - "A.8.15"  # Logging
+              - "A.8.17"  # Clock synchronization
+              - "A.5.33"  # Protection of records
+              - "A.5.36"  # Compliance with policies, rules and standards
+            soc2:
+              - "CC7.1"   # Detection and monitoring of vulnerabilities
+              - "CC7.2"   # Security event monitoring
+              - "CC4.1"   # Controls are designed and operating effectively
+              - "PI1.4"   # Outputs of processing stored and protected
+            cmmc:
+              - "AU.L2-3.3.1"  # System auditing
+              - "AU.L2-3.3.2"  # Audit record content
+              - "AU.L2-3.3.4"  # Audit logging failure alert
+              - "AU.L2-3.3.5"  # Audit record correlation
+              - "AU.L2-3.3.8"  # Audit information protection
+            fedramp:
+              - "AU-2"    # Audit Events
+              - "AU-3"    # Content of Audit Records
+              - "AU-6"    # Audit Review and Reporting
+              - "AU-9"    # Protection of Audit Information
+              - "AU-11"   # Audit Record Retention
+              - "AU-12"   # Audit Generation
+            gdpr:
+              - "Article 30(1)"    # Records of processing activities
+              - "Article 30(2)"    # Processor records
+              - "Article 5(1)(a)"  # Lawfulness, fairness, transparency
+              - "Article 5(2)"     # Accountability principle
+            singapore_pdpa:
+              - "Section 24"  # Protection of personal data
+              - "Section 28"  # Retention limitation
+              - "Section 11"  # Accountability (record-keeping)
+            japan_appi:
+              - "Article 23"  # Security control measures
+              - "Article 29"  # Record of third-party provision
+              - "Article 30"  # Confirmation/records when receiving from third party
+            cosais:
+              - "AIS-AU.01"  # AI system audit trail integrity
+              - "AIS-AU.04"  # AI system event logging requirements
+              - "AIS-AU.05"  # AI decision audit trail
+
+        # --- Chain Verification ---
+        - name: "chain_verification"
+          id: "PROOF.verify"
+          description: "Full proof chain integrity verification: genesis hash validation, sequential chain linkage check (each record previous_hash = prior record hash), position gap detection, signature verification via Ed25519, and comprehensive issue reporting. Supports per-record and full-chain verification"
+          implementation: "cognigate/app/db/proof_repository.py"
+          evidence_type: "verification_report"
+          evidence_path: "PROOF.chain_verification"
+          controls:
+            nist_800_53:
+              - "SI-7"    # Software, Firmware, and Information Integrity
+              - "SI-7(1)" # Integrity Checks
+              - "SI-7(2)" # Automated Notifications of Integrity Violations
+              - "AU-10"   # Non-Repudiation
+              - "SC-8(1)" # Cryptographic Protection
+            nist_ai_rmf:
+              - "MEASURE 2.5"  # AI system outputs assessed
+              - "MEASURE 4.2"  # Measurement results actionable
+              - "GOVERN 1.5"   # Ongoing monitoring and assurance
+            nist_800_171:
+              - "3.14.4"  # Update malicious code protection
+              - "3.14.5"  # Perform system scans
+              - "3.3.2"   # Actions traceable to individual users
+            eu_ai_act:
+              - "Article 12(4)"    # Traceability of functioning
+              - "Article 17(1)(g)" # Quality management: compliance measures
+              - "Article 17(1)(h)" # Quality management: record-keeping
+            iso_42001:
+              - "A.7.3"   # AI system traceability
+              - "A.9.3"   # AI system conformity evaluation
+              - "9.1"     # Monitoring, measurement, analysis and evaluation
+            iso_27001:
+              - "A.8.24"  # Use of cryptography
+              - "A.5.35"  # Independent review of information security
+              - "A.5.36"  # Compliance with policies
+            soc2:
+              - "PI1.1"   # Processing integrity commitments
+              - "PI1.5"   # Processing outputs complete and accurate
+              - "CC4.1"   # Design and operating effectiveness
+              - "CC4.2"   # Evaluation and communication of deficiencies
+            cmmc:
+              - "SI.L2-3.14.4"  # Update protection mechanisms
+              - "AU.L2-3.3.1"   # System auditing
+            fedramp:
+              - "SI-7"    # Information Integrity
+              - "AU-10"   # Non-Repudiation
+            gdpr:
+              - "Article 5(2)"     # Accountability (demonstrable compliance)
+              - "Article 32(1)(d)" # Regular testing and assessing
+            singapore_pdpa:
+              - "Section 24"  # Protection of personal data
+            japan_appi:
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-AU.01"  # AI system audit trail integrity
+              - "AIS-AU.06"  # Periodic AI audit chain verification
+
+        # --- Record Retention ---
+        - name: "record_retention"
+          id: "PROOF.retention"
+          description: "Proof records stored in persistent database with full chain state. Design supports 7-year regulatory retention. Versioned SBOM history with 90-day artifact retention in CI/CD. Proof records are append-only with no modification or deletion capability"
+          implementation: "cognigate/app/db/models.py"
+          evidence_type: "retention_policy"
+          evidence_path: "PROOF.retention_config"
+          controls:
+            nist_800_53:
+              - "AU-11"    # Audit Record Retention
+              - "AU-11(1)" # Long-Term Retrieval Capability
+              - "AU-4"     # Audit Log Storage Capacity
+              - "AU-9"     # Protection of Audit Information
+              - "AU-9(2)"  # Store on Separate Physical Systems/Components
+              - "SI-12"    # Information Management and Retention
+            nist_ai_rmf:
+              - "GOVERN 1.5"  # Ongoing monitoring and assurance
+              - "MAP 5.1"     # Documentation maintained throughout lifecycle
+            nist_800_171:
+              - "3.3.1"   # Create and retain system audit logs
+              - "3.3.8"   # Protect audit information
+            eu_ai_act:
+              - "Article 12(2)"  # Logging capabilities throughout lifecycle
+              - "Article 19(1)"  # Logs kept for appropriate period
+              - "Article 72"     # Documentation and record-keeping (10 years)
+            iso_42001:
+              - "A.7.4"   # AI system recordkeeping
+              - "7.5"     # Documented information
+            iso_27001:
+              - "A.5.33"  # Protection of records
+              - "A.8.10"  # Information deletion (retention schedules)
+            soc2:
+              - "CC7.2"   # Monitoring for unauthorized/unusual activities
+              - "C1.2"    # Confidentiality of information stored
+            cmmc:
+              - "AU.L2-3.3.1"  # System auditing
+              - "AU.L2-3.3.8"  # Audit information protection
+            fedramp:
+              - "AU-11"   # Audit Record Retention
+              - "AU-4"    # Audit Storage Capacity
+              - "AU-9"    # Protection of Audit Information
+            gdpr:
+              - "Article 5(1)(e)"  # Storage limitation
+              - "Article 30(1)"    # Records of processing activities
+              - "Article 17(3)(e)" # Archiving in public interest
+            singapore_pdpa:
+              - "Section 25"  # Retention limitation obligation
+              - "Section 28"  # Notification for retention
+            japan_appi:
+              - "Article 29"  # Records of third party provision
+              - "Article 30"  # Records on reception from third parties
+            cosais:
+              - "AIS-AU.07"  # AI system record retention policy
+
+    # =========================================================================
+    # CROSS-CUTTING CAPABILITIES
+    # =========================================================================
+    cross_cutting:
+      description: "Capabilities spanning multiple layers: supply chain, development security, caching, gateway, and operational infrastructure"
+      namespace: "CROSS"
+
+      capabilities:
+        # --- SBOM Generation ---
+        - name: "sbom_generation"
+          id: "CROSS.sbom"
+          description: "Automated CycloneDX 1.5 SBOM generation (JSON + XML) on every release with vulnerability correlation from npm audit, dependency review, versioned SBOM history, SBOM validation, and upload to GitHub release artifacts. 90-day artifact retention"
+          implementation: "vorion/.github/workflows/sbom.yml"
+          evidence_type: "build_artifact"
+          evidence_path: "sbom/sbom.json"
+          controls:
+            nist_800_53:
+              - "SA-12"   # Supply Chain Protection
+              - "SA-12(2)" # Supplier Assessments and Reviews
+              - "SR-3"    # Supply Chain Controls and Processes
+              - "SR-4"    # Provenance
+              - "SR-4(1)" # Identity
+              - "SR-4(2)" # Track and Trace
+              - "CM-8"    # System Component Inventory
+              - "CM-8(2)" # Automated Maintenance
+            nist_ai_rmf:
+              - "MAP 5.2"     # AI system provenance documented
+              - "GOVERN 1.1"  # Legal and regulatory requirements
+              - "GOVERN 1.7"  # Testing and evaluation
+            nist_800_171:
+              - "3.4.1"   # Establish and maintain baseline configurations
+              - "3.4.3"   # Track, review, approve changes
+              - "3.11.2"  # Scan for vulnerabilities
+            eu_ai_act:
+              - "Article 11(1)"    # Technical documentation
+              - "Article 17(1)(b)" # Quality management: design and development
+              - "Article 17(1)(f)" # Quality management: supply chain management
+            iso_42001:
+              - "A.6.1.2"  # AI system lifecycle
+              - "A.8.5"    # Third-party and supply chain management
+            iso_27001:
+              - "A.5.19"  # Information security in supplier relationships
+              - "A.5.21"  # Managing information security in ICT supply chain
+              - "A.5.22"  # Monitoring, review of supplier services
+              - "A.8.9"   # Configuration management
+            soc2:
+              - "CC3.4"   # Risk mitigation activities
+              - "CC8.1"   # Change management
+              - "CC9.2"   # Risk mitigation
+            cmmc:
+              - "CM.L2-3.4.1"  # System baselining
+              - "CM.L2-3.4.3"  # Configuration change control
+              - "RA.L2-3.11.2" # Vulnerability scanning
+            fedramp:
+              - "SA-12"   # Supply Chain Protection
+              - "SR-3"    # Supply Chain Controls
+              - "CM-8"    # Component Inventory
+            gdpr:
+              - "Article 28(1)"  # Processor providing sufficient guarantees
+              - "Article 32(1)"  # Appropriate technical measures
+            singapore_pdpa:
+              - "Section 24"  # Protection of personal data
+            japan_appi:
+              - "Article 25"  # Supervision of contractors
+            cosais:
+              - "AIS-SR.01"  # AI supply chain risk management
+              - "AIS-SR.02"  # AI component provenance tracking
+
+        # --- SAST / Security Scanning ---
+        - name: "security_scanning"
+          id: "CROSS.sast"
+          description: "Multi-layer security scanning: CodeQL (semantic analysis, security-extended queries), Trivy (filesystem vulnerability scanning, CRITICAL/HIGH severity), dependency review (deny GPL-3.0/AGPL-3.0), pip-audit (Python dependency vulnerabilities), Bandit (Python SAST), SARIF upload to GitHub Security. Weekly scheduled deep scans"
+          implementation: "vorion/.github/workflows/security-scan.yml"
+          evidence_type: "scan_report"
+          evidence_path: "security-scan-results"
+          controls:
+            nist_800_53:
+              - "SA-11"    # Developer Testing and Evaluation
+              - "SA-11(1)" # Static Code Analysis
+              - "SA-11(4)" # Manual Code Reviews
+              - "SA-11(5)" # Penetration Testing
+              - "RA-5"     # Vulnerability Monitoring and Scanning
+              - "RA-5(2)"  # Update Vulnerabilities to be Scanned
+              - "RA-5(5)"  # Privileged Access
+              - "SI-2"     # Flaw Remediation
+              - "SI-2(2)"  # Automated Flaw Remediation Status
+            nist_ai_rmf:
+              - "GOVERN 1.7"   # Testing and evaluation processes
+              - "MEASURE 2.7"  # Cybersecurity risk assessment
+              - "MANAGE 1.3"   # Responses to identified risks
+            nist_800_171:
+              - "3.11.2"  # Scan for vulnerabilities periodically
+              - "3.11.3"  # Remediate vulnerabilities
+              - "3.14.1"  # Monitor organizational systems
+            eu_ai_act:
+              - "Article 9(6)"     # Testing for high-risk AI systems
+              - "Article 15(1)"    # Accuracy, robustness and cybersecurity
+              - "Article 17(1)(d)" # Quality management: examination, test, validation
+            iso_42001:
+              - "A.6.2.4"  # AI system verification and validation
+              - "A.6.2.6"  # AI system security
+            iso_27001:
+              - "A.8.8"   # Management of technical vulnerabilities
+              - "A.8.25"  # Secure development lifecycle
+              - "A.8.28"  # Secure coding
+              - "A.8.29"  # Security testing
+            soc2:
+              - "CC7.1"   # Detection of new vulnerabilities
+              - "CC8.1"   # Change management
+              - "CC4.1"   # Control effectiveness evaluation
+            cmmc:
+              - "RA.L2-3.11.2"  # Vulnerability scanning
+              - "RA.L2-3.11.3"  # Vulnerability remediation
+              - "SI.L2-3.14.1"  # Flaw remediation
+            fedramp:
+              - "SA-11"   # Developer Security Testing
+              - "RA-5"    # Vulnerability Scanning
+              - "SI-2"    # Flaw Remediation
+            gdpr:
+              - "Article 32(1)(d)" # Regular testing/assessing
+              - "Article 25(1)"    # Data protection by design
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-SA.01"  # AI system security assessment
+              - "AIS-SA.02"  # AI system vulnerability management
+
+        # --- Caching Layer ---
+        - name: "caching_layer"
+          id: "CROSS.cache"
+          description: "Redis-backed async cache manager for policy evaluation results, trust scores, and velocity state with configurable TTLs, cache invalidation patterns, graceful degradation to no-op when Redis is unavailable, and namespaced keys (cognigate:namespace:key)"
+          implementation: "cognigate/app/core/cache.py"
+          evidence_type: "operational"
+          evidence_path: "cache_stats"
+          controls:
+            nist_800_53:
+              - "SC-4"    # Information in Shared System Resources
+              - "SC-11"   # Trusted Path
+              - "PE-11"   # Emergency Power (availability)
+            nist_ai_rmf:
+              - "MEASURE 2.8"  # AI system monitored for performance
+            nist_800_171:
+              - "3.13.4"  # Prevent unauthorized transfer via shared resources
+            eu_ai_act:
+              - "Article 15(1)"  # Appropriate level of performance
+            iso_42001:
+              - "8.1"     # Operational planning and control
+            iso_27001:
+              - "A.8.6"   # Capacity management
+              - "A.8.14"  # Redundancy
+            soc2:
+              - "A1.1"    # System availability
+              - "A1.2"    # Recovery mechanisms
+            cmmc:
+              - "SC.L2-3.13.4"  # Shared resource control
+            fedramp:
+              - "SC-4"    # Information in Shared Resources
+            gdpr:
+              - "Article 32(1)(b)" # Ongoing availability
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-SC.05"  # AI system resource management
+
+        # --- Gateway Proxy ---
+        - name: "gateway_proxy"
+          id: "CROSS.gateway"
+          description: "Reverse proxy to AgentAnchor upstream API with circuit breaker protection, multi-domain routing (compliance, council, observer, truth-chain, academy, orchestrator, webhooks, dashboard), header forwarding, API key propagation, and body forwarding for POST/PUT/PATCH"
+          implementation: "cognigate/app/routers/gateway.py"
+          evidence_type: "operational"
+          evidence_path: "gateway_logs"
+          controls:
+            nist_800_53:
+              - "SC-7"    # Boundary Protection
+              - "SC-7(5)" # Deny by Default / Allow by Exception
+              - "SC-7(8)" # Route Traffic to Authenticated Proxy Servers
+              - "AC-4"    # Information Flow Enforcement
+              - "AC-4(4)" # Flow Control of Encrypted Information
+            nist_ai_rmf:
+              - "MAP 1.3"    # AI system interaction dependencies
+              - "MANAGE 1.4" # Risk treatments monitored
+            nist_800_171:
+              - "3.13.1"  # Monitor, control, protect communications at boundary
+              - "3.13.5"  # Implement subnetworks for accessible system components
+              - "3.13.6"  # Deny network traffic by default
+            eu_ai_act:
+              - "Article 15(4)"  # Resilience against unauthorized access
+              - "Article 9(4)(e)" # Risk management for intended purpose
+            iso_42001:
+              - "A.6.2.6"  # AI system security
+              - "A.8.5"    # Third-party management
+            iso_27001:
+              - "A.8.20"  # Networks security
+              - "A.8.21"  # Security of network services
+              - "A.8.22"  # Segregation of networks
+              - "A.8.23"  # Web filtering
+            soc2:
+              - "CC6.6"   # Restriction of system components
+              - "CC6.7"   # Restriction of data transmission
+            cmmc:
+              - "SC.L2-3.13.1"  # Boundary protection
+              - "SC.L2-3.13.5"  # Subnetworks for public access
+              - "SC.L2-3.13.6"  # Deny by default
+            fedramp:
+              - "SC-7"    # Boundary Protection (enhanced)
+              - "AC-4"    # Information Flow Enforcement
+            gdpr:
+              - "Article 32(1)(a)" # Encryption of personal data
+              - "Article 32(1)(b)" # Ongoing confidentiality
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+              - "Article 24"  # Supervision
+            cosais:
+              - "AIS-SC.08"  # AI system network boundary protection
+
+        # --- Secrets Scanning ---
+        - name: "secrets_scanning"
+          id: "CROSS.secrets"
+          description: "Automated secrets scanning via GitHub workflows to detect accidentally committed credentials, API keys, and sensitive data in the codebase"
+          implementation: "vorion/.github/workflows/secrets-scan.yml"
+          evidence_type: "scan_report"
+          evidence_path: "secrets-scan-results"
+          controls:
+            nist_800_53:
+              - "IA-5(7)" # No Embedded Unencrypted Static Authenticators
+              - "SC-12"   # Cryptographic Key Establishment
+              - "SC-28(1)" # Cryptographic Protection of information at rest
+            nist_ai_rmf:
+              - "GOVERN 1.7"  # Testing and evaluation
+            nist_800_171:
+              - "3.5.10"  # Store and transmit only cryptographically-protected passwords
+              - "3.13.10" # Key management
+            eu_ai_act:
+              - "Article 15(4)"  # Resilience against unauthorized access
+            iso_42001:
+              - "A.6.2.6"  # AI system security
+            iso_27001:
+              - "A.8.24"  # Use of cryptography
+              - "A.8.28"  # Secure coding
+            soc2:
+              - "CC6.1"   # Logical access controls
+              - "CC6.7"   # Restriction of data transmission
+            cmmc:
+              - "IA.L2-3.5.10"  # Cryptographically-protected passwords
+              - "SC.L2-3.13.10" # Key management
+            fedramp:
+              - "IA-5(7)" # No Embedded Static Authenticators
+              - "SC-12"   # Cryptographic Key Management
+            gdpr:
+              - "Article 32(1)(a)" # Encryption
+            singapore_pdpa:
+              - "Section 24"  # Reasonable security arrangements
+            japan_appi:
+              - "Article 23"  # Security control measures
+            cosais:
+              - "AIS-SC.07"  # AI system cryptographic controls
+
+  # ===========================================================================
+  # CROSS-REFERENCES: Control Equivalences Across Frameworks
+  # ===========================================================================
+  cross_references:
+    access_control:
+      description: "Access control and authorization requirements"
+      nist_800_53: "AC-2"
+      nist_800_171: "3.1.1"
+      iso_27001: "A.5.15"
+      iso_42001: "A.6.2.3"
+      soc2: "CC6.1"
+      cmmc: "AC.L2-3.1.1"
+      gdpr: "Article 32(1)(b)"
+      eu_ai_act: "Article 9(4)(e)"
+      fedramp: "AC-2"
+      singapore_pdpa: "Section 24"
+      japan_appi: "Article 23"
+      nist_ai_rmf: "GOVERN 1.3"
+      cosais: "AIS-AC.01"
+
+    least_privilege:
+      description: "Principle of least privilege and minimum necessary access"
+      nist_800_53: "AC-6"
+      nist_800_171: "3.1.5"
+      iso_27001: "A.8.2"
+      iso_42001: "A.6.2.3"
+      soc2: "CC6.3"
+      cmmc: "AC.L2-3.1.5"
+      gdpr: "Article 25(2)"
+      eu_ai_act: "Article 14(3)"
+      fedramp: "AC-6"
+      singapore_pdpa: "Section 18"
+      japan_appi: "Article 18"
+      nist_ai_rmf: "MAP 1.6"
+      cosais: "AIS-AC.02"
+
+    audit_logging:
+      description: "Audit trail and event logging requirements"
+      nist_800_53: "AU-2"
+      nist_800_171: "3.3.1"
+      iso_27001: "A.8.15"
+      iso_42001: "A.7.4"
+      soc2: "CC7.2"
+      cmmc: "AU.L2-3.3.1"
+      gdpr: "Article 30(1)"
+      eu_ai_act: "Article 12(1)"
+      fedramp: "AU-2"
+      singapore_pdpa: "Section 11"
+      japan_appi: "Article 29"
+      nist_ai_rmf: "GOVERN 1.5"
+      cosais: "AIS-AU.04"
+
+    non_repudiation:
+      description: "Cryptographic non-repudiation and proof of actions"
+      nist_800_53: "AU-10"
+      nist_800_171: "3.3.2"
+      iso_27001: "A.8.24"
+      iso_42001: "A.7.3"
+      soc2: "PI1.1"
+      cmmc: "AU.L2-3.3.2"
+      gdpr: "Article 5(2)"
+      eu_ai_act: "Article 12(4)"
+      fedramp: "AU-10"
+      singapore_pdpa: "Section 24"
+      japan_appi: "Article 23"
+      nist_ai_rmf: "MAP 5.2"
+      cosais: "AIS-AU.03"
+
+    incident_response:
+      description: "Incident handling, response, and recovery"
+      nist_800_53: "IR-4"
+      nist_800_171: "3.6.1"
+      iso_27001: "A.5.24"
+      iso_42001: "A.6.2.8"
+      soc2: "CC7.4"
+      cmmc: "IR.L2-3.6.1"
+      gdpr: "Article 33(1)"
+      eu_ai_act: "Article 14(4)(e)"
+      fedramp: "IR-4"
+      singapore_pdpa: "Section 26C"
+      japan_appi: "Article 26"
+      nist_ai_rmf: "MANAGE 2.4"
+      cosais: "AIS-IR.01"
+
+    risk_assessment:
+      description: "Risk identification, analysis, and evaluation"
+      nist_800_53: "RA-3"
+      nist_800_171: "3.11.1"
+      iso_27001: "6.1.2"
+      iso_42001: "A.5.4"
+      soc2: "CC3.1"
+      cmmc: "RA.L2-3.11.1"
+      gdpr: "Article 35(1)"
+      eu_ai_act: "Article 9(1)"
+      fedramp: "RA-3"
+      singapore_pdpa: "Section 24"
+      japan_appi: "Article 23"
+      nist_ai_rmf: "MAP 3.5"
+      cosais: "AIS-RA.01"
+
+    cryptographic_protection:
+      description: "Cryptographic controls for data protection"
+      nist_800_53: "SC-13"
+      nist_800_171: "3.13.11"
+      iso_27001: "A.8.24"
+      iso_42001: "A.6.2.6"
+      soc2: "CC6.7"
+      cmmc: "SC.L2-3.13.11"
+      gdpr: "Article 32(1)(a)"
+      eu_ai_act: "Article 15(4)"
+      fedramp: "SC-13"
+      singapore_pdpa: "Section 24"
+      japan_appi: "Article 23"
+      nist_ai_rmf: "GOVERN 1.5"
+      cosais: "AIS-SC.07"
+
+    vulnerability_management:
+      description: "Vulnerability scanning, identification, and remediation"
+      nist_800_53: "RA-5"
+      nist_800_171: "3.11.2"
+      iso_27001: "A.8.8"
+      iso_42001: "A.6.2.6"
+      soc2: "CC7.1"
+      cmmc: "RA.L2-3.11.2"
+      gdpr: "Article 32(1)(d)"
+      eu_ai_act: "Article 9(6)"
+      fedramp: "RA-5"
+      singapore_pdpa: "Section 24"
+      japan_appi: "Article 23"
+      nist_ai_rmf: "MEASURE 2.7"
+      cosais: "AIS-SA.02"
+
+    supply_chain:
+      description: "Supply chain risk management and provenance"
+      nist_800_53: "SR-3"
+      nist_800_171: "3.4.1"
+      iso_27001: "A.5.21"
+      iso_42001: "A.8.5"
+      soc2: "CC9.2"
+      cmmc: "CM.L2-3.4.1"
+      gdpr: "Article 28(1)"
+      eu_ai_act: "Article 17(1)(f)"
+      fedramp: "SR-3"
+      singapore_pdpa: "Section 24"
+      japan_appi: "Article 25"
+      nist_ai_rmf: "MAP 5.2"
+      cosais: "AIS-SR.01"
+
+    identity_management:
+      description: "Identity establishment, proofing, and authentication"
+      nist_800_53: "IA-2"
+      nist_800_171: "3.5.1"
+      iso_27001: "A.5.16"
+      iso_42001: "A.5.6"
+      soc2: "CC6.2"
+      cmmc: "IA.L2-3.5.1"
+      gdpr: "Article 32(1)(b)"
+      eu_ai_act: "Article 15(4)"
+      fedramp: "IA-2"
+      singapore_pdpa: "Section 24"
+      japan_appi: "Article 23"
+      nist_ai_rmf: "GOVERN 1.3"
+      cosais: "AIS-IA.01"
+
+    data_protection_by_design:
+      description: "Privacy by design and default, data minimization"
+      nist_800_53: "SA-8"
+      nist_800_171: "3.1.5"
+      iso_27001: "A.5.34"
+      iso_42001: "A.6.2.2"
+      soc2: "CC5.2"
+      cmmc: "AC.L2-3.1.5"
+      gdpr: "Article 25(1)"
+      eu_ai_act: "Article 10(2)"
+      fedramp: "SA-8"
+      singapore_pdpa: "Section 18"
+      japan_appi: "Article 17"
+      nist_ai_rmf: "GOVERN 1.2"
+      cosais: "AIS-MP.01"
+
+    human_oversight:
+      description: "Human oversight, intervention, and control of AI systems"
+      nist_800_53: "AC-6(1)"
+      nist_800_171: "3.1.4"
+      iso_27001: "A.5.2"
+      iso_42001: "A.5.3"
+      soc2: "CC1.3"
+      cmmc: "AC.L2-3.1.4"
+      gdpr: "Article 22(3)"
+      eu_ai_act: "Article 14(1)"
+      fedramp: "AC-6(1)"
+      singapore_pdpa: "Section 11(1)"
+      japan_appi: "Article 24"
+      nist_ai_rmf: "GOVERN 1.6"
+      cosais: "AIS-AC.04"
+
+    ai_transparency:
+      description: "AI system transparency and explainability"
+      nist_800_53: "PL-8"
+      nist_800_171: "3.4.1"
+      iso_27001: "A.5.10"
+      iso_42001: "A.7.2"
+      soc2: "CC2.1"
+      cmmc: "CM.L2-3.4.1"
+      gdpr: "Article 5(1)(a)"
+      eu_ai_act: "Article 13(1)"
+      fedramp: "PL-8"
+      singapore_pdpa: "Section 20"
+      japan_appi: "Article 17"
+      nist_ai_rmf: "MAP 1.1"
+      cosais: "AIS-MP.01"
+
+    system_availability:
+      description: "System availability, resilience, and denial-of-service protection"
+      nist_800_53: "SC-5"
+      nist_800_171: "3.13.1"
+      iso_27001: "A.8.6"
+      iso_42001: "A.6.2.5"
+      soc2: "A1.1"
+      cmmc: "SC.L2-3.13.1"
+      gdpr: "Article 32(1)(b)"
+      eu_ai_act: "Article 15(1)"
+      fedramp: "SC-5"
+      singapore_pdpa: "Section 24"
+      japan_appi: "Article 23"
+      nist_ai_rmf: "MANAGE 2.4"
+      cosais: "AIS-SC.05"
+
+    record_keeping:
+      description: "Records of processing, audit retention, and documentation"
+      nist_800_53: "AU-11"
+      nist_800_171: "3.3.1"
+      iso_27001: "A.5.33"
+      iso_42001: "A.7.4"
+      soc2: "CC7.2"
+      cmmc: "AU.L2-3.3.1"
+      gdpr: "Article 30(1)"
+      eu_ai_act: "Article 19(1)"
+      fedramp: "AU-11"
+      singapore_pdpa: "Section 25"
+      japan_appi: "Article 29"
+      nist_ai_rmf: "MAP 5.1"
+      cosais: "AIS-AU.07"
+
+    ai_system_shutdown:
+      description: "Ability to deactivate, shut down, or interrupt AI system operation"
+      nist_800_53: "SI-17"
+      nist_800_171: "3.6.1"
+      iso_27001: "A.5.24"
+      iso_42001: "A.6.2.8"
+      soc2: "CC7.4"
+      cmmc: "IR.L2-3.6.1"
+      gdpr: "Article 32(1)(c)"
+      eu_ai_act: "Article 14(4)(e)"
+      fedramp: "SI-17"
+      singapore_pdpa: "Section 26C"
+      japan_appi: "Article 26"
+      nist_ai_rmf: "MANAGE 2.4"
+      cosais: "AIS-IR.02"
+
+  # ===========================================================================
+  # STATISTICS
+  # ===========================================================================
+  statistics:
+    total_capabilities: 24
+    frameworks_mapped: 13
+    layers:
+      intent: 5
+      enforce: 9
+      proof: 5
+      cross_cutting: 5
+    nist_800_53_families_covered:
+      - "AC"   # Access Control
+      - "AU"   # Audit and Accountability
+      - "CA"   # Assessment, Authorization, and Monitoring
+      - "CM"   # Configuration Management
+      - "CP"   # Contingency Planning
+      - "IA"   # Identification and Authentication
+      - "IR"   # Incident Response
+      - "MA"   # Maintenance
+      - "PE"   # Physical and Environmental Protection
+      - "PL"   # Planning
+      - "PM"   # Program Management
+      - "PS"   # Personnel Security
+      - "RA"   # Risk Assessment
+      - "SA"   # System and Services Acquisition
+      - "SC"   # System and Communications Protection
+      - "SI"   # System and Information Integrity
+      - "SR"   # Supply Chain Risk Management
+    nist_ai_rmf_functions_covered:
+      - "GOVERN"
+      - "MAP"
+      - "MEASURE"
+      - "MANAGE"
+    eu_ai_act_articles_covered:
+      - "Article 9"   # Risk management system
+      - "Article 10"  # Data and data governance
+      - "Article 11"  # Technical documentation
+      - "Article 12"  # Record-keeping
+      - "Article 13"  # Transparency
+      - "Article 14"  # Human oversight
+      - "Article 15"  # Accuracy, robustness and cybersecurity
+      - "Article 16"  # Provider obligations
+      - "Article 17"  # Quality management system
+      - "Article 19"  # Logs
+      - "Article 20"  # Automatic recording
+      - "Article 26"  # Deployer obligations
+      - "Article 61"  # Post-market monitoring
+      - "Article 72"  # Documentation requirements

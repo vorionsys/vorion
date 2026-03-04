@@ -1,0 +1,145 @@
+---
+interface ActivityItem {
+  type: 'deploy' | 'ci' | 'pr' | 'commit' | 'alert';
+  title: string;
+  timestamp: string;
+  url?: string;
+  status?: string;
+}
+
+interface Props {
+  items: ActivityItem[];
+  maxItems?: number;
+}
+
+const { items, maxItems = 15 } = Astro.props;
+
+const visibleItems = items.slice(0, maxItems);
+
+const typeConfig: Record<string, { dotColor: string; label: string; icon: string }> = {
+  deploy: {
+    dotColor: 'bg-blue-500',
+    label: 'Deploy',
+    icon: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12',
+  },
+  ci: {
+    dotColor: 'bg-emerald-500',
+    label: 'CI',
+    icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+  },
+  pr: {
+    dotColor: 'bg-purple-500',
+    label: 'PR',
+    icon: 'M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4',
+  },
+  commit: {
+    dotColor: 'bg-slate-500',
+    label: 'Commit',
+    icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
+  },
+  alert: {
+    dotColor: 'bg-red-500',
+    label: 'Alert',
+    icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z',
+  },
+};
+
+function formatRelativeTime(dateStr: string): string {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHour < 24) return `${diffHour}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+---
+
+<div class="space-y-0">
+  {visibleItems.map((item, index) => {
+    const config = typeConfig[item.type] || typeConfig.commit;
+    const relativeTime = formatRelativeTime(item.timestamp);
+    const isLast = index === visibleItems.length - 1;
+    const Tag = item.url ? 'a' : 'div';
+    const linkProps = item.url ? { href: item.url, target: '_blank', rel: 'noopener noreferrer' } : {};
+
+    return (
+      <Tag
+        {...linkProps}
+        class:list={[
+          'flex items-start gap-3 py-3 px-2 rounded-lg transition-colors',
+          item.url && 'hover:bg-slate-800/50 cursor-pointer group',
+        ]}
+      >
+        {/* Timeline dot and line */}
+        <div class="relative flex flex-col items-center flex-shrink-0">
+          <div
+            class:list={[
+              'w-3 h-3 rounded-full mt-0.5 ring-4 ring-slate-950 z-10',
+              config.dotColor,
+              item.type === 'alert' && 'animate-pulse',
+            ]}
+          />
+          {!isLast && (
+            <div class="w-px h-full bg-slate-800 absolute top-4 left-1/2 -translate-x-1/2" />
+          )}
+        </div>
+
+        {/* Content */}
+        <div class="flex-1 min-w-0 pb-1">
+          <div class="flex items-center gap-2 mb-0.5">
+            <span
+              class:list={[
+                'text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded',
+                item.type === 'deploy' && 'bg-blue-500/10 text-blue-400',
+                item.type === 'ci' && 'bg-emerald-500/10 text-emerald-400',
+                item.type === 'pr' && 'bg-purple-500/10 text-purple-400',
+                item.type === 'commit' && 'bg-slate-500/10 text-slate-400',
+                item.type === 'alert' && 'bg-red-500/10 text-red-400',
+              ]}
+            >
+              {config.label}
+            </span>
+            <span class="text-xs text-slate-600">{relativeTime}</span>
+          </div>
+          <p class:list={[
+            'text-sm text-slate-300 truncate',
+            item.url && 'group-hover:text-vorion-400 transition-colors',
+          ]}>
+            {item.title}
+          </p>
+          {item.status && (
+            <span class="text-xs text-slate-500 mt-0.5 inline-block">{item.status}</span>
+          )}
+        </div>
+
+        {/* External link indicator */}
+        {item.url && (
+          <svg class="w-3.5 h-3.5 text-slate-600 group-hover:text-vorion-400 flex-shrink-0 mt-1 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        )}
+      </Tag>
+    );
+  })}
+
+  {items.length === 0 && (
+    <div class="text-center py-8 text-slate-500 text-sm">
+      No recent activity
+    </div>
+  )}
+
+  {items.length > maxItems && (
+    <div class="text-center pt-2 pb-1">
+      <span class="text-xs text-slate-600">
+        Showing {maxItems} of {items.length} events
+      </span>
+    </div>
+  )}
+</div>

@@ -27,12 +27,3 @@ export {
   MetaOrchestratorAgent,
   HumanGatewayAgent
 } from './agents/index.js'
-
-export type {
-  MetricsSnapshot,
-  MetricsAlert,
-  AggregateStats,
-  HealthStatus,
-  HealthStatusLevel,
-  OptimizationRecommendation
-} from './agents/index.js'

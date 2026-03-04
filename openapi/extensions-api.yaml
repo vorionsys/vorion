@@ -1,0 +1,752 @@
+openapi: 3.1.0
+info:
+  title: Vorion ACI Extensions API
+  description: |
+    API for managing and invoking ACI (Agent Capability Identity) extensions.
+
+    Extensions provide Layer 4 Runtime Assurance functionality including:
+    - Capability pre-check and post-grant hooks
+    - Action pre-check, post-action, and failure handling
+    - Behavioral monitoring and verification
+    - Trust management and revocation handling
+    - Policy evaluation
+
+    Built-in extensions:
+    - **gov** (Cognigate Governance): Runtime governance and policy enforcement
+    - **mon** (Behavioral Monitoring): Agent behavior tracking and drift detection
+    - **audit** (Audit Trail): Comprehensive audit logging and chain verification
+  version: 1.0.0
+  contact:
+    name: Vorion Platform Team
+  license:
+    name: Apache-2.0
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+  - url: https://api.vorion.io/api/v1
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Extensions
+    description: ACI Extension management and invocation
+
+paths:
+  /extensions:
+    get:
+      tags: [Extensions]
+      summary: List available extensions
+      description: |
+        Returns a list of all registered ACI extensions with their metadata
+        and available hooks.
+      operationId: listExtensions
+      responses:
+        '200':
+          description: List of extensions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /extensions/{extensionId}:
+    get:
+      tags: [Extensions]
+      summary: Get extension details
+      description: |
+        Returns detailed information about a specific extension.
+        Can be looked up by extension ID or shortcode.
+      operationId: getExtension
+      parameters:
+        - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: Extension details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /extensions/{extensionId}/invoke:
+    post:
+      tags: [Extensions]
+      summary: Invoke extension
+      description: |
+        Invokes an extension with the specified request type.
+
+        Supported invocation types:
+        - **capability**: Process a capability request through extension hooks
+        - **action**: Process an action request through extension hooks
+        - **behavior**: Run behavioral verification for an agent
+      operationId: invokeExtension
+      parameters:
+        - $ref: '#/components/parameters/ExtensionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeRequest'
+            examples:
+              capability:
+                summary: Capability Request
+                value:
+                  type: capability
+                  agent:
+                    did: "did:web:agents.vorion.io:banquet-advisor"
+                    aci: "a3i.vorion.banquet-advisor:FHC-L3@1.2.0"
+                    publisher: vorion
+                    name: Banquet Advisor
+                    trustTier: 3
+                    trustScore: 650
+                    domains: 7
+                    level: 3
+                    version: "1.2.0"
+                  request:
+                    domains: ["food", "hospitality", "catering"]
+                    level: 3
+                    context:
+                      source: api
+                      purpose: menu-planning
+              action:
+                summary: Action Request
+                value:
+                  type: action
+                  agent:
+                    did: "did:web:agents.vorion.io:data-processor"
+                    aci: "a3i.vorion.data-processor:DCP-L4@2.0.0"
+                    publisher: vorion
+                    name: Data Processor
+                    trustTier: 4
+                    trustScore: 800
+                    domains: 15
+                    level: 4
+                    version: "2.0.0"
+                  request:
+                    type: read_data
+                    target:
+                      type: resource
+                      id: customer-database
+                    params:
+                      query: "SELECT * FROM customers WHERE region = 'US'"
+                    context:
+                      source: api
+                      purpose: analytics
+              behavior:
+                summary: Behavior Verification
+                value:
+                  type: behavior
+                  agent:
+                    did: "did:web:agents.vorion.io:assistant"
+                    aci: "a3i.vorion.assistant:GEN-L2@1.0.0#gov,mon"
+                    publisher: vorion
+                    name: AI Assistant
+                    trustTier: 2
+                    trustScore: 450
+                    domains: 3
+                    level: 2
+                    version: "1.0.0"
+      responses:
+        '200':
+          description: Invocation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvokeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /extensions/{extensionId}/status:
+    get:
+      tags: [Extensions]
+      summary: Get extension health status
+      description: |
+        Returns health and status information for a specific extension,
+        including loaded state, available hooks, and capabilities.
+      operationId: getExtensionStatus
+      parameters:
+        - $ref: '#/components/parameters/ExtensionId'
+      responses:
+        '200':
+          description: Extension status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token with appropriate roles for extension operations
+
+  parameters:
+    ExtensionId:
+      name: extensionId
+      in: path
+      required: true
+      description: Extension ID or shortcode (e.g., "aci-ext-cognigate-v1" or "gov")
+      schema:
+        type: string
+        minLength: 1
+        examples:
+          - aci-ext-cognigate-v1
+          - gov
+          - mon
+          - audit
+
+  schemas:
+    ExtensionInfo:
+      type: object
+      required:
+        - extensionId
+        - name
+        - version
+        - shortcode
+        - publisher
+        - description
+        - loaded
+        - hooks
+      properties:
+        extensionId:
+          type: string
+          description: Unique extension identifier
+          pattern: ^aci-ext-[a-z]+-v\d+$
+          example: aci-ext-cognigate-v1
+        name:
+          type: string
+          description: Human-readable extension name
+          example: Cognigate Governance Runtime
+        version:
+          type: string
+          description: Semantic version
+          pattern: ^\d+\.\d+\.\d+$
+          example: "1.0.0"
+        shortcode:
+          type: string
+          description: Short identifier for ACI strings
+          pattern: ^[a-z]{1,10}$
+          example: gov
+        publisher:
+          type: string
+          description: Publisher DID
+          example: did:web:agentanchor.io
+        description:
+          type: string
+          description: Extension description
+        registeredAt:
+          type: string
+          format: date-time
+          description: When the extension was registered
+        loaded:
+          type: boolean
+          description: Whether the extension is currently loaded
+        hooks:
+          type: array
+          items:
+            type: string
+          description: List of available hooks
+          example:
+            - capability.preCheck
+            - capability.postGrant
+            - action.preAction
+            - monitoring.verifyBehavior
+
+    AgentIdentity:
+      type: object
+      required:
+        - did
+        - aci
+        - publisher
+        - name
+        - trustTier
+        - trustScore
+        - domains
+        - level
+        - version
+      properties:
+        did:
+          type: string
+          description: Agent's DID (Decentralized Identifier)
+          example: did:web:agents.vorion.io:banquet-advisor
+        aci:
+          type: string
+          description: Agent's ACI string
+          example: a3i.vorion.banquet-advisor:FHC-L3@1.2.0#gov,audit
+        publisher:
+          type: string
+          description: Publisher organization
+          example: vorion
+        name:
+          type: string
+          description: Agent name
+          example: Banquet Advisor
+        trustTier:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Current trust tier (0-5)
+          example: 3
+        trustScore:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          description: Current trust score (0-1000)
+          example: 650
+        domains:
+          type: integer
+          minimum: 0
+          description: Capability domains (bitmask)
+          example: 7
+        level:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Capability level
+          example: 3
+        version:
+          type: string
+          pattern: ^\d+\.\d+\.\d+$
+          description: Agent version
+          example: "1.2.0"
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional metadata
+
+    RequestContext:
+      type: object
+      required:
+        - source
+      properties:
+        source:
+          type: string
+          description: Request source identifier
+          example: api
+        purpose:
+          type: string
+          description: Request purpose description
+          example: menu-planning
+        resource:
+          type: string
+          description: Target resource identifier
+        metadata:
+          type: object
+          additionalProperties: true
+
+    CapabilityRequest:
+      type: object
+      required:
+        - domains
+        - level
+        - context
+      properties:
+        domains:
+          type: array
+          items:
+            type: string
+          description: Requested domains
+          example: ["food", "hospitality", "catering"]
+        level:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Requested capability level
+          example: 3
+        context:
+          $ref: '#/components/schemas/RequestContext'
+        ttl:
+          type: integer
+          minimum: 1
+          description: Time-to-live in seconds
+
+    ActionTarget:
+      type: object
+      required:
+        - type
+        - id
+      properties:
+        type:
+          type: string
+          description: Target type
+          example: resource
+        id:
+          type: string
+          description: Target identifier
+          example: menu-database
+        metadata:
+          type: object
+          additionalProperties: true
+
+    ActionRequest:
+      type: object
+      required:
+        - type
+        - target
+        - params
+        - context
+      properties:
+        type:
+          type: string
+          description: Action type identifier
+          example: read_data
+        target:
+          $ref: '#/components/schemas/ActionTarget'
+        params:
+          type: object
+          additionalProperties: true
+          description: Action parameters
+        context:
+          $ref: '#/components/schemas/RequestContext'
+
+    InvokeRequest:
+      oneOf:
+        - $ref: '#/components/schemas/CapabilityInvokeRequest'
+        - $ref: '#/components/schemas/ActionInvokeRequest'
+        - $ref: '#/components/schemas/BehaviorInvokeRequest'
+      discriminator:
+        propertyName: type
+        mapping:
+          capability: '#/components/schemas/CapabilityInvokeRequest'
+          action: '#/components/schemas/ActionInvokeRequest'
+          behavior: '#/components/schemas/BehaviorInvokeRequest'
+
+    CapabilityInvokeRequest:
+      type: object
+      required:
+        - type
+        - agent
+        - request
+      properties:
+        type:
+          type: string
+          enum: [capability]
+        agent:
+          $ref: '#/components/schemas/AgentIdentity'
+        request:
+          $ref: '#/components/schemas/CapabilityRequest'
+
+    ActionInvokeRequest:
+      type: object
+      required:
+        - type
+        - agent
+        - request
+      properties:
+        type:
+          type: string
+          enum: [action]
+        agent:
+          $ref: '#/components/schemas/AgentIdentity'
+        request:
+          $ref: '#/components/schemas/ActionRequest'
+
+    BehaviorInvokeRequest:
+      type: object
+      required:
+        - type
+        - agent
+      properties:
+        type:
+          type: string
+          enum: [behavior]
+        agent:
+          $ref: '#/components/schemas/AgentIdentity'
+
+    CapabilityResult:
+      type: object
+      properties:
+        granted:
+          type: boolean
+          description: Whether the capability was granted
+        grant:
+          type: object
+          description: Capability grant details if granted
+        denialReason:
+          type: string
+          description: Reason for denial if not granted
+        deniedBy:
+          type: string
+          description: Extension that denied the request
+        extensionsEvaluated:
+          type: array
+          items:
+            type: string
+          description: Extensions that evaluated the request
+
+    ActionResult:
+      type: object
+      properties:
+        proceeded:
+          type: boolean
+          description: Whether the action was allowed to proceed
+        result:
+          type: object
+          description: Action result if executed
+        blockingReason:
+          type: string
+          description: Reason if action was blocked
+        blockedBy:
+          type: string
+          description: Extension that blocked the action
+        requiredApprovals:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [human, system, manager]
+              approver:
+                type: string
+              timeout:
+                type: integer
+        extensionsEvaluated:
+          type: array
+          items:
+            type: string
+
+    BehaviorResult:
+      type: object
+      properties:
+        inBounds:
+          type: boolean
+          description: Whether behavior is within certified bounds
+        driftScore:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Drift score (0-100, higher means more drift)
+        driftCategories:
+          type: array
+          items:
+            type: string
+          description: Categories of detected drift
+        recommendation:
+          type: string
+          enum: [continue, warn, suspend, revoke]
+          description: Recommended action
+        details:
+          type: string
+          description: Additional details
+
+    ExtensionCapabilities:
+      type: object
+      properties:
+        hasCapabilityHooks:
+          type: boolean
+        hasActionHooks:
+          type: boolean
+        hasMonitoringHooks:
+          type: boolean
+        hasTrustHooks:
+          type: boolean
+        hasPolicyEngine:
+          type: boolean
+
+    ExtensionStatus:
+      type: object
+      properties:
+        extensionId:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+        loaded:
+          type: boolean
+        registeredAt:
+          type: string
+          format: date-time
+        hooks:
+          type: object
+          properties:
+            total:
+              type: integer
+            available:
+              type: array
+              items:
+                type: string
+        capabilities:
+          $ref: '#/components/schemas/ExtensionCapabilities'
+        timestamp:
+          type: string
+          format: date-time
+
+    ExtensionListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            extensions:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExtensionInfo'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ExtensionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/ExtensionInfo'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    InvokeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            result:
+              oneOf:
+                - $ref: '#/components/schemas/CapabilityResult'
+                - $ref: '#/components/schemas/ActionResult'
+                - $ref: '#/components/schemas/BehaviorResult'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ExtensionStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/ExtensionStatus'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ResponseMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code
+            message:
+              type: string
+              description: Error message
+            details:
+              type: object
+              additionalProperties: true
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: Request validation failed
+              details:
+                errors:
+                  - path: agent.trustTier
+                    message: Number must be less than or equal to 5
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: Authentication required
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: FORBIDDEN
+              message: Insufficient permissions to access this resource
+              details:
+                requiredRoles:
+                  - admin
+                  - extension:admin
+                  - extension_reader
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: NOT_FOUND
+              message: Extension not found

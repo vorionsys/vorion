@@ -1,0 +1,512 @@
+# =============================================================================
+# SBOM Compliance Mapping
+# Maps Vorion SBOM practices to regulatory frameworks and security controls
+# =============================================================================
+#
+# This file serves as the authoritative mapping between SBOM generation
+# activities and the compliance frameworks they satisfy. It is referenced
+# by the SBOM generation pipeline, validation scripts, and audit processes.
+#
+# Last updated: 2026-02-19
+# Maintainer: Vorion Security Team
+# =============================================================================
+
+metadata:
+  document_version: "1.0.0"
+  last_reviewed: "2026-02-19"
+  next_review: "2026-05-19"
+  owner: "Vorion Security Team"
+  scope:
+    - repository: "vorion"
+      type: "TypeScript monorepo"
+      sbom_format: ["CycloneDX 1.5", "SPDX 2.3"]
+    - repository: "cognigate"
+      type: "Python FastAPI application"
+      sbom_format: ["CycloneDX 1.5", "SPDX 2.3"]
+
+# =============================================================================
+# NIST SP 800-53 Rev 5 — Security and Privacy Controls
+# =============================================================================
+nist_800_53:
+  framework: "NIST SP 800-53 Revision 5"
+  reference: "https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final"
+  controls:
+
+    SA-12:
+      name: "Supply Chain Risk Management"
+      family: "System and Services Acquisition"
+      description: >
+        Protect against supply chain threats by identifying, assessing, and
+        mitigating risks associated with the supply chain for software components.
+      sbom_practices:
+        - practice: "Automated SBOM generation on every release"
+          evidence: "GitHub Actions workflow (sbom.yml) triggered on tag push and release"
+        - practice: "Complete third-party component inventory"
+          evidence: "CycloneDX SBOM lists all direct and transitive dependencies with purl identifiers"
+        - practice: "Vulnerability correlation with supply chain components"
+          evidence: "npm audit / pip-audit results correlated and embedded in SBOM vulnerabilities section"
+        - practice: "Historical SBOM tracking for supply chain audits"
+          evidence: "Versioned SBOM copies archived to sbom-history/ on each release"
+      implementation_status: "implemented"
+      automation: "full"
+
+    SA-12(1):
+      name: "Supply Chain Risk Management | Acquisition Strategies"
+      sbom_practices:
+        - practice: "Dependency provenance verification via purl"
+          evidence: "Each component includes Package URL for registry traceability"
+      implementation_status: "implemented"
+      automation: "full"
+
+    SI-7:
+      name: "Software, Firmware, and Information Integrity"
+      family: "System and Information Integrity"
+      description: >
+        Employ integrity verification tools to detect unauthorized changes
+        to software, firmware, and information.
+      sbom_practices:
+        - practice: "Component integrity hashes in SBOM"
+          evidence: "CycloneDX components include SHA-256 hashes for integrity verification"
+        - practice: "Reproducible SBOM generation"
+          evidence: "--output-reproducible flag ensures deterministic output for same inputs"
+        - practice: "Runtime environment hash"
+          evidence: "runtime-environment.json captures build environment fingerprint"
+        - practice: "Container digest tracking"
+          evidence: "container-digest.json captures Dockerfile SHA-256 when present"
+      implementation_status: "implemented"
+      automation: "full"
+
+    SI-7(1):
+      name: "Software Integrity | Integrity Checks"
+      sbom_practices:
+        - practice: "Automated SBOM validation in CI/CD"
+          evidence: "validate-sbom.sh runs NTIA/CISA/EO14028 compliance checks"
+      implementation_status: "implemented"
+      automation: "full"
+
+    CM-8:
+      name: "System Component Inventory"
+      family: "Configuration Management"
+      description: >
+        Develop and document an inventory of system components that accurately
+        reflects the system, includes all components, and is at the level of
+        granularity necessary for tracking.
+      sbom_practices:
+        - practice: "Complete software component inventory"
+          evidence: "CycloneDX SBOM enumerates all npm/pip packages with name, version, type"
+        - practice: "SPDX cross-format inventory"
+          evidence: "SPDX 2.3 JSON provides alternative inventory format for interoperability"
+      implementation_status: "implemented"
+      automation: "full"
+
+    RA-5:
+      name: "Vulnerability Monitoring and Scanning"
+      family: "Risk Assessment"
+      description: >
+        Monitor and scan for vulnerabilities in the system and hosted applications.
+      sbom_practices:
+        - practice: "Automated dependency vulnerability scanning"
+          evidence: "npm audit (vorion) and pip-audit (cognigate) run during SBOM generation"
+        - practice: "Vulnerability correlation in SBOM"
+          evidence: "Known vulnerabilities embedded in CycloneDX vulnerabilities section"
+        - practice: "Weekly scheduled scans"
+          evidence: "SBOM workflow runs on cron schedule (Monday 6AM UTC)"
+      implementation_status: "implemented"
+      automation: "full"
+
+# =============================================================================
+# NIST SP 800-218 — Secure Software Development Framework (SSDF)
+# =============================================================================
+nist_sp_800_218:
+  framework: "NIST SP 800-218 (SSDF) v1.1"
+  reference: "https://csrc.nist.gov/publications/detail/sp/800-218/final"
+  practices:
+
+    PS.3:
+      name: "Maintain Provenance Data for All Software Components"
+      group: "Protect the Software"
+      description: >
+        Identify and document all third-party software components used, and
+        maintain their provenance data.
+      sbom_mapping:
+        - "Full dependency tree captured in CycloneDX and SPDX formats"
+        - "Component purl provides provenance to package registry"
+        - "Version pinning tracked via package-lock.json / requirements.txt"
+      evidence:
+        - "sbom/sbom-cyclonedx.json — components array with purl fields"
+        - "sbom/sbom-spdx.json — packages array with externalRefs"
+      implementation_status: "implemented"
+
+    PW.4:
+      name: "Verify Third-Party Software Components"
+      group: "Produce Well-Secured Software"
+      description: >
+        Verify the integrity and provenance of third-party components before use.
+      sbom_mapping:
+        - "Component hashes (SHA-256) in SBOM for integrity verification"
+        - "License data captured for compliance review"
+        - "purl identifiers enable provenance checking against registries"
+      evidence:
+        - "sbom/sbom-cyclonedx.json — components[].hashes and components[].licenses"
+      implementation_status: "implemented"
+
+    RV.1:
+      name: "Identify and Confirm Vulnerabilities"
+      group: "Respond to Vulnerabilities"
+      description: >
+        Identify and confirm vulnerabilities on an ongoing basis.
+      sbom_mapping:
+        - "npm audit / pip-audit runs during every SBOM generation"
+        - "Vulnerability data correlated with specific SBOM components"
+        - "vulnerability-summary.json provides actionable findings"
+        - "Weekly scheduled scans ensure ongoing vulnerability identification"
+      evidence:
+        - "sbom/vulnerability-summary.json"
+        - "sbom/audit-report.json or sbom/pip-audit-report.json"
+        - "sbom/sbom-cyclonedx.json — vulnerabilities section"
+      implementation_status: "implemented"
+
+    RV.1.3:
+      name: "Gather Information About Vulnerabilities"
+      group: "Respond to Vulnerabilities"
+      sbom_mapping:
+        - "Vulnerability severity ratings captured from npm/PyPI/OSV databases"
+        - "Fix recommendations included in vulnerability correlation"
+        - "Affected version ranges documented"
+      evidence:
+        - "sbom/sbom-cyclonedx.json — vulnerabilities[].ratings, vulnerabilities[].recommendation"
+      implementation_status: "implemented"
+
+    PO.1:
+      name: "Define Security Requirements for Software Development"
+      group: "Prepare the Organization"
+      sbom_mapping:
+        - "SBOM generation mandated in release process via CI/CD"
+        - "Compliance validation automated in pipeline"
+        - "This compliance mapping document defines requirements"
+      evidence:
+        - ".github/workflows/sbom.yml"
+        - "compliance/sbom-compliance.yaml (this file)"
+      implementation_status: "implemented"
+
+# =============================================================================
+# Executive Order 14028 — Improving the Nation's Cybersecurity (Section 4)
+# =============================================================================
+eo_14028:
+  framework: "Executive Order 14028 — Section 4"
+  reference: "https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/"
+  effective_date: "2021-05-12"
+  requirements:
+
+    section_4e_i:
+      name: "SBOM for Each Software Product"
+      requirement: >
+        Provide a purchaser an SBOM for each product directly or by publishing
+        it on a public website.
+      sbom_mapping:
+        - "SBOM generated for every tagged release"
+        - "SBOM attached as release assets on GitHub"
+        - "SBOM available as CI artifacts for 90 days"
+        - "Historical SBOMs maintained in sbom-history/"
+      implementation_status: "implemented"
+
+    section_4e_ii:
+      name: "Machine-Readable Format"
+      requirement: >
+        SBOM must be in a machine-readable format (SPDX, CycloneDX, or SWID).
+      sbom_mapping:
+        - "CycloneDX 1.5 JSON and XML formats generated"
+        - "SPDX 2.3 JSON format generated"
+        - "Both formats are NTIA-recognized machine-readable formats"
+      implementation_status: "implemented"
+
+    section_4e_iii:
+      name: "Include All Dependencies"
+      requirement: >
+        SBOM must include direct and transitive dependencies.
+      sbom_mapping:
+        - "CycloneDX generator traverses full dependency tree"
+        - "Both production and dev dependencies included by default"
+        - "Dependency relationships captured in dependencies[] array"
+      implementation_status: "implemented"
+
+    section_4e_iv:
+      name: "Vulnerability Correlation"
+      requirement: >
+        SBOM generation process should include automated vulnerability checking.
+      sbom_mapping:
+        - "npm audit (Node.js) correlates known CVEs with SBOM components"
+        - "pip-audit (Python) checks PyPI/OSV vulnerability databases"
+        - "Results embedded in CycloneDX vulnerabilities section"
+      implementation_status: "implemented"
+
+    section_4e_x:
+      name: "SBOM Frequency"
+      requirement: >
+        SBOMs must be generated for each new release and on a regular schedule.
+      sbom_mapping:
+        - "Generated on every version tag push (v*)"
+        - "Generated on every GitHub release publication"
+        - "Weekly scheduled generation (Monday 6AM UTC)"
+        - "Manual generation available via workflow_dispatch"
+      implementation_status: "implemented"
+
+# =============================================================================
+# EU AI Act — Article 15 (Accuracy, Robustness, Cybersecurity)
+# =============================================================================
+eu_ai_act:
+  framework: "EU AI Act (Regulation 2024/1689)"
+  reference: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj"
+  effective_date: "2024-08-01"
+  articles:
+
+    article_15:
+      name: "Accuracy, Robustness, and Cybersecurity"
+      description: >
+        High-risk AI systems shall be designed and developed in such a way that
+        they achieve an appropriate level of cybersecurity and are resilient
+        against attempts by unauthorized third parties to alter their use,
+        outputs, or performance by exploiting system vulnerabilities.
+      sbom_relevance:
+        - aspect: "Supply chain security for AI components"
+          mapping: >
+            SBOM provides complete inventory of all software components
+            (including AI libraries like anthropic, openai, google-generativeai)
+            enabling identification of vulnerabilities in the AI supply chain.
+        - aspect: "Third-party AI library integrity"
+          mapping: >
+            Component hashes and purl identifiers enable verification that
+            AI libraries have not been tampered with.
+        - aspect: "Continuous vulnerability monitoring of AI dependencies"
+          mapping: >
+            Weekly scheduled SBOM generation with vulnerability correlation
+            ensures ongoing monitoring of security posture of AI components.
+        - aspect: "Auditability of AI system components"
+          mapping: >
+            Historical SBOM archive provides audit trail of all components
+            used in each version of the AI system.
+      implementation_status: "implemented"
+      notes: >
+        Cognigate serves as the AI governance runtime. Its SBOM captures all
+        AI provider libraries and their dependency chains, directly supporting
+        Article 15 cybersecurity requirements for high-risk AI systems.
+
+    article_9:
+      name: "Risk Management System"
+      sbom_relevance:
+        - aspect: "Software supply chain risk identification"
+          mapping: >
+            SBOM vulnerability correlation identifies and quantifies supply
+            chain risks in the AI system's software components.
+      implementation_status: "partial"
+      notes: "SBOM covers software supply chain risks; broader risk management extends beyond SBOM scope."
+
+# =============================================================================
+# ISO 27001:2022 — Annex A Controls (Supplier Relationships)
+# =============================================================================
+iso_27001:
+  framework: "ISO/IEC 27001:2022 — Annex A"
+  reference: "https://www.iso.org/standard/27001"
+  controls:
+
+    A.5.19:
+      name: "Information Security in Supplier Relationships"
+      description: >
+        Processes and procedures shall be defined and implemented to manage
+        the information security risks associated with the use of supplier's
+        products or services.
+      sbom_mapping:
+        - "SBOM documents all third-party supplier components"
+        - "License data tracks supplier terms and conditions"
+        - "Vulnerability correlation assesses supplier component risk"
+      implementation_status: "implemented"
+
+    A.5.20:
+      name: "Addressing Information Security Within Supplier Agreements"
+      sbom_mapping:
+        - "License compliance data in SBOM supports agreement verification"
+        - "Component provenance via purl enables supplier identification"
+      implementation_status: "partial"
+      notes: "SBOM provides technical evidence; contractual agreements are out of scope."
+
+    A.5.21:
+      name: "Managing Information Security in the ICT Supply Chain"
+      sbom_mapping:
+        - "Complete transitive dependency tree captures full ICT supply chain"
+        - "Vulnerability monitoring across entire supply chain via weekly scans"
+        - "Historical SBOM archive tracks supply chain changes over time"
+      implementation_status: "implemented"
+
+    A.5.22:
+      name: "Monitoring, Review, and Change Management of Supplier Services"
+      sbom_mapping:
+        - "SBOM diff between versions reveals supply chain changes"
+        - "Scheduled weekly generation provides continuous monitoring"
+        - "GitHub dependency review action flags supply chain changes"
+      implementation_status: "implemented"
+
+    A.5.23:
+      name: "Information Security for Use of Cloud Services"
+      sbom_mapping:
+        - "SBOM captures cloud SDK dependencies (AWS SDK, etc.)"
+        - "Runtime environment hash documents deployment context"
+      implementation_status: "partial"
+      notes: "SBOM covers client-side cloud dependencies; server-side cloud configuration is out of scope."
+
+    A.8.9:
+      name: "Configuration Management"
+      sbom_mapping:
+        - "SBOM serves as configuration baseline for software components"
+        - "Versioned SBOM archive tracks configuration changes across releases"
+        - "Reproducible SBOM generation ensures consistent baselines"
+      implementation_status: "implemented"
+
+# =============================================================================
+# CISA 2025 SBOM Minimum Elements
+# =============================================================================
+cisa_2025:
+  framework: "CISA SBOM Minimum Elements (2025)"
+  reference: "https://www.cisa.gov/sbom"
+  data_fields:
+
+    1_author_name:
+      name: "Author Name"
+      description: "The name of the entity that created the SBOM"
+      sbom_field: "metadata.tools[].vendor / metadata.tools[].name"
+      present: true
+      notes: "Tool vendor identified in CycloneDX metadata"
+
+    2_timestamp:
+      name: "Timestamp"
+      description: "The date and time the SBOM was created"
+      sbom_field: "metadata.timestamp"
+      present: true
+      notes: "ISO 8601 UTC timestamp"
+
+    3_supplier_name:
+      name: "Supplier Name"
+      description: "The name of the entity that supplies the component"
+      sbom_field: "metadata.component.name / components[].author"
+      present: true
+      notes: "Root component and individual component suppliers identified"
+
+    4_component_name:
+      name: "Component Name"
+      description: "The name of the software component"
+      sbom_field: "components[].name"
+      present: true
+      notes: "All components include name field"
+
+    5_component_version:
+      name: "Component Version"
+      description: "The version of the software component"
+      sbom_field: "components[].version"
+      present: true
+      notes: "Exact versions pinned from lock files"
+
+    6_unique_identifier:
+      name: "Unique Identifier"
+      description: "A unique identifier for the component (e.g., purl, CPE)"
+      sbom_field: "components[].purl / components[].bom-ref"
+      present: true
+      notes: "Package URL (purl) for registry-level identification"
+
+    7_dependency_relationship:
+      name: "Dependency Relationship"
+      description: "The relationship between components (e.g., depends-on)"
+      sbom_field: "dependencies[]"
+      present: true
+      notes: "Full dependency graph captured"
+
+    8_component_hash:
+      name: "Component Hash"
+      description: "Cryptographic hash of the component for integrity verification"
+      sbom_field: "components[].hashes[]"
+      present: true
+      notes: "SHA-256 hashes when available from package registries"
+
+    9_lifecycle_phase:
+      name: "Lifecycle Phase"
+      description: "The phase in the software lifecycle when the SBOM was created"
+      sbom_field: "metadata.lifecycles[]"
+      present: "partial"
+      notes: >
+        CycloneDX 1.5 supports lifecycles field but it is not always populated
+        by the generation tool. SBOM generation during CI/CD build implicitly
+        indicates 'build' lifecycle phase.
+
+# =============================================================================
+# NTIA Minimum Elements for SBOM
+# =============================================================================
+ntia:
+  framework: "NTIA Minimum Elements for an SBOM"
+  reference: "https://www.ntia.gov/report/2021/minimum-elements-software-bill-materials-sbom"
+  published: "2021-07-12"
+  elements:
+
+    supplier_name:
+      required: true
+      present: true
+      sbom_field: "metadata.component.name"
+
+    component_name:
+      required: true
+      present: true
+      sbom_field: "components[].name"
+
+    version_string:
+      required: true
+      present: true
+      sbom_field: "components[].version"
+
+    other_unique_identifiers:
+      required: true
+      present: true
+      sbom_field: "components[].purl"
+
+    dependency_relationship:
+      required: true
+      present: true
+      sbom_field: "dependencies[]"
+
+    author_of_sbom_data:
+      required: true
+      present: true
+      sbom_field: "metadata.tools[]"
+
+    timestamp:
+      required: true
+      present: true
+      sbom_field: "metadata.timestamp"
+
+# =============================================================================
+# Implementation Summary
+# =============================================================================
+summary:
+  total_controls_mapped: 22
+  implemented: 18
+  partial: 3
+  not_implemented: 1
+  automation_coverage: "95%"
+  generation_triggers:
+    - "Tag push (v*)"
+    - "GitHub release publication"
+    - "Weekly schedule (Monday 6AM UTC)"
+    - "Manual workflow dispatch"
+  output_formats:
+    - "CycloneDX 1.5 JSON"
+    - "CycloneDX 1.5 XML"
+    - "SPDX 2.3 JSON"
+  toolchain:
+    vorion:
+      - "@cyclonedx/cyclonedx-npm"
+      - "npm audit"
+      - "spdx-sbom-generator (fallback: manual conversion)"
+    cognigate:
+      - "cyclonedx-py"
+      - "pip-audit"
+      - "spdx-tools (fallback: manual conversion)"
+  retention:
+    ci_artifacts: "90 days"
+    sbom_history: "indefinite (committed to repository)"
+    release_assets: "indefinite (attached to GitHub releases)"

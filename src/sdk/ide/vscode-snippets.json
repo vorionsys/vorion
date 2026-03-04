@@ -1,0 +1,294 @@
+{
+  "Vorion Policy": {
+    "prefix": "vpolicy",
+    "body": [
+      "import { Policy, user, request, time, mfa, allow, deny } from '@vorion/sdk';",
+      "",
+      "export const ${1:policyName} = Policy.create('${2:policy-id}')",
+      "  .description('${3:Policy description}')",
+      "  .when(${4:user.role.equals('admin')})",
+      "  .require(${5:mfa.verified()})",
+      "  .then(allow())",
+      "  .otherwise(deny('${6:Access denied}'))",
+      "  .build();",
+      ""
+    ],
+    "description": "Create a new Vorion security policy"
+  },
+  "Vorion Policy with Time Restriction": {
+    "prefix": "vpolicy-time",
+    "body": [
+      "import { Policy, user, request, time, mfa, allow, deny } from '@vorion/sdk';",
+      "",
+      "export const ${1:policyName} = Policy.create('${2:policy-id}')",
+      "  .description('${3:Time-restricted access policy}')",
+      "  .when(user.role.equals('${4:admin}'))",
+      "  .and(time.between('${5:09:00}', '${6:18:00}'))",
+      "  .and(time.isWeekday())",
+      "  .require(mfa.verified())",
+      "  .then(allow())",
+      "  .otherwise(deny('${7:Access only allowed during business hours}'))",
+      "  .build();",
+      ""
+    ],
+    "description": "Create a time-restricted Vorion policy"
+  },
+  "Vorion Policy with IP Restriction": {
+    "prefix": "vpolicy-ip",
+    "body": [
+      "import { Policy, user, request, allow, deny } from '@vorion/sdk';",
+      "",
+      "export const ${1:policyName} = Policy.create('${2:policy-id}')",
+      "  .description('${3:IP-restricted access policy}')",
+      "  .when(request.ip.inRange('${4:10.0.0.0/8}'))",
+      "  .then(allow())",
+      "  .otherwise(deny('${5:Access restricted to internal network}'))",
+      "  .build();",
+      ""
+    ],
+    "description": "Create an IP-restricted Vorion policy"
+  },
+  "Secured Controller": {
+    "prefix": "vsecured-controller",
+    "body": [
+      "import { Secured, RateLimit, AuditLog } from '@vorion/sdk/decorators';",
+      "",
+      "@Secured({ roles: ['${1:admin}'], mfa: ${2:true} })",
+      "export class ${3:AdminController} {",
+      "  @RateLimit({ requests: ${4:100}, window: '${5:1m}' })",
+      "  @AuditLog({ level: '${6:detailed}' })",
+      "  async ${7:sensitiveOperation}() {",
+      "    $0",
+      "  }",
+      "}",
+      ""
+    ],
+    "description": "Create a secured controller class"
+  },
+  "Secured Method": {
+    "prefix": "vsecured-method",
+    "body": [
+      "@Secured({ roles: ['${1:admin}'] })",
+      "@RateLimit({ requests: ${2:10}, window: '${3:1m}' })",
+      "@AuditLog({ level: '${4:standard}' })",
+      "async ${5:methodName}(${6:params}) {",
+      "  $0",
+      "}"
+    ],
+    "description": "Add security decorators to a method"
+  },
+  "Rate Limit Decorator": {
+    "prefix": "vratelimit",
+    "body": [
+      "@RateLimit({",
+      "  requests: ${1:100},",
+      "  window: '${2:1m}',",
+      "  keyBy: '${3|ip,user,session|}',",
+      "  onExceeded: '${4|deny,queue,degrade|}'",
+      "})"
+    ],
+    "description": "Add rate limiting to a method"
+  },
+  "Audit Log Decorator": {
+    "prefix": "vauditlog",
+    "body": [
+      "@AuditLog({",
+      "  level: '${1|minimal,standard,detailed,full|}',",
+      "  includeRequest: ${2:true},",
+      "  includeResponse: ${3:false},",
+      "  redactFields: [${4:'password', 'token'}]",
+      "})"
+    ],
+    "description": "Add audit logging to a method"
+  },
+  "Require Permission Decorator": {
+    "prefix": "vpermission",
+    "body": [
+      "@RequirePermission('${1:resource}:${2|read,write,delete,admin|}')"
+    ],
+    "description": "Require a specific permission"
+  },
+  "Break Glass Decorator": {
+    "prefix": "vbreakglass",
+    "body": [
+      "@BreakGlass({",
+      "  approvers: [${1:'security-team'}],",
+      "  minApprovals: ${2:1},",
+      "  expiresIn: '${3:1h}',",
+      "  requireReason: ${4:true},",
+      "  auditLevel: '${5|high,critical|}'",
+      "})"
+    ],
+    "description": "Add break glass requirement to a method"
+  },
+  "Vorion Test Suite": {
+    "prefix": "vtest-suite",
+    "body": [
+      "import { runTestSuite, TestSuite, TestContextBuilder, expect } from '@vorion/sdk/testing';",
+      "import { ${1:myPolicy} } from './${2:policies}';",
+      "",
+      "const suite: TestSuite = {",
+      "  name: '${3:Policy Tests}',",
+      "  tests: [",
+      "    {",
+      "      name: '${4:allows authorized users}',",
+      "      policy: ${1:myPolicy},",
+      "      context: TestContextBuilder.create()",
+      "        .asAdmin()",
+      "        .duringBusinessHours()",
+      "        .build(),",
+      "      expected: 'allow'",
+      "    },",
+      "    {",
+      "      name: '${5:denies unauthorized users}',",
+      "      policy: ${1:myPolicy},",
+      "      context: TestContextBuilder.create()",
+      "        .asUser()",
+      "        .build(),",
+      "      expected: 'deny'",
+      "    }",
+      "  ]",
+      "};",
+      "",
+      "runTestSuite(suite).then(result => {",
+      "  console.log(`Passed: \\${result.passed}, Failed: \\${result.failed}`);",
+      "});",
+      ""
+    ],
+    "description": "Create a policy test suite"
+  },
+  "Vorion Test Case": {
+    "prefix": "vtest-case",
+    "body": [
+      "{",
+      "  name: '${1:test description}',",
+      "  policy: ${2:policy},",
+      "  context: TestContextBuilder.create()",
+      "    .withUser({ ${3:role: 'admin'} })",
+      "    .withRequest({ ${4:ip: '10.0.0.1'} })",
+      "    .build(),",
+      "  expected: '${5|allow,deny,challenge,audit|}'",
+      "}"
+    ],
+    "description": "Create a policy test case"
+  },
+  "Vorion Client Setup": {
+    "prefix": "vclient",
+    "body": [
+      "import { createClient } from '@vorion/sdk/client';",
+      "",
+      "const client = createClient({",
+      "  baseUrl: '${1:https://api.vorion.io}',",
+      "  apiKey: process.env.VORION_API_KEY,",
+      "  timeout: ${2:30000},",
+      "  websocket: {",
+      "    enabled: ${3:true},",
+      "    reconnect: true",
+      "  }",
+      "});",
+      "",
+      "export { client };",
+      ""
+    ],
+    "description": "Setup Vorion API client"
+  },
+  "Vorion Policy DSL File": {
+    "prefix": "vpolicy-dsl",
+    "body": [
+      "// ${1:Policy description}",
+      "policy ${2:policy-id} {",
+      "  description: \"${1:Policy description}\"",
+      "",
+      "  when ${3:user.role} == \"${4:admin}\"",
+      "  and ${5:request.ip}.inRange(\"${6:10.0.0.0/8}\")",
+      "  and time.between(\"${7:09:00}\", \"${8:18:00}\")",
+      "",
+      "  require mfa()",
+      "",
+      "  then allow",
+      "  otherwise deny(\"${9:Access denied}\")",
+      "}",
+      ""
+    ],
+    "description": "Create a Vorion policy DSL file"
+  },
+  "Vorion Security Profile": {
+    "prefix": "vprofile",
+    "body": [
+      "import { createSecurityProfile } from '@vorion/sdk/decorators';",
+      "",
+      "export const ${1:ProfileName} = createSecurityProfile({",
+      "  secured: {",
+      "    roles: ['${2:admin}'],",
+      "    mfa: ${3:true}",
+      "  },",
+      "  rateLimit: {",
+      "    requests: ${4:100},",
+      "    window: '${5:1m}'",
+      "  },",
+      "  auditLog: {",
+      "    level: '${6|minimal,standard,detailed,full|}'",
+      "  }",
+      "});",
+      ""
+    ],
+    "description": "Create a reusable security profile"
+  },
+  "Vorion Realtime Subscription": {
+    "prefix": "vrealtime",
+    "body": [
+      "import { client } from './${1:client}';",
+      "",
+      "async function setupRealtimeUpdates() {",
+      "  await client.realtime.connect();",
+      "",
+      "  // Subscribe to policy changes",
+      "  client.realtime.onPolicyChange((event) => {",
+      "    console.log('Policy changed:', event.data.policyId);",
+      "    $0",
+      "  });",
+      "",
+      "  // Subscribe to alerts",
+      "  client.realtime.onAlert((event) => {",
+      "    console.log('Alert:', event.data.severity, event.data.message);",
+      "  });",
+      "}",
+      "",
+      "setupRealtimeUpdates();",
+      ""
+    ],
+    "description": "Setup realtime policy updates"
+  },
+  "Vorion RBAC Config": {
+    "prefix": "vrbac",
+    "body": [
+      "import { RBACPermissionChecker, setPermissionChecker } from '@vorion/sdk/decorators';",
+      "",
+      "const rbacConfig = {",
+      "  roles: {",
+      "    admin: {",
+      "      permissions: ['*'],",
+      "    },",
+      "    manager: {",
+      "      permissions: ['users:read', 'users:write', 'reports:*'],",
+      "      inherits: ['user']",
+      "    },",
+      "    user: {",
+      "      permissions: ['profile:read', 'profile:write']",
+      "    }",
+      "  }",
+      "};",
+      "",
+      "setPermissionChecker(new RBACPermissionChecker(rbacConfig));",
+      ""
+    ],
+    "description": "Configure RBAC permission checker"
+  },
+  "Vorion Condition": {
+    "prefix": "vcond",
+    "body": [
+      "${1|user,request,time,resource|}.${2|role,ip,email,permissions|}.${3|equals,notEquals,contains,inRange,matches|}(${4:'value'})"
+    ],
+    "description": "Create a policy condition"
+  }
+}

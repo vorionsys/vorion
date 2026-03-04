@@ -1,0 +1,31 @@
+Vorion API has been deployed.
+
+Release:    {{ .Release.Name }}
+Namespace:  {{ .Release.Namespace }}
+Version:    {{ .Chart.AppVersion }}
+
+{{- if .Values.ingress.enabled }}
+
+Access the API at:
+{{- range .Values.ingress.hosts }}
+  https://{{ .host }}
+{{- end }}
+
+{{- else }}
+
+To access the API, run:
+  kubectl port-forward svc/{{ include "vorion.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+
+Then visit: http://localhost:{{ .Values.service.port }}
+
+{{- end }}
+
+To check the health of the deployment:
+  kubectl get pods -l "app.kubernetes.io/name={{ include "vorion.name" . }}" -n {{ .Release.Namespace }}
+
+{{- if .Values.autoscaling.enabled }}
+
+Autoscaling: {{ .Values.autoscaling.minReplicas }}-{{ .Values.autoscaling.maxReplicas }} replicas
+{{- else }}
+Replicas: {{ .Values.replicaCount }}
+{{- end }}

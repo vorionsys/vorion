@@ -1,0 +1,190 @@
+name: Publish Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish'
+        required: true
+        type: choice
+        options:
+          - all
+          - '@vorionsys/contracts'
+          - '@vorionsys/proof-plane'
+          - '@vorionsys/basis'
+          - '@vorionsys/cognigate'
+          - '@vorionsys/sdk'
+          - '@vorionsys/agent-sdk'
+          - '@vorionsys/agentanchor-sdk'
+          - '@vorionsys/ai-gateway'
+          - '@vorionsys/atsf-core'
+          - '@vorionsys/council'
+          - '@vorionsys/platform-core'
+          - '@vorionsys/runtime'
+          - '@vorionsys/shared-constants'
+          - '@vorion/a3i'
+          - '@vorion/car-client'
+          - '@vorion/car-cli'
+          - '@vorion/security'
+      version:
+        description: 'Version bump (or exact version e.g. 1.2.3)'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prepatch
+          - preminor
+          - premajor
+          - prerelease
+      dry_run:
+        description: 'Dry run (no publish)'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: publish-packages
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  publish:
+    name: Publish ${{ github.event.inputs.package }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build all packages
+        run: npx turbo build --filter="./packages/*"
+
+      - name: Determine packages to publish
+        id: packages
+        run: |
+          SELECTED="${{ github.event.inputs.package }}"
+          if [ "$SELECTED" = "all" ]; then
+            # List all public packages
+            PACKAGES=$(node -e "
+              const fs = require('fs');
+              const path = require('path');
+              const dirs = fs.readdirSync('packages');
+              const names = dirs
+                .map(d => {
+                  const p = path.join('packages', d, 'package.json');
+                  if (!fs.existsSync(p)) return null;
+                  const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+                  if (pkg.private) return null;
+                  return pkg.name;
+                })
+                .filter(Boolean);
+              console.log(names.join('\n'));
+            ")
+            echo "packages<<EOF" >> $GITHUB_OUTPUT
+            echo "$PACKAGES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "packages=$SELECTED" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Version and publish packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION_BUMP="${{ github.event.inputs.version }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+
+          # Read package list
+          PACKAGES="${{ steps.packages.outputs.packages }}"
+
+          echo "=== Packages to publish ==="
+          echo "$PACKAGES"
+          echo "=== Version bump: $VERSION_BUMP ==="
+          echo "=== Dry run: $DRY_RUN ==="
+          echo ""
+
+          SUCCESS=0
+          FAIL=0
+
+          while IFS= read -r PKG_NAME; do
+            [ -z "$PKG_NAME" ] && continue
+
+            # Find directory for this package
+            PKG_DIR=$(node -e "
+              const fs = require('fs');
+              const path = require('path');
+              const dirs = fs.readdirSync('packages');
+              for (const d of dirs) {
+                const p = path.join('packages', d, 'package.json');
+                if (!fs.existsSync(p)) continue;
+                const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+                if (pkg.name === '$PKG_NAME') { console.log(path.join('packages', d)); break; }
+              }
+            ")
+
+            if [ -z "$PKG_DIR" ]; then
+              echo "::warning::Package $PKG_NAME not found, skipping"
+              continue
+            fi
+
+            echo ""
+            echo "========================================"
+            echo "Publishing $PKG_NAME from $PKG_DIR"
+            echo "========================================"
+
+            cd "$PKG_DIR"
+
+            # Check if dist exists
+            if [ ! -d "dist" ] && [ ! -f "index.js" ]; then
+              echo "::warning::No dist/ directory for $PKG_NAME, skipping"
+              cd "$GITHUB_WORKSPACE"
+              continue
+            fi
+
+            # Bump version
+            npm version "$VERSION_BUMP" --no-git-tag-version 2>/dev/null || true
+
+            NEW_VERSION=$(node -pe "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")
+            echo "Version: $NEW_VERSION"
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "DRY RUN - would publish $PKG_NAME@$NEW_VERSION"
+              npm publish --dry-run --access public 2>&1 || true
+            else
+              if npm publish --provenance --access public 2>&1; then
+                echo "::notice::Published $PKG_NAME@$NEW_VERSION"
+                SUCCESS=$((SUCCESS + 1))
+              else
+                echo "::error::Failed to publish $PKG_NAME"
+                FAIL=$((FAIL + 1))
+              fi
+            fi
+
+            cd "$GITHUB_WORKSPACE"
+          done <<< "$PACKAGES"
+
+          echo ""
+          echo "========================================"
+          echo "Results: $SUCCESS published, $FAIL failed"
+          echo "========================================"
+
+          if [ $FAIL -gt 0 ]; then
+            exit 1
+          fi

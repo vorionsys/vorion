@@ -1,0 +1,171 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+interface DomainHealth {
+  domain: string;
+  label: string;
+  org: string;
+  status: 'up' | 'down' | 'degraded';
+  statusCode: number | null;
+  responseTimeMs: number;
+  error?: string;
+}
+
+let domains: DomainHealth[] = [];
+let timestamp: string | null = null;
+
+try {
+  const kv = (Astro.locals as any).runtime?.env?.BAI_CC_CACHE;
+  if (kv) {
+    const raw = await kv.get('dashboard:domain-health');
+    if (raw) {
+      const data = JSON.parse(raw);
+      domains = data.domains ?? [];
+      timestamp = data.timestamp ?? null;
+    }
+  }
+} catch {
+  // Domains will be empty
+}
+
+const upCount = domains.filter(d => d.status === 'up').length;
+const degradedCount = domains.filter(d => d.status === 'degraded').length;
+const downCount = domains.filter(d => d.status === 'down').length;
+const totalCount = domains.length;
+
+const overallStatus = downCount > 2 ? 'Major Outage'
+  : downCount > 0 ? 'Partial Outage'
+  : degradedCount > 0 ? 'Degraded Performance'
+  : 'All Systems Operational';
+
+const overallColor = downCount > 2 ? 'text-red-400'
+  : downCount > 0 ? 'text-orange-400'
+  : degradedCount > 0 ? 'text-yellow-400'
+  : 'text-emerald-400';
+
+function statusDot(status: string): string {
+  if (status === 'up') return 'bg-emerald-500';
+  if (status === 'degraded') return 'bg-yellow-500';
+  return 'bg-red-500';
+}
+
+function statusLabel(status: string): string {
+  if (status === 'up') return 'Operational';
+  if (status === 'degraded') return 'Degraded';
+  return 'Down';
+}
+
+function responseColor(ms: number): string {
+  if (ms < 500) return 'text-emerald-400';
+  if (ms < 1500) return 'text-yellow-400';
+  return 'text-red-400';
+}
+
+const vorionDomains = domains.filter(d => d.org === 'vorion');
+const agentanchorDomains = domains.filter(d => d.org === 'agentanchor');
+---
+
+<Layout title="Domain Health | Vorion Dashboard">
+  <div class="space-y-8">
+    <section class="text-center py-8">
+      <h1 class="text-3xl font-bold mb-2">Domain Health</h1>
+      <p class={`text-xl font-medium ${overallColor}`}>{overallStatus}</p>
+      <p class="text-slate-400 text-sm mt-2">
+        {upCount}/{totalCount} domains operational
+        {degradedCount > 0 && ` · ${degradedCount} degraded`}
+        {downCount > 0 && ` · ${downCount} down`}
+      </p>
+    </section>
+
+    {domains.length > 0 ? (
+      <>
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 text-center">
+            <p class="text-4xl font-bold text-emerald-400">{upCount}</p>
+            <p class="text-sm text-slate-400 mt-1">Operational</p>
+          </div>
+          <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 text-center">
+            <p class="text-4xl font-bold text-yellow-400">{degradedCount}</p>
+            <p class="text-sm text-slate-400 mt-1">Degraded</p>
+          </div>
+          <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 text-center">
+            <p class="text-4xl font-bold text-red-400">{downCount}</p>
+            <p class="text-sm text-slate-400 mt-1">Down</p>
+          </div>
+        </section>
+
+        {/* Vorion Domains */}
+        <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <h2 class="text-xl font-bold mb-4">Vorion Infrastructure</h2>
+          <div class="space-y-3">
+            {vorionDomains.map((d) => (
+              <div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+                <div class="flex items-center gap-3">
+                  <span class={`w-2.5 h-2.5 rounded-full ${statusDot(d.status)}`}></span>
+                  <div>
+                    <a href={`https://${d.domain}`} target="_blank" rel="noopener" class="font-medium hover:text-emerald-400 transition-colors">
+                      {d.domain}
+                    </a>
+                    <p class="text-xs text-slate-500">{d.label}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 text-sm">
+                  <span class={responseColor(d.responseTimeMs)}>{d.responseTimeMs}ms</span>
+                  <span class={`px-2 py-0.5 rounded text-xs font-medium ${
+                    d.status === 'up' ? 'bg-emerald-500/10 text-emerald-400' :
+                    d.status === 'degraded' ? 'bg-yellow-500/10 text-yellow-400' :
+                    'bg-red-500/10 text-red-400'
+                  }`}>
+                    {statusLabel(d.status)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* AgentAnchor Domains */}
+        <section class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <h2 class="text-xl font-bold mb-4">AgentAnchor Infrastructure</h2>
+          <div class="space-y-3">
+            {agentanchorDomains.map((d) => (
+              <div class="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+                <div class="flex items-center gap-3">
+                  <span class={`w-2.5 h-2.5 rounded-full ${statusDot(d.status)}`}></span>
+                  <div>
+                    <a href={`https://${d.domain}`} target="_blank" rel="noopener" class="font-medium hover:text-emerald-400 transition-colors">
+                      {d.domain}
+                    </a>
+                    <p class="text-xs text-slate-500">{d.label}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 text-sm">
+                  <span class={responseColor(d.responseTimeMs)}>{d.responseTimeMs}ms</span>
+                  <span class={`px-2 py-0.5 rounded text-xs font-medium ${
+                    d.status === 'up' ? 'bg-emerald-500/10 text-emerald-400' :
+                    d.status === 'degraded' ? 'bg-yellow-500/10 text-yellow-400' :
+                    'bg-red-500/10 text-red-400'
+                  }`}>
+                    {statusLabel(d.status)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </>
+    ) : (
+      <section class="text-center py-16 bg-slate-800/30 rounded-xl border border-slate-700">
+        <p class="text-slate-400">Loading domain health data...</p>
+        <p class="text-sm text-slate-500 mt-2">Health checks run every 5 minutes</p>
+      </section>
+    )}
+
+    <section class="text-center py-4 text-slate-500 text-sm">
+      {timestamp && (
+        <p>Last checked: {new Date(timestamp).toLocaleString()}</p>
+      )}
+      <p class="mt-1">Checks run every 5 minutes via Cloudflare Workers</p>
+    </section>
+  </div>
+</Layout>

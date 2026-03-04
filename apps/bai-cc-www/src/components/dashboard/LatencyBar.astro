@@ -1,0 +1,34 @@
+---
+interface Props {
+  ms: number;
+  maxMs?: number;
+}
+
+const { ms, maxMs = 3000 } = Astro.props;
+
+const widthPercent = Math.min(Math.max((ms / maxMs) * 100, 2), 100);
+
+const barColor = ms < 200
+  ? 'bg-emerald-500'
+  : ms <= 500
+    ? 'bg-amber-500'
+    : 'bg-red-500';
+
+const textColor = ms < 200
+  ? 'text-emerald-400'
+  : ms <= 500
+    ? 'text-amber-400'
+    : 'text-red-400';
+---
+
+<div class="flex items-center gap-2 min-w-[120px]">
+  <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+    <div
+      class:list={['h-full rounded-full transition-all duration-500', barColor]}
+      style={`width: ${widthPercent}%`}
+    />
+  </div>
+  <span class:list={['text-xs font-mono tabular-nums whitespace-nowrap', textColor]}>
+    {ms}ms
+  </span>
+</div>

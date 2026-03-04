@@ -1,0 +1,200 @@
+{
+  "name": "@vorion/security",
+  "version": "1.0.0",
+  "description": "Enterprise security modules for Vorion platform - WebAuthn, MFA, SIEM, ZKP, HSM, and more",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./webauthn": {
+      "types": "./dist/security/webauthn/index.d.ts",
+      "import": "./dist/security/webauthn/index.js"
+    },
+    "./mfa": {
+      "types": "./dist/auth/mfa/index.d.ts",
+      "import": "./dist/auth/mfa/index.js"
+    },
+    "./sso": {
+      "types": "./dist/auth/sso/index.d.ts",
+      "import": "./dist/auth/sso/index.js"
+    },
+    "./siem": {
+      "types": "./dist/security/siem/index.d.ts",
+      "import": "./dist/security/siem/index.js"
+    },
+    "./crypto": {
+      "types": "./dist/security/crypto/index.d.ts",
+      "import": "./dist/security/crypto/index.js"
+    },
+    "./hsm": {
+      "types": "./dist/security/hsm/index.d.ts",
+      "import": "./dist/security/hsm/index.js"
+    },
+    "./kms": {
+      "types": "./dist/security/kms/index.d.ts",
+      "import": "./dist/security/kms/index.js"
+    },
+    "./encryption": {
+      "types": "./dist/security/encryption/index.d.ts",
+      "import": "./dist/security/encryption/index.js"
+    },
+    "./zkp": {
+      "types": "./dist/security/zkp/index.d.ts",
+      "import": "./dist/security/zkp/index.js"
+    },
+    "./pam": {
+      "types": "./dist/security/pam/index.d.ts",
+      "import": "./dist/security/pam/index.js"
+    },
+    "./incident": {
+      "types": "./dist/security/incident/index.d.ts",
+      "import": "./dist/security/incident/index.js"
+    },
+    "./anomaly": {
+      "types": "./dist/security/anomaly/index.d.ts",
+      "import": "./dist/security/anomaly/index.js"
+    },
+    "./alerting": {
+      "types": "./dist/security/alerting/index.d.ts",
+      "import": "./dist/security/alerting/index.js"
+    },
+    "./threat-intel": {
+      "types": "./dist/security/threat-intel/index.d.ts",
+      "import": "./dist/security/threat-intel/index.js"
+    },
+    "./policy-engine": {
+      "types": "./dist/security/policy-engine/index.d.ts",
+      "import": "./dist/security/policy-engine/index.js"
+    },
+    "./trust-oracle": {
+      "types": "./dist/security/trust-oracle/index.d.ts",
+      "import": "./dist/security/trust-oracle/index.js"
+    },
+    "./ai-governance": {
+      "types": "./dist/security/ai-governance/index.d.ts",
+      "import": "./dist/security/ai-governance/index.js"
+    },
+    "./headers": {
+      "types": "./dist/security/headers/index.d.ts",
+      "import": "./dist/security/headers/index.js"
+    },
+    "./api-keys": {
+      "types": "./dist/security/api-keys/index.d.ts",
+      "import": "./dist/security/api-keys/index.js"
+    },
+    "./dlp": {
+      "types": "./dist/security/dlp/index.d.ts",
+      "import": "./dist/security/dlp/index.js"
+    },
+    "./service-auth": {
+      "types": "./dist/security/service-auth/index.d.ts",
+      "import": "./dist/security/service-auth/index.js"
+    },
+    "./audit": {
+      "types": "./dist/audit/index.d.ts",
+      "import": "./dist/audit/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@noble/post-quantum": "^0.5.4",
+    "@otplib/preset-default": "^12.0.1",
+    "@simplewebauthn/server": "^10.0.0",
+    "@simplewebauthn/types": "^10.0.0",
+    "@vorionsys/basis": "*",
+    "@vorionsys/contracts": "^0.1.2",
+    "argon2": "^0.40.0",
+    "ioredis": "^5.4.1",
+    "jose": "^5.2.0",
+    "openid-client": "^6.1.0",
+    "otplib": "^12.0.1",
+    "prom-client": "^15.1.0",
+    "qrcode": "^1.5.3",
+    "uuid": "^11.0.0",
+    "zod": "^3.24.1",
+    "zxcvbn": "^4.4.2"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-kms": "^3.600.0",
+    "@aws-sdk/client-ses": "^3.600.0",
+    "@aws-sdk/client-sns": "^3.600.0",
+    "@fastify/swagger": "^9.0.0",
+    "@types/node": "^22.10.5",
+    "@types/qrcode": "^1.5.5",
+    "@types/uuid": "^10.0.0",
+    "@types/zxcvbn": "^4.4.4",
+    "fastify": "^5.7.4",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-cloudhsm-v2": "^3.0.0",
+    "@aws-sdk/client-kms": "^3.0.0",
+    "@aws-sdk/client-ses": "^3.0.0",
+    "@aws-sdk/client-sns": "^3.0.0",
+    "@azure/keyvault-keys": "^4.0.0",
+    "@google-cloud/kms": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-kms": {
+      "optional": true
+    },
+    "@aws-sdk/client-cloudhsm-v2": {
+      "optional": true
+    },
+    "@aws-sdk/client-sns": {
+      "optional": true
+    },
+    "@aws-sdk/client-ses": {
+      "optional": true
+    },
+    "@azure/keyvault-keys": {
+      "optional": true
+    },
+    "@google-cloud/kms": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "security",
+    "webauthn",
+    "mfa",
+    "siem",
+    "zkp",
+    "hsm",
+    "encryption",
+    "vorion",
+    "enterprise"
+  ],
+  "author": "Vorion <team@vorion.org>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/voriongit/vorion.git",
+    "directory": "packages/security"
+  },
+  "bugs": {
+    "url": "https://github.com/voriongit/vorion/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://vorion.org",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

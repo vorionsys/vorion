@@ -1,0 +1,1266 @@
+openapi: 3.1.0
+info:
+  title: Cognigate API
+  description: |
+    # Cognigate AI Governance API
+
+    Cognigate provides AI governance, trust scoring, and policy enforcement for autonomous agents.
+
+    ## Base URLs
+    - **Production**: `https://cognigate.dev/v1`
+    - **Staging**: `https://staging.cognigate.dev/v1`
+
+    ## Authentication
+    All endpoints require Bearer token authentication:
+    ```
+    Authorization: Bearer <your-api-key>
+    ```
+
+    ## Trust Tiers (BASIS Specification)
+    | Tier | Score Range | Name | Description |
+    |------|-------------|------|-------------|
+    | T0 | 0-199 | Sandbox | Isolated, no external access |
+    | T1 | 200-349 | Observed | Read-only, monitored |
+    | T2 | 350-500 | Provisional | Basic operations, supervised |
+    | T3 | 501-649 | Monitored | Standard operations with monitoring |
+    | T4 | 650-799 | Standard | External API access, policy-governed |
+    | T5 | 800-875 | Trusted | Cross-agent communication |
+    | T6 | 876-950 | Certified | Admin tasks, minimal oversight |
+    | T7 | 951-1000 | Autonomous | Full autonomy, self-governance |
+
+    ## Related Resources
+    - [BASIS Specification](https://basis.vorion.org)
+    - [TypeScript SDK](https://npmjs.com/package/@vorionsys/cognigate)
+    - [Agent Anchor Trust](https://trust.agentanchorai.com)
+
+  version: 1.0.0
+  contact:
+    name: Agent Anchor AI
+    email: api-support@agentanchorai.com
+    url: https://cognigate.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  x-logo:
+    url: https://cognigate.dev/logo.svg
+
+servers:
+  - url: https://cognigate.dev/v1
+    description: Production
+  - url: https://staging.cognigate.dev/v1
+    description: Staging
+  - url: http://localhost:3000/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Agents
+    description: Agent lifecycle management
+  - name: Trust
+    description: Trust score and tier management
+  - name: Governance
+    description: Intent parsing and policy enforcement
+  - name: Proofs
+    description: Immutable audit trail
+  - name: Webhooks
+    description: Event notifications
+  - name: Health
+    description: Service health and status
+
+paths:
+  # ==========================================================================
+  # AGENTS
+  # ==========================================================================
+  /agents:
+    get:
+      tags: [Agents]
+      summary: List agents
+      description: Retrieve a paginated list of agents
+      operationId: listAgents
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, PAUSED, SUSPENDED, TERMINATED]
+        - name: minTrustTier
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 7
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Agents]
+      summary: Create agent
+      description: Register a new agent
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentRequest'
+      responses:
+        '201':
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /agents/{agentId}:
+    get:
+      tags: [Agents]
+      summary: Get agent
+      description: Retrieve agent details
+      operationId: getAgent
+      parameters:
+        - $ref: '#/components/parameters/agentId'
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Agents]
+      summary: Update agent
+      description: Update agent properties
+      operationId: updateAgent
+      parameters:
+        - $ref: '#/components/parameters/agentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAgentRequest'
+      responses:
+        '200':
+          description: Agent updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Agents]
+      summary: Delete agent
+      description: Permanently delete an agent
+      operationId: deleteAgent
+      parameters:
+        - $ref: '#/components/parameters/agentId'
+      responses:
+        '204':
+          description: Agent deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agents/{agentId}/pause:
+    post:
+      tags: [Agents]
+      summary: Pause agent
+      description: Temporarily pause agent operations
+      operationId: pauseAgent
+      parameters:
+        - $ref: '#/components/parameters/agentId'
+      responses:
+        '200':
+          description: Agent paused
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+
+  /agents/{agentId}/resume:
+    post:
+      tags: [Agents]
+      summary: Resume agent
+      description: Resume a paused agent
+      operationId: resumeAgent
+      parameters:
+        - $ref: '#/components/parameters/agentId'
+      responses:
+        '200':
+          description: Agent resumed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+
+  # ==========================================================================
+  # TRUST
+  # ==========================================================================
+  /trust/{entityId}/status:
+    get:
+      tags: [Trust]
+      summary: Get trust status
+      description: Retrieve current trust score, tier, and capabilities
+      operationId: getTrustStatus
+      parameters:
+        - $ref: '#/components/parameters/entityId'
+      responses:
+        '200':
+          description: Trust status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /trust/{entityId}/history:
+    get:
+      tags: [Trust]
+      summary: Get trust history
+      description: Retrieve trust score history over time
+      operationId: getTrustHistory
+      parameters:
+        - $ref: '#/components/parameters/entityId'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+      responses:
+        '200':
+          description: Trust history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustHistoryResponse'
+
+  /trust/{entityId}/outcomes:
+    post:
+      tags: [Trust]
+      summary: Submit outcome
+      description: Record an action outcome to update trust score
+      operationId: submitOutcome
+      parameters:
+        - $ref: '#/components/parameters/entityId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutcomeRequest'
+      responses:
+        '200':
+          description: Outcome recorded, trust updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustStatusResponse'
+
+  # ==========================================================================
+  # GOVERNANCE
+  # ==========================================================================
+  /governance/parse:
+    post:
+      tags: [Governance]
+      summary: Parse intent
+      description: Parse natural language into structured intent
+      operationId: parseIntent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParseIntentRequest'
+      responses:
+        '200':
+          description: Parsed intent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParseIntentResponse'
+
+  /governance/enforce:
+    post:
+      tags: [Governance]
+      summary: Enforce governance
+      description: Evaluate intent against policies and trust level
+      operationId: enforceGovernance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnforceRequest'
+      responses:
+        '200':
+          description: Governance decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GovernanceResultResponse'
+
+  /governance/evaluate:
+    post:
+      tags: [Governance]
+      summary: Evaluate (parse + enforce)
+      description: Combined intent parsing and governance enforcement
+      operationId: evaluateIntent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluateRequest'
+      responses:
+        '200':
+          description: Full evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluateResponse'
+
+  /governance/can-perform:
+    post:
+      tags: [Governance]
+      summary: Check capability
+      description: Check if entity can perform action without creating proof
+      operationId: canPerform
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanPerformRequest'
+      responses:
+        '200':
+          description: Capability check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanPerformResponse'
+
+  # ==========================================================================
+  # PROOFS
+  # ==========================================================================
+  /proofs/{proofId}:
+    get:
+      tags: [Proofs]
+      summary: Get proof record
+      description: Retrieve a specific proof record
+      operationId: getProof
+      parameters:
+        - name: proofId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Proof record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofRecordResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /proofs/entity/{entityId}:
+    get:
+      tags: [Proofs]
+      summary: List proofs
+      description: List proof records for an entity
+      operationId: listProofs
+      parameters:
+        - $ref: '#/components/parameters/entityId'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: outcome
+          in: query
+          schema:
+            type: string
+            enum: [SUCCESS, FAILURE, PARTIAL, PENDING]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: Proof records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofListResponse'
+
+  /proofs/entity/{entityId}/stats:
+    get:
+      tags: [Proofs]
+      summary: Get chain statistics
+      description: Retrieve proof chain statistics
+      operationId: getProofStats
+      parameters:
+        - $ref: '#/components/parameters/entityId'
+      responses:
+        '200':
+          description: Chain statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofStatsResponse'
+
+  /proofs/entity/{entityId}/verify:
+    post:
+      tags: [Proofs]
+      summary: Verify chain integrity
+      description: Verify the integrity of an entity's proof chain
+      operationId: verifyChain
+      parameters:
+        - $ref: '#/components/parameters/entityId'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyChainResponse'
+
+  # ==========================================================================
+  # WEBHOOKS
+  # ==========================================================================
+  /webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List webhooks
+      description: List configured webhooks
+      operationId: listWebhooks
+      responses:
+        '200':
+          description: Webhook configurations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookListResponse'
+    post:
+      tags: [Webhooks]
+      summary: Create webhook
+      description: Register a new webhook endpoint
+      operationId: createWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: Webhook created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+
+  /webhooks/{webhookId}:
+    delete:
+      tags: [Webhooks]
+      summary: Delete webhook
+      description: Remove a webhook configuration
+      operationId: deleteWebhook
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Webhook deleted
+
+  # ==========================================================================
+  # HEALTH
+  # ==========================================================================
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Service health status
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /health/ready:
+    get:
+      tags: [Health]
+      summary: Readiness check
+      description: Service readiness status
+      operationId: readinessCheck
+      security: []
+      responses:
+        '200':
+          description: Service ready
+        '503':
+          description: Service not ready
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    agentId:
+      name: agentId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique agent identifier
+    entityId:
+      name: entityId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Entity identifier (agent or user)
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # ==========================================================================
+    # COMMON
+    # ==========================================================================
+    ErrorResponse:
+      type: object
+      required: [success, error, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    TrustTier:
+      type: integer
+      minimum: 0
+      maximum: 7
+      description: |
+        Trust tier (0-7):
+        - 0: T0_SANDBOX (0-199)
+        - 1: T1_OBSERVED (200-349)
+        - 2: T2_PROVISIONAL (350-500)
+        - 3: T3_MONITORED (501-649)
+        - 4: T4_STANDARD (650-799)
+        - 5: T5_TRUSTED (800-875)
+        - 6: T6_CERTIFIED (876-950)
+        - 7: T7_AUTONOMOUS (951-1000)
+
+    GovernanceDecision:
+      type: string
+      enum: [ALLOW, DENY, ESCALATE, DEGRADE]
+
+    # ==========================================================================
+    # AGENT SCHEMAS
+    # ==========================================================================
+    Agent:
+      type: object
+      required: [id, name, description, ownerId, trustScore, trustTier, status, capabilities, executions, successRate, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        ownerId:
+          type: string
+        trustScore:
+          type: number
+          minimum: 0
+          maximum: 1000
+        trustTier:
+          $ref: '#/components/schemas/TrustTier'
+        tierName:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, PAUSED, SUSPENDED, TERMINATED]
+        capabilities:
+          type: array
+          items:
+            type: string
+        executions:
+          type: integer
+        successRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    CreateAgentRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        template:
+          type: string
+        initialCapabilities:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+
+    UpdateAgentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, PAUSED]
+        metadata:
+          type: object
+
+    AgentResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/Agent'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    AgentListResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [items, total, page, pageSize, hasMore]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Agent'
+            total:
+              type: integer
+            page:
+              type: integer
+            pageSize:
+              type: integer
+            hasMore:
+              type: boolean
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    # ==========================================================================
+    # TRUST SCHEMAS
+    # ==========================================================================
+    TrustStatus:
+      type: object
+      required: [entityId, trustScore, trustTier, tierName, capabilities, factorScores, lastEvaluated, compliant, warnings]
+      properties:
+        entityId:
+          type: string
+        trustScore:
+          type: number
+          minimum: 0
+          maximum: 1000
+        trustTier:
+          $ref: '#/components/schemas/TrustTier'
+        tierName:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        factorScores:
+          type: object
+          additionalProperties:
+            type: number
+        lastEvaluated:
+          type: string
+          format: date-time
+        compliant:
+          type: boolean
+        warnings:
+          type: array
+          items:
+            type: string
+
+    TrustStatusResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/TrustStatus'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    TrustHistoryResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              trustScore:
+                type: number
+              trustTier:
+                $ref: '#/components/schemas/TrustTier'
+              event:
+                type: string
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    OutcomeRequest:
+      type: object
+      required: [proofId, success]
+      properties:
+        proofId:
+          type: string
+        success:
+          type: boolean
+        metrics:
+          type: object
+          additionalProperties:
+            type: number
+
+    # ==========================================================================
+    # GOVERNANCE SCHEMAS
+    # ==========================================================================
+    ParseIntentRequest:
+      type: object
+      required: [entityId, input]
+      properties:
+        entityId:
+          type: string
+        input:
+          type: string
+          minLength: 1
+          maxLength: 10000
+
+    ParseIntentResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [intent, confidence]
+          properties:
+            intent:
+              $ref: '#/components/schemas/Intent'
+            confidence:
+              type: number
+              minimum: 0
+              maximum: 1
+            alternativeInterpretations:
+              type: array
+              items:
+                $ref: '#/components/schemas/Intent'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Intent:
+      type: object
+      required: [id, entityId, rawInput, parsedAction, parameters, riskLevel, requiredCapabilities, timestamp]
+      properties:
+        id:
+          type: string
+        entityId:
+          type: string
+        rawInput:
+          type: string
+        parsedAction:
+          type: string
+        parameters:
+          type: object
+        riskLevel:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        requiredCapabilities:
+          type: array
+          items:
+            type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    EnforceRequest:
+      type: object
+      required: [intent]
+      properties:
+        intent:
+          $ref: '#/components/schemas/Intent'
+
+    GovernanceResult:
+      type: object
+      required: [decision, trustScore, trustTier, grantedCapabilities, deniedCapabilities, reasoning, timestamp]
+      properties:
+        decision:
+          $ref: '#/components/schemas/GovernanceDecision'
+        trustScore:
+          type: number
+        trustTier:
+          $ref: '#/components/schemas/TrustTier'
+        grantedCapabilities:
+          type: array
+          items:
+            type: string
+        deniedCapabilities:
+          type: array
+          items:
+            type: string
+        reasoning:
+          type: string
+        constraints:
+          type: object
+        proofId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    GovernanceResultResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/GovernanceResult'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    EvaluateRequest:
+      type: object
+      required: [entityId, input]
+      properties:
+        entityId:
+          type: string
+        input:
+          type: string
+
+    EvaluateResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [intent, result]
+          properties:
+            intent:
+              $ref: '#/components/schemas/Intent'
+            result:
+              $ref: '#/components/schemas/GovernanceResult'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    CanPerformRequest:
+      type: object
+      required: [entityId, action, requiredCapabilities]
+      properties:
+        entityId:
+          type: string
+        action:
+          type: string
+        requiredCapabilities:
+          type: array
+          items:
+            type: string
+
+    CanPerformResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [allowed, trustScore, trustTier, missingCapabilities]
+          properties:
+            allowed:
+              type: boolean
+            trustScore:
+              type: number
+            trustTier:
+              $ref: '#/components/schemas/TrustTier'
+            missingCapabilities:
+              type: array
+              items:
+                type: string
+            reasoning:
+              type: string
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    # ==========================================================================
+    # PROOF SCHEMAS
+    # ==========================================================================
+    ProofRecord:
+      type: object
+      required: [id, entityId, intentId, decision, action, outcome, trustScoreBefore, trustScoreAfter, timestamp, hash, previousHash]
+      properties:
+        id:
+          type: string
+        entityId:
+          type: string
+        intentId:
+          type: string
+        decision:
+          $ref: '#/components/schemas/GovernanceDecision'
+        action:
+          type: string
+        outcome:
+          type: string
+          enum: [SUCCESS, FAILURE, PARTIAL, PENDING]
+        trustScoreBefore:
+          type: number
+        trustScoreAfter:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+        hash:
+          type: string
+        previousHash:
+          type: string
+        metadata:
+          type: object
+
+    ProofRecordResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/ProofRecord'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ProofListResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProofRecord'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ProofStatsResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [totalRecords, successRate, averageTrustScore, chainIntegrity, lastVerified]
+          properties:
+            totalRecords:
+              type: integer
+            successRate:
+              type: number
+            averageTrustScore:
+              type: number
+            chainIntegrity:
+              type: boolean
+            lastVerified:
+              type: string
+              format: date-time
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    VerifyChainResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [valid, recordsVerified, errors]
+          properties:
+            valid:
+              type: boolean
+            recordsVerified:
+              type: integer
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  recordId:
+                    type: string
+                  error:
+                    type: string
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    # ==========================================================================
+    # WEBHOOK SCHEMAS
+    # ==========================================================================
+    Webhook:
+      type: object
+      required: [id, url, events, active, createdAt]
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+              - agent.created
+              - agent.updated
+              - agent.deleted
+              - agent.status_changed
+              - trust.score_changed
+              - trust.tier_changed
+              - governance.decision
+              - proof.recorded
+              - alert.triggered
+        active:
+          type: boolean
+        secret:
+          type: string
+          description: Only returned on creation
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateWebhookRequest:
+      type: object
+      required: [url, events]
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+
+    WebhookResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          $ref: '#/components/schemas/Webhook'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    WebhookListResponse:
+      type: object
+      required: [success, data, requestId, timestamp]
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+        requestId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    # ==========================================================================
+    # HEALTH SCHEMAS
+    # ==========================================================================
+    HealthResponse:
+      type: object
+      required: [status, version, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        dependencies:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+              latency:
+                type: number

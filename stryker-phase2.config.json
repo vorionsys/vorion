@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/api/schema/stryker-core.json",
+  "packageManager": "npm",
+  "reporters": ["clear-text", "progress", "json"],
+  "mutate": [
+    "packages/security/src/security/webauthn/service.ts",
+    "packages/security/src/security/webauthn/store.ts",
+    "packages/security/src/security/webauthn/middleware.ts",
+    "packages/security/src/security/webauthn/types.ts",
+    "packages/security/src/security/mfa/mfa-service.ts",
+    "packages/security/src/security/mfa/mfa-store.ts",
+    "packages/security/src/security/mfa/mfa-middleware.ts",
+    "packages/security/src/security/mfa/types.ts",
+    "packages/security/src/security/incident/executor.ts",
+    "packages/security/src/security/incident/triggers.ts"
+  ],
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vitest.config.ts"
+  },
+  "mutator": {
+    "excludedMutations": ["StringLiteral"]
+  },
+  "timeoutMS": 60000,
+  "timeoutFactor": 2.5,
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": null
+  },
+  "incremental": false,
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".next",
+    "k6",
+    "e2e",
+    ".stryker-tmp"
+  ]
+}

@@ -1,0 +1,244 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const products = [
+  {
+    name: 'Vorion Platform',
+    description: 'Core governance infrastructure',
+    icon: 'shield',
+    link: 'https://github.com/vorionsys/vorion/issues',
+    color: 'text-indigo-400',
+    bgColor: 'bg-indigo-500/10',
+    borderHover: 'hover:border-indigo-500/50',
+  },
+  {
+    name: 'Vorion Governance',
+    description: 'AI governance operating system',
+    icon: 'cpu',
+    link: 'https://github.com/vorionsys/vorion/issues?q=label:governance',
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/10',
+    borderHover: 'hover:border-cyan-500/50',
+  },
+  {
+    name: 'Cognigate',
+    description: 'Developer governance engine',
+    icon: 'code',
+    link: 'https://github.com/vorionsys/cognigate/issues',
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+    borderHover: 'hover:border-emerald-500/50',
+  },
+  {
+    name: 'BASIS Standard',
+    description: 'Open governance protocol',
+    icon: 'layers',
+    link: 'https://github.com/vorionsys/vorion/issues?q=label:basis',
+    color: 'text-amber-400',
+    bgColor: 'bg-amber-500/10',
+    borderHover: 'hover:border-amber-500/50',
+  },
+  {
+    name: 'ATSF Framework',
+    description: '46-layer trust scoring',
+    icon: 'git-pull-request',
+    link: 'https://github.com/vorionsys/vorion/issues?q=label:atsf',
+    color: 'text-violet-400',
+    bgColor: 'bg-violet-500/10',
+    borderHover: 'hover:border-violet-500/50',
+  },
+  {
+    name: 'CAR Specification',
+    description: 'Categorical Agentic Registry — TypeScript types & contracts',
+    icon: 'message-square',
+    link: 'https://github.com/vorionsys/vorion/issues?q=label:car-spec',
+    color: 'text-rose-400',
+    bgColor: 'bg-rose-500/10',
+    borderHover: 'hover:border-rose-500/50',
+  },
+];
+
+const steps = [
+  { number: '1', title: 'Pick a Product', description: 'Choose the product you want to give feedback on from the cards above.', icon: 'mouse-pointer-click' },
+  { number: '2', title: 'Open an Issue', description: 'Describe your idea, bug report, or feature request on GitHub.', icon: 'git-pull-request' },
+  { number: '3', title: 'Join the Discussion', description: 'Connect with the community on Discord to discuss your feedback.', icon: 'users' },
+];
+---
+
+<BaseLayout
+  title="Vorion Feedback"
+  description="Your feedback drives the Vorion ecosystem. Submit ideas, report issues, and vote on features across all our products."
+>
+    <!-- Hero Section -->
+      <section class="pt-32 pb-16 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-sm font-medium">
+            <Icon name="message-square" size={16} class="w-4 h-4" />
+            Community Feedback Portal
+          </div>
+
+          <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
+            Shape the Future of
+            <span class="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+              AI Governance
+            </span>
+          </h1>
+
+          <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Your feedback drives the Vorion ecosystem. Submit ideas, report issues, and vote on features across all our products.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="#products"
+              class="px-8 py-4 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white rounded-lg font-semibold transition shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 inline-flex items-center justify-center gap-2"
+            >
+              Submit Feedback
+              <Icon name="arrow-right" size={20} class="w-5 h-5" />
+            </a>
+            <a
+              href="https://discord.gg/basis-protocol"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg font-semibold transition inline-flex items-center justify-center gap-2"
+            >
+              <Icon name="users" size={20} class="w-5 h-5" />
+              Join Discord
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Product Feedback Cards -->
+      <section id="products" class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+          <div class="max-w-3xl mx-auto text-center mb-12">
+            <h2 class="text-3xl font-bold text-white mb-4">Choose a Product</h2>
+            <p class="text-lg text-gray-400">
+              Select the product you'd like to provide feedback on. Each card links directly to the relevant GitHub issues page.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <a
+                href={product.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class={`group bg-white/[0.03] p-6 rounded-xl border border-white/10 ${product.borderHover} transition-all duration-300 hover:bg-white/[0.06] hover:shadow-lg`}
+              >
+                <div class="flex items-start justify-between mb-4">
+                  <div class={`w-12 h-12 ${product.bgColor} rounded-xl flex items-center justify-center`}>
+                    <Icon name={product.icon} class={`w-6 h-6 ${product.color}`} />
+                  </div>
+                  <Icon name="external-link" size={16} class="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition" />
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">{product.name}</h3>
+                <p class="text-gray-400 text-sm mb-4">{product.description}</p>
+                <span class={`text-sm font-medium ${product.color} inline-flex items-center gap-1.5`}>
+                  Open Issues
+                  <Icon name="arrow-right" size={14} class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- How to Contribute -->
+      <section class="py-20 px-4 bg-white/[0.02] border-y border-white/5">
+        <div class="max-w-7xl mx-auto">
+          <div class="max-w-3xl mx-auto text-center mb-12">
+            <h2 class="text-3xl font-bold text-white mb-4">How to Contribute</h2>
+            <p class="text-lg text-gray-400">
+              Three simple steps to make your voice heard in the Vorion ecosystem.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {steps.map((step) => (
+              <div class="text-center">
+                <div class="w-16 h-16 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Icon name={step.icon} class="w-7 h-7 text-indigo-400" />
+                </div>
+                <div class="text-sm font-medium text-indigo-400 mb-2">Step {step.number}</div>
+                <h3 class="text-xl font-semibold text-white mb-3">{step.title}</h3>
+                <p class="text-gray-400">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- Community Links -->
+      <section class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+          <div class="max-w-3xl mx-auto text-center mb-12">
+            <h2 class="text-3xl font-bold text-white mb-4">Connect with the Community</h2>
+            <p class="text-lg text-gray-400">
+              Stay up to date and get involved with the Vorion ecosystem.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <!-- GitHub -->
+            <a
+              href="https://github.com/vorionsys"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group bg-white/[0.03] p-6 rounded-xl border border-white/10 hover:border-indigo-500/50 transition-all duration-300 hover:bg-white/[0.06]"
+            >
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center">
+                  <Icon name="github" size={20} class="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-white">GitHub</h3>
+                  <p class="text-xs text-gray-500">github.com/vorionsys</p>
+                </div>
+              </div>
+              <p class="text-gray-400 text-sm">Browse code, submit PRs, report issues</p>
+            </a>
+
+            <!-- Discord -->
+            <a
+              href="https://discord.gg/basis-protocol"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group bg-white/[0.03] p-6 rounded-xl border border-white/10 hover:border-[#5865F2]/50 transition-all duration-300 hover:bg-white/[0.06]"
+            >
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-[#5865F2]/10 border border-[#5865F2]/20 rounded-xl flex items-center justify-center">
+                  <Icon name="discord" size={20} class="w-5 h-5 text-[#5865F2]" />
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-white">Discord</h3>
+                  <p class="text-xs text-gray-500">discord.gg/basis-protocol</p>
+                </div>
+              </div>
+              <p class="text-gray-400 text-sm">Chat with the team and community</p>
+            </a>
+
+            <!-- Twitter/X -->
+            <a
+              href="https://x.com/BASISprotocol"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group bg-white/[0.03] p-6 rounded-xl border border-white/10 hover:border-sky-500/50 transition-all duration-300 hover:bg-white/[0.06]"
+            >
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-sky-500/10 border border-sky-500/20 rounded-xl flex items-center justify-center">
+                  <Icon name="x" size={20} class="w-5 h-5 text-sky-400" />
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-white">Twitter / X</h3>
+                  <p class="text-xs text-gray-500">@BASISprotocol</p>
+                </div>
+              </div>
+              <p class="text-gray-400 text-sm">Follow for updates</p>
+            </a>
+          </div>
+        </div>
+      </section>
+</BaseLayout>

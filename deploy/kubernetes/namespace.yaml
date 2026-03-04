@@ -1,0 +1,22 @@
+---
+# Vorion Namespace
+# Provides isolation for all Vorion resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vorion
+  labels:
+    app.kubernetes.io/name: vorion
+    app.kubernetes.io/part-of: vorion
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    # Network policy enforcement
+    net.beta.kubernetes.io/network-policy: |
+      {
+        "ingress": {
+          "isolation": "DefaultDeny"
+        }
+      }

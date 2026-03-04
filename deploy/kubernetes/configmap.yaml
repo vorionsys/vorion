@@ -1,0 +1,73 @@
+---
+# Vorion ConfigMap
+# Non-sensitive configuration values
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vorion-config
+  namespace: vorion
+  labels:
+    app.kubernetes.io/name: vorion
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: vorion
+data:
+  # Application settings
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+
+  # Server configuration
+  PORT: "3000"
+  METRICS_PORT: "9090"
+  HOST: "0.0.0.0"
+
+  # API settings
+  API_VERSION: "v1"
+  API_PREFIX: "/api"
+
+  # Request handling
+  REQUEST_TIMEOUT_MS: "30000"
+  BODY_SIZE_LIMIT: "10mb"
+
+  # Rate limiting
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+
+  # Database configuration (non-sensitive)
+  DB_HOST: "postgresql.vorion.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "vorion"
+  DB_SSL_MODE: "require"
+  DB_POOL_MIN: "5"
+  DB_POOL_MAX: "20"
+  DB_IDLE_TIMEOUT_MS: "30000"
+  DB_CONNECTION_TIMEOUT_MS: "10000"
+
+  # Redis configuration (non-sensitive)
+  REDIS_HOST: "redis.vorion.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  REDIS_KEY_PREFIX: "vorion:"
+  REDIS_MAX_RETRIES: "3"
+  REDIS_RETRY_DELAY_MS: "1000"
+
+  # Cache settings
+  CACHE_DEFAULT_TTL: "3600"
+  CACHE_MAX_ITEMS: "10000"
+
+  # CORS settings
+  CORS_ENABLED: "true"
+  CORS_CREDENTIALS: "true"
+
+  # Health check settings
+  HEALTH_CHECK_TIMEOUT_MS: "5000"
+
+  # Telemetry settings
+  OTEL_ENABLED: "true"
+  OTEL_SERVICE_NAME: "vorion-api"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.observability.svc.cluster.local:4317"
+
+  # Feature flags
+  FEATURE_RATE_LIMITING: "true"
+  FEATURE_CACHING: "true"
+  FEATURE_METRICS: "true"

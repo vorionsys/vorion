@@ -1,0 +1,108 @@
+---
+# Vorion API Ingress
+# Ingress with TLS termination and security headers
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vorion-api
+  namespace: vorion
+  labels:
+    app.kubernetes.io/name: vorion
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/part-of: vorion
+  annotations:
+    # Ingress class
+    kubernetes.io/ingress.class: nginx
+
+    # TLS configuration
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Frame-Options "DENY" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';" always;
+      add_header Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+
+    # Request size limits
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+
+    # Timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+
+    # Backend protocol
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+
+    # Enable CORS (if needed from ingress level)
+    nginx.ingress.kubernetes.io/enable-cors: "false"
+
+    # ModSecurity WAF (if available)
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+
+    # Cert-manager for automatic TLS
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/common-name: api.vorion.example.com
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.vorion.example.com
+      secretName: vorion-api-tls
+  rules:
+    - host: api.vorion.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vorion-api
+                port:
+                  name: http
+
+---
+# Internal Ingress for metrics (restricted access)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vorion-metrics
+  namespace: vorion
+  labels:
+    app.kubernetes.io/name: vorion
+    app.kubernetes.io/component: metrics-ingress
+    app.kubernetes.io/part-of: vorion
+  annotations:
+    kubernetes.io/ingress.class: nginx-internal
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Whitelist internal monitoring IPs only
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+spec:
+  ingressClassName: nginx-internal
+  tls:
+    - hosts:
+        - metrics.vorion.internal
+      secretName: vorion-metrics-tls
+  rules:
+    - host: metrics.vorion.internal
+      http:
+        paths:
+          - path: /metrics
+            pathType: Exact
+            backend:
+              service:
+                name: vorion-api
+                port:
+                  name: metrics

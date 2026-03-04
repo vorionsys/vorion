@@ -1,0 +1,28 @@
+# Semgrep ignore patterns
+# Maintained as part of Epic 2.5 — SAST triage
+
+# Archive / dead code
+archive/
+
+# Documentation containing code examples (all ATSF versions)
+docs/ATSF*/
+docs/atsf*/
+
+# Deployment scripts (child_process expected for system commands)
+deploy/
+
+# Build artifacts and dependencies
+node_modules/
+dist/
+.next/
+.turbo/
+*.min.js
+*.bundle.js
+
+# Test fixtures and mocks
+**/*.fixture.*
+**/fixtures/
+
+# Generated files
+**/generated/
+**/swagger-ui-dist/

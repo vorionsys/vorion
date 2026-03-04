@@ -1,0 +1,1215 @@
+{
+  "component-definition": {
+    "uuid": "4f1e4b4c-f877-40ad-876e-9d65c648ae47",
+    "metadata": {
+      "title": "Vorion Cognigate Governance Engine - OSCAL Component Definition",
+      "last-modified": "2026-02-19T00:00:00.000Z",
+      "version": "1.0.0",
+      "oscal-version": "1.1.2",
+      "published": "2026-02-19T00:00:00.000Z",
+      "remarks": "OSCAL Component Definition for the Vorion Cognigate AI Agent Governance Engine implementing the BASIS specification. This document maps Cognigate's security capabilities to NIST SP 800-53 Rev 5 Moderate baseline controls. Intended for ICP (Initial Compliance Package) review and FedRAMP authorization boundary documentation.",
+      "roles": [
+        {
+          "id": "provider",
+          "title": "Cognigate Service Provider",
+          "description": "Vorion, Inc. — developer and operator of the Cognigate governance engine."
+        },
+        {
+          "id": "consumer",
+          "title": "Cognigate Consumer",
+          "description": "Organizations integrating Cognigate into their AI agent infrastructure to inherit governance controls."
+        },
+        {
+          "id": "assessor",
+          "title": "Independent Assessor",
+          "description": "Third-party assessor evaluating Cognigate controls for authorization decisions."
+        }
+      ],
+      "parties": [
+        {
+          "uuid": "15874bdf-72f9-47ba-8376-7d514e3f6bfd",
+          "type": "organization",
+          "name": "Vorion, Inc.",
+          "short-name": "Vorion",
+          "links": [
+            {
+              "href": "https://vorion.org",
+              "rel": "homepage"
+            }
+          ],
+          "email-addresses": [
+            "security@vorion.org"
+          ],
+          "remarks": "Developer and operator of the Cognigate AI governance engine and the BASIS open governance standard."
+        }
+      ],
+      "responsible-parties": [
+        {
+          "role-id": "provider",
+          "party-uuids": [
+            "15874bdf-72f9-47ba-8376-7d514e3f6bfd"
+          ]
+        }
+      ]
+    },
+    "components": [
+      {
+        "uuid": "383eacad-0028-4655-99a8-2d31a7cafde6",
+        "type": "software",
+        "title": "Cognigate Governance Engine",
+        "description": "Cognigate is a runtime enforcement engine for AI agent governance implementing the BASIS (Behavioral Agent Standard for Intelligent Systems) specification. It provides three operational layers: INTENT (goal parsing, risk classification, tripwire detection, AI critic evaluation), ENFORCE (policy evaluation with 5 enforcement sublayers — circuit breaker, velocity caps, rigor modes, policy engine, verdict determination — across an 8-tier trust model scored 0-1000), and PROOF (immutable SHA-256 hash chain audit trail with Ed25519 digital signatures and tamper detection). The system manages 100+ capabilities across 8 namespaces (sandbox, data, comm, execute, financial, admin, efficiency, custom) and enforces trust-proportional access control for autonomous AI agents.",
+        "purpose": "Provide runtime governance, trust-based access control, policy enforcement, and cryptographic audit trails for AI agent operations in compliance with NIST SP 800-53 Rev 5 Moderate baseline.",
+        "responsible-roles": [
+          {
+            "role-id": "provider",
+            "party-uuids": [
+              "15874bdf-72f9-47ba-8376-7d514e3f6bfd"
+            ]
+          }
+        ],
+        "props": [
+          {
+            "name": "software-identifier",
+            "value": "cognigate-governance-engine"
+          },
+          {
+            "name": "version",
+            "value": "0.1.x"
+          },
+          {
+            "name": "asset-type",
+            "value": "service"
+          },
+          {
+            "name": "deployment-model",
+            "value": "saas"
+          },
+          {
+            "name": "implementation-point",
+            "value": "internal"
+          },
+          {
+            "name": "basis-specification-version",
+            "value": "1.0"
+          }
+        ],
+        "protocols": [
+          {
+            "uuid": "a46e42ea-054b-4044-bbd8-154fd6f94e21",
+            "name": "https",
+            "title": "HTTPS REST API",
+            "port-ranges": [
+              {
+                "start": 443,
+                "end": 443,
+                "transport": "TCP"
+              }
+            ]
+          }
+        ],
+        "control-implementations": [
+          {
+            "uuid": "44e75ff3-9333-43a3-a912-cf1bef2ab10b",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+            "description": "NIST SP 800-53 Rev 5 Moderate Baseline control implementations for the Cognigate Governance Engine. Each implemented requirement describes how Cognigate's INTENT, ENFORCE, and PROOF layers satisfy the control objective.",
+            "props": [
+              {
+                "name": "framework-id",
+                "value": "NIST-SP-800-53-rev5"
+              },
+              {
+                "name": "baseline",
+                "value": "moderate"
+              }
+            ],
+            "implemented-requirements": [
+              {
+                "uuid": "46128c05-8013-45c5-a8e3-bc764a1ea344",
+                "control-id": "ac-1",
+                "description": "Cognigate implements access control policy through its ENFORCE layer policy engine, which evaluates expression-based constraints defined in PolicyRule objects. Three default policies ship with every deployment: (1) sandbox_isolation — restricts T0-T1 entities to sandbox-namespace capabilities only, (2) data_classification — enforces data:read and data:write scope tiers based on trust level, and (3) admin_restriction — limits admin-namespace capabilities to T6+ entities with valid X-Admin-Key authentication. Policies are versioned and tracked through the proof chain. Policy definitions are declarative (JSON/YAML) and support hot-reload without service restart, enabling organizations to codify their access control policy as auditable configuration. The BASIS specification (docs/basis-docs/) serves as the authoritative policy document, with ADR records (17 ADRs) documenting all policy design decisions.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides the policy engine, expression evaluator, and default policies. Consumer organizations are responsible for defining additional policies specific to their operational environment, reviewing policies periodically, and disseminating policy to their personnel."
+              },
+              {
+                "uuid": "b6554dcb-b783-4978-b16f-09b12f4075a9",
+                "control-id": "ac-2",
+                "description": "Cognigate manages AI agent accounts (entity accounts) through the /v1/agents REST API endpoint. Entity registration requires: (1) a unique entity_id, (2) an Ed25519 public key for cryptographic identity binding, (3) initial trust tier assignment (default T0 — Sandbox). Each registered entity receives a trust score (0-1000) that determines its access tier (T0-T7). Account lifecycle is managed through trust score progression: entities start at T0 with minimal capabilities and progressively unlock higher-tier capabilities as trust evidence accumulates. Account suspension is enforced through the circuit breaker (OPEN state halts all entity sessions) and graceful degradation (WARN, THROTTLE, RESTRICT, SUSPEND levels). Entity deregistration revokes all capabilities and archives the entity's proof chain. The /v1/admin/entities endpoint provides account enumeration and status review for administrators. Trust score deltas (TRUST_DELTA proof events) provide a complete account modification history.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides entity lifecycle management, trust-based access tiers, and automated account suspension. Consumers are responsible for defining their entity provisioning procedures, periodic access reviews, and integration with their identity management systems."
+              },
+              {
+                "uuid": "86cb95b4-efc1-45a4-b003-97dae3417e59",
+                "control-id": "ac-3",
+                "description": "Cognigate's ENFORCE layer enforces mandatory access control on every request through a five-sublayer pipeline: (1) Circuit Breaker — checks system-wide halt conditions before any processing; (2) Velocity Caps — enforces rate limits at three levels (L0 burst per-second, L1 sustained per-minute, L2 quota per-day) per entity; (3) Rigor Mode — applies STRICT, MODERATE, or RELAXED enforcement based on entity trust tier (T0-T2 = STRICT, T3-T5 = MODERATE, T6-T7 = RELAXED); (4) Policy Engine — evaluates all applicable PolicyRule expressions against the request context (entity trust score, requested capability, target namespace, action parameters); (5) Verdict Determination — produces ALLOW, DENY, ESCALATE, or SANDBOX verdicts. Access decisions are capability-based: the system maintains a capability taxonomy of 100+ capabilities across 8 namespaces (sandbox, data, comm, execute, financial, admin, efficiency, custom), with each capability gated by minimum trust tier. Every access decision generates a DECISION_MADE proof record with the full evaluation context.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Cognigate fully implements access enforcement. This control is inherited by consumer systems — all API requests routed through Cognigate are subject to the five-layer enforcement pipeline. No consumer action is required for enforcement to be active."
+              },
+              {
+                "uuid": "fee0436a-b451-49e2-bb3d-c01d96ca5bba",
+                "control-id": "ac-4",
+                "description": "Cognigate enforces information flow control through its capability taxonomy and data classification system. The data namespace capabilities (data:read, data:write) include scope tiers that restrict which data classification levels an entity can access: T0-T1 entities are restricted to sandbox data only, T2-T3 can access non-sensitive operational data, T4-T5 can read classified data with audit, T6-T7 can write to classified data stores. Cross-namespace information flow is controlled by the policy engine: an entity with data:read capability cannot invoke comm:external (external communication) in the same session unless explicitly authorized by policy, preventing data exfiltration patterns. The INTENT layer classifies every request's information flow direction (internal, external, cross-boundary) and the ENFORCE layer validates the flow against the entity's authorized flow patterns. Flow violations generate DECISION_MADE proof records with verdict=DENY and the specific flow rule that was violated.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides the information flow enforcement mechanism and default flow policies. Consumers must define their specific data classification levels, authorized flow patterns, and any cross-boundary exceptions required by their operational environment."
+              },
+              {
+                "uuid": "f9c386cf-47fa-4036-9127-d436d78d638d",
+                "control-id": "ac-5",
+                "description": "Cognigate enforces separation of duties through the architectural isolation of its three operational layers: (1) INTENT layer — performs request analysis, risk scoring, and goal classification; it has no authority to make enforcement decisions or write to the proof chain. (2) ENFORCE layer — evaluates policies and produces verdicts; it cannot modify the INTENT analysis or tamper with proof records. (3) PROOF layer — records immutable audit entries; it operates as an append-only store with no ability to influence intent analysis or enforcement decisions. This pipeline architecture ensures that the entity analyzing a request (INTENT) is structurally separate from the entity enforcing policy (ENFORCE), which is structurally separate from the entity recording the audit trail (PROOF). Additionally, the trust scoring system uses evidence type weighting (HITL approvals = 5x, audits = 3x, sandbox tests = 0.5x) that requires multiple independent evidence sources for trust advancement, preventing a single actor from escalating trust unilaterally.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Separation of duties is enforced by Cognigate's architecture. The INTENT/ENFORCE/PROOF pipeline is not configurable — it is a structural guarantee. Consumer systems inherit this separation for all operations routed through Cognigate."
+              },
+              {
+                "uuid": "03b3f725-30b8-4965-9585-9cce18cd5159",
+                "control-id": "ac-6",
+                "description": "Cognigate implements least privilege through its 8-tier trust model with progressive capability unlocking. Every entity starts at T0 (Sandbox, score 0-199) with access limited to sandbox-namespace capabilities only. Capabilities are unlocked incrementally as trust evidence accumulates: T1 (Observed, 200-349) adds constrained read operations; T2 (Provisional, 350-499) adds limited write operations; T3 (Monitored, 500-649) adds standard operations with monitoring; T4 (Standard, 650-799) adds external communication and public data read; T5 (Trusted, 800-875) adds extended autonomy; T6 (Certified, 876-950) adds high autonomy and self-attestation; T7 (Autonomous, 951-1000) provides maximum autonomy. Rigor modes enforce strictness proportional to trust: STRICT mode (T0-T2) requires human-in-the-loop approval for sensitive operations, MODERATE mode (T3-T5) allows autonomous operation with enhanced monitoring, RELAXED mode (T6-T7) allows autonomous operation with standard logging. Shadow mode ensures T0 entities emit events tagged 'shadow' that do not affect production state until HITL verification. The capability taxonomy ensures no entity receives capabilities beyond what its trust tier authorizes.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Least privilege is a core architectural property of Cognigate. The 8-tier trust model and progressive capability unlocking ensure all entities operate with minimum necessary privileges. Consumer systems inherit this enforcement automatically."
+              },
+              {
+                "uuid": "59dd72e6-6912-4b44-9642-88f8e50eafcb",
+                "control-id": "ac-7",
+                "description": "Cognigate enforces unsuccessful access attempt limits through its three-tier velocity cap system: L0 (burst) limits requests per second, L1 (sustained) limits requests per minute, and L2 (quota) limits requests per day. Each tier is configurable per trust level and per capability namespace. When an entity exceeds its velocity cap at any level, the system: (1) records a VELOCITY_EXCEEDED proof event, (2) applies progressive throttling (first warning, then temporary suspension, then entity halt), (3) increments the circuit breaker's velocity_abuse counter. If velocity abuse is persistent or severe, the circuit breaker may trip to OPEN state, halting all sessions for that entity. The /v1/admin/velocity endpoint allows administrators to view current velocity states, adjust caps, and manually clear velocity counters after investigation. All velocity enforcement decisions are recorded in the proof chain with full context (entity_id, cap_level, current_count, cap_limit, action_taken).",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Velocity caps are enforced automatically by the ENFORCE layer on every request. Consumer systems inherit this protection without additional configuration, though caps can be tuned per organizational requirements."
+              },
+              {
+                "uuid": "8a6eead6-b0eb-46bf-8bde-1a287a00cb6a",
+                "control-id": "ac-11",
+                "description": "Cognigate implements session locking through its circuit breaker mechanism. When the circuit breaker transitions to OPEN state (triggered by HIGH_RISK_THRESHOLD, INJECTION_DETECTED, TRIPWIRE_CASCADE, ENTITY_MISBEHAVIOR, CRITIC_BLOCK_CASCADE, or VELOCITY_ABUSE conditions), all active sessions for the affected scope (entity-level or system-wide) are immediately halted. No further requests are processed until an administrator manually resets the circuit breaker through the /v1/admin/circuit/reset endpoint with valid X-Admin-Key authentication. The circuit breaker supports three states: CLOSED (normal operation), HALF-OPEN (limited probe requests to test recovery), and OPEN (all sessions locked). The half-open state limits concurrent sessions to a configurable probe count, allowing controlled resumption after investigation. Circuit breaker state transitions are recorded as CIRCUIT_STATE_CHANGE proof events.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Session locking via circuit breaker is an automatic enforcement mechanism. Consumer systems inherit session halt protection for all entities managed by Cognigate."
+              },
+              {
+                "uuid": "9421c62d-7b9e-40a8-a28a-64529aa8bba3",
+                "control-id": "ac-17",
+                "description": "Cognigate controls remote access to its API through multiple authentication mechanisms: (1) API key authentication — all /v1/ endpoints require a valid API key in the Authorization header, validated against the registered entity's key binding; (2) X-Admin-Key authentication — administrative endpoints (/v1/admin/*) require an additional X-Admin-Key header, providing a second authentication factor for privileged operations; (3) Entity-key binding — API keys are cryptographically bound to entity_ids, preventing key reuse across entities. All remote access sessions are subject to the full INTENT/ENFORCE/PROOF pipeline. HTTPS is enforced for all communications. CORS middleware restricts cross-origin access to configured allowed origins. Rate limiting (via velocity caps) prevents brute-force attacks against authentication endpoints.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides API key management, admin key authentication, CORS controls, and rate limiting. Consumers are responsible for securing API key distribution, managing admin key rotation, and configuring network-level controls (VPN, IP allowlisting) appropriate to their environment."
+              },
+              {
+                "uuid": "777efcae-0176-4f2c-804f-f7750f2e5a29",
+                "control-id": "au-2",
+                "description": "Cognigate's PROOF layer generates audit records for the following event types, covering the complete governance lifecycle: INTENT_RECEIVED — logged when the INTENT layer receives and begins processing a request, capturing the raw input, entity_id, timestamp, and session context; DECISION_MADE — logged when the ENFORCE layer produces a verdict (ALLOW, DENY, ESCALATE, SANDBOX), capturing the full evaluation context including policy rules evaluated, trust score at decision time, capability requested, and risk_score; TRUST_DELTA — logged when an entity's trust score changes, capturing the previous score, new score, delta magnitude, evidence type that triggered the change, and tier transition if applicable; EXECUTION_STARTED — logged when an allowed action begins execution, capturing the action parameters and execution context; EXECUTION_COMPLETED — logged on successful action completion, capturing the result summary and outputs_hash; EXECUTION_FAILED — logged on action failure, capturing the error type, error message, and failure context; CIRCUIT_STATE_CHANGE — logged on circuit breaker state transitions; VELOCITY_EXCEEDED — logged on velocity cap breaches; ENTITY_REGISTERED — logged on new entity registration; ENTITY_SUSPENDED — logged on entity suspension or degradation.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Audit event generation is automatic and non-bypassable. Every INTENT/ENFORCE/PROOF cycle produces audit records without consumer configuration. Consumers inherit a complete audit trail for all governance operations."
+              },
+              {
+                "uuid": "52070199-b9a0-4f1a-b1cf-aa35e4e754cb",
+                "control-id": "au-3",
+                "description": "Every Cognigate proof record (ProofRecord) contains the following fields providing sufficient audit detail: proof_id — unique identifier for the audit record (UUID v4); entity_id — the AI agent entity that triggered the event; action_type — categorized event type (INTENT_RECEIVED, DECISION_MADE, TRUST_DELTA, EXECUTION_STARTED, EXECUTION_COMPLETED, EXECUTION_FAILED, etc.); decision — the enforcement verdict (ALLOW, DENY, ESCALATE, SANDBOX) when applicable; inputs_hash — SHA-256 hash of the request inputs, enabling content verification without storing raw inputs; outputs_hash — SHA-256 hash of the action outputs when applicable; timestamp — ISO 8601 UTC timestamp of the event; chain_position — sequential position in the append-only proof chain; prev_hash — SHA-256 hash of the previous proof record (hash chain linkage); current_hash — SHA-256 hash of this record's content; signature — Ed25519 digital signature over the record; metadata — extensible JSON object containing context-specific details (risk_score, trust_tier, policy_rules_evaluated, capability_requested, namespace, velocity_state, circuit_breaker_state, etc.).",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Audit record content is defined by the ProofRecord schema and generated automatically by the PROOF layer. The record structure is not configurable — all fields are populated on every audit event."
+              },
+              {
+                "uuid": "4af4385c-18de-44ec-afd4-0e891f28c806",
+                "control-id": "au-6",
+                "description": "Cognigate provides the /v1/proof/query API endpoint for audit record review and analysis. The query API supports filtering by: entity_id (isolate a specific agent's activity), intent_type (filter by request classification), verdict (ALLOW, DENY, ESCALATE, SANDBOX), decision (specific enforcement outcomes), date_range (start/end timestamps), action_type (event categories), risk_score_range (minimum/maximum risk scores), trust_tier (specific trust levels), and chain_position_range (specific chain segments). Results support pagination, sorting by timestamp or chain_position, and aggregate statistics (event counts by type, verdict distribution, risk score histograms). The /v1/admin/status endpoint provides real-time dashboards of enforcement activity, including high_risk_ratio trends, blocked_request_rates, and active entity counts by trust tier. Administrators can configure alert thresholds for anomalous audit patterns (e.g., spike in DENY verdicts, sudden trust score drops across multiple entities).",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides the audit query infrastructure, filtering capabilities, and alert mechanisms. Consumers are responsible for establishing audit review schedules, defining their alert thresholds, assigning audit review responsibilities, and integrating audit data with their SIEM or GRC platform."
+              },
+              {
+                "uuid": "8e0650a8-3354-4e44-b357-4d0624e90de7",
+                "control-id": "au-7",
+                "description": "The Cognigate proof chain supports comprehensive audit reduction and report generation. The /v1/proof/query endpoint provides: pagination (configurable page size, cursor-based navigation for large result sets), date filtering (ISO 8601 range queries with millisecond precision), entity filtering (single entity or entity group queries), verdict filtering (isolate specific enforcement outcomes), aggregation (count, sum, average, min/max over configurable dimensions), and export (JSON and CSV output formats for external tool integration). The proof chain's sequential chain_position field enables efficient range queries and gap detection. The SHA-256 hash chain allows independent verification of chain integrity during audit reduction — any tampering between the recorded and computed hashes is detectable at the individual record level.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Audit reduction capabilities are built into the proof query API. Consumer systems can leverage these capabilities directly through the REST API."
+              },
+              {
+                "uuid": "26556f25-58a5-4f06-8594-97cedf81db52",
+                "control-id": "au-8",
+                "description": "All Cognigate proof records include UTC timestamps in ISO 8601 format with millisecond precision. Timestamps are generated server-side at the moment of event occurrence using the system clock. The chain_position field provides an additional monotonically increasing ordering guarantee independent of clock accuracy, ensuring audit trail ordering is preserved even in the event of clock skew. Proof records are immutable after creation — timestamps cannot be retroactively modified. The proof chain's hash linking (each record includes prev_hash referencing the preceding record) provides cryptographic ordering verification: any attempt to reorder records would break the hash chain, detectable via the /v1/proof/{id}/verify endpoint.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Timestamps are generated automatically on all proof records. Consumer systems inherit time-stamped audit trails without configuration. Consumers are responsible for NTP synchronization of infrastructure hosting Cognigate."
+              },
+              {
+                "uuid": "3e063206-774a-455a-9b02-e2618b285731",
+                "control-id": "au-9",
+                "description": "Cognigate protects audit information through multiple mechanisms: (1) Append-only chain — the proof chain is structurally append-only; there is no API endpoint, internal function, or administrative capability to modify or delete existing proof records; (2) Hash linking — each proof record contains prev_hash (SHA-256 of the preceding record), creating a cryptographic chain where any modification to a historical record would invalidate all subsequent hashes; (3) Ed25519 signatures — each record is digitally signed, binding the record content to the signing key and providing non-repudiation; (5) Tamper detection — the /v1/proof/{id}/verify endpoint recalculates both hashes and validates the signature, detecting any modification to the record or its chain linkage; (6) Administrative access control — proof chain access requires authentication, and there are no administrative overrides that allow proof modification.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Audit integrity protection is a structural guarantee of the proof chain architecture. Consumer systems inherit tamper-evident audit trails. Consumers are responsible for protecting the underlying infrastructure (database, storage) from direct manipulation outside the Cognigate API."
+              },
+              {
+                "uuid": "5359c3b4-d5cd-45e8-bd56-57a3cf4cff32",
+                "control-id": "au-10",
+                "description": "Cognigate provides non-repudiation through Ed25519 digital signatures on all proof records. Each proof record includes a signature field containing an Ed25519 signature computed over the record's canonical content (proof_id, entity_id, action_type, decision, inputs_hash, outputs_hash, timestamp, chain_position, metadata). The signing key is managed through the /v1/auth/keys endpoint. Signature verification is available through the /v1/proof/{id}/verify endpoint, which validates the signature against the registered public key. The combination of digital signatures with the SHA-256 hash chain ensures that: (1) the originator of each audit record is cryptographically identified, (2) the record content has not been modified since signing, and (3) the record's position in the chain is verifiable. This provides non-repudiation for all governance actions — an entity cannot deny having performed an action that is recorded in a signed, hash-linked proof record.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Non-repudiation is enforced by the cryptographic signing of all proof records. Consumer systems inherit non-repudiation guarantees for all governance operations."
+              },
+              {
+                "uuid": "5a72d72b-49bd-4e03-a0ee-0115baa17402",
+                "control-id": "au-11",
+                "description": "Cognigate enforces a 7-year retention period for all audit records across three categories: (1) Access logs — all INTENT_RECEIVED, DECISION_MADE, and related proof records documenting who accessed what and when; (2) Change logs — all TRUST_DELTA, CIRCUIT_STATE_CHANGE, ENTITY_REGISTERED, and ENTITY_SUSPENDED records documenting configuration and state changes; (3) Security events — all records related to tripwire triggers, injection detection, velocity abuse, and circuit breaker trips. The proof chain's append-only architecture inherently supports long-term retention — records are never deleted. Retention enforcement is configured at the storage layer with automated archival to long-term storage after the active retention window. Archived records maintain their hash chain integrity and remain verifiable through the standard verification endpoint.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate enforces append-only retention and provides archival mechanisms. Consumers deploying Cognigate self-hosted are responsible for configuring the underlying storage to meet the 7-year retention requirement and for managing archival infrastructure."
+              },
+              {
+                "uuid": "6f594f6a-9175-4e46-991a-f778e3b26e98",
+                "control-id": "au-12",
+                "description": "Cognigate generates audit records automatically on every INTENT/ENFORCE/PROOF processing cycle. Audit record generation is integral to the request processing pipeline — it cannot be disabled, bypassed, or conditionally skipped. Every request that enters the INTENT layer triggers: (1) INTENT_RECEIVED proof record at intake, (2) DECISION_MADE proof record after ENFORCE evaluation, (3) EXECUTION_STARTED proof record if the verdict is ALLOW, (4) EXECUTION_COMPLETED or EXECUTION_FAILED proof record after action execution. This ensures 100% audit coverage of all governance operations. The proof chain is the system's primary data store for governance history — disabling audit generation would disable the governance engine itself. Audit generation is tested as part of the 593+ automated test suite, with dedicated integration tests verifying that every code path produces the expected proof records.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Audit generation is structurally inseparable from the governance pipeline. Consumer systems inherit complete audit trails for all operations routed through Cognigate."
+              },
+              {
+                "uuid": "5827aff4-b655-49ae-a5fb-22a9355da7ad",
+                "control-id": "cm-2",
+                "description": "Cognigate maintains baseline configurations through multiple mechanisms: (1) Policy versioning — every PolicyRule includes a version field, and policy changes create new versions rather than modifying existing ones; historical versions are preserved in the proof chain; (2) ADR documentation — 17 Architecture Decision Records document all significant design and configuration decisions, providing traceable rationale for the current baseline; (3) BASIS specification versioning — the BASIS governance standard is versioned (currently v1.0), and Cognigate's configuration is traceable to specific specification versions; (4) Infrastructure as Code — deployment configurations are defined in docker-compose.yml, Dockerfile, and fly.toml files, providing reproducible baseline configurations; (5) Environment configuration — .env.example files document all configurable parameters with their default values.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides baseline configuration documentation, versioning, and IaC templates. Consumers are responsible for maintaining their deployment-specific baseline configurations, documenting deviations, and performing periodic baseline reviews."
+              },
+              {
+                "uuid": "c2697c01-10b7-43cd-b43a-250bd6f15968",
+                "control-id": "cm-3",
+                "description": "Cognigate tracks configuration changes through the proof chain and source control: (1) Policy changes — every policy modification generates proof records documenting the previous and new policy states; (2) Trust score changes — TRUST_DELTA proof events record all trust score modifications with the evidence that triggered the change, the previous score, the new score, and the resulting tier transition if applicable; (3) Circuit breaker changes — CIRCUIT_STATE_CHANGE records capture all state transitions with the trigger condition and administrator identity; (4) Source code changes — all code modifications go through pull request review in the monorepo, with Semgrep SAST, CodeQL analysis, and Gitleaks secret scanning as CI/CD gates; (5) Dependency changes — package.json and requirements.txt changes are tracked through version control with automated vulnerability scanning.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides automated change tracking for runtime configuration via the proof chain and CI/CD gates for code changes. Consumers are responsible for establishing their change control board procedures and approval workflows for changes to their Cognigate deployment."
+              },
+              {
+                "uuid": "fa85a031-e5f6-458d-b494-35262d94d786",
+                "control-id": "cm-5",
+                "description": "Cognigate restricts access to configuration changes through role-based administrative controls: (1) X-Admin-Key authentication — all administrative endpoints (/v1/admin/*) require a separate admin key distinct from standard API keys, ensuring only authorized administrators can modify system configuration; (2) Circuit breaker controls — manual circuit breaker operations (reset, trip, probe) require X-Admin-Key authentication through /v1/admin/circuit/* endpoints; (3) Policy management — policy creation, modification, and deletion require administrative authentication; (4) Trust score overrides — manual trust score adjustments require administrative authentication with justification recorded in the proof chain; (5) Entity management — entity suspension, reactivation, and deregistration require administrative authentication. All administrative actions generate proof records with the administrator identity, providing full accountability for configuration changes.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides role-based administrative access control and change auditing. Consumers are responsible for managing admin key distribution, implementing key rotation procedures, and defining their administrative role assignments."
+              },
+              {
+                "uuid": "d12f9d20-5d24-44b5-9587-c5e67ee51208",
+                "control-id": "cm-7",
+                "description": "Cognigate enforces least functionality through its capability taxonomy. The system defines 100+ capabilities across 8 namespaces (sandbox, data, comm, execute, financial, admin, efficiency, custom). Each entity is authorized only for capabilities appropriate to its trust tier — capabilities outside the entity's authorized set are denied by the ENFORCE layer before execution. The capability taxonomy is the authoritative list of functions the system provides; there are no undocumented capabilities or hidden administrative functions. Capability definitions include: capability_id (namespace:action format), minimum_trust_tier (lowest tier that can invoke this capability), required_rigor_mode (STRICT/MODERATE/RELAXED enforcement level), and scope_restrictions (additional constraints on capability parameters). Organizations can further restrict available capabilities through custom policies that deny specific capabilities even when the trust tier would normally allow them, enabling least-functionality enforcement tailored to their operational requirements.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides the capability taxonomy and trust-tier gating. Consumers may further restrict available capabilities through custom policies to enforce least functionality specific to their operational needs."
+              },
+              {
+                "uuid": "416e941f-8579-4353-92d4-1221959794df",
+                "control-id": "cm-8",
+                "description": "Cognigate maintains a comprehensive component inventory through its monorepo structure: 24 packages tracked through package.json workspaces with explicit dependency declarations. The system generates Software Bills of Materials (SBOMs) using CycloneDX format on every release, capturing: all direct and transitive dependencies, their versions, licenses, and known vulnerabilities. SBOM history is maintained in the sbom-history/ directory for historical comparison. Dependency auditing is performed through pip-audit (Python dependencies in cognigate/) and npm audit (TypeScript dependencies in vorion/), integrated into the CI/CD pipeline. The component inventory includes: runtime dependencies, development dependencies, build tools, and infrastructure components, providing a complete system inventory for vulnerability management and compliance reporting.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate generates SBOMs and maintains dependency inventories. Consumers are responsible for incorporating Cognigate's SBOM into their organization-wide system inventory and for tracking any additional components they deploy alongside Cognigate."
+              },
+              {
+                "uuid": "00b19692-1804-4f49-baad-821e6aae3313",
+                "control-id": "ia-2",
+                "description": "Cognigate requires identification and authentication for all /v1/ API endpoints. Every request must include: (1) a valid API key in the Authorization header, authenticating the calling application; (2) an entity_id parameter identifying the specific AI agent entity performing the action. The API key is validated against the registered entity's key binding — a key issued to entity A cannot be used to perform actions as entity B. Authentication failure results in HTTP 401 (Unauthorized) response before any INTENT/ENFORCE/PROOF processing occurs. Administrative endpoints additionally require X-Admin-Key authentication, providing two-factor authentication for privileged operations. All authentication events (success and failure) are logged, with failed authentication attempts contributing to velocity cap counters and circuit breaker monitoring.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides API key authentication, entity identification, and admin key controls. Consumers are responsible for integrating Cognigate authentication with their identity provider, managing user-to-entity mappings, and implementing any additional authentication factors required by their policy."
+              },
+              {
+                "uuid": "76c21112-bf27-4095-822f-f42b8c32cc01",
+                "control-id": "ia-4",
+                "description": "Cognigate manages entity identifiers through the /v1/agents registration endpoint. Entity identifier lifecycle includes: (1) Registration — entities receive a unique entity_id (UUID v4) upon registration, bound to their Ed25519 public key; (2) Verification — entity identity is verified on every request through API key validation and entity_id matching; (3) Status tracking — entity status (active, suspended, degraded) is maintained and enforced; (4) Deregistration — entity identifiers can be deactivated, preventing further use while preserving historical proof records. Entity_ids are globally unique and never reused — deregistered entity_ids are permanently retired. The proof chain maintains a complete history of entity_id lifecycle events (registration, suspension, reactivation, deregistration), providing traceable identity management.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides entity identifier management, uniqueness guarantees, and lifecycle tracking. Consumers are responsible for establishing their entity naming conventions, defining who can approve entity registration, and integrating with their identity governance processes."
+              },
+              {
+                "uuid": "ba4a1efa-3b83-4027-9e82-80c0adb15c7a",
+                "control-id": "ia-5",
+                "description": "Cognigate manages authenticator credentials through Ed25519 cryptographic key pairs: (1) Key generation — entities generate Ed25519 key pairs, with the public key registered through the /v1/auth/keys endpoint at entity registration; (2) Key storage — private keys are held by the entity (client-side); Cognigate stores only public keys for signature verification; (3) Key verification — the /v1/auth/keys endpoint supports key verification operations, confirming that a presented public key matches the registered key for an entity; (4) Key rotation — entities can rotate their key pairs through the /v1/auth/keys endpoint, with the rotation event recorded in the proof chain; (5) Key revocation — compromised keys can be revoked through administrative action, immediately invalidating all sessions using the revoked key. Ed25519 provides 128-bit security equivalent, meeting NIST recommended key sizes for digital signatures.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides key registration, verification, rotation, and revocation mechanisms. Consumers are responsible for secure key generation on the client side, private key protection, defining key rotation schedules, and establishing key compromise response procedures."
+              },
+              {
+                "uuid": "13df0544-d27c-4d25-ae27-f3257adfda7b",
+                "control-id": "ia-8",
+                "description": "Cognigate identifies and authenticates non-organizational entities (third-party AI agents, external service consumers) through its trust scoring and progressive verification system. Non-organizational entities are registered at T0 (Sandbox) and must accumulate trust evidence to advance through the trust tiers. The system does not distinguish between organizational and non-organizational entities at the identity level — all entities are subject to the same trust-based progressive verification. However, organizational policies can define different trust advancement rules for non-organizational entities (e.g., requiring higher evidence thresholds, additional HITL verification steps, or capping maximum trust tier). All non-organizational entity activity is recorded in the proof chain with the same completeness as organizational entities, ensuring full accountability.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides the trust-based progressive verification framework for all entities. Consumers are responsible for defining policies that differentiate organizational from non-organizational entities and establishing appropriate trust advancement requirements for each category."
+              },
+              {
+                "uuid": "1898f59a-f50d-4ad7-af7a-dfb56cd19c3c",
+                "control-id": "ir-4",
+                "description": "Cognigate implements automated incident handling through its circuit breaker mechanism, which automatically trips (transitions to OPEN state) upon detecting any of the following conditions: (1) HIGH_RISK_THRESHOLD — aggregate risk_score across recent requests exceeds the configured threshold, indicating a pattern of high-risk activity; (2) INJECTION_DETECTED — the INTENT layer's tripwire detection identifies a confirmed injection attack (SQL injection, shell injection, path traversal); (3) TRIPWIRE_CASCADE — multiple tripwire rules trigger in rapid succession, indicating a coordinated attack; (4) ENTITY_MISBEHAVIOR — a single entity's denied-request ratio exceeds the misbehavior threshold; (5) CRITIC_BLOCK_CASCADE — the AI critic evaluation layer produces multiple consecutive block recommendations, indicating sustained adversarial activity; (6) VELOCITY_ABUSE — persistent velocity cap violations across multiple entities or namespaces. When the circuit breaker trips, all affected sessions are immediately halted, preventing further damage. The trip event is recorded as a CIRCUIT_STATE_CHANGE proof record with full trigger context. Recovery requires administrator intervention through the /v1/admin/circuit/reset endpoint after investigation.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides automated incident detection and response through the circuit breaker. Consumers are responsible for defining circuit breaker thresholds appropriate to their risk tolerance, establishing incident response procedures for circuit breaker trips, and training personnel on the /v1/admin/circuit/* recovery workflow."
+              },
+              {
+                "uuid": "55a520d5-8e58-4f41-b50f-7553d41bef32",
+                "control-id": "ir-5",
+                "description": "Cognigate preserves incident-related data through the immutable proof chain and circuit breaker history. All incident-relevant data is automatically captured: (1) Pre-incident proof records — the complete chain of events leading up to the incident, including INTENT_RECEIVED, DECISION_MADE, and any VELOCITY_EXCEEDED or tripwire events; (2) Incident trigger record — the CIRCUIT_STATE_CHANGE proof record documenting the specific condition that triggered the incident (trip reason, threshold values, entity involved); (3) Post-incident records — any probe requests during HALF-OPEN state and the eventual recovery actions. The /v1/admin/circuit/history endpoint provides a dedicated view of circuit breaker incident history, including: trip timestamp, trigger condition, affected entities, duration of OPEN state, administrator who performed the reset, and any notes added during investigation. All incident data is subject to the same retention and integrity protections as standard proof records (append-only, SHA-256 hash-chained, Ed25519 signed).",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate preserves all incident data in the immutable proof chain and provides incident history APIs. Consumers are responsible for incorporating Cognigate incident data into their organizational incident tracking systems and conducting post-incident analysis."
+              },
+              {
+                "uuid": "4bbcff5f-c267-4812-b2d9-94cb558b9e61",
+                "control-id": "ir-6",
+                "description": "Cognigate provides incident reporting capabilities through multiple channels: (1) Status endpoints — /v1/admin/status provides real-time system health, including circuit breaker state, active incident indicators, and enforcement statistics; (2) Velocity alerts — the velocity monitoring system generates alerts when entity request rates approach cap thresholds (pre-incident warning) or exceed caps (incident notification); (3) Circuit breaker state — the circuit breaker state is queryable through the /v1/admin/circuit/status endpoint, providing immediate visibility into active incidents; (4) Health endpoints — /health, /health/live, and /ready endpoints report system operational status, enabling integration with external monitoring systems (Prometheus, Datadog, PagerDuty). Administrative notification is supported through configurable webhook integrations that fire on circuit breaker state transitions and high-severity security events.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides status endpoints, alerts, and webhook integrations for incident reporting. Consumers are responsible for configuring webhook destinations, integrating with their notification systems, and defining escalation procedures for incident reports."
+              },
+              {
+                "uuid": "1ee42ab9-578e-4f5e-b2b0-2f1fab3a1da9",
+                "control-id": "ra-3",
+                "description": "Cognigate performs real-time risk assessment on every request through its INTENT layer. Each incoming request is analyzed and assigned a risk_score (0.0 to 1.0) based on: (1) Capability risk — the inherent risk level of the requested capability (e.g., admin:modify = high risk, sandbox:read = low risk); (2) Entity risk — the requesting entity's current trust tier and recent behavioral patterns; (3) Context risk — environmental factors including time-of-day patterns, request frequency, parameter anomalies; (4) Tripwire results — whether the request matched any tripwire detection patterns (injection attempts, suspicious patterns); (5) Critic evaluation — AI adversarial analysis score when paranoia mode is active. The risk_score directly influences enforcement: scores above the configured threshold trigger STRICT rigor mode regardless of entity trust tier, scores in the medium range trigger enhanced monitoring, and extreme scores contribute to circuit breaker trip conditions. Every risk assessment is recorded in the proof chain as part of the DECISION_MADE record, providing a complete risk assessment history for each entity and action type.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Risk assessment is performed automatically by the INTENT layer on every request. Consumer systems inherit real-time risk assessment for all operations routed through Cognigate."
+              },
+              {
+                "uuid": "8e731a53-9a9b-483d-810b-f1c6e36b74e0",
+                "control-id": "ra-5",
+                "description": "Cognigate performs continuous vulnerability scanning through two complementary mechanisms: (1) Tripwire detection — the INTENT layer applies regex-based pattern matching against all incoming requests, detecting known vulnerability exploitation patterns including: shell injection (command chaining, backtick execution, $() substitution), path traversal (../ sequences, URL-encoded traversal, null byte injection), SQL injection (UNION SELECT, OR 1=1, comment injection, time-based blind techniques), SSRF (internal IP ranges, cloud metadata endpoints), and XSS (script tags, event handlers, protocol handlers). Tripwire rules are updatable without service restart. (2) Critic analysis — when paranoia mode is active, an AI adversarial evaluation system analyzes requests for novel attack patterns that may not match known signatures. The critic produces a block/allow recommendation with confidence score. Critic block cascades (multiple consecutive blocks) trigger circuit breaker escalation. Both detection mechanisms produce proof records documenting what was detected, which rules matched, and what enforcement action was taken.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Tripwire detection and critic analysis are automatic on all requests. Consumer systems inherit vulnerability scanning for all operations. Consumers may add custom tripwire rules specific to their application domain."
+              },
+              {
+                "uuid": "03da38c3-11d8-4dae-a81a-26d39aa510e4",
+                "control-id": "sc-7",
+                "description": "Cognigate enforces boundary protection for its API surface through: (1) CORS middleware — Cross-Origin Resource Sharing is configured with explicit allowed origins, preventing unauthorized browser-based access from unregistered domains; (2) API key authentication — all /v1/ endpoints require valid API keys, creating an authentication boundary that prevents unauthenticated access; (3) Admin key separation — administrative endpoints are isolated behind additional X-Admin-Key authentication, creating a privileged boundary within the API; (4) Namespace isolation — the capability taxonomy's 8 namespaces (sandbox, data, comm, execute, financial, admin, efficiency, custom) create logical boundaries between functional domains, with cross-namespace access controlled by policy; (5) Trust-tier boundaries — each trust tier defines a boundary of permitted capabilities, with lower tiers unable to access higher-tier functionality regardless of request parameters.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides API-level boundary protection through authentication, CORS, and namespace isolation. Consumers are responsible for network-level boundary protection (firewalls, WAF, VPN, IP allowlisting) in their deployment environment."
+              },
+              {
+                "uuid": "8a5b9737-e551-4050-adef-11a01071a83b",
+                "control-id": "sc-8",
+                "description": "Cognigate enforces confidentiality and integrity of transmitted information through HTTPS (TLS 1.2+) for all API communications. The vercel.json and fly.toml deployment configurations enforce HTTPS-only access with automatic HTTP-to-HTTPS redirection. API keys and admin keys are transmitted only over encrypted channels. The SHA-256 hash chain provides integrity verification for audit data: any modification to transmitted proof records is detectable through hash verification at the receiving end. Ed25519 signatures provide origin authentication for proof records, ensuring that records received from the API were generated by an authenticated Cognigate instance.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate enforces HTTPS for its API and provides cryptographic integrity verification for audit data. Consumers are responsible for TLS configuration on their infrastructure, certificate management, and ensuring their client applications enforce TLS verification."
+              },
+              {
+                "uuid": "d6f98527-c868-4164-9c16-412f6e883ee9",
+                "control-id": "sc-12",
+                "description": "Cognigate manages cryptographic keys through the following lifecycle: (1) Key generation — Ed25519 key pairs are generated using cryptographically secure random number generators; entities generate their key pairs client-side and register the public key through /v1/auth/keys; (2) Key registration — public keys are registered and bound to entity_ids, creating a verified identity binding; (3) Key usage — private keys are used for signing proof records and authenticating API requests; public keys are used for signature verification; (4) Key rotation — the /v1/auth/keys endpoint supports key rotation with automatic transition (old key remains valid during a configurable grace period); (5) Key revocation — compromised keys can be immediately revoked through administrative action; (6) Key archival — revoked and rotated keys are preserved in the proof chain for historical signature verification. The system uses Ed25519 exclusively (no algorithm negotiation), eliminating downgrade attacks.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides key lifecycle management APIs and uses Ed25519 for all cryptographic operations. Consumers are responsible for secure key generation, private key storage (HSM or equivalent), and defining key management procedures aligned with their organizational key management policy."
+              },
+              {
+                "uuid": "0457f99e-7211-484b-b0b8-38e334119f93",
+                "control-id": "sc-13",
+                "description": "Cognigate employs NIST-approved and independently verified cryptographic algorithms for all security functions: (1) SHA-256 (NIST FIPS 180-4) — primary hash function for proof chain linking, content hashing (inputs_hash, outputs_hash), and tamper detection; (2) Ed25519 (based on Curve25519, referenced in NIST SP 800-186) — used for digital signatures on all proof records, providing 128-bit security equivalent with fast signature generation and verification. All cryptographic operations use established, audited libraries rather than custom implementations.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Cognigate uses NIST-approved cryptographic algorithms with no configuration required. Consumer systems inherit cryptographic protection for all operations routed through Cognigate."
+              },
+              {
+                "uuid": "9d038220-1f56-44f3-8880-6d63d1472cdc",
+                "control-id": "si-3",
+                "description": "Cognigate implements malicious code protection through its INTENT layer tripwire detection system. Tripwire rules scan all incoming request parameters for known malicious patterns: (1) Shell injection — command chaining (;, &&, ||), backtick execution, $() substitution, pipe redirection; (2) Path traversal — ../ sequences (including URL-encoded variants %2e%2e%2f), null byte injection, symlink traversal patterns; (3) SQL injection — UNION SELECT, OR 1=1, comment-based injection (--), time-based blind techniques (SLEEP, WAITFOR), stacked queries; (4) SSRF — internal IP range access (10.x, 172.16-31.x, 192.168.x), cloud metadata endpoints (169.254.169.254), DNS rebinding patterns; (5) XSS — script tags, event handler attributes (onerror, onload), javascript: protocol handlers; (6) Code injection — eval(), exec(), import(), require() in user-controlled inputs. When malicious code is detected, the request is denied with the specific tripwire rule logged in the proof chain. Persistent malicious code attempts trigger TRIPWIRE_CASCADE circuit breaker escalation.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Tripwire detection is automatic on all requests. Consumer systems inherit malicious code protection for all operations routed through Cognigate."
+              },
+              {
+                "uuid": "d4874307-7da5-4db7-9435-26c7dedb8424",
+                "control-id": "si-4",
+                "description": "Cognigate implements continuous system monitoring through its circuit breaker monitoring subsystem and administrative status endpoints. The circuit breaker monitors four key indicators in real time: (1) high_risk_ratio — the proportion of recent requests receiving risk_score above the configured threshold; (2) blocked_requests — the rate of DENY verdicts across all entities; (3) tripwire_triggers — the frequency of tripwire detection activations; (4) injection_attempts — confirmed injection detection events. These indicators are evaluated continuously against configurable thresholds, with automatic escalation when thresholds are breached. The /v1/admin/status endpoint provides real-time visibility into all monitoring indicators, entity behavior patterns, trust score distributions, and enforcement statistics. The /health, /health/live, and /ready endpoints provide infrastructure monitoring integration points. All monitoring events that result in enforcement actions are recorded in the proof chain, creating a continuous monitoring audit trail.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides continuous monitoring of its governance operations and exposes monitoring data through APIs and health endpoints. Consumers are responsible for integrating these endpoints with their monitoring infrastructure (Prometheus, Datadog, CloudWatch), configuring monitoring thresholds, and establishing monitoring response procedures."
+              },
+              {
+                "uuid": "a7bd7c4c-776b-4bb6-adfc-6aced0a2230e",
+                "control-id": "si-5",
+                "description": "Cognigate manages security advisories through: (1) SECURITY.md — a public security policy document following responsible disclosure practices, with severity classification (CVSS v3.1), response timelines (48-hour acknowledgment, 5-day assessment), and reporting procedures (security@vorion.org); (2) security.txt — a machine-readable security policy following RFC 9116, published at the well-known URL; (3) Dependabot alerts — automated vulnerability notifications for all dependencies; (4) GitHub Security Advisories — coordinated vulnerability disclosure for identified issues in Cognigate itself. Security advisory information is disseminated to affected parties through: email notification to registered security contacts, GitHub security advisory notifications, and CHANGELOG.md entries for resolved vulnerabilities.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides security advisory infrastructure and responsible disclosure processes. Consumers are responsible for monitoring Cognigate security advisories, applying security updates to their deployments, and incorporating Cognigate advisories into their vulnerability management program."
+              },
+              {
+                "uuid": "fb404997-f306-4a64-94ee-71ccc888e410",
+                "control-id": "si-7",
+                "description": "Cognigate implements software, firmware, and information integrity verification through its proof chain verification system: (1) Proof record integrity — the /v1/proof/{id}/verify endpoint recalculates the SHA-256 hash for a proof record and validates its Ed25519 signature, detecting any modification to the record content; (2) Chain integrity — the hash linking between records (prev_hash field) ensures that any insertion, deletion, or reordering of records is detectable by walking the chain and verifying each link; (3) Gap detection — the monotonically increasing chain_position field allows detection of deleted records by identifying gaps in the sequence; (4) Signature verification — Ed25519 signatures on each record provide origin authenticity verification, ensuring records were produced by an authorized Cognigate instance with access to the signing key.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Integrity verification is built into the proof chain architecture. Consumer systems can verify audit trail integrity at any time through the verification API."
+              },
+              {
+                "uuid": "eed9d166-4c91-48a7-b6c3-511ae39f1a07",
+                "control-id": "si-10",
+                "description": "Cognigate implements comprehensive input validation using Pydantic BaseModel with field constraints on all API inputs. Validation is enforced at multiple levels: (1) API layer — request payloads are validated against Pydantic models before entering the INTENT layer; invalid inputs are rejected with HTTP 422 (Unprocessable Entity) and detailed validation error messages; (2) INTENT layer — parsed inputs are validated for semantic correctness (e.g., entity_id must reference a registered entity, capability_id must exist in the taxonomy); (3) ENFORCE layer — policy rule parameters are validated before evaluation. Field constraints include: type validation (string, integer, float, UUID, enum), length limits (min/max string length, array size limits), range validation (numeric min/max, score 0.0-1.0), pattern matching (regex for structured fields), and required/optional field enforcement. In the TypeScript platform packages, Zod schema validation provides equivalent input validation at API boundaries. All validation failures are logged for security analysis.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Input validation is enforced on all API inputs before processing. Consumer systems inherit input validation protection for all operations routed through Cognigate."
+              },
+              {
+                "uuid": "d15fd49d-a2c1-443a-a9b8-36e461420d9b",
+                "control-id": "sa-4",
+                "description": "Cognigate tracks acquisition and supply chain information through: (1) requirements.txt — Python dependency declarations with pinned versions for the Cognigate runtime engine; (2) pyproject.toml — Python project metadata including dependency specifications, build system requirements, and project classifiers; (3) package.json — TypeScript/Node.js dependency declarations for the Vorion platform packages, with explicit version ranges and peer dependency requirements; (4) package-lock.json — deterministic dependency resolution ensuring reproducible builds across all environments. Dependency specifications include security requirements: all dependencies are subject to automated vulnerability scanning (pip-audit, npm audit), license compliance checking, and SBOM generation. Third-party component acceptance criteria include: no known critical vulnerabilities, compatible open-source license, active maintenance (no abandoned projects), and documented security practices.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides dependency tracking, automated vulnerability scanning, and acceptance criteria. Consumers are responsible for reviewing Cognigate's SBOM against their organizational supply chain requirements and any additional acquisition controls they require."
+              },
+              {
+                "uuid": "c1bbee28-96f4-4324-8107-15f78dc5b3a8",
+                "control-id": "sa-9",
+                "description": "Cognigate manages external information system services through its gateway proxy architecture. When entities request external communication capabilities (comm:external namespace), the request is routed through Cognigate's gateway proxy, which applies trust verification before allowing outbound connections. External service integration controls include: (1) Trust-gated access — only entities with sufficient trust tier (T4+ for external communication) can invoke external services; (2) Request sanitization — outbound requests are inspected for data exfiltration patterns by the INTENT layer; (3) Response validation — inbound responses from external services are validated before being returned to the requesting entity; (4) Audit logging — all external service interactions are recorded in the proof chain with complete request/response metadata. The gateway proxy prevents direct external access from untrusted entities, creating a mediated trust boundary.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides trust-verified gateway proxy for external service access. Consumers are responsible for defining their approved external service list, configuring outbound access policies, and establishing trust requirements for external integrations."
+              },
+              {
+                "uuid": "a8fc5e3b-1c52-4c7d-b49b-5d1e874ad0c8",
+                "control-id": "sa-10",
+                "description": "Cognigate implements developer security testing through a comprehensive CI/CD security toolchain: (1) Semgrep SAST — static application security testing runs on every push and pull request, applying rules for common vulnerability patterns (injection, insecure deserialization, hardcoded secrets, insecure cryptography); (2) CodeQL — GitHub Advanced Security's semantic code analysis runs on all pull requests, detecting complex vulnerability patterns through data flow analysis; (3) Gitleaks — secret scanning runs in the CI pipeline and as a pre-commit hook (.gitleaks.toml configuration), detecting accidentally committed credentials, API keys, private keys, and other secrets; (4) Semgrep ignore rules — .semgrepignore is configured to exclude test fixtures and generated files while maintaining full coverage of application code. All security scan failures are blocking — code cannot be merged to protected branches without passing all security checks.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: Security testing is integrated into Cognigate's development pipeline. Consumer systems benefit from a security-tested codebase."
+              },
+              {
+                "uuid": "5dc5e82e-edb2-4491-a510-d4b7f4be0676",
+                "control-id": "sa-11",
+                "description": "Cognigate maintains a comprehensive automated test suite as part of its developer testing and evaluation program: (1) Unit tests — 593+ automated tests covering individual functions, classes, and modules across the codebase; (2) Code coverage — 85%+ code coverage enforced through CI thresholds, with line and branch coverage metrics tracked per package; (3) Property-based testing — Hypothesis framework used for property-based testing of trust score calculations, proof chain integrity, and policy evaluation, generating thousands of randomized test cases to discover edge cases; (4) Integration tests — cross-package integration tests validate the INTENT/ENFORCE/PROOF pipeline end-to-end; (5) Mutation testing — Stryker (stryker.config.mjs) and mutmut (mutmut_config.py) provide mutation testing to validate test effectiveness; (6) Performance testing — k6 load testing scripts validate system behavior under stress. The test suite runs on every pull request and must pass before merge.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "provided"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Provided: The automated test suite is maintained by Vorion as part of the Cognigate development process. Consumer systems benefit from a thoroughly tested codebase."
+              },
+              {
+                "uuid": "ad20eca8-62ec-4986-8c2e-ae4396be646b",
+                "control-id": "sa-12",
+                "description": "Cognigate implements supply chain protection through: (1) SBOM generation — CycloneDX Software Bill of Materials generated on every release via the sbom.yml GitHub Actions workflow, capturing all direct and transitive dependencies with their versions, licenses, and known vulnerabilities; (2) SBOM history — historical SBOMs preserved in sbom-history/ directory, enabling diff analysis between releases to identify newly introduced dependencies; (3) Dependency auditing — pip-audit (Python) and npm audit (TypeScript) run in CI, failing builds when critical or high-severity vulnerabilities are detected in dependencies; (4) License compliance — automated license checking in CI ensures all dependencies use compatible open-source licenses; (5) Dependabot — GitHub Dependabot monitors for dependency vulnerabilities and creates automated pull requests for security updates; (6) Lock files — package-lock.json and pinned requirements.txt ensure deterministic dependency resolution, preventing supply chain attacks through version hijacking.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate generates SBOMs, performs dependency auditing, and enforces license compliance. Consumers are responsible for incorporating Cognigate's SBOM into their organizational supply chain risk management program and for maintaining supply chain controls on any additional components in their deployment."
+              },
+              {
+                "uuid": "73792bc1-8769-4d81-8b12-9a1f5327386e",
+                "control-id": "ca-7",
+                "description": "Cognigate supports continuous monitoring through multiple real-time observability endpoints: (1) /health — basic health check returning system status (healthy/degraded/unhealthy) with response time; (2) /health/live — liveness probe for container orchestration, confirming the process is running and responsive; (3) /ready — readiness probe confirming the system can accept requests (database connected, proof chain initialized, policies loaded); (4) /v1/admin/status — comprehensive administrative status including: active entity count by trust tier, circuit breaker state, velocity cap utilization rates, recent enforcement statistics (allow/deny/escalate/sandbox ratios), high_risk_ratio trend, proof chain length and last verification timestamp; (5) Circuit breaker monitoring — real-time tracking of all circuit breaker indicators with configurable alert thresholds; (6) Velocity tracking — per-entity and per-namespace velocity utilization metrics. These endpoints enable integration with external continuous monitoring tools (Prometheus scraping, Datadog agents, CloudWatch synthetic monitoring) for organizationally defined monitoring frequencies.",
+                "props": [
+                  {
+                    "name": "responsibility",
+                    "value": "shared"
+                  },
+                  {
+                    "name": "implementation-status",
+                    "value": "implemented"
+                  }
+                ],
+                "responsible-roles": [
+                  {
+                    "role-id": "provider"
+                  }
+                ],
+                "remarks": "Shared: Cognigate provides monitoring endpoints and internal metrics. Consumers are responsible for configuring their continuous monitoring infrastructure to consume Cognigate's endpoints, defining monitoring frequencies, establishing alert thresholds, and integrating with their ConMon program."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "back-matter": {
+      "resources": [
+        {
+          "uuid": "5a0f94b3-8e18-4350-ad06-23ec6c0f98c8",
+          "title": "NIST SP 800-53 Rev 5 Catalog",
+          "description": "NIST Special Publication 800-53 Revision 5 — Security and Privacy Controls for Information Systems and Organizations.",
+          "rlinks": [
+            {
+              "href": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+              "media-type": "application/json"
+            },
+            {
+              "href": "https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final",
+              "media-type": "text/html"
+            }
+          ]
+        },
+        {
+          "uuid": "fb51fbbd-df6e-4048-9a1f-950951292389",
+          "title": "NIST SP 800-53B Moderate Baseline",
+          "description": "NIST Special Publication 800-53B — Control Baselines for Information Systems and Organizations. Moderate impact baseline.",
+          "rlinks": [
+            {
+              "href": "https://csrc.nist.gov/publications/detail/sp/800-53b/final",
+              "media-type": "text/html"
+            }
+          ]
+        },
+        {
+          "uuid": "98291a42-7b3f-4e3f-a072-b9d874f891f9",
+          "title": "BASIS Specification v1.0",
+          "description": "Behavioral Agent Standard for Intelligent Systems — the open governance standard implemented by Cognigate.",
+          "rlinks": [
+            {
+              "href": "https://basis.vorion.org",
+              "media-type": "text/html"
+            }
+          ]
+        },
+        {
+          "uuid": "68779e06-eb95-4495-9158-37ebc60c0d06",
+          "title": "Vorion Security Policy",
+          "description": "Vorion's security policy, vulnerability disclosure process, and security practices documentation.",
+          "rlinks": [
+            {
+              "href": "https://github.com/vorion/vorion/blob/main/SECURITY.md",
+              "media-type": "text/html"
+            }
+          ]
+        },
+        {
+          "uuid": "449e87f9-64fb-46a9-843d-31966d0b4c33",
+          "title": "Cognigate API Documentation",
+          "description": "OpenAPI specification and developer documentation for the Cognigate governance engine REST API.",
+          "rlinks": [
+            {
+              "href": "https://vorion.org/docs/cognigate-api",
+              "media-type": "text/html"
+            }
+          ]
+        },
+        {
+          "uuid": "91bcc5b1-c078-4678-8530-3e279bf49315",
+          "title": "NIST AI Risk Management Framework",
+          "description": "NIST AI 100-1 — Artificial Intelligence Risk Management Framework. Cognigate is designed to align with the Govern, Map, Measure, and Manage functions.",
+          "rlinks": [
+            {
+              "href": "https://www.nist.gov/itl/ai-risk-management-framework",
+              "media-type": "text/html"
+            }
+          ]
+        },
+        {
+          "uuid": "4bfd6cc6-ab09-4999-8744-21b6e1a08ea6",
+          "title": "FedRAMP Authorization Boundary Reference",
+          "description": "FedRAMP authorization boundary documentation applicable to Cognigate's Moderate impact level deployment.",
+          "rlinks": [
+            {
+              "href": "https://www.fedramp.gov/documents/",
+              "media-type": "text/html"
+            }
+          ]
+        },
+        {
+          "uuid": "39865837-4a8e-403e-ab2b-e26afd4169de",
+          "title": "OSCAL Component Definition Model Reference",
+          "description": "NIST OSCAL Reference — Component Definition model specification used to structure this document.",
+          "rlinks": [
+            {
+              "href": "https://pages.nist.gov/OSCAL-Reference/models/latest/component-definition/json-outline/",
+              "media-type": "text/html"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

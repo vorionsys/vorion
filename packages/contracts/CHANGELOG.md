@@ -43,6 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ACI module (deprecated alias for CAR, backwards compatibility)
 - Subpath exports for granular imports: /common, /v2, /validators, /car, /aci, /canonical, /db
 
-[0.1.2]: https://github.com/vorionsys/vorion/compare/contracts-v0.1.1...contracts-v0.1.2
-[0.1.1]: https://github.com/vorionsys/vorion/compare/contracts-v0.1.0...contracts-v0.1.1
-[0.1.0]: https://github.com/vorionsys/vorion/releases/tag/contracts-v0.1.0
+[0.1.2]: https://github.com/voriongit/vorion/compare/contracts-v0.1.1...contracts-v0.1.2
+[0.1.1]: https://github.com/voriongit/vorion/compare/contracts-v0.1.0...contracts-v0.1.1
+[0.1.0]: https://github.com/voriongit/vorion/releases/tag/contracts-v0.1.0

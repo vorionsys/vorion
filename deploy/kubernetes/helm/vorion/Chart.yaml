@@ -1,0 +1,74 @@
+---
+# Vorion Helm Chart
+apiVersion: v2
+name: vorion
+description: A Helm chart for deploying the Vorion API platform
+type: application
+
+# Chart version - increment for chart changes
+version: 1.0.0
+
+# Application version - matches the Vorion release
+appVersion: "1.0.0"
+
+# Minimum Kubernetes version required
+kubeVersion: ">=1.25.0"
+
+# Chart maintainers
+maintainers:
+  - name: Vorion Team
+    url: https://github.com/vorionsys
+
+# Chart home page
+home: https://github.com/vorionsys/vorion
+
+# Source code repository
+sources:
+  - https://github.com/vorionsys/vorion
+
+# Keywords for search
+keywords:
+  - vorion
+  - api
+  - backend
+  - nodejs
+
+# Chart annotations
+annotations:
+  # Artifact Hub annotations
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/signKey: |
+    fingerprint: REPLACE_WITH_GPG_FINGERPRINT
+    url: https://vorion.example.com/gpg-key.asc
+
+  # Security annotations
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/prerelease: "false"
+
+  # Change log
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial chart release
+    - kind: security
+      description: Added pod security contexts
+    - kind: added
+      description: Network policies for isolation
+
+# Chart dependencies
+dependencies:
+  # PostgreSQL dependency (optional, can be disabled)
+  - name: postgresql
+    version: "12.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+    tags:
+      - database
+
+  # Redis dependency (optional, can be disabled)
+  - name: redis
+    version: "17.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+    tags:
+      - cache

@@ -15,16 +15,9 @@ export async function GET() {
   };
 
   return NextResponse.json({
-    firebase: {
-      configured: !!(
-        process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
-        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
-        process.env.NEXT_PUBLIC_FIREBASE_APP_ID
-      ),
-      apiKeyPresent: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-      apiKeyLength: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.length || 0,
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'NOT SET',
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'NOT SET',
+    supabase: {
+      configured: !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+      urlPresent: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
     },
     providers: providerStatus,
   });

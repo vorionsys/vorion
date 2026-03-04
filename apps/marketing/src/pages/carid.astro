@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const features = [
+  {
+    icon: 'fingerprint',
+    title: 'Agent Identity',
+    description: 'Unique, verifiable IDs for every agent. The CAR ID format — car:domain/category/name:version — encodes identity, capability scope, and version in a single URI.',
+  },
+  {
+    icon: 'shield-check',
+    title: 'Trust Binding',
+    description: 'Each CAR ID carries its trust score, tier (T0–T7), and full provenance chain. Trust travels with the identity — no separate lookup required.',
+  },
+  {
+    icon: 'globe',
+    title: 'Registry API',
+    description: 'Register, lookup, and verify agents via REST API. Query by ID, domain, category, or trust tier. Built for integration into any governance pipeline.',
+  },
+  {
+    icon: 'link2',
+    title: 'Interoperability',
+    description: 'Works across platforms — any system can parse and verify a CAR ID. Open standard built on the BASIS specification with TypeScript and Python SDKs.',
+  },
+];
+
+---
+
+<BaseLayout
+  title="CAR ID"
+  description="The Categorical Agentic Registry — universal identification for autonomous AI agents. The CAR ID format encodes identity, capability scope, and version in a single URI."
+>
+    <!-- Hero -->
+      <section class="pt-32 pb-20 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-sm mb-8">
+            <Icon name="fingerprint" size={16} class="w-4 h-4" />
+            Open Standard — Part of the Vorion Stack
+          </div>
+          <h1 class="text-5xl sm:text-7xl font-bold mb-6">
+            <span class="bg-gradient-to-r from-violet-400 to-violet-200 bg-clip-text text-transparent">
+              CAR ID
+            </span>
+          </h1>
+          <p class="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-4">
+            The Categorical Agentic Registry — universal identification for autonomous AI agents.
+          </p>
+          <div class="inline-block bg-white/[0.03] border border-white/10 rounded-lg px-4 py-2 font-mono text-sm text-violet-300 mb-10">
+            car:vorion/governance/sentinel:1.0.0
+          </div>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="https://basis.vorion.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-400 hover:to-violet-500 text-white font-medium shadow-lg shadow-violet-500/25 transition-all"
+            >
+              Read the Spec
+              <Icon name="arrow-right" size={16} class="w-4 h-4" />
+            </a>
+            <a
+              href="https://www.npmjs.com/package/@vorionsys/car-spec"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium transition-all"
+            >
+              <Icon name="book-open" size={16} class="w-4 h-4" />
+              View on npm
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="pb-20 px-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          {features.map((feature) => (
+            <div class="bg-white/[0.03] p-6 rounded-xl border border-white/5 hover:border-violet-500/30 transition-colors">
+              <Icon name={feature.icon} class="w-8 h-8 text-violet-400 mb-4" />
+              <h3 class="text-lg font-semibold mb-2">{feature.title}</h3>
+              <p class="text-white/50 text-sm leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Format -->
+      <section class="pb-20 px-6">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-2xl font-bold text-center mb-8">CAR ID Format</h2>
+          <div class="bg-white/[0.03] border border-white/5 rounded-xl p-8">
+            <div class="font-mono text-center text-lg mb-6">
+              <span class="text-violet-400">car</span>
+              <span class="text-white/30">:</span>
+              <span class="text-cyan-400">domain</span>
+              <span class="text-white/30">/</span>
+              <span class="text-emerald-400">category</span>
+              <span class="text-white/30">/</span>
+              <span class="text-amber-400">name</span>
+              <span class="text-white/30">:</span>
+              <span class="text-rose-400">version</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+              <div class="text-center">
+                <div class="text-cyan-400 font-medium">domain</div>
+                <div class="text-white/40 mt-1">Organization scope</div>
+              </div>
+              <div class="text-center">
+                <div class="text-emerald-400 font-medium">category</div>
+                <div class="text-white/40 mt-1">Capability area</div>
+              </div>
+              <div class="text-center">
+                <div class="text-amber-400 font-medium">name</div>
+                <div class="text-white/40 mt-1">Agent identifier</div>
+              </div>
+              <div class="text-center">
+                <div class="text-rose-400 font-medium">version</div>
+                <div class="text-white/40 mt-1">Semantic version</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+</BaseLayout>

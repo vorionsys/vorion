@@ -1,0 +1,212 @@
+App,Route,Page Title,Framework,Deployment,Domain,Type,Audience,Rendering,Status,Data Sources,Category,Priority
+marketing,/,Vorion Home,Astro 5.17,Vercel,vorion.org,Landing Page,Public,SSG,Live,None,Marketing,High
+marketing,/carid,CAR ID - Categorical Agentic Registry,Astro 5.17,Vercel,vorion.org,Product Page,Public,SSG,Live,None,Marketing,Medium
+marketing,/feedback,Feedback Portal,Astro 5.17,Vercel,vorion.org,Product Page,Public,SSG,Live,None,Marketing,Medium
+marketing,/logic,Logic Engine,Astro 5.17,Vercel,vorion.org,Product Page,Public,SSG,Live,None,Marketing,Medium
+marketing,/opensource,Open Source,Astro 5.17,Vercel,vorion.org,Community Page,Public,SSG,Live,None,Marketing,Medium
+marketing,/trust,Trust Framework,Astro 5.17,Vercel,vorion.org,Product Page,Public,SSG,Live,None,Marketing,Medium
+marketing,/verify,Verification,Astro 5.17,Vercel,vorion.org,Product Page,Public,SSG,Live,None,Marketing,Medium
+agentanchor-www,/,AgentAnchor Home,Next.js 16,Vercel,agentanchorai.com,Landing Page,Public,SSG,Live,None,Marketing,High
+agentanchor-www,/concepts,Concepts,Next.js 16,Vercel,agentanchorai.com,Educational,Public,SSG,Live,None,Marketing,High
+agentanchor-www,/demo,Live Demo,Next.js 16,Vercel,agentanchorai.com,Interactive Demo,Public,SSG,Live,None,Marketing,High
+agentanchor-www,/marketplace,Marketplace,Next.js 16,Vercel,agentanchorai.com,Product Page,Public,SSG,Live,None,Marketing,Medium
+agentanchor-www,/pricing,Pricing,Next.js 16,Vercel,agentanchorai.com,Product Page,Public,SSG,Live,None,Marketing,Medium
+status-www,/,Status Dashboard,Next.js 16.1,Vercel,status.agentanchorai.com,Status Page,Public,SSG,Live,External APIs,Operations,High
+status-www,/api/status,Status API,Next.js 16.1,Vercel,status.agentanchorai.com,API Endpoint,Internal,SSR,Live,Service Health Checks,Operations,High
+bai-cc-www,/,BAI CC Home,Astro 5.17,Vercel,bai-cc.com,Landing Page,Public,SSG,Live,None,Marketing,Medium
+bai-cc-www,/about,About BAI CC,Astro 5.17,Vercel,bai-cc.com,Info Page,Public,SSG,Live,None,Marketing,Low
+bai-cc-www,/architecture,Architecture Overview,Astro 5.17,Vercel,bai-cc.com,Technical,Internal,SSG,Live,None,Technical,Medium
+bai-cc-www,/ecosystem,Ecosystem Map,Astro 5.17,Vercel,bai-cc.com,Info Page,Public,SSG,Live,None,Technical,Medium
+bai-cc-www,/packages,Package Registry,Astro 5.17,Vercel,bai-cc.com,Technical,Developers,SSG,Live,npm Registry,Technical,Medium
+bai-cc-www,/projects,Projects Index,Astro 5.17,Vercel,bai-cc.com,Portfolio,Public,SSG,Live,None,Marketing,Medium
+bai-cc-www,/projects/agentanchor,AgentAnchor Project,Astro 5.17,Vercel,bai-cc.com,Project Detail,Public,SSG,Live,None,Marketing,Low
+bai-cc-www,/projects/atsf,ATSF Project,Astro 5.17,Vercel,bai-cc.com,Project Detail,Public,SSG,Live,None,Marketing,Low
+bai-cc-www,/projects/aurais,Aurais Project,Astro 5.17,Vercel,bai-cc.com,Project Detail,Public,SSG,Live,None,Marketing,Low
+bai-cc-www,/projects/basis,BASIS Project,Astro 5.17,Vercel,bai-cc.com,Project Detail,Public,SSG,Live,None,Marketing,Low
+bai-cc-www,/projects/cognigate,Cognigate Project,Astro 5.17,Vercel,bai-cc.com,Project Detail,Public,SSG,Live,None,Marketing,Low
+bai-cc-www,/projects/learn-vorion,Learn Vorion Project,Astro 5.17,Vercel,bai-cc.com,Project Detail,Public,SSG,Live,None,Marketing,Low
+bai-cc-www,/projects/vorion,Vorion Project,Astro 5.17,Vercel,bai-cc.com,Project Detail,Public,SSG,Live,None,Marketing,Low
+bai-cc-dashboard,/,Dashboard Home,Astro 5.17,Cloudflare Pages,bai-cc.com,Dashboard,Internal,SSR,Partial (Vercel mismatch),KV Cache + APIs,Operations,Critical
+bai-cc-dashboard,/agents,Agent Registry,Astro 5.17,Cloudflare Pages,bai-cc.com,Dashboard,Internal,SSR,404 (deployment issue),KV: public-agents,Operations,Critical
+bai-cc-dashboard,/architecture,Architecture View,Astro 5.17,Cloudflare Pages,bai-cc.com,Dashboard,Internal,Prerendered,Live,Static,Technical,Medium
+bai-cc-dashboard,/governance,Governance Metrics,Astro 5.17,Cloudflare Pages,bai-cc.com,Dashboard,Internal,SSR,404 (deployment issue),KV: governance-metrics,Operations,Critical
+bai-cc-dashboard,/health,Health Monitor,Astro 5.17,Cloudflare Pages,bai-cc.com,Dashboard,Internal,SSR,404 (deployment issue),KV: service-status + domain-health,Operations,Critical
+bai-cc-dashboard,/tests,Test Results,Astro 5.17,Cloudflare Pages,bai-cc.com,Dashboard,Internal,SSR,404 (deployment issue),KV: ci-status,Operations,Critical
+bai-cc-dashboard,/api/health,Health API,Astro 5.17,Cloudflare Pages,bai-cc.com,API Endpoint,Internal,SSR,404 (deployment issue),Service Checks,Operations,Critical
+bai-cc-dashboard,/api/stats.json,Stats JSON,Astro 5.17,Cloudflare Pages,bai-cc.com,API Endpoint,Internal,SSR,404 (deployment issue),KV: public-stats,Operations,High
+bai-cc-dashboard,/api/agents.json,Agents JSON,Astro 5.17,Cloudflare Pages,bai-cc.com,API Endpoint,Internal,SSR,404 (deployment issue),KV: public-agents,Operations,High
+bai-cc-dashboard,/api/ci.json,CI Status JSON,Astro 5.17,Cloudflare Pages,bai-cc.com,API Endpoint,Internal,SSR,404 (deployment issue),KV: ci-status,Operations,High
+bai-cc-dashboard,/api/domains.json,Domain Health JSON,Astro 5.17,Cloudflare Pages,bai-cc.com,API Endpoint,Internal,SSR,404 (deployment issue),KV: domain-health,Operations,High
+bai-cc-dashboard,/api/npm.json,NPM Stats JSON,Astro 5.17,Cloudflare Pages,bai-cc.com,API Endpoint,Internal,SSR,404 (deployment issue),KV: npm-stats,Operations,High
+bai-cc-dashboard,/api/status.json,Service Status JSON,Astro 5.17,Cloudflare Pages,bai-cc.com,API Endpoint,Internal,SSR,404 (deployment issue),KV: service-status,Operations,High
+bai-cc-dashboard,/api/governance.json,Governance JSON,Astro 5.17,Cloudflare Pages,bai-cc.com,API Endpoint,Internal,SSR,404 (deployment issue),KV: governance-metrics,Operations,High
+bai-cc-dashboard,/api/badge/agents.svg,Agents Badge,Astro 5.17,Cloudflare Pages,bai-cc.com,SVG Badge,Public,SSR,404 (deployment issue),KV: public-agents,Marketing,Low
+bai-cc-dashboard,/api/badge/ci.svg,CI Badge,Astro 5.17,Cloudflare Pages,bai-cc.com,SVG Badge,Public,SSR,404 (deployment issue),KV: ci-status,Marketing,Low
+bai-cc-dashboard,/api/badge/npm.svg,NPM Badge,Astro 5.17,Cloudflare Pages,bai-cc.com,SVG Badge,Public,SSR,404 (deployment issue),KV: npm-stats,Marketing,Low
+bai-cc-dashboard,/api/badge/trust.svg,Trust Badge,Astro 5.17,Cloudflare Pages,bai-cc.com,SVG Badge,Public,SSR,404 (deployment issue),KV: public-stats,Marketing,Low
+agentanchor,/,AgentAnchor Portal Home,Next.js 15.5,Vercel,agentanchorai.com,App Portal,Users,SSR,Live,Database,Product,Critical
+agentanchor,/auth/login,Login,Next.js 15.5,Vercel,agentanchorai.com,Auth Page,Users,SSR,Live,Auth Provider,Product,Critical
+agentanchor,/auth/signup,Sign Up,Next.js 15.5,Vercel,agentanchorai.com,Auth Page,Users,SSR,Live,Auth Provider,Product,Critical
+agentanchor,/auth/forgot-password,Forgot Password,Next.js 15.5,Vercel,agentanchorai.com,Auth Page,Users,SSR,Live,Auth Provider,Product,Medium
+agentanchor,/auth/reset-password,Reset Password,Next.js 15.5,Vercel,agentanchorai.com,Auth Page,Users,SSR,Live,Auth Provider,Product,Medium
+agentanchor,/academy,Academy,Next.js 15.5,Vercel,agentanchorai.com,Training,Users,SSR,Live,Curriculum API,Product,High
+agentanchor,/agents,Agent List,Next.js 15.5,Vercel,agentanchorai.com,Agent Management,Users,SSR,Live,Agents API,Product,Critical
+agentanchor,/agents/new,Create Agent,Next.js 15.5,Vercel,agentanchorai.com,Agent Management,Users,SSR,Live,Agents API,Product,Critical
+agentanchor,/agents/[id],Agent Detail,Next.js 15.5,Vercel,agentanchorai.com,Agent Management,Users,SSR,Live,Agents API,Product,Critical
+agentanchor,/agents/[id]/edit,Edit Agent,Next.js 15.5,Vercel,agentanchorai.com,Agent Management,Users,SSR,Live,Agents API,Product,High
+agentanchor,/agents/[id]/trust,Agent Trust View,Next.js 15.5,Vercel,agentanchorai.com,Trust Display,Users,SSR,Live,Trust Engine API,Product,High
+agentanchor,/agents/[id]/training,Agent Training,Next.js 15.5,Vercel,agentanchorai.com,Training,Users,SSR,Live,Training API,Product,High
+agentanchor,/bots,Bot List,Next.js 15.5,Vercel,agentanchorai.com,Bot Management,Users,SSR,Live,Agents API,Product,Medium
+agentanchor,/bots/new,Create Bot,Next.js 15.5,Vercel,agentanchorai.com,Bot Management,Users,SSR,Live,Agents API,Product,Medium
+agentanchor,/bots/[id],Bot Detail,Next.js 15.5,Vercel,agentanchorai.com,Bot Management,Users,SSR,Live,Agents API,Product,Medium
+agentanchor,/bots/[id]/trust,Bot Trust View,Next.js 15.5,Vercel,agentanchorai.com,Trust Display,Users,SSR,Live,Trust Engine API,Product,Medium
+agentanchor,/chat,Chat Interface,Next.js 15.5,Vercel,agentanchorai.com,Communication,Users,SSR,Live,Chat API,Product,High
+agentanchor,/collaborate,Collaboration Hub,Next.js 15.5,Vercel,agentanchorai.com,Collaboration,Users,SSR,Live,Collaborate API,Product,Medium
+agentanchor,/collaborate/[id],Collaboration Detail,Next.js 15.5,Vercel,agentanchorai.com,Collaboration,Users,SSR,Live,Collaborate API,Product,Medium
+agentanchor,/conversations,Conversations List,Next.js 15.5,Vercel,agentanchorai.com,Communication,Users,SSR,Live,Chat API,Product,Medium
+agentanchor,/conversations/[id]/export,Export Conversation,Next.js 15.5,Vercel,agentanchorai.com,Export,Users,SSR,Live,Export API,Product,Low
+agentanchor,/dashboard,Dashboard Home,Next.js 15.5,Vercel,agentanchorai.com,Dashboard,Users,SSR,Live,Multiple APIs,Product,Critical
+agentanchor,/dashboard/agents,Dashboard Agents,Next.js 15.5,Vercel,agentanchorai.com,Agent Management,Users,SSR,Live,Agents API,Product,Critical
+agentanchor,/dashboard/agents/new,Dashboard Create Agent,Next.js 15.5,Vercel,agentanchorai.com,Agent Management,Users,SSR,Live,Agents API,Product,High
+agentanchor,/dashboard/agents/[id],Dashboard Agent Detail,Next.js 15.5,Vercel,agentanchorai.com,Agent Management,Users,SSR,Live,Agents API,Product,High
+agentanchor,/dashboard/agents/[id]/edit,Dashboard Edit Agent,Next.js 15.5,Vercel,agentanchorai.com,Agent Management,Users,SSR,Live,Agents API,Product,High
+agentanchor,/dashboard/agents/[id]/trust,Dashboard Agent Trust,Next.js 15.5,Vercel,agentanchorai.com,Trust Display,Users,SSR,Live,Trust Engine API,Product,High
+agentanchor,/dashboard/audit,Audit Trail,Next.js 15.5,Vercel,agentanchorai.com,Compliance,Users,SSR,Live,Audit API,Product,High
+agentanchor,/dashboard/circuit-breaker,Circuit Breaker,Next.js 15.5,Vercel,agentanchorai.com,Safety System,Users,SSR,Live,Circuit Breaker API,Product,Critical
+agentanchor,/dashboard/collaboration,Collaboration View,Next.js 15.5,Vercel,agentanchorai.com,Collaboration,Users,SSR,Live,Collaborate API,Product,Medium
+agentanchor,/dashboard/compliance,Compliance Dashboard,Next.js 15.5,Vercel,agentanchorai.com,Compliance,Users,SSR,Live,Compliance API,Product,High
+agentanchor,/dashboard/council,Trust Council,Next.js 15.5,Vercel,agentanchorai.com,Governance,Users,SSR,Live,Council API,Product,High
+agentanchor,/dashboard/council/[validatorId],Validator Detail,Next.js 15.5,Vercel,agentanchorai.com,Governance,Users,SSR,Live,Council API,Product,Medium
+agentanchor,/dashboard/escalations,Escalations,Next.js 15.5,Vercel,agentanchorai.com,Safety System,Users,SSR,Live,Escalations API,Product,High
+agentanchor,/dashboard/governance,Governance,Next.js 15.5,Vercel,agentanchorai.com,Governance,Users,SSR,Live,Governance API,Product,High
+agentanchor,/dashboard/help,Help Center,Next.js 15.5,Vercel,agentanchorai.com,Support,Users,SSR,Live,Static,Product,Medium
+agentanchor,/dashboard/observer,Observer Mode,Next.js 15.5,Vercel,agentanchorai.com,Monitoring,Users,SSR,Live,Observer API,Product,Medium
+agentanchor,/dashboard/sandbox,Sandbox,Next.js 15.5,Vercel,agentanchorai.com,Testing,Users,SSR,Live,Sandbox API,Product,High
+agentanchor,/dashboard/settings,Settings,Next.js 15.5,Vercel,agentanchorai.com,Settings,Users,SSR,Live,Profile API,Product,Medium
+agentanchor,/dashboard/settings/api-keys,API Keys,Next.js 15.5,Vercel,agentanchorai.com,Settings,Developers,SSR,Live,Keys API,Product,High
+agentanchor,/dashboard/settings/notifications,Notifications,Next.js 15.5,Vercel,agentanchorai.com,Settings,Users,SSR,Live,Notifications API,Product,Low
+agentanchor,/dashboard/settings/payouts,Payouts,Next.js 15.5,Vercel,agentanchorai.com,Settings,Users,SSR,Live,Wallet API,Product,Medium
+agentanchor,/dashboard/settings/profile,Profile,Next.js 15.5,Vercel,agentanchorai.com,Settings,Users,SSR,Live,Profile API,Product,Medium
+agentanchor,/dashboard/shadow-training,Shadow Training,Next.js 15.5,Vercel,agentanchorai.com,Training,Users,SSR,Live,Training API,Product,High
+agentanchor,/dashboard/testing-studio,Testing Studio,Next.js 15.5,Vercel,agentanchorai.com,Testing,Developers,SSR,Live,Testing API,Product,High
+agentanchor,/dashboard/trust,Trust Overview,Next.js 15.5,Vercel,agentanchorai.com,Trust Display,Users,SSR,Live,Trust Engine API,Product,Critical
+agentanchor,/dashboard/trust-bridge,Trust Bridge,Next.js 15.5,Vercel,agentanchorai.com,Trust Display,Users,SSR,Live,Trust Bridge API,Product,High
+agentanchor,/dashboard/trust-engine,Trust Engine,Next.js 15.5,Vercel,agentanchorai.com,Trust Core,Users,SSR,Live,Trust Engine API,Product,Critical
+agentanchor,/dashboard/trust-engine/alerts,Trust Alerts,Next.js 15.5,Vercel,agentanchorai.com,Monitoring,Users,SSR,Live,Trust Engine API,Product,High
+agentanchor,/dashboard/trust-engine/audit,Trust Audit,Next.js 15.5,Vercel,agentanchorai.com,Compliance,Users,SSR,Live,Trust Engine API,Product,High
+agentanchor,/dashboard/trust-engine/ceiling,Trust Ceiling,Next.js 15.5,Vercel,agentanchorai.com,Trust Config,Users,SSR,Live,Trust Engine API,Product,High
+agentanchor,/dashboard/trust-engine/context,Trust Context,Next.js 15.5,Vercel,agentanchorai.com,Trust Display,Users,SSR,Live,Trust Engine API,Product,Medium
+agentanchor,/dashboard/trust-engine/presets,Trust Presets,Next.js 15.5,Vercel,agentanchorai.com,Trust Config,Users,SSR,Live,Presets API,Product,Medium
+agentanchor,/dashboard/trust-engine/provenance,Provenance Chain,Next.js 15.5,Vercel,agentanchorai.com,Trust Display,Users,SSR,Live,Trust Engine API,Product,High
+agentanchor,/dashboard/trust-engine/role-gates,Role Gates,Next.js 15.5,Vercel,agentanchorai.com,Access Control,Users,SSR,Live,Trust Engine API,Product,High
+agentanchor,/dashboard/trust-engine/verify,Trust Verify,Next.js 15.5,Vercel,agentanchorai.com,Verification,Users,SSR,Live,Trust Engine API,Product,Critical
+agentanchor,/dashboard/trust-metrics,Trust Metrics,Next.js 15.5,Vercel,agentanchorai.com,Analytics,Users,SSR,Live,Trust Metrics API,Product,High
+agentanchor,/dashboard/truth-chain,Truth Chain,Next.js 15.5,Vercel,agentanchorai.com,Audit Trail,Users,SSR,Live,Truth Chain API,Product,High
+agentanchor,/dashboard/usage,Usage Analytics,Next.js 15.5,Vercel,agentanchorai.com,Analytics,Users,SSR,Live,Usage API,Product,Medium
+agentanchor,/dashboard/welcome,Welcome,Next.js 15.5,Vercel,agentanchorai.com,Onboarding,Users,SSR,Live,Static,Product,Medium
+agentanchor,/docs/api,API Docs,Next.js 15.5,Vercel,agentanchorai.com,Documentation,Developers,SSR,Live,Static,Documentation,High
+agentanchor,/docs/phase6,Phase 6 Docs,Next.js 15.5,Vercel,agentanchorai.com,Documentation,Developers,SSR,Live,Static,Documentation,Medium
+agentanchor,/mcp,MCP Hub,Next.js 15.5,Vercel,agentanchorai.com,Integration,Developers,SSR,Live,MCP API,Product,High
+agentanchor,/mcp/new,Create MCP,Next.js 15.5,Vercel,agentanchorai.com,Integration,Developers,SSR,Live,MCP API,Product,High
+agentanchor,/mcp/[id],MCP Detail,Next.js 15.5,Vercel,agentanchorai.com,Integration,Developers,SSR,Live,MCP API,Product,Medium
+agentanchor,/onboarding/role-selection,Role Selection,Next.js 15.5,Vercel,agentanchorai.com,Onboarding,Users,SSR,Live,Static,Product,High
+agentanchor,/orchestrator,Orchestrator,Next.js 15.5,Vercel,agentanchorai.com,Agent Orchestration,Users,SSR,Live,Orchestrator API,Product,Critical
+agentanchor,/portal/certify,Certify Agent,Next.js 15.5,Vercel,agentanchorai.com,Certification,Users,SSR,Live,Certification API,Product,High
+agentanchor,/portal/mint,Mint Credential,Next.js 15.5,Vercel,agentanchorai.com,Credentials,Users,SSR,Live,Mint API,Product,High
+agentanchor,/status,Platform Status,Next.js 15.5,Vercel,agentanchorai.com,Status,Users,SSR,Live,Health API,Product,Medium
+agentanchor,/teams,Teams,Next.js 15.5,Vercel,agentanchorai.com,Collaboration,Users,SSR,Live,Teams API,Product,Medium
+agentanchor,/teams/new,Create Team,Next.js 15.5,Vercel,agentanchorai.com,Collaboration,Users,SSR,Live,Teams API,Product,Medium
+agentanchor,/teams/[id]/chat,Team Chat,Next.js 15.5,Vercel,agentanchorai.com,Communication,Users,SSR,Live,Chat API,Product,Medium
+agentanchor,/templates,Templates,Next.js 15.5,Vercel,agentanchorai.com,Agent Templates,Users,SSR,Live,Templates API,Product,Medium
+agentanchor,/verify/[hash],Verify Hash,Next.js 15.5,Vercel,agentanchorai.com,Verification,Public,SSR,Live,Verification API,Product,Critical
+agentanchor,/.well-known/agents.json,Agent Card,Next.js 15.5,Vercel,agentanchorai.com,Discovery,Machines,SSR,Live,Static Config,Infrastructure,High
+agentanchor,/.well-known/jwks.json,JWKS,Next.js 15.5,Vercel,agentanchorai.com,Auth,Machines,SSR,Live,Key Store,Infrastructure,Critical
+aurais,/,Aurais Home,Next.js 16.1,Vercel,aurais.net,Landing Page,Public,SSG,Live,None,Marketing,Medium
+aurais,/about,About,Next.js 16.1,Vercel,aurais.net,Info Page,Public,SSG,Live,None,Marketing,Low
+aurais,/blog,Blog,Next.js 16.1,Vercel,aurais.net,Content,Public,SSG,Live,None,Marketing,Medium
+aurais,/careers,Careers,Next.js 16.1,Vercel,aurais.net,Recruiting,Public,SSG,Live,None,Marketing,Low
+aurais,/changelog,Changelog,Next.js 16.1,Vercel,aurais.net,Content,Public,SSG,Live,None,Documentation,Medium
+aurais,/contact,Contact,Next.js 16.1,Vercel,aurais.net,Contact Form,Public,SSG,Live,None,Marketing,Medium
+aurais,/demo,Demo,Next.js 16.1,Vercel,aurais.net,Interactive Demo,Public,SSG,Live,None,Marketing,High
+aurais,/docs,Documentation,Next.js 16.1,Vercel,aurais.net,Documentation,Developers,SSG,Live,None,Documentation,High
+aurais,/features,Features,Next.js 16.1,Vercel,aurais.net,Product Page,Public,SSG,Live,None,Marketing,High
+aurais,/marketplace,Marketplace,Next.js 16.1,Vercel,aurais.net,Marketplace,Public,SSG,Live,None,Marketing,Medium
+aurais,/marketplace/[id],Marketplace Detail,Next.js 16.1,Vercel,aurais.net,Marketplace,Public,SSR,Live,None,Marketing,Medium
+aurais,/pricing,Pricing,Next.js 16.1,Vercel,aurais.net,Product Page,Public,SSG,Live,None,Marketing,High
+aurais,/privacy,Privacy Policy,Next.js 16.1,Vercel,aurais.net,Legal,Public,SSG,Live,None,Legal,Low
+aurais,/security,Security,Next.js 16.1,Vercel,aurais.net,Info Page,Public,SSG,Live,None,Marketing,Medium
+aurais,/terms,Terms of Service,Next.js 16.1,Vercel,aurais.net,Legal,Public,SSG,Live,None,Legal,Low
+aurais,/login,Login,Next.js 16.1,Vercel,aurais.net,Auth Page,Users,SSR,Live,Auth Provider,Product,High
+aurais,/signup,Sign Up,Next.js 16.1,Vercel,aurais.net,Auth Page,Users,SSR,Live,Auth Provider,Product,High
+aurais,/forgot-password,Forgot Password,Next.js 16.1,Vercel,aurais.net,Auth Page,Users,SSR,Live,Auth Provider,Product,Medium
+aurais,/verify-email,Verify Email,Next.js 16.1,Vercel,aurais.net,Auth Page,Users,SSR,Live,Auth Provider,Product,Medium
+aurais,/dashboard,Dashboard,Next.js 16.1,Vercel,aurais.net,Dashboard,Users,SSR,Live,Multiple APIs,Product,High
+aurais,/dashboard/activity,Activity Feed,Next.js 16.1,Vercel,aurais.net,Dashboard,Users,SSR,Live,Activity API,Product,Medium
+aurais,/dashboard/settings,Settings,Next.js 16.1,Vercel,aurais.net,Settings,Users,SSR,Live,Profile API,Product,Medium
+aurais,/dashboard/agents,Agents,Next.js 16.1,Vercel,aurais.net,Agent Management,Users,SSR,Live,Agents API,Product,High
+aurais,/dashboard/agents/new,Create Agent,Next.js 16.1,Vercel,aurais.net,Agent Management,Users,SSR,Live,Agents API,Product,High
+aurais,/dashboard/agents/[id],Agent Detail,Next.js 16.1,Vercel,aurais.net,Agent Management,Users,SSR,Live,Agents API,Product,High
+kaizen,/,Kaizen Home,Next.js 16.1,Vercel,learn.vorion.org,Landing Page,Public,SSG,Live,None,Education,High
+kaizen,/certificates,Certificates,Next.js 16.1,Vercel,learn.vorion.org,Credentials,Users,SSR,Live,Cert API,Education,High
+kaizen,/cortex,Cortex,Next.js 16.1,Vercel,learn.vorion.org,Learning,Users,SSR,Live,Content API,Education,High
+kaizen,/docs,Docs,Next.js 16.1,Vercel,learn.vorion.org,Documentation,Users,SSR,Live,None,Education,Medium
+kaizen,/internal,Internal,Next.js 16.1,Vercel,learn.vorion.org,Admin,Internal,SSR,Live,Internal APIs,Education,Medium
+kaizen,/lexicon,Lexicon Index,Next.js 16.1,Vercel,learn.vorion.org,Reference,Public,SSR,Live,Lexicon DB,Education,High
+kaizen,/lexicon/[slug],Lexicon Entry,Next.js 16.1,Vercel,learn.vorion.org,Reference,Public,SSR,Live,Lexicon DB,Education,High
+kaizen,/neural,Neural,Next.js 16.1,Vercel,learn.vorion.org,Learning,Users,SSR,Live,Content API,Education,Medium
+kaizen,/paths,Learning Paths,Next.js 16.1,Vercel,learn.vorion.org,Learning,Users,SSR,Live,Paths API,Education,Critical
+kaizen,/paths/[slug],Path Detail,Next.js 16.1,Vercel,learn.vorion.org,Learning,Users,SSR,Live,Paths API,Education,Critical
+kaizen,/paths/[slug]/quiz,Path Quiz,Next.js 16.1,Vercel,learn.vorion.org,Assessment,Users,SSR,Live,Quiz API,Education,High
+kaizen,/pitch,Pitch,Next.js 16.1,Vercel,learn.vorion.org,Marketing,Public,SSG,Live,None,Marketing,Medium
+kaizen,/profile,Profile,Next.js 16.1,Vercel,learn.vorion.org,Settings,Users,SSR,Live,Profile API,Education,Medium
+kaizen,/studio,Studio,Next.js 16.1,Vercel,learn.vorion.org,Content Creation,Internal,SSR,Live,Studio API,Education,High
+vorion-admin,/,Admin Home,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Multiple APIs,Operations,High
+vorion-admin,/dashboard,Admin Dashboard,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Multiple APIs,Operations,High
+vorion-admin,/dashboard/agents,Manage Agents,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Agents API,Operations,High
+vorion-admin,/dashboard/api-keys,API Key Management,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Keys API,Operations,High
+vorion-admin,/dashboard/audit-logs,Audit Logs,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Audit API,Operations,High
+vorion-admin,/dashboard/monitoring,Monitoring,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Health APIs,Operations,Critical
+vorion-admin,/dashboard/organizations,Organizations,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Org API,Operations,Medium
+vorion-admin,/dashboard/security,Security,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Security API,Operations,Critical
+vorion-admin,/dashboard/settings,Admin Settings,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Config API,Operations,Medium
+vorion-admin,/dashboard/users,User Management,Next.js 16.1,Vercel,N/A,Admin Panel,Internal,SSR,Live,Users API,Operations,High
+cognigate-api,POST /v1/agents,Register Agent,Fastify 5.0,Fly.io,cognigate.dev,REST API,Machines,SSR,Degraded,Database,API,Critical
+cognigate-api,GET /v1/agents/:id,Get Agent,Fastify 5.0,Fly.io,cognigate.dev,REST API,Machines,SSR,Degraded,Database,API,Critical
+cognigate-api,GET /v1/agents/:id/trust,Agent Trust Score,Fastify 5.0,Fly.io,cognigate.dev,REST API,Machines,SSR,Degraded,Trust Engine,API,Critical
+cognigate-api,POST /v1/intents,Submit Intent,Fastify 5.0,Fly.io,cognigate.dev,REST API,Machines,SSR,Degraded,Intent Engine,API,Critical
+cognigate-api,POST /v1/verify,Verify Proof,Fastify 5.0,Fly.io,cognigate.dev,REST API,Machines,SSR,Degraded,Proof Engine,API,Critical
+cognigate-api,GET /v1/chain/:hash,Chain Lookup,Fastify 5.0,Fly.io,cognigate.dev,REST API,Machines,SSR,Degraded,Chain Store,API,High
+cognigate-api,GET /health,Health Check,Fastify 5.0,Fly.io,cognigate.dev,REST API,Machines,SSR,Degraded,Self,API,Critical
+api,sentinel:audit,Security Audit,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,Codebase Scan,API,Medium
+api,scribe:map,Codebase Map,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,Codebase Scan,API,Medium
+api,curator:scan,Dependency Scan,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,npm Registry,API,Medium
+api,watchman:monitor,Monitor,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,Service Health,API,Medium
+api,librarian:index,Index Content,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,Codebase Scan,API,Medium
+api,envoy:plan,Plan Generation,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,AI Engine,API,Medium
+api,envoy:draft,Draft Content,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,AI Engine,API,Medium
+api,council:list,List Proposals,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,Council DB,API,Medium
+api,council:submit,Submit Proposal,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,Council DB,API,Medium
+api,herald:run,Herald Runner,Fastify 5.7,Self-hosted,N/A,Agent Command,Internal,SSR,Not deployed,Multi-source,API,Medium
+basis-docs,/,BASIS Overview,Docusaurus 3.9,Vercel,basis.vorion.org,Documentation,Public,SSG,Live,None,Documentation,Critical
+basis-docs,/layers/car,CAR Layer,Docusaurus 3.9,Vercel,basis.vorion.org,Specification,Public,SSG,Live,None,Documentation,Critical
+basis-docs,/layers/intent,INTENT Layer,Docusaurus 3.9,Vercel,basis.vorion.org,Specification,Public,SSG,Live,None,Documentation,Critical
+basis-docs,/layers/enforce,ENFORCE Layer,Docusaurus 3.9,Vercel,basis.vorion.org,Specification,Public,SSG,Live,None,Documentation,Critical
+basis-docs,/layers/proof,PROOF Layer,Docusaurus 3.9,Vercel,basis.vorion.org,Specification,Public,SSG,Live,None,Documentation,Critical
+basis-docs,/layers/chain,CHAIN Layer,Docusaurus 3.9,Vercel,basis.vorion.org,Specification,Public,SSG,Live,None,Documentation,Critical
+basis-docs,/cognigate,Cognigate Docs,Docusaurus 3.9,Vercel,basis.vorion.org,Product Docs,Public,SSG,Live,None,Documentation,High
+basis-docs,/agentanchor,AgentAnchor Docs,Docusaurus 3.9,Vercel,basis.vorion.org,Product Docs,Public,SSG,Live,None,Documentation,High
+basis-docs,/community,Community,Docusaurus 3.9,Vercel,basis.vorion.org,Community,Public,SSG,Live,None,Community,High
+basis-docs,/blog,Blog,Docusaurus 3.9,Vercel,basis.vorion.org,Content,Public,SSG,Live,None,Marketing,Medium
+aci-docs,/,ACI Overview,Docusaurus 3.9,Vercel,aci.vorion.org,Documentation,Public,SSG,Live,None,Documentation,High
+aci-docs,/vocabulary,ACI Vocabulary,Docusaurus 3.9,Vercel,aci.vorion.org,Specification,Public,SSG,Live,None,Documentation,High
+aci-docs,/guides/quickstart,ACI Quickstart,Docusaurus 3.9,Vercel,aci.vorion.org,Guide,Developers,SSG,Live,None,Documentation,High
+aci-docs,/guides/integration,ACI Integration,Docusaurus 3.9,Vercel,aci.vorion.org,Guide,Developers,SSG,Live,None,Documentation,High
+aci-docs,/guides/framework-analysis,Framework Analysis,Docusaurus 3.9,Vercel,aci.vorion.org,Guide,Developers,SSG,Live,None,Documentation,Medium
+aci-docs,/security/hardening,Security Hardening,Docusaurus 3.9,Vercel,aci.vorion.org,Security,Developers,SSG,Live,None,Documentation,High
+aci-docs,/security/owasp-cheatsheet,OWASP Cheatsheet,Docusaurus 3.9,Vercel,aci.vorion.org,Security,Developers,SSG,Live,None,Documentation,High
+aci-docs,/security/semantic-governance,Semantic Governance,Docusaurus 3.9,Vercel,aci.vorion.org,Security,Developers,SSG,Live,None,Documentation,High
+aci-docs,/specs/core,ACI Core Spec,Docusaurus 3.9,Vercel,aci.vorion.org,Specification,Developers,SSG,Live,None,Documentation,Critical
+aci-docs,/specs/did-method,DID Method,Docusaurus 3.9,Vercel,aci.vorion.org,Specification,Developers,SSG,Live,None,Documentation,Critical
+aci-docs,/specs/extensions,ACI Extensions,Docusaurus 3.9,Vercel,aci.vorion.org,Specification,Developers,SSG,Live,None,Documentation,High
+aci-docs,/specs/openid-claims,OpenID Claims,Docusaurus 3.9,Vercel,aci.vorion.org,Specification,Developers,SSG,Live,None,Documentation,High
+aci-docs,/specs/registry-api,Registry API,Docusaurus 3.9,Vercel,aci.vorion.org,Specification,Developers,SSG,Live,None,Documentation,High

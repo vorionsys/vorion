@@ -1,0 +1,116 @@
+---
+interface Props {
+  name: string;
+  url: string;
+  state: string;
+  createdAt: string;
+  buildDurationMs: number | null;
+  commitMessage?: string;
+  commitSha?: string;
+}
+
+const { name, url, state, createdAt, buildDurationMs, commitMessage, commitSha } = Astro.props;
+
+const stateConfig: Record<string, { color: string; bgColor: string; dotColor: string }> = {
+  READY: { color: 'text-emerald-400', bgColor: 'bg-emerald-500/10 border-emerald-500/20', dotColor: 'bg-emerald-500' },
+  ERROR: { color: 'text-red-400', bgColor: 'bg-red-500/10 border-red-500/20', dotColor: 'bg-red-500' },
+  BUILDING: { color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20', dotColor: 'bg-amber-500' },
+  QUEUED: { color: 'text-slate-400', bgColor: 'bg-slate-500/10 border-slate-500/20', dotColor: 'bg-slate-500' },
+  CANCELED: { color: 'text-slate-400', bgColor: 'bg-slate-500/10 border-slate-500/20', dotColor: 'bg-slate-500' },
+};
+
+const config = stateConfig[state] || stateConfig.QUEUED;
+
+function formatRelativeTime(dateStr: string): string {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return 'just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHour < 24) return `${diffHour}h ago`;
+  if (diffDay < 30) return `${diffDay}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatBuildDuration(ms: number | null): string {
+  if (ms === null) return '--';
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const min = Math.floor(seconds / 60);
+  const sec = seconds % 60;
+  return sec > 0 ? `${min}m ${sec}s` : `${min}m`;
+}
+
+const truncatedCommit = commitMessage
+  ? commitMessage.length > 60
+    ? commitMessage.slice(0, 60) + '...'
+    : commitMessage
+  : null;
+
+const shortSha = commitSha ? commitSha.slice(0, 7) : null;
+const relativeTime = formatRelativeTime(createdAt);
+const buildDuration = formatBuildDuration(buildDurationMs);
+---
+
+<div class="flex flex-col gap-2 py-3 px-4 rounded-lg hover:bg-slate-800/50 transition-colors border-b border-slate-800/50 last:border-0">
+  <!-- Top row: project name, state badge, time -->
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <span class="font-semibold text-sm text-white truncate">{name}</span>
+      <span
+        class:list={[
+          'inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border',
+          config.bgColor,
+          config.color,
+        ]}
+      >
+        <span class:list={['w-1.5 h-1.5 rounded-full', config.dotColor, state === 'BUILDING' && 'animate-pulse']} />
+        {state}
+      </span>
+    </div>
+    <span class="text-xs text-slate-500 whitespace-nowrap" title={createdAt}>
+      {relativeTime}
+    </span>
+  </div>
+
+  <!-- Bottom row: URL, commit, build duration -->
+  <div class="flex items-center gap-4 text-xs text-slate-400">
+    <!-- Deployment URL -->
+    <a
+      href={url.startsWith('http') ? url : `https://${url}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="truncate hover:text-vorion-400 transition-colors max-w-[200px]"
+      title={url}
+    >
+      {url.replace('https://', '')}
+    </a>
+
+    <!-- Build duration -->
+    <span class="inline-flex items-center gap-1 text-slate-500 whitespace-nowrap">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      {buildDuration}
+    </span>
+
+    <!-- Commit info -->
+    {(shortSha || truncatedCommit) && (
+      <div class="flex items-center gap-2 min-w-0 ml-auto">
+        {shortSha && (
+          <span class="font-mono text-slate-500 flex-shrink-0">{shortSha}</span>
+        )}
+        {truncatedCommit && (
+          <span class="text-slate-500 truncate hidden sm:inline" title={commitMessage}>
+            {truncatedCommit}
+          </span>
+        )}
+      </div>
+    )}
+  </div>
+</div>

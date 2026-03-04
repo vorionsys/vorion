@@ -1,0 +1,231 @@
+---
+# Vorion Helm Chart - Production Values
+# Production-specific overrides for the Vorion chart.
+# Use: helm install vorion ./vorion -f values.yaml -f values-production.yaml
+
+# Higher replica count for production
+replicaCount: 5
+
+# Use specific image tag (not latest)
+image:
+  repository: vorion/api
+  pullPolicy: IfNotPresent
+  tag: "1.0.0"  # Pin to specific version
+
+# Production pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/path: "/metrics"
+  # DataDog annotations (if using)
+  # ad.datadoghq.com/vorion-api.logs: '[{"source": "nodejs", "service": "vorion-api"}]'
+
+# Production resource limits
+resources:
+  limits:
+    cpu: "2"
+    memory: 2Gi
+    ephemeral-storage: 200Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+    ephemeral-storage: 100Mi
+
+# Production autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 5
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 6
+          periodSeconds: 30
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 120
+        - type: Percent
+          value: 10
+          periodSeconds: 120
+
+# Production PDB
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 3
+
+# Production ingress
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/limit-rps: "200"
+    nginx.ingress.kubernetes.io/limit-connections: "100"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # External DNS annotations
+    external-dns.alpha.kubernetes.io/hostname: api.vorion.com
+  hosts:
+    - host: api.vorion.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: vorion-api-tls-prod
+      hosts:
+        - api.vorion.com
+
+# Production affinity (require pod anti-affinity)
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: vorion
+            app.kubernetes.io/component: api
+        topologyKey: kubernetes.io/hostname
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: vorion
+              app.kubernetes.io/component: api
+          topologyKey: topology.kubernetes.io/zone
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node.kubernetes.io/instance-type
+              operator: In
+              values:
+                - m5.xlarge
+                - m5.2xlarge
+                - m5.4xlarge
+                - m6i.xlarge
+                - m6i.2xlarge
+                - m6i.4xlarge
+
+# Production topology spread (strict)
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: vorion
+  - maxSkew: 2
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: vorion
+
+# Production environment
+env:
+  NODE_ENV: production
+  LOG_LEVEL: warn
+  LOG_FORMAT: json
+  PORT: "3000"
+  METRICS_PORT: "9090"
+  # Performance tuning
+  UV_THREADPOOL_SIZE: "8"
+  NODE_OPTIONS: "--max-old-space-size=1536"
+
+# Production config
+config:
+  database:
+    host: vorion-postgresql-primary.vorion.svc.cluster.local
+    port: "5432"
+    name: vorion_production
+    sslMode: verify-full
+    poolMin: "10"
+    poolMax: "50"
+
+  redis:
+    host: vorion-redis-master.vorion.svc.cluster.local
+    port: "6379"
+    db: "0"
+    keyPrefix: "vorion:prod:"
+
+  api:
+    version: v1
+    prefix: /api
+    requestTimeout: "30000"
+    bodySizeLimit: 10mb
+
+  rateLimit:
+    windowMs: "60000"
+    maxRequests: "500"
+
+# Use external secrets in production
+secrets:
+  create: false
+  existingSecret: vorion-secrets-production
+
+# Production network policies (stricter)
+networkPolicy:
+  enabled: true
+  ingressNamespaceSelector:
+    kubernetes.io/metadata.name: ingress-nginx
+    environment: production
+  prometheusNamespace: monitoring
+
+# Node selector for production workloads
+nodeSelector:
+  workload-type: production
+  node-pool: vorion
+
+# Tolerations for dedicated nodes
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "vorion"
+    effect: "NoSchedule"
+
+# Priority class
+priorityClassName: high-priority
+
+# Production probes (more aggressive)
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+
+startupProbe:
+  httpGet:
+    path: /health/live
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 3
+  timeoutSeconds: 3
+  failureThreshold: 60
+  successThreshold: 1

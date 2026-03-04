@@ -35,6 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ESM and CJS dual-format builds via tsup
 - Full TypeScript type exports
 
-[1.0.2]: https://github.com/vorionsys/vorion/compare/shared-constants-v1.0.1...shared-constants-v1.0.2
-[1.0.1]: https://github.com/vorionsys/vorion/compare/shared-constants-v1.0.0...shared-constants-v1.0.1
-[1.0.0]: https://github.com/vorionsys/vorion/releases/tag/shared-constants-v1.0.0
+[1.0.2]: https://github.com/voriongit/vorion/compare/shared-constants-v1.0.1...shared-constants-v1.0.2
+[1.0.1]: https://github.com/voriongit/vorion/compare/shared-constants-v1.0.0...shared-constants-v1.0.1
+[1.0.0]: https://github.com/voriongit/vorion/releases/tag/shared-constants-v1.0.0

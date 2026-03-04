@@ -1,0 +1,59 @@
+---
+import StatusBadge from './StatusBadge.astro';
+import LatencyBar from './LatencyBar.astro';
+import SslBadge from './SslBadge.astro';
+
+interface Props {
+  domain: string;
+  label: string;
+  status: 'up' | 'down' | 'degraded';
+  statusCode: number | null;
+  responseTimeMs: number;
+  sslDaysRemaining: number | null;
+}
+
+const { domain, label, status, statusCode, responseTimeMs, sslDaysRemaining } = Astro.props;
+
+function getStatusCodeColor(code: number | null): string {
+  if (code === null) return 'text-slate-500';
+  if (code >= 200 && code < 300) return 'text-emerald-400';
+  if (code >= 300 && code < 400) return 'text-blue-400';
+  if (code >= 400 && code < 500) return 'text-amber-400';
+  if (code >= 500) return 'text-red-400';
+  return 'text-slate-500';
+}
+
+const statusCodeColor = getStatusCodeColor(statusCode);
+---
+
+<div class="grid grid-cols-12 gap-4 items-center py-3 px-4 rounded-lg hover:bg-slate-800/50 transition-colors border-b border-slate-800/50 last:border-0">
+  <!-- Domain name & label -->
+  <div class="col-span-4 sm:col-span-3 min-w-0">
+    <div class="font-mono text-sm text-white truncate" title={domain}>
+      {domain}
+    </div>
+    <div class="text-xs text-slate-500 truncate">{label}</div>
+  </div>
+
+  <!-- Status badge -->
+  <div class="col-span-2 sm:col-span-2">
+    <StatusBadge status={status} size="md" />
+  </div>
+
+  <!-- Status code -->
+  <div class="col-span-1 sm:col-span-1">
+    <span class:list={['font-mono text-sm font-medium', statusCodeColor]}>
+      {statusCode !== null ? statusCode : '--'}
+    </span>
+  </div>
+
+  <!-- Latency bar -->
+  <div class="col-span-3 sm:col-span-4">
+    <LatencyBar ms={responseTimeMs} />
+  </div>
+
+  <!-- SSL badge -->
+  <div class="col-span-2 sm:col-span-2 flex justify-end">
+    <SslBadge daysRemaining={sslDaysRemaining} />
+  </div>
+</div>

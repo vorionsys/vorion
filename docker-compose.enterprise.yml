@@ -1,0 +1,267 @@
+# Vorion Enterprise Deployment
+# High-availability configuration with replicas
+#
+# Features:
+# - Multiple API replicas behind a load balancer
+# - Redis Sentinel for Redis HA
+# - PostgreSQL with replication (requires external setup)
+# - Horizontal scaling support
+#
+# Usage:
+#   docker compose -f docker-compose.enterprise.yml up -d --scale vorion=3
+#   docker compose -f docker-compose.enterprise.yml logs -f
+#
+# Access:
+#   API: http://localhost:3000 (through traefik)
+#   Metrics: http://localhost:9090/metrics
+#   Traefik Dashboard: http://localhost:8080/dashboard/
+
+services:
+  # ==========================================================================
+  # Traefik Load Balancer
+  # ==========================================================================
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--metrics.prometheus=true"
+      - "--accesslog=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - vorion-network
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Vorion API (Replicated)
+  # ==========================================================================
+  vorion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # Deployment mode
+      - VORION_ENV=production
+      - VORION_LITE_MODE=false
+
+      # Secrets (from environment or secrets manager)
+      - VORION_JWT_SECRET=${VORION_JWT_SECRET:?JWT secret is required}
+      - VORION_ENCRYPTION_KEY=${VORION_ENCRYPTION_KEY:?Encryption key is required}
+      - VORION_ENCRYPTION_SALT=${VORION_ENCRYPTION_SALT:?Encryption salt is required}
+      - VORION_DEDUPE_SECRET=${VORION_DEDUPE_SECRET:?Dedupe secret is required}
+      - VORION_CSRF_SECRET=${VORION_CSRF_SECRET:?CSRF secret is required}
+
+      # Database connection (use external managed DB in production)
+      - VORION_DB_HOST=${VORION_DB_HOST:-postgres}
+      - VORION_DB_PORT=${VORION_DB_PORT:-5432}
+      - VORION_DB_NAME=${VORION_DB_NAME:-vorion}
+      - VORION_DB_USER=${VORION_DB_USER:-vorion}
+      - VORION_DB_PASSWORD=${VORION_DB_PASSWORD:?Database password is required}
+      - VORION_DB_POOL_MIN=5
+      - VORION_DB_POOL_MAX=20
+
+      # Redis connection (use Redis Sentinel for HA)
+      - VORION_REDIS_HOST=${VORION_REDIS_HOST:-redis}
+      - VORION_REDIS_PORT=${VORION_REDIS_PORT:-6379}
+      - VORION_REDIS_PASSWORD=${VORION_REDIS_PASSWORD:-}
+
+      # API configuration
+      - VORION_API_HOST=0.0.0.0
+      - VORION_API_PORT=3000
+
+      # Logging
+      - VORION_LOG_LEVEL=${VORION_LOG_LEVEL:-info}
+
+      # Telemetry
+      - VORION_TELEMETRY_ENABLED=true
+      - VORION_OTLP_ENDPOINT=${VORION_OTLP_ENDPOINT:-http://otel-collector:4318/v1/traces}
+      - VORION_TELEMETRY_SAMPLE_RATE=${VORION_TELEMETRY_SAMPLE_RATE:-0.1}
+
+      # Leader election for scheduled tasks (only one instance runs cron jobs)
+      - VORION_LEADER_ELECTION_ENABLED=true
+    volumes:
+      - vorion-data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # Use readiness endpoint which includes queue health status
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:3000/health/ready"]
+      interval: 15s
+      timeout: 10s
+      start_period: 45s
+      retries: 3
+    # Allow 45 seconds for graceful shutdown (HTTP drain + job drain + cleanup)
+    stop_grace_period: 45s
+    # Send SIGTERM for graceful shutdown
+    stop_signal: SIGTERM
+    restart: unless-stopped
+    networks:
+      - vorion-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vorion.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.vorion.entrypoints=web"
+      - "traefik.http.services.vorion.loadbalancer.server.port=3000"
+      - "traefik.http.services.vorion.loadbalancer.healthcheck.path=/health/live"
+      - "traefik.http.services.vorion.loadbalancer.healthcheck.interval=10s"
+    deploy:
+      mode: replicated
+      replicas: 3
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+
+  # ==========================================================================
+  # PostgreSQL Database (for development - use managed DB in production)
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${VORION_DB_USER:-vorion}
+      - POSTGRES_PASSWORD=${VORION_DB_PASSWORD:-vorion_enterprise_password}
+      - POSTGRES_DB=${VORION_DB_NAME:-vorion}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vorion -d vorion"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - vorion-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    profiles:
+      - with-db
+
+  # ==========================================================================
+  # Redis (for development - use Redis Sentinel/Cluster in production)
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${VORION_REDIS_PASSWORD:-}
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - vorion-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    profiles:
+      - with-redis
+
+  # ==========================================================================
+  # OpenTelemetry Collector (optional)
+  # ==========================================================================
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./deploy/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # Prometheus metrics
+    networks:
+      - vorion-network
+    profiles:
+      - observability
+
+  # ==========================================================================
+  # Prometheus (optional)
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9091:9090"
+    networks:
+      - vorion-network
+    profiles:
+      - observability
+
+  # ==========================================================================
+  # Grafana (optional)
+  # ==========================================================================
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - vorion-network
+    profiles:
+      - observability
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  vorion-network:
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  vorion-data:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

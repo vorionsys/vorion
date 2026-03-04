@@ -1,0 +1,70 @@
+{
+  "type": "typescript",
+  "timestamp": "2026-02-03T16:44:23.989246",
+  "structure": {
+    "package.json": true,
+    "tsconfig.json": true,
+    "src directory": true,
+    "tests directory": true,
+    "README.md": true,
+    "eslint config": false,
+    "prettier config": false,
+    "CI/CD config": true
+  },
+  "gaps": [
+    "eslint config",
+    "prettier config"
+  ],
+  "dependencies": {
+    "production": 40,
+    "dev": 22,
+    "scripts": {
+      "dev": "tsx watch src/index.ts",
+      "build": "npm run copy-swagger-assets && tsc && tsc-alias",
+      "start": "node dist/index.js",
+      "cli": "tsx src/cli/index.ts",
+      "test": "vitest",
+      "test:unit": "vitest run --dir tests/unit",
+      "test:integration": "vitest run --dir tests/integration",
+      "test:e2e": "vitest run --dir tests/e2e",
+      "test:coverage": "vitest run --coverage",
+      "lint": "eslint src --ext .ts,.tsx",
+      "lint:fix": "eslint src --ext .ts,.tsx --fix",
+      "format": "prettier --write \"src/**/*.ts\"",
+      "format:check": "prettier --check \"src/**/*.ts\"",
+      "typecheck": "tsc --noEmit",
+      "clean": "rm -rf dist coverage",
+      "verify-setup": "tsx scripts/verify-setup.ts",
+      "db:migrate": "node scripts/migrate.mjs",
+      "db:seed": "tsx scripts/seed.ts",
+      "docs:api": "typedoc --out docs/api src/index.ts",
+      "copy-swagger-assets": "mkdir -p public/swagger && cp node_modules/swagger-ui-dist/swagger-ui.css public/swagger/ && cp node_modules/swagger-ui-dist/swagger-ui-bundle.js public/swagger/ && cp node_modules/swagger-ui-dist/swagger-ui-standalone-preset.js public/swagger/",
+      "generate-swagger-sri": "tsx scripts/generate-swagger-sri.ts",
+      "security:audit": "npm audit --audit-level=high"
+    }
+  },
+  "test_coverage": {
+    "frameworks": {
+      "jest": false,
+      "vitest": true,
+      "mocha": false
+    }
+  },
+  "compliance_status": {
+    "security": {
+      "npm_audit": true,
+      "snyk": false,
+      "secrets_detection": false
+    },
+    "code_quality": {
+      "eslint": true,
+      "prettier": true,
+      "typescript_strict": true,
+      "husky_hooks": false
+    },
+    "documentation": {
+      "jsdoc": true,
+      "typedoc": true
+    }
+  }
+}

@@ -118,7 +118,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vorionsys/vorion.git",
+    "url": "git+https://github.com/voriongit/vorion.git",
     "directory": "packages/contracts"
   },
   "homepage": "https://vorion.org",

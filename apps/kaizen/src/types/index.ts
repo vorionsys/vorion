@@ -225,13 +225,3 @@ export interface DocPage {
   meta: DocMeta;
   content: string;
 }
-
-// Firebase Types
-export interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-}

@@ -1,0 +1,24 @@
+security:
+  label: Security
+  permalink: /security
+  description: Security-related posts covering threats, mitigations, and best practices
+
+owasp:
+  label: OWASP
+  permalink: /owasp
+  description: OWASP standards and mappings for AI agent security
+
+basis:
+  label: BASIS
+  permalink: /basis
+  description: Posts about the BASIS open standard for AI agent governance
+
+governance:
+  label: Governance
+  permalink: /governance
+  description: AI agent governance patterns, policies, and frameworks
+
+agentic-ai:
+  label: Agentic AI
+  permalink: /agentic-ai
+  description: Topics related to autonomous AI agent systems

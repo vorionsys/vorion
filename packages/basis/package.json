@@ -63,7 +63,7 @@
   "author": "Vorion <team@vorion.org>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vorionsys/vorion.git",
+    "url": "git+https://github.com/voriongit/vorion.git",
     "directory": "packages/basis"
   },
   "homepage": "https://vorion.org",

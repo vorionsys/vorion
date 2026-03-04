@@ -1,0 +1,821 @@
+{
+  "plan-of-action-and-milestones": {
+    "uuid": "a7c3e9f1-4b2d-48e6-9f1a-3c5d7e8b0a12",
+    "metadata": {
+      "title": "Vorion Cognigate Plan of Action and Milestones",
+      "last-modified": "2026-02-20T00:00:00.000Z",
+      "version": "1.1.0",
+      "oscal-version": "1.1.2",
+      "roles": [
+        {
+          "id": "prepared-by",
+          "title": "Prepared By",
+          "description": "Individual or organization responsible for preparing the POA&M."
+        },
+        {
+          "id": "responsible-party",
+          "title": "Responsible Party",
+          "description": "Individual or organization responsible for remediating the POA&M item."
+        }
+      ],
+      "parties": [
+        {
+          "uuid": "15874bdf-72f9-47ba-8376-7d514e3f6bfd",
+          "type": "organization",
+          "name": "Vorion, Inc.",
+          "short-name": "Vorion",
+          "links": [
+            {
+              "href": "https://vorion.org",
+              "rel": "homepage"
+            }
+          ],
+          "email-addresses": [
+            "security@vorion.org"
+          ],
+          "remarks": "Developer and operator of the Cognigate AI governance engine and the BASIS open governance standard."
+        }
+      ],
+      "responsible-parties": [
+        {
+          "role-id": "prepared-by",
+          "party-uuids": [
+            "15874bdf-72f9-47ba-8376-7d514e3f6bfd"
+          ]
+        },
+        {
+          "role-id": "responsible-party",
+          "party-uuids": [
+            "15874bdf-72f9-47ba-8376-7d514e3f6bfd"
+          ]
+        }
+      ]
+    },
+    "import-ssp": {
+      "href": "./ssp-draft.json"
+    },
+    "risks": [
+      {
+        "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "title": "Privileged Account Compromise Without MFA",
+        "description": "Without multi-factor authentication for privileged accounts, a compromised API key could grant full administrative access to the Cognigate governance engine without a second authentication factor, potentially allowing unauthorized modification of policies, trust tiers, or PROOF ledger configuration.",
+        "statement": "Without multi-factor authentication for privileged accounts, a compromised API key could grant full administrative access to the Cognigate governance engine without a second authentication factor, potentially allowing unauthorized modification of policies, trust tiers, or PROOF ledger configuration.",
+        "status": "open"
+      },
+      {
+        "uuid": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "title": "Non-Privileged Account Compromise Without MFA",
+        "description": "Without multi-factor authentication for non-privileged accounts, compromised agent credentials could be used to submit intents and interact with the governance engine without a second authentication factor, relying solely on compensating controls for risk mitigation.",
+        "statement": "Without multi-factor authentication for non-privileged accounts, compromised agent credentials could be used to submit intents and interact with the governance engine without a second authentication factor, relying solely on compensating controls for risk mitigation.",
+        "status": "open"
+      },
+      {
+        "uuid": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+        "title": "Lack of OIDC Delegation for Human Dashboard",
+        "description": "Without OIDC delegation for the human dashboard, human operators cannot leverage their organization's identity provider for authentication, requiring separate credential management and preventing integration with enterprise SSO and password policy enforcement.",
+        "statement": "Without OIDC delegation for the human dashboard, human operators cannot leverage their organization's identity provider for authentication, requiring separate credential management and preventing integration with enterprise SSO and password policy enforcement.",
+        "status": "open"
+      },
+      {
+        "uuid": "d4e5f6a7-b8c9-0123-defa-234567890123",
+        "title": "Limited External Credential Federation",
+        "description": "Without SAML/OIDC federation, external organizations cannot use their existing identity infrastructure to authenticate with Cognigate, limiting interoperability and requiring custom Ed25519 key management for cross-organizational credential acceptance.",
+        "statement": "Without SAML/OIDC federation, external organizations cannot use their existing identity infrastructure to authenticate with Cognigate, limiting interoperability and requiring custom Ed25519 key management for cross-organizational credential acceptance.",
+        "status": "open"
+      },
+      {
+        "uuid": "e5f6a7b8-c9d0-1234-efab-345678901234",
+        "title": "Limited External Authenticator Support",
+        "description": "Without support for JWT, OIDC, and FIDO2 authenticators, Cognigate cannot accept the full range of industry-standard authentication mechanisms, limiting integration options for consumer organizations and potentially excluding environments that require hardware-backed authentication assurance.",
+        "statement": "Without support for JWT, OIDC, and FIDO2 authenticators, Cognigate cannot accept the full range of industry-standard authentication mechanisms, limiting integration options for consumer organizations and potentially excluding environments that require hardware-backed authentication assurance.",
+        "status": "open"
+      },
+      {
+        "uuid": "b1a2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6",
+        "title": "Absence of Formal Security Authorization",
+        "description": "Without formal security authorization, the system operates without an explicit risk acceptance decision by a designated authorizing official, which may not satisfy FedRAMP or agency-specific authorization requirements.",
+        "statement": "Without formal security authorization, the system operates without an explicit risk acceptance decision by a designated authorizing official, which may not satisfy FedRAMP or agency-specific authorization requirements.",
+        "status": "open"
+      },
+      {
+        "uuid": "c2b3d4e5-f6a7-8b9c-0d1e-f2a3b4c5d6e7",
+        "title": "Telecommunications Service Disruption Risk",
+        "description": "Without alternate telecommunications services, a primary network service disruption could render Cognigate unreachable, preventing AI agent governance enforcement and leaving agents operating without policy evaluation, trust scoring, or proof recording.",
+        "statement": "Without alternate telecommunications services, a primary network service disruption could render Cognigate unreachable, preventing AI agent governance enforcement and leaving agents operating without policy evaluation, trust scoring, or proof recording.",
+        "status": "open"
+      },
+      {
+        "uuid": "d3c4e5f6-a7b8-9c0d-1e2f-a3b4c5d6e7f8",
+        "title": "Lack of Formalized Authorization Process",
+        "description": "Without a formalized authorization process at the program management level, there is no standardized mechanism for authorizing Cognigate or systems that inherit its controls, potentially creating inconsistent risk acceptance across the organization.",
+        "statement": "Without a formalized authorization process at the program management level, there is no standardized mechanism for authorizing Cognigate or systems that inherit its controls, potentially creating inconsistent risk acceptance across the organization.",
+        "status": "open"
+      },
+      {
+        "uuid": "e4d5f6a7-b8c9-0d1e-2f3a-b4c5d6e7f8a9",
+        "title": "Insufficient Supplier Security Assessment",
+        "description": "Without formal supplier assessments, compromised or insecure third-party components could be integrated into Cognigate without adequate security evaluation, potentially introducing vulnerabilities into the governance engine that AI agents rely on for policy enforcement.",
+        "statement": "Without formal supplier assessments, compromised or insecure third-party components could be integrated into Cognigate without adequate security evaluation, potentially introducing vulnerabilities into the governance engine that AI agents rely on for policy enforcement.",
+        "status": "open"
+      },
+      {
+        "uuid": "f5e6a7b8-c9d0-1e2f-3a4b-c5d6e7f8a9b0",
+        "title": "Component Tampering Detection Gap",
+        "description": "Without formal inspection of systems and components, tampered or counterfeit components could be deployed into the Cognigate production environment without detection, potentially compromising the integrity of the governance engine, the PROOF ledger, or the trust scoring system.",
+        "statement": "Without formal inspection of systems and components, tampered or counterfeit components could be deployed into the Cognigate production environment without detection, potentially compromising the integrity of the governance engine, the PROOF ledger, or the trust scoring system.",
+        "status": "open"
+      },
+      {
+        "uuid": "f6a7b8c9-d0e1-2345-fabc-456789012345",
+        "title": "Manual Training Record Management",
+        "description": "Without automated training record tracking in the system component, training compliance verification requires manual processes and cannot leverage the Cognigate PROOF ledger for immutable training completion attestation.",
+        "statement": "Without automated training record tracking in the system component, training compliance verification requires manual processes and cannot leverage the Cognigate PROOF ledger for immutable training completion attestation.",
+        "status": "open"
+      }
+    ],
+    "poam-items": [
+      {
+        "uuid": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+        "title": "Implement IA-2(1) Multi-Factor Authentication for Privileged Accounts",
+        "description": "Cognigate does not yet enforce multi-factor authentication for privileged account access as required by NIST SP 800-53 IA-2(1). Currently, privileged accounts use 256-bit entropy API keys with rate limiting and circuit breaker protections as compensating controls. Full MFA implementation using TOTP (Time-based One-Time Password) is required for all privileged administrative access to the Cognigate platform.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-001"
+          },
+          {
+            "name": "risk-level",
+            "value": "high"
+          },
+          {
+            "name": "priority",
+            "value": "P1"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0001-4001-8001-000000000001",
+            "title": "TOTP library integration and admin MFA enrollment flow designed",
+            "schedule": {
+              "task-date": {
+                "date": "2026-04-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Select and integrate TOTP library; design enrollment UI/API for admin accounts."
+          },
+          {
+            "uuid": "a1010101-0001-4001-8001-000000000002",
+            "title": "MFA enforcement implemented for all admin API endpoints",
+            "schedule": {
+              "task-date": {
+                "date": "2026-05-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Enforce TOTP verification on X-Admin-Key authenticated endpoints; record MFA events in PROOF ledger."
+          },
+          {
+            "uuid": "a1010101-0001-4001-8001-000000000003",
+            "title": "MFA for privileged accounts fully operational and tested",
+            "schedule": {
+              "task-date": {
+                "date": "2026-06-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete integration testing, security review, and documentation. All privileged accounts require MFA."
+          }
+        ],
+        "remarks": "Target: Q2 2026. Control ID: IA-2(1). Remediation involves implementing TOTP-based multi-factor authentication for all privileged administrative accounts, integrating MFA verification into the existing API key authentication flow, and recording MFA events in the PROOF ledger. Compensating controls currently in place: 256-bit entropy keys, rate limiting, circuit breaker."
+      },
+      {
+        "uuid": "d2e3f4a5-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+        "title": "Implement IA-2(2) Multi-Factor Authentication for Non-Privileged Accounts",
+        "description": "Cognigate does not yet enforce multi-factor authentication for non-privileged account access as required by NIST SP 800-53 IA-2(2). Currently, non-privileged accounts rely on trust tier isolation, velocity caps, tripwire detection, and the AI Critic subsystem as compensating controls. Full MFA implementation using Ed25519 challenge-response is required for non-privileged agent and operator accounts.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-002"
+          },
+          {
+            "name": "risk-level",
+            "value": "high"
+          },
+          {
+            "name": "priority",
+            "value": "P1"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0002-4001-8001-000000000001",
+            "title": "Ed25519 challenge-response protocol designed and prototyped",
+            "schedule": {
+              "task-date": {
+                "date": "2026-07-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Design challenge-response protocol for agent MFA; prototype integration with agent registration flow."
+          },
+          {
+            "uuid": "a1010101-0002-4001-8001-000000000002",
+            "title": "Non-privileged MFA enforcement implemented across agent endpoints",
+            "schedule": {
+              "task-date": {
+                "date": "2026-08-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Enforce Ed25519 challenge-response on /v1/intent and /v1/enforce endpoints; update agent SDKs."
+          },
+          {
+            "uuid": "a1010101-0002-4001-8001-000000000003",
+            "title": "Non-privileged MFA fully operational and tested",
+            "schedule": {
+              "task-date": {
+                "date": "2026-09-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete integration testing, backward compatibility verification, and documentation. All non-privileged accounts require MFA."
+          }
+        ],
+        "remarks": "Target: Q3 2026. Control ID: IA-2(2). Remediation involves implementing Ed25519 challenge-response multi-factor authentication for non-privileged accounts, requiring agents to prove possession of their signing key in addition to API key authentication. Compensating controls currently in place: trust tier isolation, velocity caps, tripwires, Critic evaluation."
+      },
+      {
+        "uuid": "e3f4a5b6-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+        "title": "Implement IA-5(1) Password-Based Authentication Management via OIDC Delegation",
+        "description": "Cognigate does not currently support password-based authentication management as required by NIST SP 800-53 IA-5(1). The system uses key-based authentication exclusively (Ed25519 signing keys and 256-bit entropy API keys). OIDC delegation is planned for the human operator dashboard to support standard identity provider integration and password-based flows through federated authentication.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-003"
+          },
+          {
+            "name": "risk-level",
+            "value": "moderate"
+          },
+          {
+            "name": "priority",
+            "value": "P2"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "c3d4e5f6-a7b8-9012-cdef-123456789012"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0003-4001-8001-000000000001",
+            "title": "OIDC provider integration architecture and IdP trust configuration designed",
+            "schedule": {
+              "task-date": {
+                "date": "2026-07-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Design OIDC integration architecture; select reference IdP; define claim-to-trust-tier mapping."
+          },
+          {
+            "uuid": "a1010101-0003-4001-8001-000000000002",
+            "title": "OIDC authentication flow implemented for operator dashboard",
+            "schedule": {
+              "task-date": {
+                "date": "2026-08-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Implement OIDC authorization code flow; integrate with operator dashboard; record OIDC events in PROOF ledger."
+          },
+          {
+            "uuid": "a1010101-0003-4001-8001-000000000003",
+            "title": "OIDC delegation fully operational with IdP integration tested",
+            "schedule": {
+              "task-date": {
+                "date": "2026-09-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete integration testing with reference IdP, security review, and documentation."
+          }
+        ],
+        "remarks": "Target: Q3 2026. Control ID: IA-5(1). Remediation involves implementing OIDC-based authentication delegation for the Cognigate human operator dashboard, enabling integration with enterprise identity providers, delegating password policy enforcement to the IdP, and recording OIDC authentication events in the PROOF ledger."
+      },
+      {
+        "uuid": "f4a5b6c7-8d9e-0f1a-2b3c-4d5e6f7a8b9c",
+        "title": "Implement IA-8(1) External Credential Federation via SAML/OIDC",
+        "description": "Cognigate does not yet support SAML/OIDC federation for accepting external credentials as required by NIST SP 800-53 IA-8(1). Currently, the system accepts Ed25519 signatures as the primary external credential format. SAML and OIDC federation support is planned to enable broader credential acceptance from external identity providers and cross-organizational trust establishment.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-004"
+          },
+          {
+            "name": "risk-level",
+            "value": "moderate"
+          },
+          {
+            "name": "priority",
+            "value": "P2"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "d4e5f6a7-b8c9-0123-defa-234567890123"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0004-4001-8001-000000000001",
+            "title": "SAML/OIDC federation architecture designed and trust framework defined",
+            "schedule": {
+              "task-date": {
+                "date": "2026-07-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Design federation endpoints; define trust relationship model; map federated claims to Cognigate trust tiers."
+          },
+          {
+            "uuid": "a1010101-0004-4001-8001-000000000002",
+            "title": "SAML 2.0 and OIDC 1.0 federation endpoints implemented",
+            "schedule": {
+              "task-date": {
+                "date": "2026-08-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Implement SAML assertion consumer service and OIDC relying party endpoints; integrate with trust tier model."
+          },
+          {
+            "uuid": "a1010101-0004-4001-8001-000000000003",
+            "title": "Federation fully operational with external IdP integration tested",
+            "schedule": {
+              "task-date": {
+                "date": "2026-09-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete federation testing with reference IdPs, security review, and PROOF ledger integration for federation events."
+          }
+        ],
+        "remarks": "Target: Q3 2026. Control ID: IA-8(1). Remediation involves implementing SAML 2.0 and OIDC 1.0 federation endpoints, establishing trust relationships with external identity providers, mapping federated identity claims to Cognigate trust tiers, and recording federation events in the PROOF ledger."
+      },
+      {
+        "uuid": "a5b6c7d8-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+        "title": "Implement IA-8(2) External Authenticator Support for JWT/OIDC/FIDO2",
+        "description": "Cognigate does not yet support the full range of external authenticator types required by NIST SP 800-53 IA-8(2). Currently, the system supports RFC 8032 Ed25519 digital signatures as the primary external authenticator. Support for JWT, OIDC tokens, and FIDO2 hardware authenticators is planned to enable broader authenticator acceptance and stronger authentication assurance levels.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-005"
+          },
+          {
+            "name": "risk-level",
+            "value": "moderate"
+          },
+          {
+            "name": "priority",
+            "value": "P2"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "e5f6a7b8-c9d0-1234-efab-345678901234"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0005-4001-8001-000000000001",
+            "title": "JWT/OIDC/FIDO2 authenticator support architecture designed",
+            "schedule": {
+              "task-date": {
+                "date": "2026-07-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Design multi-authenticator architecture; select FIDO2 library; define authenticator-to-trust-tier mapping."
+          },
+          {
+            "uuid": "a1010101-0005-4001-8001-000000000002",
+            "title": "JWT validation and OIDC token introspection implemented",
+            "schedule": {
+              "task-date": {
+                "date": "2026-08-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Implement JWT validation with configurable trust anchors and OIDC token introspection; integrate with trust tier model."
+          },
+          {
+            "uuid": "a1010101-0005-4001-8001-000000000003",
+            "title": "All external authenticator types operational and tested",
+            "schedule": {
+              "task-date": {
+                "date": "2026-09-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete FIDO2/WebAuthn implementation, integration testing for all authenticator types, and PROOF ledger integration."
+          }
+        ],
+        "remarks": "Target: Q3 2026. Control ID: IA-8(2). Remediation involves implementing JWT token validation with configurable trust anchors, OIDC token introspection endpoints, FIDO2/WebAuthn authenticator support for human operators, and integration of all authenticator types with the existing trust tier model and PROOF ledger."
+      },
+      {
+        "uuid": "d4e5f6a7-1b2c-3d4e-5f6a-7b8c9d0e1f2a",
+        "title": "Implement CA-6 Security Authorization",
+        "description": "Cognigate currently lacks a formal security authorization process as defined by NIST SP 800-53 CA-6. This control requires establishing a security authorization process, designating an authorizing official, and ensuring the system is authorized before operation. Vorion must formalize the authorization workflow, designate an authorizing official for the Cognigate platform, integrate authorization decision records into the PROOF ledger, and establish a continuous authorization monitoring cadence that leverages Cognigate's existing CA-7 continuous monitoring capabilities.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-006"
+          },
+          {
+            "name": "risk-level",
+            "value": "moderate"
+          },
+          {
+            "name": "priority",
+            "value": "P2"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "b1a2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0006-4001-8001-000000000001",
+            "title": "Authorization workflow designed and authorizing official designated",
+            "schedule": {
+              "task-date": {
+                "date": "2026-04-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Define authorization workflow; designate authorizing official; draft authorization package template referencing SSP."
+          },
+          {
+            "uuid": "a1010101-0006-4001-8001-000000000002",
+            "title": "Authorization package created and PROOF ledger integration implemented",
+            "schedule": {
+              "task-date": {
+                "date": "2026-05-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Create authorization package; implement AUTHORIZATION_GRANTED/REVOKED event types in PROOF ledger."
+          },
+          {
+            "uuid": "a1010101-0006-4001-8001-000000000003",
+            "title": "Security authorization process fully operational",
+            "schedule": {
+              "task-date": {
+                "date": "2026-06-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete authorization workflow; integrate with CA-7 continuous monitoring for ongoing authorization status."
+          }
+        ],
+        "remarks": "Target: Q2 2026. Remediation involves formalizing the authorization workflow by designating an authorizing official, creating authorization packages that reference the SSP and existing assessment artifacts, and integrating authorization decision events (AUTHORIZATION_GRANTED, AUTHORIZATION_REVOKED) into the Cognigate PROOF ledger for immutable traceability. The existing continuous monitoring (CA-7) infrastructure will feed ongoing authorization status."
+      },
+      {
+        "uuid": "e5f6a7b8-2c3d-4e5f-6a7b-8c9d0e1f2a3b",
+        "title": "Implement CP-8 Telecommunications Services",
+        "description": "Cognigate does not currently have formally documented alternate telecommunications service agreements as required by NIST SP 800-53 CP-8. This control requires establishing alternate telecommunications services to permit continued operations in the event of a primary telecommunications service disruption. Vorion must establish contracts or agreements with multiple cloud providers or connectivity providers for redundant telecommunications paths, document failover procedures, and integrate telecommunications health monitoring into the Cognigate observability stack.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-007"
+          },
+          {
+            "name": "risk-level",
+            "value": "moderate"
+          },
+          {
+            "name": "priority",
+            "value": "P2"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "c2b3d4e5-f6a7-8b9c-0d1e-f2a3b4c5d6e7"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0007-4001-8001-000000000001",
+            "title": "Multi-provider telecommunications redundancy plan designed",
+            "schedule": {
+              "task-date": {
+                "date": "2026-04-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Evaluate alternate cloud/connectivity providers; design failover architecture; draft telecommunications contingency procedures."
+          },
+          {
+            "uuid": "a1010101-0007-4001-8001-000000000002",
+            "title": "Alternate telecommunications paths configured and failover tested",
+            "schedule": {
+              "task-date": {
+                "date": "2026-05-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Configure alternate ingress/egress paths; implement automatic failover; integrate network health into circuit breaker."
+          },
+          {
+            "uuid": "a1010101-0007-4001-8001-000000000003",
+            "title": "Telecommunications redundancy fully operational",
+            "schedule": {
+              "task-date": {
+                "date": "2026-06-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete failover testing; document alternate connectivity paths in contingency plan; verify graceful degradation."
+          }
+        ],
+        "remarks": "Target: Q2 2026. Remediation involves establishing multi-provider telecommunications redundancy at the cloud infrastructure level, documenting alternate connectivity paths in the contingency plan, configuring automatic failover for API ingress and egress traffic, and integrating network health status into the existing circuit breaker mechanism so Cognigate can gracefully degrade if telecommunications capacity is reduced."
+      },
+      {
+        "uuid": "f6a7b8c9-3d4e-5f6a-7b8c-9d0e1f2a3b4c",
+        "title": "Implement PM-10 Security Authorization Process",
+        "description": "Cognigate does not yet have a formalized organization-wide security authorization process as required by NIST SP 800-53 PM-10. This control requires managing the security and privacy state of organizational systems through authorization processes, including defining authorization boundaries, assigning authorizing officials, and establishing a standardized process for initial and ongoing authorization. Vorion must create a documented authorization process that covers the Cognigate platform and any systems that inherit Cognigate controls, define roles and responsibilities, and establish a process for managing authorization status changes.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-008"
+          },
+          {
+            "name": "risk-level",
+            "value": "moderate"
+          },
+          {
+            "name": "priority",
+            "value": "P2"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "d3c4e5f6-a7b8-9c0d-1e2f-a3b4c5d6e7f8"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0008-4001-8001-000000000001",
+            "title": "Organization-wide authorization process document drafted",
+            "schedule": {
+              "task-date": {
+                "date": "2026-04-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Draft authorization process defining boundaries, roles, authorizing officials, and criteria for initial/ongoing authorization."
+          },
+          {
+            "uuid": "a1010101-0008-4001-8001-000000000002",
+            "title": "Authorization process integrated with continuous monitoring data feeds",
+            "schedule": {
+              "task-date": {
+                "date": "2026-05-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Integrate PROOF ledger events, trust score trends, and policy metrics into authorization decision support."
+          },
+          {
+            "uuid": "a1010101-0008-4001-8001-000000000003",
+            "title": "Security authorization process fully operational for Cognigate and inheriting systems",
+            "schedule": {
+              "task-date": {
+                "date": "2026-06-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete process documentation; establish reauthorization triggers; verify integration with CA-7 monitoring."
+          }
+        ],
+        "remarks": "Target: Q2 2026. Remediation involves developing a formal authorization process document that defines authorization boundaries for Cognigate and inheriting systems, designates authorizing officials with appropriate seniority, establishes criteria for initial authorization and reauthorization triggers, and integrates with the existing continuous monitoring data feeds (PROOF ledger events, trust score trends, policy evaluation metrics) to support ongoing authorization decisions."
+      },
+      {
+        "uuid": "a7b8c9d0-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+        "title": "Implement SR-6 Supplier Assessments and Reviews",
+        "description": "Cognigate does not yet perform formal supplier assessments and reviews as required by NIST SP 800-53 SR-6. This control requires assessing and reviewing the supply chain-related risks associated with suppliers and system components. While Cognigate already generates SBOMs (CycloneDX 1.5) and performs automated vulnerability scanning of dependencies, it lacks a formal supplier assessment program that evaluates supplier security practices, tracks supplier risk over time, and incorporates supplier assessment results into procurement and integration decisions.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-009"
+          },
+          {
+            "name": "risk-level",
+            "value": "high"
+          },
+          {
+            "name": "priority",
+            "value": "P1"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "e4d5f6a7-b8c9-0d1e-2f3a-b4c5d6e7f8a9"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0009-4001-8001-000000000001",
+            "title": "Supplier assessment framework and questionnaire designed",
+            "schedule": {
+              "task-date": {
+                "date": "2026-07-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Design supplier security questionnaire; define evaluation criteria; identify critical dependency suppliers."
+          },
+          {
+            "uuid": "a1010101-0009-4001-8001-000000000002",
+            "title": "Supplier risk registry and SBOM integration implemented",
+            "schedule": {
+              "task-date": {
+                "date": "2026-08-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Create supplier risk tracking registry; integrate assessment scores with SBOM and vulnerability scanning pipeline."
+          },
+          {
+            "uuid": "a1010101-0009-4001-8001-000000000003",
+            "title": "Supplier assessment program fully operational",
+            "schedule": {
+              "task-date": {
+                "date": "2026-09-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete initial supplier assessments; implement SUPPLIER_ASSESSMENT proof events; establish automated risk profile change alerts."
+          }
+        ],
+        "remarks": "Target: Q3 2026. Remediation involves establishing a supplier assessment program that includes: (1) a supplier security questionnaire and evaluation framework, (2) periodic review of critical dependency suppliers (npm packages, cloud infrastructure providers, cryptographic libraries), (3) integration of supplier assessment scores with the existing SBOM and vulnerability scanning pipeline, (4) supplier risk tracking in a dedicated registry with automated alerts when supplier risk profiles change, and (5) incorporation of supplier assessment results into the Cognigate PROOF ledger as SUPPLIER_ASSESSMENT proof events."
+      },
+      {
+        "uuid": "b8c9d0e1-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+        "title": "Implement SR-10 Inspection of Systems or Components",
+        "description": "Cognigate does not yet perform formal inspections of delivered systems, components, or services as required by NIST SP 800-53 SR-10. This control requires inspecting systems or system components to detect tampering, unauthorized changes, or counterfeit items. While Cognigate has automated security scanning (npm audit, SAST, dependency review) and SBOM generation, it lacks a formal inspection process for verifying the integrity of delivered components against known-good baselines, detecting supply chain tampering, and validating that deployed artifacts match their signed build outputs.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-010"
+          },
+          {
+            "name": "risk-level",
+            "value": "high"
+          },
+          {
+            "name": "priority",
+            "value": "P1"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "f5e6a7b8-c9d0-1e2f-3a4b-c5d6e7f8a9b0"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0010-4001-8001-000000000001",
+            "title": "Build artifact signature verification and provenance tooling designed",
+            "schedule": {
+              "task-date": {
+                "date": "2026-07-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Evaluate Sigstore/similar tools; design artifact signature verification workflow; define container digest pinning strategy."
+          },
+          {
+            "uuid": "a1010101-0010-4001-8001-000000000002",
+            "title": "Component inspection pipeline implemented",
+            "schedule": {
+              "task-date": {
+                "date": "2026-08-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Implement build artifact verification; container image integrity checks; SBOM baseline comparison for deployed dependencies."
+          },
+          {
+            "uuid": "a1010101-0010-4001-8001-000000000003",
+            "title": "Inspection of systems and components fully operational",
+            "schedule": {
+              "task-date": {
+                "date": "2026-09-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete COMPONENT_INSPECTION proof event integration; implement automated discrepancy alerting; document inspection procedures."
+          }
+        ],
+        "remarks": "Target: Q3 2026. Remediation involves implementing: (1) build artifact signature verification using Sigstore or similar provenance tooling to ensure deployed binaries match signed build outputs, (2) container image integrity verification with digest pinning and runtime attestation, (3) periodic comparison of deployed dependency trees against SBOM baselines to detect unauthorized modifications, (4) integration of inspection results into the Cognigate PROOF ledger as COMPONENT_INSPECTION proof events, and (5) automated alerting when inspection reveals discrepancies between expected and actual component states."
+      },
+      {
+        "uuid": "b6c7d8e9-0f1a-2b3c-4d5e-6f7a8b9c0d1e",
+        "title": "Implement AT-4 Security Training Records System Component",
+        "description": "The Cognigate system component's contribution to AT-4 (Security and Privacy Training Records) is in a planned state. While the AT-4 control is satisfied at the system level through organizational training policies and procedures, the system component does not yet provide automated training record tracking or integration with the PROOF ledger for training compliance verification. The organizational process currently handles training records through manual documentation.",
+        "date-authorized": "2026-02-20",
+        "props": [
+          {
+            "name": "poam-item-id",
+            "value": "POAM-011"
+          },
+          {
+            "name": "risk-level",
+            "value": "low"
+          },
+          {
+            "name": "priority",
+            "value": "P3"
+          }
+        ],
+        "related-observations": [],
+        "related-risks": [
+          {
+            "risk-uuid": "f6a7b8c9-d0e1-2345-fabc-456789012345"
+          }
+        ],
+        "milestones": [
+          {
+            "uuid": "a1010101-0011-4001-8001-000000000001",
+            "title": "Training record ingestion API and data model designed",
+            "schedule": {
+              "task-date": {
+                "date": "2026-07-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Design training record data model; define ingestion API for external training systems; plan PROOF ledger event types."
+          },
+          {
+            "uuid": "a1010101-0011-4001-8001-000000000002",
+            "title": "Training record tracking implemented with PROOF ledger integration",
+            "schedule": {
+              "task-date": {
+                "date": "2026-08-15T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Implement training record ingestion; create TRAINING_COMPLETED proof events; build dashboard training compliance view."
+          },
+          {
+            "uuid": "a1010101-0011-4001-8001-000000000003",
+            "title": "Automated training records system component fully operational",
+            "schedule": {
+              "task-date": {
+                "date": "2026-09-30T00:00:00Z",
+                "type": "on-date"
+              }
+            },
+            "remarks": "Complete integration testing; verify dashboard visibility; document training record lifecycle."
+          }
+        ],
+        "remarks": "Target: Q3 2026. Control ID: AT-4. The system-level control is satisfied through organizational training policies. This POA&M item tracks the planned system component contribution: automated training record ingestion, PROOF ledger integration for training completion events, and dashboard visibility for training compliance status. This is a by-component 'planned' state — the control itself is implemented at the system level."
+      }
+    ]
+  }
+}

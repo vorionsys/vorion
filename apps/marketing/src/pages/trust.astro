@@ -1,0 +1,114 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const features = [
+  {
+    icon: 'shield',
+    title: 'Trust Scoring',
+    description: '0–1000 scale across an 8-tier model (T0 Sandbox → T7 Autonomous). 16 trust factors across 5 groups ensure agents earn privileges through demonstrated trustworthiness.',
+  },
+  {
+    icon: 'activity',
+    title: 'Real-Time Dashboard',
+    description: 'Live trust scores, tier transitions, and decay tracking. Radar charts for factor breakdowns, historical trends, and fleet-wide analytics.',
+  },
+  {
+    icon: 'globe',
+    title: 'Verification API',
+    description: "Verify any agent's trust level via REST API. Role-gating, ceiling checks, and provenance verification in a single call.",
+  },
+  {
+    icon: 'file-check',
+    title: 'Compliance Reports',
+    description: 'EU AI Act, ISO 42001, and SOC 2 trust attestation exports. Immutable audit trails for every tier change and policy decision.',
+  },
+];
+
+const tiers = [
+  { tier: 'T0', name: 'Sandbox', range: '0–199', color: 'text-red-400' },
+  { tier: 'T1', name: 'Observed', range: '200–349', color: 'text-orange-400' },
+  { tier: 'T2', name: 'Provisional', range: '350–499', color: 'text-yellow-400' },
+  { tier: 'T3', name: 'Monitored', range: '500–649', color: 'text-lime-400' },
+  { tier: 'T4', name: 'Standard', range: '650–799', color: 'text-green-400' },
+  { tier: 'T5', name: 'Trusted', range: '800–875', color: 'text-teal-400' },
+  { tier: 'T6', name: 'Certified', range: '876–950', color: 'text-cyan-400' },
+  { tier: 'T7', name: 'Autonomous', range: '951–1000', color: 'text-blue-400' },
+];
+
+---
+
+<BaseLayout
+  title="Vorion Trust"
+  description="Real-time trust scoring for autonomous AI agents. Measure, verify, and gate agent autonomy across 16 trust factors across 5 groups."
+>
+    <!-- Hero -->
+      <section class="pt-32 pb-20 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm mb-8">
+            <Icon name="activity" size={16} class="w-4 h-4" />
+            Coming Soon — Part of the Vorion Stack
+          </div>
+          <h1 class="text-5xl sm:text-7xl font-bold mb-6">
+            <span class="bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent">
+              Vorion
+            </span>
+            <br />
+            <span class="text-white">Trust</span>
+          </h1>
+          <p class="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10">
+            Real-time trust scoring for autonomous AI agents. Measure,
+            verify, and gate agent autonomy across 16 trust factors across 5 groups.
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="https://app.vorion.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white font-medium shadow-lg shadow-cyan-500/25 transition-all"
+            >
+              Get Started
+              <Icon name="arrow-right" size={16} class="w-4 h-4" />
+            </a>
+            <a
+              href="https://basis.vorion.org/basis/trust"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium transition-all"
+            >
+              <Icon name="book-open" size={16} class="w-4 h-4" />
+              Learn More
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="pb-20 px-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          {features.map((feature) => (
+            <div class="bg-white/[0.03] p-6 rounded-xl border border-white/5 hover:border-cyan-500/30 transition-colors">
+              <Icon name={feature.icon} class="w-8 h-8 text-cyan-400 mb-4" />
+              <h3 class="text-lg font-semibold mb-2">{feature.title}</h3>
+              <p class="text-white/50 text-sm leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Tier Preview -->
+      <section class="pb-20 px-6">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-2xl font-bold text-center mb-8">8-Tier Trust Hierarchy</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {tiers.map((t) => (
+              <div class="bg-white/[0.03] p-4 rounded-lg border border-white/5 text-center">
+                <div class={`text-xl font-bold ${t.color}`}>{t.tier}</div>
+                <div class="text-sm font-medium mt-1">{t.name}</div>
+                <div class="text-xs text-white/40 mt-1">{t.range}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+</BaseLayout>

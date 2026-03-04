@@ -1,0 +1,362 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import PackageCard from '../components/PackageCard.astro';
+import LiveSiteCard from '../components/LiveSiteCard.astro';
+import { products } from '../data/ecosystem-status';
+
+// =============================================================================
+// Static data — no live API fetching. All data comes from ecosystem-status.ts
+// or is defined inline below.
+// =============================================================================
+
+// --- Static live sites ---
+const liveSites = [
+  { title: 'AgentAnchor App', description: 'Enterprise dashboard for AI agent governance', url: 'https://app.agentanchorai.com', status: 'online' as const },
+  { title: 'BASIS Standard', description: 'Open governance standard specification', url: 'https://basis.vorion.org', status: 'online' as const },
+  { title: 'Cognigate API', description: 'Governance runtime endpoint', url: 'https://cognigate.dev', status: 'online' as const },
+  { title: 'Learn Vorion', description: 'Kaizen AI knowledge base', url: 'https://learn.vorion.org', status: 'online' as const },
+  { title: 'Vorion.org', description: 'Main organization site', url: 'https://vorion.org', status: 'online' as const },
+];
+
+// --- Static packages ---
+const packages = [
+  { name: '@vorionsys/basis', description: 'Open governance standard for AI agent trust', features: ['8-tier trust model T0-T7', 'TrustTier helpers', 'TypeScript + ESM/CJS'] },
+  { name: '@vorionsys/atsf-core', description: 'Core runtime for the Agentic Trust Scoring Framework', features: ['8-tier trust levels', 'Accelerated decay', 'Recovery mechanisms'] },
+  { name: '@vorionsys/cognigate', description: 'Governance runtime enforcement API', features: ['Real-time policy evaluation', 'Intent processing', 'Pluggable policy engine'] },
+  { name: '@vorionsys/contracts', description: 'Shared Zod schemas and validators', features: ['Zod schema definitions', 'Runtime validation', 'TypeScript type exports'] },
+];
+
+// --- Build projects list from ecosystem-status products ---
+const productStatusToProjectStatus = (s: string): 'live' | 'active' | 'shipped' | 'development' => {
+  switch (s) {
+    case 'GA': return 'live';
+    case 'BETA': return 'active';
+    case 'ALPHA': return 'active';
+    case 'DEV': return 'development';
+    default: return 'development';
+  }
+};
+
+const productIcons: Record<string, string> = {
+  'basis': '📐',
+  'car-id': '🆔',
+  'atsf': '🔬',
+  'proof-plane': '📝',
+  'contracts': '📋',
+  'kaizen': '📚',
+  'cognigate': '🚪',
+  'trust': '🛡️',
+  'logic': '⚙️',
+  'platform': '⚓',
+};
+
+const productHrefs: Record<string, string> = {
+  'basis': '/projects/basis',
+  'car-id': '/projects/car-id',
+  'atsf': '/projects/atsf',
+  'proof-plane': '/projects/proof-plane',
+  'contracts': '/projects/contracts',
+  'kaizen': '/projects/learn-vorion',
+  'cognigate': '/projects/cognigate',
+  'trust': '/projects/agentanchor',
+  'logic': '/projects/agentanchor',
+  'platform': '/projects/agentanchor',
+};
+
+const projects = products.map(p => ({
+  title: p.name,
+  description: p.description,
+  href: productHrefs[p.id] || `/projects/${p.id}`,
+  status: productStatusToProjectStatus(p.status) as 'live' | 'active' | 'shipped' | 'development',
+  icon: productIcons[p.id] || '🚀',
+  liveUrl: p.status === 'GA' ? p.url : undefined,
+  tags: [
+    p.category === 'open-source' ? 'Open Source' : p.category === 'commercial' ? 'Commercial' : p.category === 'education' ? 'Education' : 'Tools',
+    p.status,
+    ...(p.npmPackage ? [`npm`] : []),
+  ],
+}));
+
+// --- Static hero tagline ---
+const heroTagline = 'Ecosystem Live — 7 Packages Published';
+---
+
+<BaseLayout title="Home">
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden">
+    <!-- Background gradient -->
+    <div class="absolute inset-0 bg-gradient-to-b from-vorion-500/10 via-transparent to-transparent"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-vorion-500/20 via-transparent to-transparent"></div>
+
+    <!-- Grid pattern -->
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23334155%22%20fill-opacity%3D%220.15%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+      <div class="text-center max-w-4xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-vorion-500/10 border border-vorion-500/20 text-vorion-400 text-sm font-medium mb-8">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          {heroTagline}
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+          Building the Future of
+          <span class="bg-gradient-to-r from-vorion-400 to-accent-cyan bg-clip-text text-transparent">
+            AI Governance
+          </span>
+        </h1>
+
+        <p class="text-xl text-slate-400 leading-relaxed mb-10 max-w-2xl mx-auto">
+          Enterprise trust, compliance, and oversight for autonomous AI systems.
+          Open standards. Production-ready tooling. Human-in-the-loop workflows.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a
+            href="/projects"
+            class="w-full sm:w-auto px-8 py-3 rounded-xl bg-vorion-500 hover:bg-vorion-600 text-white font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            View Projects
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+          <a
+            href="https://github.com/vorionsys"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-full sm:w-auto px-8 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What is AI Governance? - Beginner Section -->
+  <section class="py-16 sm:py-20 bg-gradient-to-b from-slate-900/50 to-transparent">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-vorion-500/10 border border-vorion-500/20 text-vorion-400 text-sm font-medium mb-4">
+          <span>New Here?</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">What is AI Governance?</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto">
+          AI governance ensures AI systems operate safely and predictably within defined boundaries—like guardrails for autonomous vehicles, but for AI.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+          <div class="w-12 h-12 rounded-xl bg-vorion-500/20 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-vorion-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Trust Scoring</h3>
+          <p class="text-slate-400 text-sm">
+            AI agents earn trust over time through consistent, safe behavior. New agents start restricted; proven agents gain autonomy. Think of it like a credit score for AI.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+          <div class="w-12 h-12 rounded-xl bg-accent-cyan/20 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-accent-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Capability Gating</h3>
+          <p class="text-slate-400 text-sm">
+            Match AI permissions to trust levels. A low-trust agent can read data but not modify it. High-trust agents can act autonomously within defined scope.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Circuit Breakers</h3>
+          <p class="text-slate-400 text-sm">
+            Safety systems that halt AI operations when anomalies are detected. Budget limits, approval workflows, and automatic rollbacks prevent runaway behavior.
+          </p>
+        </div>
+      </div>
+
+      <!-- How the ecosystem fits together -->
+      <div class="p-8 rounded-xl bg-slate-900/80 border border-slate-700">
+        <h3 class="text-lg font-semibold text-white mb-6 text-center">How Our Ecosystem Fits Together</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="w-16 h-16 rounded-xl bg-vorion-500/20 flex items-center justify-center mx-auto mb-3">
+              <span class="text-2xl">📐</span>
+            </div>
+            <h4 class="font-medium text-white text-sm mb-1">BASIS Standard</h4>
+            <p class="text-xs text-slate-500">The open standard<br/>defining the rules</p>
+          </div>
+          <div class="flex items-center justify-center text-slate-600 hidden md:flex">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 rounded-xl bg-accent-cyan/20 flex items-center justify-center mx-auto mb-3">
+              <span class="text-2xl">🚪</span>
+            </div>
+            <h4 class="font-medium text-white text-sm mb-1">Cognigate Runtime</h4>
+            <p class="text-xs text-slate-500">Enforces the rules<br/>in real-time</p>
+          </div>
+          <div class="flex items-center justify-center text-slate-600 hidden md:flex">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 rounded-xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+              <span class="text-2xl">⚓</span>
+            </div>
+            <h4 class="font-medium text-white text-sm mb-1">AgentAnchor</h4>
+            <p class="text-xs text-slate-500">Enterprise dashboard<br/>for management</p>
+          </div>
+          <div class="flex items-center justify-center text-slate-600 hidden md:flex">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </div>
+          <div class="text-center">
+            <div class="w-16 h-16 rounded-xl bg-purple-500/20 flex items-center justify-center mx-auto mb-3">
+              <span class="text-2xl">📚</span>
+            </div>
+            <h4 class="font-medium text-white text-sm mb-1">Learn Vorion</h4>
+            <p class="text-xs text-slate-500">Education and<br/>certification</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Sites Section -->
+  <section class="py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">Live Platforms</h2>
+          <p class="text-slate-400">Production deployments and services</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {liveSites.map(site => (
+          <LiveSiteCard {...site} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section class="py-16 sm:py-20 bg-slate-900/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">Projects</h2>
+          <p class="text-slate-400">The Vorion AI Governance ecosystem</p>
+        </div>
+        <a
+          href="/projects"
+          class="hidden sm:flex items-center gap-1 text-vorion-400 hover:text-vorion-300 transition-colors"
+        >
+          View all
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projects.map(project => (
+          <ProjectCard {...project} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Packages Section -->
+  <section class="py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">Open Source Packages</h2>
+          <p class="text-slate-400">Production-ready SDKs and libraries</p>
+        </div>
+        <a
+          href="/packages"
+          class="hidden sm:flex items-center gap-1 text-vorion-400 hover:text-vorion-300 transition-colors"
+        >
+          View all
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {packages.map(pkg => (
+          <PackageCard {...pkg} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Preview -->
+  <section class="py-16 sm:py-20 bg-slate-900/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4">8-Tier Trust Architecture (T0-T7)</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto">
+          The BASIS standard defines eight trust tiers (0-1000 scale) for AI agents, from sandboxed newcomers to fully autonomous systems.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+        {[
+          { level: 0, name: 'Sandbox', score: '0-199', color: 'from-stone-500 to-stone-600' },
+          { level: 1, name: 'Observed', score: '200-349', color: 'from-red-500 to-red-600' },
+          { level: 2, name: 'Provisional', score: '350-499', color: 'from-orange-500 to-orange-600' },
+          { level: 3, name: 'Monitored', score: '500-649', color: 'from-yellow-500 to-yellow-600' },
+          { level: 4, name: 'Standard', score: '650-799', color: 'from-green-500 to-green-600' },
+          { level: 5, name: 'Trusted', score: '800-875', color: 'from-blue-500 to-blue-600' },
+          { level: 6, name: 'Certified', score: '876-950', color: 'from-violet-500 to-violet-600' },
+          { level: 7, name: 'Autonomous', score: '951-1000', color: 'from-cyan-500 to-cyan-600' },
+        ].map(tier => (
+          <div class="p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+            <div class:list={[
+              'w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br',
+              tier.color
+            ]}>
+              T{tier.level}
+            </div>
+            <h3 class="font-semibold text-white text-xs mb-1">{tier.name}</h3>
+            <p class="text-xs text-slate-500">{tier.score}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="text-center mt-8">
+        <a
+          href="/architecture"
+          class="inline-flex items-center gap-2 text-vorion-400 hover:text-vorion-300 transition-colors"
+        >
+          Explore the full architecture
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

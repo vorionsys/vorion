@@ -1,0 +1,181 @@
+# Vorion Business Deployment
+# Full stack with Redis for team/business use
+#
+# Usage:
+#   docker compose -f docker-compose.business.yml up -d
+#   docker compose -f docker-compose.business.yml logs -f
+#
+# Access:
+#   API: http://localhost:3000
+#   Metrics: http://localhost:9090/metrics
+#   Health: http://localhost:3000/health
+#
+# Dev Tools (optional):
+#   docker compose -f docker-compose.business.yml --profile dev-tools up -d
+#   Adminer: http://localhost:8080
+#   Redis Commander: http://localhost:8081
+
+services:
+  # ==========================================================================
+  # Vorion API
+  # ==========================================================================
+  vorion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+      - "9090:9090"
+    environment:
+      # Deployment mode
+      - VORION_ENV=production
+      - VORION_LITE_MODE=false
+
+      # Secrets (CHANGE THESE IN PRODUCTION!)
+      # Generate with: openssl rand -base64 64
+      - VORION_JWT_SECRET=${VORION_JWT_SECRET:-CHANGE_ME_IN_PRODUCTION_MIN_64_CHARS_SECURE_RANDOM_STRING}
+      - VORION_ENCRYPTION_KEY=${VORION_ENCRYPTION_KEY:-}
+      - VORION_ENCRYPTION_SALT=${VORION_ENCRYPTION_SALT:-}
+      - VORION_DEDUPE_SECRET=${VORION_DEDUPE_SECRET:-}
+      - VORION_CSRF_SECRET=${VORION_CSRF_SECRET:-}
+
+      # Database connection
+      - VORION_DB_HOST=postgres
+      - VORION_DB_PORT=5432
+      - VORION_DB_NAME=vorion
+      - VORION_DB_USER=vorion
+      - VORION_DB_PASSWORD=${VORION_DB_PASSWORD:-vorion_secure_password}
+
+      # Redis connection
+      - VORION_REDIS_HOST=redis
+      - VORION_REDIS_PORT=6379
+
+      # API configuration
+      - VORION_API_HOST=0.0.0.0
+      - VORION_API_PORT=3000
+
+      # Logging
+      - VORION_LOG_LEVEL=${VORION_LOG_LEVEL:-info}
+
+      # Telemetry (optional)
+      - VORION_TELEMETRY_ENABLED=${VORION_TELEMETRY_ENABLED:-false}
+      - VORION_OTLP_ENDPOINT=${VORION_OTLP_ENDPOINT:-}
+    volumes:
+      - vorion-data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health/live"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - vorion-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # ==========================================================================
+  # PostgreSQL Database
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=vorion
+      - POSTGRES_PASSWORD=${VORION_DB_PASSWORD:-vorion_secure_password}
+      - POSTGRES_DB=vorion
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vorion -d vorion"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - vorion-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # ==========================================================================
+  # Redis Cache & Queue
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - vorion-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ==========================================================================
+  # Adminer (Database UI) - Development Only
+  # ==========================================================================
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+    depends_on:
+      - postgres
+    networks:
+      - vorion-network
+    profiles:
+      - dev-tools
+
+  # ==========================================================================
+  # Redis Commander (Redis UI) - Development Only
+  # ==========================================================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - vorion-network
+    profiles:
+      - dev-tools
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  vorion-network:
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  vorion-data:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local

@@ -11,7 +11,7 @@
  *
  * @example
  * ```typescript
- * import { createProofPlane } from '@vorionsys/proof-plane';
+ * import { createProofPlane } from '@vorion/proof-plane';
  *
  * const proofPlane = createProofPlane({ signedBy: 'my-service' });
  *

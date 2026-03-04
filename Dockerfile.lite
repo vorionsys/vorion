@@ -1,0 +1,124 @@
+# Vorion Lite Mode Dockerfile
+# Single-container deployment for personal/small team use
+# No Redis required - uses in-process job handling
+#
+# Build: docker build -f Dockerfile.lite -t vorion:lite .
+# Run: docker run -p 3000:3000 -v vorion-data:/app/data vorion:lite
+
+# =============================================================================
+# Stage 1: Build
+# =============================================================================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++
+
+# Copy package files first for better layer caching
+COPY package*.json ./
+RUN npm ci --ignore-scripts
+
+# Copy source files
+COPY tsconfig.json ./
+COPY src ./src
+
+# Build TypeScript
+RUN npm run build
+
+# Prune dev dependencies for smaller image
+RUN npm prune --production
+
+# =============================================================================
+# Stage 2: Production
+# =============================================================================
+FROM node:20-alpine AS production
+
+# Security: Run as non-root user
+RUN addgroup -g 1001 -S vorion && \
+    adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G vorion vorion
+
+WORKDIR /app
+
+# Copy built artifacts from builder
+COPY --from=builder --chown=vorion:vorion /app/dist ./dist
+COPY --from=builder --chown=vorion:vorion /app/node_modules ./node_modules
+COPY --chown=vorion:vorion package.json ./
+
+# Create data directories with proper permissions
+# - /app/data/proofs: Proof artifacts storage
+# - /app/data/secrets: Auto-generated secrets
+# - /app/data/exports: GDPR export files
+RUN mkdir -p /app/data/proofs /app/data/secrets /app/data/exports && \
+    chown -R vorion:vorion /app/data && \
+    chmod 700 /app/data/secrets
+
+# Switch to non-root user
+USER vorion
+
+# =============================================================================
+# Environment Configuration
+# =============================================================================
+
+# Core environment
+ENV NODE_ENV=production
+ENV VORION_ENV=production
+
+# Lite mode configuration
+ENV VORION_LITE_MODE=true
+
+# Data directory (contains secrets, proofs, exports)
+ENV VORION_DATA_DIR=/app/data
+
+# Auto-generate secrets on startup if not provided
+ENV VORION_AUTO_GENERATE_SECRETS=true
+
+# Database configuration (override with -e flags)
+ENV VORION_DB_HOST=postgres
+ENV VORION_DB_PORT=5432
+ENV VORION_DB_NAME=vorion
+ENV VORION_DB_USER=vorion
+# VORION_DB_PASSWORD should be set via -e flag or docker secret
+
+# API configuration
+ENV VORION_API_HOST=0.0.0.0
+ENV VORION_API_PORT=3000
+
+# Proof storage (local filesystem in lite mode)
+ENV VORION_PROOF_STORAGE=local
+ENV VORION_PROOF_LOCAL_PATH=/app/data/proofs
+
+# Logging
+ENV VORION_LOG_LEVEL=info
+
+# =============================================================================
+# Health Check
+# =============================================================================
+
+# Health check configuration for orchestrators
+# - interval: How often to run the check
+# - timeout: Max time to wait for a response
+# - start-period: Initial grace period for startup
+# - retries: Number of consecutive failures before unhealthy
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health/live || exit 1
+
+# =============================================================================
+# Expose & Run
+# =============================================================================
+
+# API port
+EXPOSE 3000
+
+# Default command
+CMD ["node", "dist/index.js"]
+
+# =============================================================================
+# Labels
+# =============================================================================
+
+LABEL org.opencontainers.image.title="Vorion Lite"
+LABEL org.opencontainers.image.description="Vorion Governed AI Execution Platform - Lite Mode"
+LABEL org.opencontainers.image.vendor="Vorion, Inc."
+LABEL org.opencontainers.image.source="https://github.com/vorion/vorion"
+LABEL vorion.mode="lite"

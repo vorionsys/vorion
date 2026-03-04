@@ -154,5 +154,4 @@ benchmarks/results/
 
 # Stryker mutation testing temp
 .stryker-tmp/
-
-vorion-www/
+reports/mutation/

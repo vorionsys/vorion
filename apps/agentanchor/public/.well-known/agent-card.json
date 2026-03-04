@@ -1,0 +1,115 @@
+{
+  "$schema": "https://a2a-protocol.org/schemas/agent-card/v1.0",
+  "schemaVersion": "1.0",
+  "id": "did:web:agentanchorai.com:services:certification-authority",
+  "name": "AgentAnchor Certification Authority",
+  "description": "AgentAnchor is the commercial certification authority for AI agents operating under the BASIS open standard. Issues trust scores, assigns capabilities, manages agent lifecycles, and provides cryptographic identity binding for governed AI agents.",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-18T00:00:00Z",
+
+  "provider": {
+    "name": "Vorion",
+    "url": "https://vorion.org",
+    "contact": "agents@vorion.org",
+    "jurisdiction": "US"
+  },
+
+  "interfaces": [
+    {
+      "type": "a2a",
+      "endpoint": "https://api.agentanchorai.com/a2a/v1",
+      "protocol": "https",
+      "port": 443
+    }
+  ],
+
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "extendedAgentCard": false
+  },
+
+  "defaultInputModes": ["json"],
+  "defaultOutputModes": ["json"],
+
+  "skills": [
+    {
+      "id": "agent-registration",
+      "name": "Agent Identity Registration",
+      "description": "Register AI agents with cryptographic identity binding, trust score initialization, and capability assignment under the BASIS open standard.",
+      "inputModes": ["json"],
+      "outputModes": ["json"]
+    },
+    {
+      "id": "trust-scoring",
+      "name": "Behavioral Trust Scoring",
+      "description": "Issue and manage trust scores (0-1000) across 8 trust tiers (T0 Sandbox through T7 Autonomous) using 16-factor behavioral analysis with asymmetric dynamics.",
+      "inputModes": ["json"],
+      "outputModes": ["json"]
+    },
+    {
+      "id": "capability-assignment",
+      "name": "Capability Assignment",
+      "description": "Assign and manage agent capabilities based on trust tier, organizational policy, and regulatory requirements.",
+      "inputModes": ["json"],
+      "outputModes": ["json"]
+    },
+    {
+      "id": "lifecycle-management",
+      "name": "Agent Lifecycle Management",
+      "description": "Manage agent lifecycle from registration through certification, monitoring, suspension, and decommissioning.",
+      "inputModes": ["json"],
+      "outputModes": ["json"]
+    }
+  ],
+
+  "securitySchemes": {
+    "oauth2": {
+      "type": "oauth2",
+      "flows": {
+        "clientCredentials": {
+          "tokenUrl": "https://auth.agentanchorai.com/oauth/token",
+          "scopes": {
+            "agents:read": "Read agent records",
+            "agents:write": "Register and update agents",
+            "trust:read": "Read trust scores",
+            "trust:write": "Update trust scores",
+            "capabilities:manage": "Manage capability assignments"
+          }
+        }
+      }
+    }
+  },
+
+  "security": [
+    { "oauth2": ["agents:read"] }
+  ],
+
+  "trust": {
+    "ansName": "a2a://certificationAuthority.AgentGovernance.VorionRisk.v1.0.0",
+    "standard": "BASIS v1.2 (CC BY 4.0)",
+    "trustTiers": {
+      "T0": { "name": "Sandbox", "range": "0-199" },
+      "T1": { "name": "Observed", "range": "200-349" },
+      "T2": { "name": "Provisional", "range": "350-499" },
+      "T3": { "name": "Monitored", "range": "500-649" },
+      "T4": { "name": "Standard", "range": "650-799" },
+      "T5": { "name": "Trusted", "range": "800-875" },
+      "T6": { "name": "Certified", "range": "876-950" },
+      "T7": { "name": "Autonomous", "range": "951-1000" }
+    }
+  },
+
+  "governance": {
+    "standard": "BASIS - Baseline Authority for Safe & Interoperable Systems",
+    "standardUrl": "https://basis.vorion.org",
+    "license": "Apache-2.0",
+    "pipeline": ["CAR", "INTENT", "ENFORCE", "PROOF", "CHAIN"],
+    "complianceFrameworks": ["NIST-AI-RMF", "EU-AI-ACT", "ISO-42001", "OWASP-AGENTIC-TOP-10"]
+  },
+
+  "documentationUrl": "https://agentanchorai.com/docs",
+  "iconUrl": "https://agentanchorai.com/icon.png",
+  "privacyPolicyUrl": "https://agentanchorai.com/privacy",
+  "termsOfServiceUrl": "https://agentanchorai.com/terms"
+}

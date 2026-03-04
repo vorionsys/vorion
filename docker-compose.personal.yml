@@ -1,0 +1,98 @@
+# Vorion Personal Deployment
+# Lite mode single-container deployment for individual use
+#
+# Usage:
+#   docker compose -f docker-compose.personal.yml up -d
+#   docker compose -f docker-compose.personal.yml logs -f vorion
+#
+# Access:
+#   API: http://localhost:3000
+#   Health: http://localhost:3000/health
+
+services:
+  # ==========================================================================
+  # Vorion API (Lite Mode)
+  # ==========================================================================
+  vorion:
+    build:
+      context: .
+      dockerfile: Dockerfile.lite
+    ports:
+      - "3000:3000"
+    environment:
+      # Deployment mode
+      - VORION_LITE_MODE=true
+      - VORION_ENV=development
+
+      # Auto-generate secrets if not provided
+      - VORION_AUTO_GENERATE_SECRETS=true
+
+      # Database connection
+      - VORION_DB_HOST=postgres
+      - VORION_DB_PORT=5432
+      - VORION_DB_NAME=vorion
+      - VORION_DB_USER=vorion
+      - VORION_DB_PASSWORD=vorion_dev
+
+      # API configuration
+      - VORION_API_HOST=0.0.0.0
+      - VORION_API_PORT=3000
+
+      # Logging
+      - VORION_LOG_LEVEL=info
+    volumes:
+      # Persistent data storage
+      - vorion-data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health/live"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - vorion-network
+
+  # ==========================================================================
+  # PostgreSQL Database
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=vorion
+      - POSTGRES_PASSWORD=vorion_dev
+      - POSTGRES_DB=vorion
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vorion"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - vorion-network
+    # Limit resources for personal deployment
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  vorion-network:
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  vorion-data:
+    driver: local
+  postgres-data:
+    driver: local

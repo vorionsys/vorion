@@ -60,7 +60,8 @@ kaizen/
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Yes | Gemini API key for synthesis |
 | `ANTHROPIC_API_KEY` | No | Enables native Claude (instead of simulation) |
 | `XAI_API_KEY` | No | Enables native Grok (instead of simulation) |
-| `NEXT_PUBLIC_FIREBASE_*` | No | Firebase config for cloud sync |
+| `NEXT_PUBLIC_SUPABASE_URL` | No | Supabase project URL for cloud sync |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No | Supabase anonymous key for cloud sync |
 
 ## How It Works
 
@@ -91,7 +92,7 @@ Currently, Claude and Grok are simulated using Gemini with persona prompts. Add 
 git init
 git add .
 git commit -m "Initial commit"
-gh repo create vorionsys/kaizen --public --source=. --push
+gh repo create voriongit/kaizen --public --source=. --push
 
 # Deploy on Vercel
 # 1. Import from GitHub at vercel.com

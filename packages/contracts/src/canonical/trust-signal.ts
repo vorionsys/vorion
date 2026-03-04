@@ -426,7 +426,10 @@ export function isNegativeSignal(type: SignalType): boolean {
 /**
  * Calculates the effective impact of a signal.
  *
- * Applies weight, confidence, and magnitude multiplier to base impact.
+ * For positive signals: applies weight, confidence, and magnitude multiplier.
+ * For negative signals: magnitudeMultiplier is clamped to max 1.0 — negative
+ * signals are never amplified here. The tier-scaled penalty formula (7-10x)
+ * is the sole mechanism for negative amplification.
  *
  * @param signal - Trust signal
  * @returns Calculated effective impact value
@@ -435,7 +438,10 @@ export function calculateEffectiveImpact(signal: TrustSignal): number {
   const { impact, weight = 1.0 } = signal;
   const { baseImpact, magnitudeMultiplier = 1.0, confidence = 1.0 } = impact;
 
-  return baseImpact * weight * magnitudeMultiplier * confidence;
+  // Clamp magnitudeMultiplier to 1.0 for negative signals — no extra amplification
+  const effectiveMultiplier = baseImpact < 0 ? Math.min(1.0, magnitudeMultiplier) : magnitudeMultiplier;
+
+  return baseImpact * weight * effectiveMultiplier * confidence;
 }
 
 /**

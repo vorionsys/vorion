@@ -1,0 +1,28 @@
+gates:
+  commit:
+    name: "Code Quality"
+    checks:
+      - "linter_pass"
+      - "type_check_pass"
+      - "security_scan_pass"
+      - "prettier_formatted"
+      - "eslint_pass"
+      - "tsc_no_errors"
+    auto_fix: true
+  pull_request:
+    name: "Integration Readiness"
+    checks:
+      - "tests_pass"
+      -
+        coverage_threshold: 75
+      - "no_critical_vulnerabilities"
+      - "documentation_updated"
+    block_merge: true
+  deployment:
+    name: "Compliance Validation"
+    checks:
+      - "nist_controls_verified"
+      - "gdpr_data_flow_mapped"
+      - "encryption_enabled"
+      - "audit_logging_active"
+    manual_override: "security_lead_only"

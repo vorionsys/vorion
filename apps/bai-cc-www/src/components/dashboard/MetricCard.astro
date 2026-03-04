@@ -1,0 +1,83 @@
+---
+interface Props {
+  label: string;
+  value: string | number;
+  subtext?: string;
+  trend?: 'up' | 'down' | 'stable';
+  status?: 'healthy' | 'warning' | 'critical';
+  href?: string;
+}
+
+const { label, value, subtext, trend, status, href } = Astro.props;
+
+const trendConfig = {
+  up: { color: 'text-emerald-400', rotate: '' },
+  down: { color: 'text-red-400', rotate: 'rotate-180' },
+  stable: { color: 'text-slate-400', rotate: 'rotate-90' },
+};
+
+const statusConfig = {
+  healthy: 'bg-emerald-500',
+  warning: 'bg-amber-500',
+  critical: 'bg-red-500',
+};
+
+const Tag = href ? 'a' : 'div';
+const linkProps = href ? { href } : {};
+---
+
+<Tag
+  {...linkProps}
+  class:list={[
+    'block bg-slate-900/50 border border-slate-800 rounded-xl p-5 transition-all duration-300',
+    href && 'group cursor-pointer hover:border-vorion-500/50 hover:bg-slate-900',
+  ]}
+>
+  <div class="flex items-center justify-between mb-2">
+    <span class="text-sm text-slate-400">{label}</span>
+    <div class="flex items-center gap-2">
+      {status && (
+        <span
+          class:list={[
+            'w-2.5 h-2.5 rounded-full',
+            statusConfig[status],
+            status === 'critical' && 'animate-pulse',
+          ]}
+          title={status}
+        />
+      )}
+      {trend && (
+        <span class:list={['flex items-center', trendConfig[trend].color]}>
+          <svg
+            class:list={['w-4 h-4', trendConfig[trend].rotate]}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 15l7-7 7 7"
+            />
+          </svg>
+        </span>
+      )}
+    </div>
+  </div>
+
+  <div class="text-3xl font-bold text-white mb-1">{value}</div>
+
+  {subtext && (
+    <div class="text-xs text-slate-500">{subtext}</div>
+  )}
+
+  {href && (
+    <div class="mt-3 flex items-center gap-1 text-xs text-vorion-400 opacity-0 group-hover:opacity-100 transition-opacity">
+      <span>View details</span>
+      <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </div>
+  )}
+</Tag>

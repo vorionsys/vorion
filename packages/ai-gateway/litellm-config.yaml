@@ -138,42 +138,6 @@ model_list:
       priority: 2
 
   # ==========================================
-  # VLLM MODELS (High-Throughput Self-Hosted)
-  # ==========================================
-  # vLLM provides high-throughput inference with continuous batching
-  # and PagedAttention. Runs locally alongside Ollama for maximum
-  # self-hosted capacity. Uses the OpenAI-compatible API at /v1.
-  #
-  # Default model: meta-llama/Llama-3.1-8B-Instruct (override via VLLM_MODEL).
-  # LiteLLM routes to vLLM using the openai/ prefix with a custom api_base.
-
-  - model_name: vllm/general
-    litellm_params:
-      model: openai/meta-llama/Llama-3.1-8B-Instruct
-      api_base: http://vllm:8000/v1
-      api_key: "none"  # vLLM does not require auth by default
-    model_info:
-      tier: "self-hosted"
-      cost_per_1m_input: 0.00
-      cost_per_1m_output: 0.00
-      use_case: "High-throughput general inference via vLLM"
-      priority: 3
-      max_tokens: 4096
-
-  - model_name: vllm/coding
-    litellm_params:
-      model: openai/meta-llama/Llama-3.1-8B-Instruct
-      api_base: http://vllm:8000/v1
-      api_key: "none"
-    model_info:
-      tier: "self-hosted"
-      cost_per_1m_input: 0.00
-      cost_per_1m_output: 0.00
-      use_case: "Coding assistance via vLLM (higher throughput than Ollama)"
-      priority: 3
-      max_tokens: 4096
-
-  # ==========================================
   # FALLBACK MODELS
   # ==========================================
 
@@ -206,13 +170,11 @@ router_settings:
   timeout: 300
 
   # Model fallback order
-  # vLLM slots added as high-throughput self-hosted fallbacks between
-  # cloud providers and Ollama. Order: cloud -> vLLM -> Ollama -> final fallback.
   fallbacks:
-    - ["coding/expert", "coding/fast", "vllm/coding", "fallback/primary"]
-    - ["reasoning/complex", "reasoning/fast", "vllm/general", "fallback/primary"]
-    - ["general/premium", "general/balanced", "vllm/general", "general/fast"]
-    - ["advisor/council", "advisor/consultation", "vllm/general", "fallback/primary"]
+    - ["coding/expert", "coding/fast", "fallback/primary"]
+    - ["reasoning/complex", "reasoning/fast", "fallback/primary"]
+    - ["general/premium", "general/balanced", "general/fast"]
+    - ["advisor/council", "advisor/consultation", "fallback/primary"]
 
 # ============================================
 # GENERAL SETTINGS
@@ -255,24 +217,3 @@ litellm_settings:
 
   # Prompt injection detection
   enable_guardrails: true
-
-  # ==========================================
-  # FAILSAFE: Default fallback chain
-  # ==========================================
-  # If primary cloud provider fails after retries,
-  # cascade to vLLM (high-throughput) then Ollama before giving up.
-  # LiteLLM handles this transparently — no code changes needed.
-  fallbacks:
-    - {"general/premium": ["general/balanced", "vllm/general", "general/fast"]}
-    - {"general/balanced": ["vllm/general", "general/fast"]}
-    - {"vllm/general": ["general/fast"]}
-    - {"coding/expert": ["coding/fast", "vllm/coding"]}
-    - {"coding/fast": ["vllm/coding"]}
-    - {"vllm/coding": ["general/fast"]}
-    - {"reasoning/complex": ["reasoning/fast", "vllm/general", "general/fast"]}
-    - {"advisor/council": ["advisor/consultation", "vllm/general", "general/fast"]}
-    - {"advisor/consultation": ["vllm/general", "general/fast"]}
-  default_fallbacks: ["vllm/general", "general/fast"]
-  context_window_fallbacks:
-    - {"reasoning/complex": ["general/premium"]}
-    - {"coding/expert": ["coding/fast", "vllm/coding"]}

@@ -1,0 +1,121 @@
+---
+export const prerender = false;
+
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import MetricCard from '../../components/dashboard/MetricCard.astro';
+import PackageRow from '../../components/dashboard/PackageRow.astro';
+import RefreshIndicator from '../../components/dashboard/RefreshIndicator.astro';
+
+import { cached } from '../../lib/cache.js';
+import { fetchNpmStats } from '../../lib/fetchers/npm-stats.js';
+import type { NpmStatsResponse } from '../../lib/types.js';
+
+// ---------------------------------------------------------------------------
+// Server-side data fetching
+// ---------------------------------------------------------------------------
+let data: NpmStatsResponse | null = null;
+let fetchError: string | null = null;
+
+try {
+  data = await cached<NpmStatsResponse>('page:npm', 120, fetchNpmStats);
+} catch (err) {
+  fetchError = err instanceof Error ? err.message : 'Unknown error fetching npm data';
+  console.error('[packages] Data fetch error:', fetchError);
+}
+
+// ---------------------------------------------------------------------------
+// Computed values
+// ---------------------------------------------------------------------------
+const packages = data?.packages ?? [];
+const totalDownloads = data?.totalDownloads ?? 0;
+const totalPackages = packages.length;
+
+function formatNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString('en-US');
+}
+---
+
+<DashboardLayout title="Packages" description="npm package monitoring for @vorionsys scope">
+  {/* Error Banner */}
+  {fetchError && (
+    <div class="mb-6 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+      <strong>Data fetch error:</strong> {fetchError}. Package data may be stale or unavailable.
+    </div>
+  )}
+
+  {/* Page Header */}
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Packages</h1>
+      <p class="text-sm text-slate-400 mt-1">npm package registry monitoring for <span class="font-mono text-vorion-400">@vorionsys</span></p>
+    </div>
+    <RefreshIndicator interval={300} />
+  </div>
+
+  {/* Summary Metrics */}
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+    <MetricCard
+      label="Total Packages"
+      value={totalPackages}
+      subtext="monitored"
+    />
+    <MetricCard
+      label="Weekly Downloads"
+      value={formatNumber(totalDownloads)}
+      subtext="across all packages"
+    />
+    <MetricCard
+      label="Registry"
+      value="npmjs.com"
+      subtext="@vorionsys scope"
+    />
+  </div>
+
+  {/* Package Table */}
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">All Packages</h2>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+      {/* Column Headers */}
+      <div class="grid grid-cols-12 gap-4 items-center py-2 px-4 text-xs text-slate-500 font-medium border-b border-slate-800">
+        <div class="col-span-5 sm:col-span-4">Package</div>
+        <div class="col-span-2 sm:col-span-2">Version</div>
+        <div class="col-span-3 sm:col-span-3">Downloads/wk</div>
+        <div class="col-span-2 sm:col-span-3 text-right">Published</div>
+      </div>
+      {packages.length > 0 ? (
+        packages.map((pkg) => (
+          <PackageRow
+            name={pkg.name}
+            label={pkg.label}
+            latestVersion={pkg.latestVersion}
+            weeklyDownloads={pkg.weeklyDownloads}
+            lastPublished={pkg.lastPublished}
+          />
+        ))
+      ) : (
+        <p class="text-sm text-slate-500 p-4">No package data available.</p>
+      )}
+    </div>
+  </section>
+</DashboardLayout>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Client-side auto-refresh: polls /api/npm.json every 300s (5 min)
+  // ---------------------------------------------------------------------------
+  const REFRESH_INTERVAL_MS = 300_000;
+
+  async function refreshPackages() {
+    try {
+      const res = await fetch('/api/npm.json');
+      if (!res.ok) return;
+      window.location.reload();
+    } catch (err) {
+      console.warn('[packages] Auto-refresh failed:', err);
+    }
+  }
+
+  setInterval(refreshPackages, REFRESH_INTERVAL_MS);
+</script>

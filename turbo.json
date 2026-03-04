@@ -7,9 +7,13 @@
   ],
   "globalEnv": [
     "NODE_ENV",
+    "VERCEL_ENV",
     "CI",
+    "XAI_API_KEY",
+    "XAI_MODEL",
     "TURBO_TOKEN",
-    "TURBO_TEAM"
+    "TURBO_TEAM",
+    "DATABASE_URL"
   ],
   "ui": "tui",
   "tasks": {
@@ -19,7 +23,16 @@
         "dist/**",
         ".next/**",
         "!.next/cache/**",
-        "build/**"
+        "build/**",
+        ".docusaurus/**"
+      ],
+      "env": [
+        "NEXT_PUBLIC_*",
+        "XAI_*",
+        "SUPABASE_*",
+        "STRIPE_*",
+        "PUSHER_*",
+        "SENTRY_*"
       ]
     },
     "dev": {
@@ -58,6 +71,29 @@
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "env": [
+        "DATABASE_URL",
+        "REDIS_URL",
+        "TEST_DATABASE_URL",
+        "TEST_REDIS_URL"
+      ]
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "outputs": ["playwright-report/**", "test-results/**"],
+      "env": [
+        "BASE_URL",
+        "CI"
+      ]
+    },
+    "test:perf": {
+      "dependsOn": ["build"],
+      "outputs": ["k6-results/**"],
+      "cache": false
+    },
     "typecheck": {
       "dependsOn": ["^build"],
       "outputs": []
@@ -84,6 +120,26 @@
     },
     "clean": {
       "cache": false
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:push": {
+      "cache": false
+    },
+    "db:seed": {
+      "cache": false
+    },
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    },
+    "build-storybook": {
+      "dependsOn": ["^build"],
+      "outputs": ["storybook-static/**"]
     }
   }
 }

@@ -1,0 +1,238 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { products, packages, apis } from '../data/ecosystem-status';
+
+const statusColors: Record<string, string> = {
+  GA: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  BETA: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  ALPHA: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  DEV: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+  STABLE: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  PREVIEW: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+};
+
+const vorionProducts = products.filter(p => p.org === 'vorion');
+const anchorProducts = products.filter(p => p.org === 'agentanchor');
+const publishedPkgs = packages.filter(p => p.published);
+const internalPkgs = packages.filter(p => !p.published);
+---
+
+<BaseLayout title="Ecosystem" description="Vorion ecosystem status — products, packages, and APIs">
+  <section class="py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Header -->
+      <div class="max-w-3xl mb-12">
+        <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">Ecosystem Status</h1>
+        <p class="text-lg text-slate-400 leading-relaxed">
+          Overview of the Vorion ecosystem — products, packages, and API endpoints.
+        </p>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
+        <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="text-2xl font-bold text-white">{products.length}</span>
+          </div>
+          <div class="text-sm text-slate-400 mt-1">Products</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span class={`inline-flex rounded-full h-2 w-2 ${publishedPkgs.length === packages.length ? 'bg-emerald-500' : 'bg-blue-500'}`}></span>
+            <span class="text-2xl font-bold text-white">{publishedPkgs.length}/{packages.length}</span>
+          </div>
+          <div class="text-sm text-slate-400 mt-1">Packages Published</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span class="inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span class="text-2xl font-bold text-white">{apis.length}</span>
+          </div>
+          <div class="text-sm text-slate-400 mt-1">API Endpoints</div>
+        </div>
+      </div>
+
+      <!-- CI/CD Status Badges -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">CI/CD Pipeline</h2>
+        <div class="flex flex-wrap gap-3 p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/ci.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/ci.yml/badge.svg" alt="CI" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/ci-python.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/ci-python.yml/badge.svg" alt="Python CI" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/secrets-scan.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/secrets-scan.yml/badge.svg" alt="Secrets Scan" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/deploy.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/deploy.yml/badge.svg" alt="Deploy" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/schema-check.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/schema-check.yml/badge.svg" alt="Schema Drift Check" />
+          </a>
+          <a href="https://github.com/vorionsys/vorion/actions/workflows/publish-packages.yml" target="_blank" rel="noopener">
+            <img src="https://github.com/vorionsys/vorion/actions/workflows/publish-packages.yml/badge.svg" alt="Publish Packages" />
+          </a>
+        </div>
+      </div>
+
+      <!-- Section 1: Products -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Products</h2>
+
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Vorion (Open Source)</h3>
+        <div class="overflow-x-auto mb-8">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Product</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Status</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Category</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">URL</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">npm</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vorionProducts.map(p => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-medium text-white">{p.name}</td>
+                  <td class="py-3 px-4">
+                    <span class={`inline-block px-2 py-0.5 rounded text-xs font-medium border ${statusColors[p.status]}`}>{p.status}</span>
+                  </td>
+                  <td class="py-3 px-4 text-slate-400">{p.category}</td>
+                  <td class="py-3 px-4">
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" class="text-vorion-400 hover:underline">{p.url.replace('https://', '')}</a>
+                  </td>
+                  <td class="py-3 px-4 text-slate-500 font-mono text-xs">{p.npmPackage || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Agent Anchor (Commercial)</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Product</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Status</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Category</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">URL</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">npm</th>
+              </tr>
+            </thead>
+            <tbody>
+              {anchorProducts.map(p => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-medium text-white">{p.name}</td>
+                  <td class="py-3 px-4">
+                    <span class={`inline-block px-2 py-0.5 rounded text-xs font-medium border ${statusColors[p.status]}`}>{p.status}</span>
+                  </td>
+                  <td class="py-3 px-4 text-slate-400">{p.category}</td>
+                  <td class="py-3 px-4">
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" class="text-accent-cyan hover:underline">{p.url.replace('https://', '')}</a>
+                  </td>
+                  <td class="py-3 px-4 text-slate-500 font-mono text-xs">{p.npmPackage || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Packages -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Packages</h2>
+
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Published ({publishedPkgs.length})</h3>
+        <div class="overflow-x-auto mb-8">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Package</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Version</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Source</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">npm</th>
+              </tr>
+            </thead>
+            <tbody>
+              {publishedPkgs.map(p => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-mono text-xs text-white">{p.name}</td>
+                  <td class="py-3 px-4 text-slate-400">{p.version}</td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-500">{p.sourceDir}</td>
+                  <td class="py-3 px-4">
+                    {p.npmUrl ? (
+                      <a href={p.npmUrl} target="_blank" rel="noopener noreferrer" class="text-vorion-400 hover:underline text-xs">View</a>
+                    ) : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Internal ({internalPkgs.length})</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Package</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Version</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {internalPkgs.map(p => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-mono text-xs text-white">{p.name}</td>
+                  <td class="py-3 px-4 text-slate-400">{p.version}</td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-500">{p.sourceDir}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 3: APIs -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">API Endpoints</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-800">
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Service</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Version</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Status</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Production</th>
+                <th class="text-left py-3 px-4 text-slate-400 font-medium">Staging</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apis.map(a => (
+                <tr class="border-b border-slate-800/50 hover:bg-slate-900/30">
+                  <td class="py-3 px-4 font-medium text-white">{a.service}</td>
+                  <td class="py-3 px-4 text-slate-400">{a.version}</td>
+                  <td class="py-3 px-4">
+                    <span class={`inline-block px-2 py-0.5 rounded text-xs font-medium border ${statusColors[a.status]}`}>{a.status}</span>
+                  </td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-400">{a.productionUrl.replace('https://', '')}</td>
+                  <td class="py-3 px-4 font-mono text-xs text-slate-500">{a.stagingUrl?.replace('https://', '') || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,272 @@
+---
+export const prerender = false;
+
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+import MetricCard from '../components/dashboard/MetricCard.astro';
+import HealthGrid from '../components/dashboard/HealthGrid.astro';
+import WorkflowCard from '../components/dashboard/WorkflowCard.astro';
+import ActivityFeed from '../components/dashboard/ActivityFeed.astro';
+import RefreshIndicator from '../components/dashboard/RefreshIndicator.astro';
+
+import { cached } from '../lib/cache.js';
+import { fetchDomainHealth } from '../lib/fetchers/domains.js';
+import { fetchCiStatus } from '../lib/fetchers/github-ci.js';
+import { fetchNpmStats } from '../lib/fetchers/npm-stats.js';
+import { fetchVercelDeployments } from '../lib/fetchers/vercel-deployments.js';
+import { fetchGithubStats } from '../lib/fetchers/github-stats.js';
+
+import type {
+  DomainHealthResponse,
+  CiStatusResponse,
+  NpmStatsResponse,
+  VercelDeploymentsResponse,
+  GithubStatsResponse,
+  ActivityItem,
+} from '../lib/types.js';
+
+// ---------------------------------------------------------------------------
+// Server-side data fetching — call fetchers directly to avoid self-referential HTTP
+// ---------------------------------------------------------------------------
+let domains: DomainHealthResponse | null = null;
+let ci: CiStatusResponse | null = null;
+let npm: NpmStatsResponse | null = null;
+let vercel: VercelDeploymentsResponse | null = null;
+let github: GithubStatsResponse | null = null;
+let fetchError: string | null = null;
+
+try {
+  [domains, ci, npm, vercel, github] = await Promise.all([
+    cached<DomainHealthResponse>('page:domains', 60, fetchDomainHealth),
+    cached<CiStatusResponse>('page:ci', 60, fetchCiStatus),
+    cached<NpmStatsResponse>('page:npm', 120, fetchNpmStats),
+    cached<VercelDeploymentsResponse>('page:vercel', 60, fetchVercelDeployments),
+    cached<GithubStatsResponse>('page:github', 120, fetchGithubStats),
+  ]);
+} catch (err) {
+  fetchError = err instanceof Error ? err.message : 'Unknown error fetching dashboard data';
+  console.error('[index] Dashboard data fetch error:', fetchError);
+}
+
+// ---------------------------------------------------------------------------
+// Computed values for MetricCards
+// ---------------------------------------------------------------------------
+const domainsUp = domains?.summary.up ?? 0;
+const domainsTotal = domains?.summary.total ?? 0;
+const ciPassing = ci?.summary.passing ?? 0;
+const ciTotal = ci?.summary.total ?? 0;
+const totalDownloads = npm?.totalDownloads ?? 0;
+const deploysRecent = vercel?.deployments.length ?? 0;
+const openPRs = github?.pullRequests.open ?? 0;
+
+function formatDownloads(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toString();
+}
+
+// Health status for metric cards
+const domainStatus: 'healthy' | 'warning' | 'critical' =
+  domainsUp === domainsTotal ? 'healthy' : domainsUp >= domainsTotal * 0.75 ? 'warning' : 'critical';
+const ciStatus: 'healthy' | 'warning' | 'critical' =
+  (ci?.summary.failing ?? 0) === 0 ? 'healthy' : (ci?.summary.failing ?? 0) <= 1 ? 'warning' : 'critical';
+
+// HealthGrid items
+const healthItems = (domains?.domains ?? []).map((d) => ({
+  label: d.label,
+  status: d.status,
+  href: `/domains`,
+  tooltip: `${d.domain} — ${d.status} (${d.responseTimeMs}ms)`,
+}));
+
+// Activity feed — combine recent events from all sources
+const activityItems: ActivityItem[] = [];
+
+// Add recent deployments
+for (const d of (vercel?.deployments ?? []).slice(0, 5)) {
+  activityItems.push({
+    type: 'deploy',
+    title: `${d.name} — ${d.state}`,
+    timestamp: d.createdAt,
+    url: d.url,
+    status: d.state,
+  });
+}
+
+// Add recent CI runs
+for (const w of (ci?.workflows ?? []).filter((w) => w.updatedAt)) {
+  activityItems.push({
+    type: 'ci',
+    title: `${w.name} — ${w.status}`,
+    timestamp: w.updatedAt!,
+    url: w.runUrl ?? undefined,
+    status: w.status,
+  });
+}
+
+// Add recent PRs
+for (const pr of (github?.pullRequests.recent ?? []).filter((p) => p.state === 'open').slice(0, 5)) {
+  activityItems.push({
+    type: 'pr',
+    title: `#${pr.number} ${pr.title}`,
+    timestamp: pr.createdAt,
+    status: pr.state,
+  });
+}
+
+// Add recent commits
+for (const c of (github?.commits.recent ?? []).slice(0, 5)) {
+  activityItems.push({
+    type: 'commit',
+    title: `${c.sha} ${c.message}`,
+    timestamp: c.date,
+  });
+}
+
+// Sort all activity by timestamp descending
+activityItems.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+---
+
+<DashboardLayout title="Dashboard" description="BAI Command Center — real-time infrastructure overview">
+  {/* Error Banner */}
+  {fetchError && (
+    <div class="mb-6 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+      <strong>Data fetch error:</strong> {fetchError}. Some panels may show stale or missing data.
+    </div>
+  )}
+
+  {/* Page Header */}
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+      <p class="text-sm text-slate-400 mt-1">Real-time infrastructure overview</p>
+    </div>
+    <RefreshIndicator interval={60} />
+  </div>
+
+  {/* Metric Cards Row */}
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8" id="metrics-row">
+    <MetricCard
+      label="Domains"
+      value={`${domainsUp}/${domainsTotal}`}
+      subtext="up"
+      status={domainStatus}
+      href="/domains"
+    />
+    <MetricCard
+      label="CI Pipelines"
+      value={`${ciPassing}/${ciTotal}`}
+      subtext="passing"
+      status={ciStatus}
+      href="/cicd"
+    />
+    <MetricCard
+      label="npm Downloads"
+      value={formatDownloads(totalDownloads)}
+      subtext="this week"
+      href="/packages"
+    />
+    <MetricCard
+      label="Deployments"
+      value={deploysRecent}
+      subtext="recent"
+      href="/deployments"
+    />
+    <MetricCard
+      label="Open PRs"
+      value={openPRs}
+      subtext="pull requests"
+      href="/cicd"
+    />
+  </div>
+
+  {/* Health Grid */}
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-white mb-4">Domain Health</h2>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
+      {healthItems.length > 0 ? (
+        <HealthGrid items={healthItems} />
+      ) : (
+        <p class="text-sm text-slate-500">No domain data available.</p>
+      )}
+    </div>
+  </section>
+
+  {/* Two-Column: CI/CD Workflows + Activity Feed */}
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    {/* Left: CI/CD Workflow Cards */}
+    <section>
+      <h2 class="text-lg font-semibold text-white mb-4">CI/CD Workflows</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {(ci?.workflows ?? []).map((w) => (
+          <WorkflowCard
+            name={w.name}
+            description={w.description}
+            status={w.status}
+            runUrl={w.runUrl}
+            updatedAt={w.updatedAt}
+            durationSeconds={w.durationSeconds}
+          />
+        ))}
+        {(ci?.workflows ?? []).length === 0 && (
+          <p class="text-sm text-slate-500 col-span-full">No workflow data available.</p>
+        )}
+      </div>
+    </section>
+
+    {/* Right: Activity Feed */}
+    <section>
+      <h2 class="text-lg font-semibold text-white mb-4">Recent Activity</h2>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 max-h-[600px] overflow-y-auto">
+        <ActivityFeed items={activityItems} maxItems={20} />
+      </div>
+    </section>
+  </div>
+</DashboardLayout>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Client-side auto-refresh: polls /api/overview.json every 60s and updates
+  // metric card values via DOM manipulation.
+  // ---------------------------------------------------------------------------
+  const REFRESH_INTERVAL_MS = 60_000;
+
+  async function refreshMetrics() {
+    try {
+      const res = await fetch('/api/overview.json');
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const metricsRow = document.getElementById('metrics-row');
+      if (!metricsRow) return;
+
+      const cards = metricsRow.querySelectorAll(':scope > *');
+
+      // Helper: update the big number in a metric card
+      function updateCardValue(card: Element, value: string) {
+        const valueEl = card.querySelector('.text-3xl');
+        if (valueEl) valueEl.textContent = value;
+      }
+
+      // Card 0: Domains
+      if (cards[0]) updateCardValue(cards[0], `${data.domains?.up ?? 0}/${data.domains?.total ?? 0}`);
+      // Card 1: CI
+      if (cards[1]) updateCardValue(cards[1], `${data.ci?.passing ?? 0}/${data.ci?.total ?? 0}`);
+      // Card 2: npm
+      if (cards[2]) {
+        const dl = data.npm?.totalDownloads ?? 0;
+        const formatted = dl >= 1_000_000 ? `${(dl / 1_000_000).toFixed(1)}M`
+          : dl >= 1_000 ? `${(dl / 1_000).toFixed(1)}K`
+          : dl.toString();
+        updateCardValue(cards[2], formatted);
+      }
+      // Card 3: Deployments
+      if (cards[3]) updateCardValue(cards[3], `${data.vercel?.recentDeployments ?? 0}`);
+      // Card 4: Open PRs
+      if (cards[4]) updateCardValue(cards[4], `${data.github?.openPRs ?? 0}`);
+    } catch (err) {
+      console.warn('[dashboard] Auto-refresh failed:', err);
+    }
+  }
+
+  setInterval(refreshMetrics, REFRESH_INTERVAL_MS);
+</script>

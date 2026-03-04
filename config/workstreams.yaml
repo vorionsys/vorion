@@ -1,0 +1,77 @@
+orchestration:
+  strategy: "parallel-bounded"
+  max_concurrent: 6
+  coordination: "event-driven"
+  project_type: "typescript"
+workstreams:
+  foundation:
+    priority: "critical"
+    blockers:
+    tasks:
+      - "update-dependencies-secure"
+      - "implement-feature-flags"
+      - "setup-monitoring"
+    agent: "specialist-infra"
+  architecture:
+    priority: "critical"
+    blockers:
+      - "foundation"
+    tasks:
+      - "refactor-module-boundaries"
+      - "implement-clean-interfaces"
+      - "add-telemetry-hooks"
+      - "enable-strict-mode"
+    agent: "specialist-architecture"
+  security:
+    priority: "critical"
+    blockers:
+    parallel_with:
+      - "foundation"
+      - "architecture"
+    tasks:
+      - "implement-rbac"
+      - "add-encryption-layer"
+      - "setup-audit-logging"
+      - "vulnerability-remediation"
+      - "compliance-certification-prep"
+      - "setup-typescript-security-scanning"
+    agent: "specialist-security"
+    compliance_frameworks:
+      - "NIST-800-53"
+      - "SOC2-TypeII"
+      - "GDPR"
+      - "ISO27001"
+      - "FedRAMP-Moderate"
+      - "CMMC-Level2"
+  quality:
+    priority: "high"
+    blockers:
+      - "architecture"
+    tasks:
+      - "increase-coverage-to-80"
+      - "add-integration-tests"
+      - "setup-performance-baselines"
+      - "implement-contract-tests"
+    agent: "specialist-qa"
+  devx:
+    priority: "medium"
+    blockers:
+      - "architecture"
+    tasks:
+      - "write-getting-started-guide"
+      - "create-example-apps"
+      - "improve-error-messages"
+      - "build-debugging-tools"
+    agent: "specialist-devx"
+  enterprise:
+    priority: "high"
+    blockers:
+      - "security"
+      - "quality"
+    tasks:
+      - "implement-multi-tenancy"
+      - "add-usage-analytics"
+      - "create-deployment-templates"
+      - "write-runbooks"
+      - "basis-integration-prep"
+    agent: "specialist-enterprise"

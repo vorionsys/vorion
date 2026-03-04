@@ -1,0 +1,20 @@
+{
+  "name": "@vorion/examples",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Vorion SDK Examples",
+  "scripts": {
+    "quickstart": "tsx quickstart.ts",
+    "remote": "tsx remote-mode.ts",
+    "langchain": "tsx langchain-agent.ts"
+  },
+  "dependencies": {
+    "@vorionsys/sdk": "^0.1.0",
+    "@vorionsys/atsf-core": "^0.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

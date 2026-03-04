@@ -53,5 +53,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time event subscriptions (`subscribe`, `subscribeToType`)
 - Event statistics (`getStats`)
 
-[0.1.1]: https://github.com/vorionsys/vorion/compare/proof-plane-v0.1.0...proof-plane-v0.1.1
-[0.1.0]: https://github.com/vorionsys/vorion/releases/tag/proof-plane-v0.1.0
+[0.1.1]: https://github.com/voriongit/vorion/compare/proof-plane-v0.1.0...proof-plane-v0.1.1
+[0.1.0]: https://github.com/voriongit/vorion/releases/tag/proof-plane-v0.1.0

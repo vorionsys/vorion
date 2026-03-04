@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const features = [
+  {
+    icon: 'scale',
+    title: 'Policy Rules',
+    description: 'Define constraint-based governance rules in TypeScript. Composable rule sets that evaluate agent actions against organizational policies in real time.',
+  },
+  {
+    icon: 'layers',
+    title: 'BASIS Integration',
+    description: 'Rules derived from the open BASIS standard. Inherit community-vetted governance patterns and customize them for your deployment.',
+  },
+  {
+    icon: 'git-branch',
+    title: 'Decision Engine',
+    description: 'ALLOW / DENY / ESCALATE with full audit trail. Every decision is logged with reasoning, context, and the rule chain that produced it.',
+  },
+  {
+    icon: 'layout-template',
+    title: 'Rule Templates',
+    description: 'Pre-built templates for common governance patterns — finance, healthcare, HR, and infrastructure. Start secure, customize as you grow.',
+  },
+];
+
+const steps = [
+  { step: '01', title: 'Define', desc: 'Write governance rules in TypeScript or use pre-built templates.' },
+  { step: '02', title: 'Evaluate', desc: 'Agent actions are checked against rules in real time. ALLOW, DENY, or ESCALATE.' },
+  { step: '03', title: 'Audit', desc: 'Every decision is recorded with full context, reasoning, and provenance.' },
+];
+
+---
+
+<BaseLayout
+  title="Vorion Logic"
+  description="Policy engine for AI agent governance. Define rules, enforce decisions, and maintain complete audit trails."
+>
+    <!-- Hero -->
+      <section class="pt-32 pb-20 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-8">
+            <Icon name="git-branch" size={16} class="w-4 h-4" />
+            Coming Soon — Part of the Vorion Stack
+          </div>
+          <h1 class="text-5xl sm:text-7xl font-bold mb-6">
+            <span class="bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">
+              Vorion
+            </span>
+            <br />
+            <span class="text-white">Logic</span>
+          </h1>
+          <p class="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10">
+            Policy engine for AI agent governance. Define rules,
+            enforce decisions, and maintain complete audit trails.
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="https://app.vorion.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-medium shadow-lg shadow-emerald-500/25 transition-all"
+            >
+              Get Started
+              <Icon name="arrow-right" size={16} class="w-4 h-4" />
+            </a>
+            <a
+              href="https://basis.vorion.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium transition-all"
+            >
+              <Icon name="book-open" size={16} class="w-4 h-4" />
+              Read the Spec
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="pb-20 px-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          {features.map((feature) => (
+            <div class="bg-white/[0.03] p-6 rounded-xl border border-white/5 hover:border-emerald-500/30 transition-colors">
+              <Icon name={feature.icon} class="w-8 h-8 text-emerald-400 mb-4" />
+              <h3 class="text-lg font-semibold mb-2">{feature.title}</h3>
+              <p class="text-white/50 text-sm leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- How It Works -->
+      <section class="pb-20 px-6">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-2xl font-bold text-center mb-8">How It Works</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {steps.map((item) => (
+              <div class="bg-white/[0.03] p-6 rounded-xl border border-white/5 text-center">
+                <div class="text-3xl font-bold text-emerald-400 mb-3">{item.step}</div>
+                <h3 class="font-semibold mb-2">{item.title}</h3>
+                <p class="text-sm text-white/50">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+</BaseLayout>

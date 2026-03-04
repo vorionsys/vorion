@@ -1,0 +1,36 @@
+{
+  "name": "bai-cc-dashboard",
+  "version": "1.0.0",
+  "description": "Vorion Public Dashboard - Cloudflare Pages + Workers",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "wrangler pages dev ./dist",
+    "deploy": "wrangler pages deploy ./dist",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "typecheck": "astro check && tsc --noEmit",
+    "lint": "eslint src/",
+    "format": "prettier --write src/"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@astrojs/cloudflare": "^12.6.6",
+    "@neondatabase/serverless": "^0.9.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "@vorionsys/contracts": "*",
+    "astro": "^5.17.1",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241205.0",
+    "@eslint/js": "^9",
+    "@types/node": "^22.10.5",
+    "eslint": "^9",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8",
+    "vitest": "^4.0.18",
+    "wrangler": "^4.63.0"
+  }
+}

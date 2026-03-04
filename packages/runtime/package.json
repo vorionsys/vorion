@@ -28,10 +28,6 @@
     "./stores": {
       "types": "./dist/stores/index.d.ts",
       "import": "./dist/stores/index.js"
-    },
-    "./tracing": {
-      "types": "./dist/tracing/index.d.ts",
-      "import": "./dist/tracing/index.js"
     }
   },
   "files": [
@@ -91,11 +87,11 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vorionsys/vorion.git",
+    "url": "git+https://github.com/voriongit/vorion.git",
     "directory": "packages/runtime"
   },
   "bugs": {
-    "url": "https://github.com/vorionsys/vorion/issues"
+    "url": "https://github.com/voriongit/vorion/issues"
   },
   "homepage": "https://vorion.org",
   "engines": {

@@ -1,0 +1,80 @@
+%%{init: {'theme': 'dark'}}%%
+graph TD
+    START(("New Visitor"))
+
+    subgraph DISCOVER["1. Discovery Layer"]
+        V_HOME["vorion.org<br/>Vorion Home"]
+        AA_HOME["agentanchorai.com<br/>AgentAnchor Home"]
+        AU_HOME["aurais.net<br/>Aurais Home"]
+        BAI_HOME["bai-cc.com<br/>BAI CC Home"]
+    end
+
+    subgraph EDUCATE["2. Education Layer"]
+        BASIS["basis.vorion.org<br/>BASIS Standard"]
+        ACI["aci.vorion.org<br/>ACI Specification"]
+        LEARN["learn.vorion.org<br/>Kaizen Learning"]
+        CONCEPTS["AgentAnchor<br/>Concepts"]
+        DEMO["AgentAnchor<br/>Live Demo"]
+    end
+
+    subgraph PRODUCT["3. Product Layer"]
+        AA_APP["AgentAnchor Portal<br/>Agent Management"]
+        AU_APP["Aurais Dashboard<br/>Trust-Verified Agents"]
+        SANDBOX["Sandbox<br/>Testing"]
+        TRUST["Trust Engine<br/>Core"]
+    end
+
+    subgraph DEV["4. Developer Layer"]
+        API_DOCS["API<br/>Documentation"]
+        SDK["npm Packages<br/>@vorion scope"]
+        MCP_HUB["MCP Hub<br/>Integrations"]
+        CG_API["Cognigate API<br/>cognigate.dev"]
+    end
+
+    subgraph OPERATE["5. Operations Layer"]
+        STATUS["Status Page"]
+        ADMIN["Vorion Admin"]
+        BAI_DASH["BAI-CC<br/>Dashboard"]
+        CERTS["Certificates<br/>& Credentials"]
+    end
+
+    %% Entry points
+    START --> V_HOME
+    START --> AA_HOME
+    START --> AU_HOME
+
+    %% Discovery to Education
+    V_HOME -->|"learn standard"| BASIS
+    V_HOME -->|"explore products"| AA_HOME
+    V_HOME -->|"learn AI trust"| LEARN
+    AA_HOME -->|"understand"| CONCEPTS
+    AA_HOME -->|"try demo"| DEMO
+    AA_HOME -->|"pricing"| AA_APP
+    AU_HOME -->|"features"| AU_APP
+
+    %% Education to deeper learning
+    BASIS -->|"deep dive"| ACI
+    BASIS -->|"implement"| API_DOCS
+    CONCEPTS -->|"hands-on"| DEMO
+    DEMO -->|"sign up"| AA_APP
+    LEARN -->|"earn certs"| CERTS
+
+    %% Product usage
+    AA_APP -->|"manage agents"| TRUST
+    AA_APP -->|"test safely"| SANDBOX
+    AA_APP -->|"integrate"| MCP_HUB
+    AU_APP -->|"verify trust"| TRUST
+
+    %% Developer paths
+    API_DOCS -->|"build with"| CG_API
+    SDK -->|"npm install"| CG_API
+    MCP_HUB -->|"connect to"| CG_API
+
+    %% Operations
+    TRUST -->|"certified"| CERTS
+    BAI_DASH -->|"monitor"| STATUS
+
+    %% Color coding by health
+    style BAI_DASH fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style CG_API fill:#ffa94d,stroke:#e67700,color:#000
+    style START fill:#4c6ef5,stroke:#364fc7,color:#fff

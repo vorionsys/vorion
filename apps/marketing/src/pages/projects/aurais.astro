@@ -1,0 +1,205 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Aurais" description="Trust-verified AI agents for enterprise - Consumer frontend powered by Cognigate governance">
+  <article class="py-16 sm:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="mb-12">
+        <a href="/projects" class="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-white mb-6">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Projects
+        </a>
+
+        <div class="flex items-start gap-4 mb-6">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/20 flex items-center justify-center text-3xl">
+            🤖
+          </div>
+          <div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-white mb-2">Aurais</h1>
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="px-3 py-1 text-sm font-medium rounded-full bg-vorion-500/20 text-vorion-400 border border-vorion-500/30">
+                Active Development
+              </span>
+              <span class="text-sm text-slate-500">aurais.agentanchorai.com</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xl text-slate-400 leading-relaxed">
+          Trust-verified AI agents for enterprise. Deploy agents with confidence using Cognigate
+          governance and AgentAnchor certification.
+        </p>
+      </div>
+
+      <!-- Links -->
+      <div class="flex flex-wrap gap-4 mb-12 p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+        <a
+          href="https://aurais.agentanchorai.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          Open Aurais
+        </a>
+        <a
+          href="https://cognigate.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors"
+        >
+          Cognigate API
+        </a>
+      </div>
+
+      <!-- Overview -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Overview</h2>
+        <p class="text-slate-400 leading-relaxed mb-4">
+          Aurais is the consumer-facing frontend for the Vorion AI governance ecosystem.
+          It provides a modern dashboard for deploying and managing trust-verified AI agents,
+          with real-time governance powered by the Cognigate runtime.
+        </p>
+        <p class="text-slate-400 leading-relaxed">
+          Every agent deployed through Aurais is governed by BASIS-compliant trust scoring,
+          certified through AgentAnchor, and monitored in real-time for policy compliance.
+        </p>
+      </section>
+
+      <!-- Pricing Tiers -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">Product Tiers</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-white mb-2">Core</h3>
+            <p class="text-2xl font-bold text-white mb-2">Free</p>
+            <ul class="text-sm text-slate-400 space-y-2">
+              <li>3 agents</li>
+              <li>Basic governance</li>
+              <li>Community support</li>
+              <li>Public trust badges</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-xl bg-indigo-500/10 border border-indigo-500/30">
+            <h3 class="font-semibold text-indigo-400 mb-2">Pro</h3>
+            <p class="text-2xl font-bold text-white mb-2">$49/mo</p>
+            <ul class="text-sm text-slate-400 space-y-2">
+              <li>25 agents</li>
+              <li>Advanced governance</li>
+              <li>Priority support</li>
+              <li>Custom policies</li>
+            </ul>
+          </div>
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-white mb-2">Exec</h3>
+            <p class="text-2xl font-bold text-white mb-2">Custom</p>
+            <ul class="text-sm text-slate-400 space-y-2">
+              <li>Unlimited agents</li>
+              <li>White-label options</li>
+              <li>Dedicated support</li>
+              <li>SLA guarantees</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-6">Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-white mb-2">Dashboard</h3>
+            <p class="text-sm text-slate-400">
+              Real-time agent overview with trust scores, execution history, and tier status.
+              Monitor your entire fleet from a single pane of glass.
+            </p>
+          </div>
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-white mb-2">Cognigate Integration</h3>
+            <p class="text-sm text-slate-400">
+              Native integration with the Cognigate governance runtime. Intent parsing,
+              policy enforcement, and proof chain verification built-in.
+            </p>
+          </div>
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-white mb-2">AgentAnchor Certification</h3>
+            <p class="text-sm text-slate-400">
+              All agents are certified through AgentAnchor. Trust badges, public profiles,
+              and verifiable audit trails for compliance.
+            </p>
+          </div>
+          <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+            <h3 class="font-semibold text-white mb-2">BASIS Trust Tiers</h3>
+            <p class="text-sm text-slate-400">
+              8-tier trust model (T0-T7) from Sandbox (0-199) to Autonomous (951-1000).
+              Capabilities unlock progressively as trust is earned.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Trust Architecture -->
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-white mb-4">Trust Architecture</h2>
+        <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+          <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs">
+            <div class="p-2 rounded-lg bg-stone-500/20 text-stone-400">
+              <div class="font-bold">T0</div>
+              <div class="text-slate-500">0-199</div>
+            </div>
+            <div class="p-2 rounded-lg bg-red-500/20 text-red-400">
+              <div class="font-bold">T1</div>
+              <div class="text-slate-500">200-349</div>
+            </div>
+            <div class="p-2 rounded-lg bg-orange-500/20 text-orange-400">
+              <div class="font-bold">T2</div>
+              <div class="text-slate-500">350-499</div>
+            </div>
+            <div class="p-2 rounded-lg bg-yellow-500/20 text-yellow-400">
+              <div class="font-bold">T3</div>
+              <div class="text-slate-500">500-649</div>
+            </div>
+            <div class="p-2 rounded-lg bg-green-500/20 text-green-400">
+              <div class="font-bold">T4</div>
+              <div class="text-slate-500">650-799</div>
+            </div>
+            <div class="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+              <div class="font-bold">T5</div>
+              <div class="text-slate-500">800-875</div>
+            </div>
+            <div class="p-2 rounded-lg bg-violet-500/20 text-violet-400">
+              <div class="font-bold">T6</div>
+              <div class="text-slate-500">876-950</div>
+            </div>
+            <div class="p-2 rounded-lg bg-cyan-500/20 text-cyan-400">
+              <div class="font-bold">T7</div>
+              <div class="text-slate-500">951-1000</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Related -->
+      <section>
+        <h2 class="text-2xl font-bold text-white mb-4">Related</h2>
+        <div class="flex flex-wrap gap-4">
+          <a href="/projects/cognigate" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+            Cognigate
+          </a>
+          <a href="/projects/agentanchor" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+            AgentAnchor
+          </a>
+          <a href="/projects/basis" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
+            BASIS Standard
+          </a>
+        </div>
+      </section>
+    </div>
+  </article>
+</BaseLayout>

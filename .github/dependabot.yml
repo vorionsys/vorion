@@ -1,61 +1,59 @@
 version: 2
 updates:
-  # NPM dependencies - Security updates only
-  # Only allow production dependency updates to reduce noise
-  - package-ecosystem: npm
+  # Root package.json and npm workspaces
+  - package-ecosystem: "npm"
     directory: "/"
-    target-branch: main
     schedule:
-      interval: weekly
-      day: monday
-      time: "03:00"
-    allow:
-      - dependency-type: production
-    groups:
-      production-minor-patch:
-        dependency-types:
-          - production
-        update-types:
-          - minor
-          - patch
-    open-pull-requests-limit: 10
-    reviewers:
-      - "dependabot-triage"
-    commit-message:
-      prefix: "chore(deps):"
-      include: scope
-
-  # GitHub Actions
-  - package-ecosystem: github-actions
-    directory: "/"
-    target-branch: main
-    schedule:
-      interval: weekly
-      day: monday
-      time: "03:15"
+      interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 10
     groups:
-      actions:
+      production-dependencies:
         patterns:
           - "*"
-    commit-message:
-      prefix: "chore(ci):"
-      include: scope
+        exclude-patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier"
+          - "typescript"
+          - "vitest"
+          - "@vitest/*"
+          - "turbo"
+      dev-dependencies:
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier"
+          - "typescript"
+          - "vitest"
+          - "@vitest/*"
+          - "turbo"
+    labels:
+      - "dependencies"
+      - "npm"
 
-  # Python dependencies for car-cli
-  - package-ecosystem: pip
-    directory: "/packages/car-python/"
-    target-branch: main
+  # Python dependencies for cognigate-api
+  - package-ecosystem: "pip"
+    directory: "/cognigate-api"
     schedule:
-      interval: monthly
-      day: first
-      time: "03:30"
-    open-pull-requests-limit: 10
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
     groups:
-      python-minor-patch:
-        update-types:
-          - minor
-          - patch
-    commit-message:
-      prefix: "chore(deps-python):"
-      include: scope
+      python-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"

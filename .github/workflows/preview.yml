@@ -1,0 +1,354 @@
+name: Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: preview-${{ github.head_ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      agentanchor: ${{ steps.filter.outputs.agentanchor }}
+      agentanchor-www: ${{ steps.filter.outputs.agentanchor-www }}
+      aurais: ${{ steps.filter.outputs.aurais }}
+      kaizen: ${{ steps.filter.outputs.kaizen }}
+      kaizen-docs: ${{ steps.filter.outputs.kaizen-docs }}
+      marketing: ${{ steps.filter.outputs.marketing }}
+      vorion-www: ${{ steps.filter.outputs.vorion-www }}
+      packages: ${{ steps.filter.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            agentanchor:
+              - 'apps/agentanchor/**'
+              - 'packages/**'
+            agentanchor-www:
+              - 'apps/agentanchor-www/**'
+            aurais:
+              - 'apps/aurais/**'
+            kaizen:
+              - 'apps/kaizen/**'
+              - 'packages/**'
+            kaizen-docs:
+              - 'kaizen-docs/**'
+            marketing:
+              - 'apps/marketing/**'
+            vorion-www:
+              - 'vorion-www/**'
+            packages:
+              - 'packages/**'
+
+  build-packages:
+    name: Build Packages
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.packages == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Turbo
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build packages
+        run: >-
+          npx turbo build --filter="./packages/*"
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages-dist
+          path: packages/*/dist
+          retention-days: 1
+
+  preview-agentanchor:
+    name: Preview AgentAnchor
+    runs-on: ubuntu-latest
+    needs: [changes, build-packages]
+    if: |
+      always() &&
+      needs.changes.outputs.agentanchor == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-dist
+          path: packages
+        continue-on-error: true
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          url=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+        working-directory: apps/agentanchor
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_AGENTANCHOR_PROJECT_ID }}
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '### AgentAnchor Preview\n\nDeployed to: ${{ steps.deploy.outputs.url }}'
+            })
+
+  preview-agentanchor-www:
+    name: Preview AgentAnchor WWW
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.agentanchor-www == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          url=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+        working-directory: apps/agentanchor-www
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_AGENTANCHOR_WWW_PROJECT_ID }}
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '### AgentAnchor WWW Preview\n\nDeployed to: ${{ steps.deploy.outputs.url }}'
+            })
+
+  preview-kaizen:
+    name: Preview Kaizen
+    runs-on: ubuntu-latest
+    needs: [changes, build-packages]
+    if: |
+      always() &&
+      needs.changes.outputs.kaizen == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-dist
+          path: packages
+        continue-on-error: true
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          url=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+        working-directory: apps/kaizen
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_KAIZEN_PROJECT_ID }}
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '### Kaizen Preview\n\nDeployed to: ${{ steps.deploy.outputs.url }}'
+            })
+
+  preview-vorion-www:
+    name: Preview Vorion WWW
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.vorion-www == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          url=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+        working-directory: vorion-www
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_VORION_WWW_PROJECT_ID }}
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '### Vorion WWW Preview\n\nDeployed to: ${{ steps.deploy.outputs.url }}'
+            })
+
+  preview-marketing:
+    name: Preview Marketing (consolidated landing sites)
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.marketing == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          url=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+        working-directory: apps/marketing
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MARKETING_PROJECT_ID }}
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '### Marketing Preview\n\nDeployed to: ${{ steps.deploy.outputs.url }}'
+            })
+
+  preview-aurais:
+    name: Preview Aurais
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.aurais == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          url=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+        working-directory: apps/aurais
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_AURAIS_PROJECT_ID }}
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '### Aurais Preview\n\nDeployed to: ${{ steps.deploy.outputs.url }}'
+            })

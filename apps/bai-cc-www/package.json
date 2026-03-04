@@ -1,0 +1,28 @@
+{
+  "name": "bai-cc-www",
+  "type": "module",
+  "version": "2.0.0",
+  "description": "BAI Command Center - Internal IT/DevOps dashboard for the Vorion ecosystem",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^9.0.4",
+    "@tailwindcss/vite": "^4.1.18",
+    "@vercel/analytics": "^1.6.1",
+    "astro": "^5.17.1",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "@types/node": "^22.10.5",
+    "eslint": "^9",
+    "sharp": "^0.34.5",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8"
+  }
+}

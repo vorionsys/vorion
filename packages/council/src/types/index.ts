@@ -151,8 +151,8 @@ export interface ExecutionResult {
 }
 
 export interface QAFeedback {
-  aspect: 'accuracy' | 'completeness' | 'clarity' | 'relevance' | 'tone'
-  score: number // 0-10
+  aspect: 'accuracy' | 'completeness' | 'clarity' | 'relevance' | 'safety'
+  score: number // 1-10
   feedback: string
   reviewedBy: string // Agent ID
   requiresRevision: boolean

@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================================
+ * VORION UNIFIED THEME SYSTEM
+ *
+ * CSS variables driven by @vorionsys/shared-constants/themes.ts
+ * To switch themes: change ACTIVE_THEME in themes.ts
+ *
+ * Current: midnight_cyan
+ * Options: midnight_cyan | indigo_authority | obsidian_amber | arctic_glass
+ * =========================================================================== */
+
+:root {
+  /* ── Backgrounds ── */
+  --bg-primary: #0a0a0f;
+  --bg-surface: #111118;
+  --bg-input: #0d0d14;
+  --bg-nav: #111118;
+  --bg-code: #0d0d14;
+
+  /* ── Accent ── */
+  --accent: #06b6d4;
+  --accent-hover: #22d3ee;
+  --accent-muted: rgba(6, 182, 212, 0.1);
+  --accent-subtle: rgba(6, 182, 212, 0.03);
+
+  /* ── Text ── */
+  --text-primary: #e0e0e6;
+  --text-heading: #ffffff;
+  --text-secondary: #888888;
+  --text-tertiary: #666666;
+
+  /* ── Borders ── */
+  --border: #1e1e2e;
+  --border-input: #2a2a3a;
+  --border-hover: rgba(6, 182, 212, 0.4);
+  --border-divider: rgba(255, 255, 255, 0.05);
+
+  /* ── Gradients ── */
+  --gradient-from: #06b6d4;
+  --gradient-to: #2dd4bf;
+
+  /* ── Scrollbar ── */
+  --scroll-track: #0a0a0f;
+  --scroll-thumb: #333340;
+  --scroll-thumb-hover: #06b6d4;
+
+  /* ── Selection ── */
+  --selection-bg: rgba(6, 182, 212, 0.3);
+
+  /* ── Semantic ── */
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f97316;
+  --info: #3b82f6;
+
+  /* ── Layers ── */
+  --layer-basis: #fbbf24;
+  --layer-intent: #60a5fa;
+  --layer-enforce: #818cf8;
+  --layer-proof: #34d399;
+
+  /* ── Button ── */
+  --btn-text: #000000;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Dark theme scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+
+/* Selection styling */
+::selection {
+  background-color: var(--selection-bg);
+}
+
+/* Chat message animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}

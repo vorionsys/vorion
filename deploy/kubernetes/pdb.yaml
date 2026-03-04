@@ -1,0 +1,29 @@
+---
+# Vorion API Pod Disruption Budget
+# Ensures minimum availability during voluntary disruptions
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: vorion-api
+  namespace: vorion
+  labels:
+    app.kubernetes.io/name: vorion
+    app.kubernetes.io/component: pdb
+    app.kubernetes.io/part-of: vorion
+spec:
+  # At least 2 pods must be available during disruptions
+  # This ensures high availability while allowing rolling updates
+  minAvailable: 2
+
+  # Alternative: use maxUnavailable
+  # maxUnavailable: 1
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vorion
+      app.kubernetes.io/component: api
+
+  # Unhealthy pod eviction policy (Kubernetes 1.26+)
+  # AlwaysAllow: Always allow eviction of unhealthy pods
+  # IfHealthyBudget: Only evict unhealthy pods if budget allows
+  unhealthyPodEvictionPolicy: IfHealthyBudget
