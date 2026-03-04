@@ -2,6 +2,7 @@
 ## [Unreleased] — March 2026
 
 ### Features
+- **a3i**: Wire `TrustSignalPipeline` into `PreActionGate` and `Orchestrator` — gate rejections emit `OP-ALIGN` negative signals; execution outcomes emit `CT-COMP` signals (success/failure with methodologyKey). `OrchestratorBuilder.withPipeline()` added. New E2E integration tests cover full lifecycle, circuit breaker trip, degraded state, methodology repeat-failure detection, and two-engine feedback loop. 17 new tests (3 gate + 3 orchestrator + 11 E2E), 74 total in affected files.
 - **a3i + basis**: Wire `KYA AccountabilityChain` to `TrustSignalPipeline` via injected `AccountabilitySignalCallback`; every accountability record now propagates a `CT-ACCT` trust signal through the fast+slow pipeline lanes without a basis→a3i upward dependency. New `createKYAWithPipeline()` factory in `packages/a3i/src/kya/`. 8 test cases (kya-pipeline.test.ts).
 - **POST /api/v1/trust/signal**: New `processSignal` handler registered in A3I API routes.
 - **tools/validate-oscal-ssp.py**: Python-based OSCAL structural validator for all 4 OSCAL artifacts (SSP, component-definition, assessment-plan, POA&M) — works without Java/CLI.
