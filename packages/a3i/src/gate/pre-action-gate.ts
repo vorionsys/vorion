@@ -26,6 +26,7 @@ import {
 } from '@vorionsys/contracts';
 
 import { classifyRisk, explainRiskFactors } from './risk-classifier.js';
+import { TrustSignalPipeline } from '../trust/signal-pipeline.js';
 
 /**
  * Trust provider interface - abstracts trust score retrieval
@@ -45,15 +46,18 @@ export type GateEventListener = (event: GateEvent) => void;
 export class PreActionGate {
   private readonly config: PreActionGateConfig;
   private readonly trustProvider?: TrustProvider;
+  private readonly pipeline?: TrustSignalPipeline;
   private readonly trustThresholds: Record<RiskLevel, number>;
   private readonly eventListeners: GateEventListener[] = [];
 
   constructor(
     config: Partial<PreActionGateConfig> = {},
-    trustProvider?: TrustProvider
+    trustProvider?: TrustProvider,
+    pipeline?: TrustSignalPipeline
   ) {
     this.config = { ...DEFAULT_GATE_CONFIG, ...config };
     this.trustProvider = trustProvider;
+    this.pipeline = pipeline;
     this.trustThresholds = {
       ...TRUST_THRESHOLDS,
       ...config.trustThresholds,
@@ -120,6 +124,18 @@ export class PreActionGate {
       timestamp: now,
       verificationId,
     });
+
+    // Route gate rejections through trust pipeline
+    if (!passed && this.pipeline) {
+      this.pipeline.process({
+        agentId: request.agentId,
+        success: false,
+        factorCode: 'OP-ALIGN',
+        methodologyKey: `gate:rejected:${riskLevel}`,
+      }).catch(() => {
+        // Pipeline errors should not break gate verification
+      });
+    }
 
     return result;
   }
@@ -355,9 +371,10 @@ export class PreActionGate {
  */
 export function createPreActionGate(
   config?: Partial<PreActionGateConfig>,
-  trustProvider?: TrustProvider
+  trustProvider?: TrustProvider,
+  pipeline?: TrustSignalPipeline
 ): PreActionGate {
-  return new PreActionGate(config, trustProvider);
+  return new PreActionGate(config, trustProvider, pipeline);
 }
 
 /**

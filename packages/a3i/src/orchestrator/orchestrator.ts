@@ -27,6 +27,7 @@ import {
   TrustProfileService,
   type ProfileServiceConfig,
 } from '../trust/profile-service.js';
+import { TrustSignalPipeline } from '../trust/signal-pipeline.js';
 
 import type { Intent, Decision, TrustProfile, AuthorizationResponse } from '@vorionsys/contracts';
 
@@ -132,6 +133,8 @@ export interface OrchestratorConfig {
   logger?: OrchestratorLogger;
   /** Enable logging (default: true if logger provided) */
   enableLogging?: boolean;
+  /** Trust signal pipeline for routing execution outcomes */
+  pipeline?: TrustSignalPipeline;
 }
 
 /**
@@ -144,11 +147,13 @@ export class Orchestrator {
   private readonly hookManager?: HookManager;
   private readonly logger?: OrchestratorLogger;
   private readonly enableLogging: boolean;
+  private readonly pipeline?: TrustSignalPipeline;
 
   constructor(config: OrchestratorConfig = {}) {
     this.hookManager = config.hookManager;
     this.logger = config.logger;
     this.enableLogging = config.enableLogging ?? (config.logger !== undefined);
+    this.pipeline = config.pipeline;
 
     // Create or use provided profile service
     this.profileService = config.profileService ?? new TrustProfileService({
@@ -263,6 +268,19 @@ export class Orchestrator {
         execution.retryable ?? false,
         correlationId
       );
+    }
+
+    // Route execution outcome through trust pipeline
+    if (this.pipeline) {
+      const signalSuccess = execution.success;
+      this.pipeline.process({
+        agentId: intent.agentId,
+        success: signalSuccess,
+        factorCode: 'CT-COMP',
+        methodologyKey: signalSuccess ? undefined : `execution:failure:${intent.actionType}`,
+      }).catch(() => {
+        // Pipeline errors should not break orchestration
+      });
     }
 
     return {
@@ -452,6 +470,14 @@ export class OrchestratorBuilder {
    */
   withLogger(logger: OrchestratorLogger): this {
     this.config.logger = logger;
+    return this;
+  }
+
+  /**
+   * Set the trust signal pipeline for execution outcome routing
+   */
+  withPipeline(pipeline: TrustSignalPipeline): this {
+    this.config.pipeline = pipeline;
     return this;
   }
 

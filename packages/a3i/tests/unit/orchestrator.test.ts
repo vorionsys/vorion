@@ -477,3 +477,129 @@ describe('Orchestrator Logging', () => {
     expect(orchestrator.getLogger()).toBe(logger);
   });
 });
+
+describe('Pipeline Integration', () => {
+  // Helper to create factor-code evidence (16-factor model)
+  function createFactorEvidence(factorCode: string, impact: number): TrustEvidence {
+    return {
+      evidenceId: uuidv4(),
+      factorCode,
+      impact,
+      source: 'test',
+      collectedAt: new Date(),
+    };
+  }
+
+  it('should route successful execution through trust pipeline', async () => {
+    const { TrustDynamicsEngine } = await import('../../src/trust/trust-dynamics.js');
+    const { TrustSignalPipeline } = await import('../../src/trust/signal-pipeline.js');
+
+    const dynamics = new TrustDynamicsEngine();
+    const profileService = new TrustProfileService();
+    const pipeline = new TrustSignalPipeline(dynamics, profileService);
+    const processSpy = vi.fn().mockResolvedValue({
+      dynamicsResult: { newScore: 10, delta: 5, circuitBreakerTripped: false },
+      profile: null,
+      evidence: null,
+      blocked: false,
+    });
+    pipeline.process = processSpy;
+
+    // Create agent with enough trust
+    await profileService.create('pipeline-agent', ObservationTier.WHITE_BOX, [
+      createFactorEvidence('CT-COMP', 200),
+      createFactorEvidence('CT-REL', 200),
+      createFactorEvidence('CT-OBS', 200),
+      createFactorEvidence('CT-TRANS', 200),
+      createFactorEvidence('CT-ACCT', 200),
+    ]);
+
+    const orchestrator = orchestratorBuilder()
+      .withProfileService(profileService)
+      .withPipeline(pipeline)
+      .build();
+
+    const executor: ActionExecutor = vi.fn().mockResolvedValue({ ok: true });
+    orchestrator.registerExecutor(ActionType.READ, executor);
+
+    await orchestrator.processIntent(createIntent({ agentId: 'pipeline-agent' }));
+
+    // Give fire-and-forget promise time to resolve
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    expect(processSpy).toHaveBeenCalledWith(expect.objectContaining({
+      agentId: 'pipeline-agent',
+      success: true,
+      factorCode: 'CT-COMP',
+    }));
+  });
+
+  it('should route execution failure through trust pipeline with methodology key', async () => {
+    const { TrustDynamicsEngine } = await import('../../src/trust/trust-dynamics.js');
+    const { TrustSignalPipeline } = await import('../../src/trust/signal-pipeline.js');
+
+    const dynamics = new TrustDynamicsEngine();
+    const profileService = new TrustProfileService();
+    const pipeline = new TrustSignalPipeline(dynamics, profileService);
+    const processSpy = vi.fn().mockResolvedValue({
+      dynamicsResult: { newScore: 1, delta: -10, circuitBreakerTripped: false },
+      profile: null,
+      evidence: null,
+      blocked: false,
+    });
+    pipeline.process = processSpy;
+
+    await profileService.create('failing-pipeline-agent', ObservationTier.WHITE_BOX, [
+      createFactorEvidence('CT-COMP', 200),
+      createFactorEvidence('CT-REL', 200),
+      createFactorEvidence('CT-OBS', 200),
+      createFactorEvidence('CT-TRANS', 200),
+      createFactorEvidence('CT-ACCT', 200),
+    ]);
+
+    const orchestrator = orchestratorBuilder()
+      .withProfileService(profileService)
+      .withPipeline(pipeline)
+      .build();
+
+    const executor: ActionExecutor = vi.fn().mockRejectedValue(new Error('boom'));
+    orchestrator.registerExecutor(ActionType.READ, executor);
+
+    await orchestrator.processIntent(createIntent({
+      agentId: 'failing-pipeline-agent',
+      actionType: ActionType.READ,
+    }));
+
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    expect(processSpy).toHaveBeenCalledWith(expect.objectContaining({
+      agentId: 'failing-pipeline-agent',
+      success: false,
+      factorCode: 'CT-COMP',
+      methodologyKey: `execution:failure:${ActionType.READ}`,
+    }));
+  });
+
+  it('should NOT route through pipeline when authorization denied', async () => {
+    const { TrustDynamicsEngine } = await import('../../src/trust/trust-dynamics.js');
+    const { TrustSignalPipeline } = await import('../../src/trust/signal-pipeline.js');
+
+    const dynamics = new TrustDynamicsEngine();
+    const profileService = new TrustProfileService();
+    const pipeline = new TrustSignalPipeline(dynamics, profileService);
+    const processSpy = vi.fn();
+    pipeline.process = processSpy;
+
+    // Don't create agent — will be denied (unknown agent)
+    const orchestrator = orchestratorBuilder()
+      .withProfileService(profileService)
+      .withPipeline(pipeline)
+      .build();
+
+    await orchestrator.processIntent(createIntent({ agentId: 'unknown-agent' }));
+
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    expect(processSpy).not.toHaveBeenCalled();
+  });
+});

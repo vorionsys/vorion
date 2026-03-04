@@ -540,3 +540,98 @@ describe('Trust Progression Path', () => {
     expect(writeResult2.passed).toBe(true);
   });
 });
+
+describe('Pipeline Integration', () => {
+  it('should route gate rejections through the trust pipeline', async () => {
+    const { TrustDynamicsEngine } = await import('../../src/trust/trust-dynamics.js');
+    const { TrustProfileService } = await import('../../src/trust/profile-service.js');
+    const { TrustSignalPipeline } = await import('../../src/trust/signal-pipeline.js');
+
+    const dynamics = new TrustDynamicsEngine();
+    const profiles = new TrustProfileService();
+    const pipeline = new TrustSignalPipeline(dynamics, profiles);
+    const processSpy = vi.fn().mockResolvedValue({
+      dynamicsResult: { newScore: 1, delta: -10, circuitBreakerTripped: false },
+      profile: null,
+      evidence: null,
+      blocked: false,
+    });
+    pipeline.process = processSpy;
+
+    const gate = createPreActionGate({}, undefined, pipeline);
+
+    // Agent with trust=100 trying CRITICAL action (needs much higher trust)
+    await gate.verify({
+      agentId: 'low-trust-agent',
+      action: 'Delete production database',
+      actionType: ActionType.DELETE,
+      resourceScope: ['production-db'],
+      dataSensitivity: DataSensitivity.RESTRICTED,
+      reversibility: Reversibility.IRREVERSIBLE,
+    }, 100);
+
+    // Give fire-and-forget promise time to resolve
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    expect(processSpy).toHaveBeenCalledWith(expect.objectContaining({
+      agentId: 'low-trust-agent',
+      success: false,
+      factorCode: 'OP-ALIGN',
+    }));
+    expect(processSpy.mock.calls[0][0].methodologyKey).toMatch(/^gate:rejected:/);
+  });
+
+  it('should NOT route approved gates through the pipeline', async () => {
+    const { TrustDynamicsEngine } = await import('../../src/trust/trust-dynamics.js');
+    const { TrustProfileService } = await import('../../src/trust/profile-service.js');
+    const { TrustSignalPipeline } = await import('../../src/trust/signal-pipeline.js');
+
+    const dynamics = new TrustDynamicsEngine();
+    const profiles = new TrustProfileService();
+    const pipeline = new TrustSignalPipeline(dynamics, profiles);
+    const processSpy = vi.fn();
+    pipeline.process = processSpy;
+
+    const gate = createPreActionGate({}, undefined, pipeline);
+
+    // High trust agent doing low-risk action — should be approved
+    await gate.verify({
+      agentId: 'high-trust-agent',
+      action: 'Read public file',
+      actionType: ActionType.READ,
+      resourceScope: ['public-file'],
+      dataSensitivity: DataSensitivity.PUBLIC,
+      reversibility: Reversibility.REVERSIBLE,
+    }, 900);
+
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    expect(processSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not break gate verification if pipeline errors', async () => {
+    const { TrustDynamicsEngine } = await import('../../src/trust/trust-dynamics.js');
+    const { TrustProfileService } = await import('../../src/trust/profile-service.js');
+    const { TrustSignalPipeline } = await import('../../src/trust/signal-pipeline.js');
+
+    const dynamics = new TrustDynamicsEngine();
+    const profiles = new TrustProfileService();
+    const pipeline = new TrustSignalPipeline(dynamics, profiles);
+    pipeline.process = vi.fn().mockRejectedValue(new Error('Pipeline down'));
+
+    const gate = createPreActionGate({ allowPendingStates: false }, undefined, pipeline);
+
+    // Should still return a valid result even when pipeline errors
+    const result = await gate.verify({
+      agentId: 'test-agent',
+      action: 'Delete records',
+      actionType: ActionType.DELETE,
+      resourceScope: ['records'],
+      dataSensitivity: DataSensitivity.RESTRICTED,
+      reversibility: Reversibility.IRREVERSIBLE,
+    }, 10);
+
+    expect(result.passed).toBe(false);
+    expect(result.status).toBe(GateStatus.REJECTED);
+  });
+});
