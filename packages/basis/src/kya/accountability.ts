@@ -6,11 +6,33 @@
 import { createHash } from 'crypto';
 import { AccountabilityRecord, DatabaseConfig } from './types.js';
 
+/**
+ * Callback invoked after each accountability record is appended.
+ * Allows the caller to propagate trust signals to an external engine
+ * (e.g. TrustSignalPipeline) without creating an upward dependency on a3i.
+ *
+ * @param agentId     Agent DID / identifier
+ * @param success     true = positive outcome, false = failure or denial
+ * @param factorCode  16-factor code to credit/debit (e.g. 'CT-ACCT')
+ * @param methodologyKey  Optional key for repeat-failure tracking
+ */
+export type AccountabilitySignalCallback = (
+  agentId: string,
+  success: boolean,
+  factorCode: string,
+  methodologyKey?: string,
+) => void | Promise<void>;
+
 export class AccountabilityChain {
   private records: Map<string, AccountabilityRecord[]>;
+  private onSignal?: AccountabilitySignalCallback;
 
-  constructor(private config: DatabaseConfig) {
+  constructor(
+    private config: DatabaseConfig,
+    onSignal?: AccountabilitySignalCallback,
+  ) {
     this.records = new Map();
+    this.onSignal = onSignal;
     // Would initialize database connection here
   }
 
@@ -119,14 +141,21 @@ export class AccountabilityChain {
   }
 
   /**
-   * Update agent's accountability score
+   * Update agent's accountability score via injected signal callback.
+   * Maps outcome to CT-ACCT factor signals on the 16-factor trust model.
    */
   private async updateAccountabilityScore(
     agentDID: string,
     outcome: 'success' | 'failure' | 'denied'
   ): Promise<void> {
-    // Would update TSG trust score based on outcome
-    const impact = outcome === 'success' ? 1 : outcome === 'failure' ? -5 : -10;
-    // await tsg.updateTrustScore(agentDID, impact);
+    if (!this.onSignal) return;
+
+    const success = outcome === 'success';
+    const methodologyKey =
+      outcome === 'denied' ? 'accountability:denied'
+      : outcome === 'failure' ? 'accountability:failure'
+      : undefined;
+
+    await this.onSignal(agentDID, success, 'CT-ACCT', methodologyKey);
   }
 }

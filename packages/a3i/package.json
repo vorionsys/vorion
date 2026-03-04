@@ -33,6 +33,10 @@
     "./orchestrator": {
       "types": "./dist/orchestrator/index.d.ts",
       "import": "./dist/orchestrator/index.js"
+    },
+    "./kya": {
+      "types": "./dist/kya/index.d.ts",
+      "import": "./dist/kya/index.js"
     }
   },
   "files": [

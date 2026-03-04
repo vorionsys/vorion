@@ -19,6 +19,8 @@ import {
 } from './middleware.js';
 import { AuthorizationEngine } from '../authorization/engine.js';
 import { TrustProfileService } from '../trust/profile-service.js';
+import { TrustSignalPipeline } from '../trust/signal-pipeline.js';
+import { TrustDynamicsEngine } from '../trust/trust-dynamics.js';
 
 /**
  * API configuration options
@@ -75,10 +77,12 @@ export function createApi(config: ApiConfig = {}): Hono {
   // Create services if not provided
   const profileService = config.context?.profileService ?? new TrustProfileService();
   const authEngine = config.context?.authEngine ?? new AuthorizationEngine({ profileService });
+  const pipeline = config.context?.pipeline ?? new TrustSignalPipeline(new TrustDynamicsEngine(), profileService);
 
   const context: HandlerContext = {
     profileService,
     authEngine,
+    pipeline,
   };
 
   const handlers = createHandlers(context);
@@ -109,6 +113,7 @@ export function createApi(config: ApiConfig = {}): Hono {
   app.get(`${basePath}/trust/:agentId`, handlers.getTrustProfile);
   app.get(`${basePath}/trust/:agentId/history`, handlers.getTrustHistory);
   app.post(`${basePath}/trust/calculate`, handlers.calculateTrust);
+  app.post(`${basePath}/trust/signal`, handlers.processSignal);
   app.delete(`${basePath}/trust/:agentId`, handlers.deleteTrustProfile);
 
   // Band configuration

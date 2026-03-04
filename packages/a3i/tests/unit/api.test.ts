@@ -16,6 +16,8 @@ import {
   createApiWithContext,
   TrustProfileService,
   AuthorizationEngine,
+  TrustSignalPipeline,
+  TrustDynamicsEngine,
 } from '../../src/index.js';
 
 // Use consistent test agent ID
@@ -363,6 +365,69 @@ describe('A3I API', () => {
 
       const data = await res.json();
       expect(data.decision.latencyMs).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('POST /api/v1/trust/signal', () => {
+    let appWithPipeline: ReturnType<typeof createApi>;
+
+    beforeEach(() => {
+      const dynamics = new TrustDynamicsEngine();
+      const pipeline = new TrustSignalPipeline(dynamics, profileService);
+      appWithPipeline = createApiWithContext(
+        { profileService, authEngine, pipeline },
+        { apiKey: { allowUnauthenticated: true } },
+      );
+    });
+
+    it('should process a positive signal and return profile', async () => {
+      const res = await appWithPipeline.request('/api/v1/trust/signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: TEST_AGENT_ID, success: true, factorCode: 'CT-COMP' }),
+      });
+
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.agentId).toBe(TEST_AGENT_ID);
+      expect(data.blocked).toBe(false);
+      expect(data.dynamics).toBeDefined();
+      expect(data.dynamics.newScore).toBeGreaterThanOrEqual(0);
+      expect(data.profile).toBeDefined();
+      expect(data.profile.compositeScore).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should process a negative signal', async () => {
+      const res = await appWithPipeline.request('/api/v1/trust/signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: TEST_AGENT_ID, success: false, factorCode: 'CT-COMP', methodologyKey: 'test:neg' }),
+      });
+
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(data.agentId).toBe(TEST_AGENT_ID);
+      expect(data.dynamics.delta).toBeLessThan(0);
+    });
+
+    it('should return 400 for missing agentId', async () => {
+      const res = await appWithPipeline.request('/api/v1/trust/signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: true, factorCode: 'CT-COMP' }),
+      });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should return 400 for missing factorCode', async () => {
+      const res = await appWithPipeline.request('/api/v1/trust/signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: TEST_AGENT_ID, success: true }),
+      });
+
+      expect(res.status).toBe(400);
     });
   });
 

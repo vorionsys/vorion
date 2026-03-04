@@ -13,7 +13,7 @@ export * from './types.js';
 
 import { IdentityVerifier } from './identity.js';
 import { AuthorizationManager } from './authorization.js';
-import { AccountabilityChain } from './accountability.js';
+import { AccountabilityChain, type AccountabilitySignalCallback } from './accountability.js';
 import { BehaviorMonitor } from './behavior.js';
 import { KYAConfig, AnomalyAlert } from './types.js';
 
@@ -26,10 +26,10 @@ export class KYA {
   public accountability: AccountabilityChain;
   public behavior: BehaviorMonitor;
 
-  constructor(config: KYAConfig) {
+  constructor(config: KYAConfig, onSignal?: AccountabilitySignalCallback) {
     this.identity = new IdentityVerifier(config.didResolver);
     this.authorization = new AuthorizationManager(config.policyEngine);
-    this.accountability = new AccountabilityChain(config.database);
+    this.accountability = new AccountabilityChain(config.database, onSignal);
     this.behavior = new BehaviorMonitor(config.database);
   }
 

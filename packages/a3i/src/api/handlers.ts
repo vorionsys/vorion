@@ -27,6 +27,10 @@ import {
   type ProfileQueryFilter,
   type ProfileQueryOptions,
 } from '../trust/profile-service.js';
+import {
+  TrustSignalPipeline,
+  type SignalInput,
+} from '../trust/signal-pipeline.js';
 
 import type { Context } from 'hono';
 
@@ -36,6 +40,7 @@ import type { Context } from 'hono';
 export interface HandlerContext {
   profileService: TrustProfileService;
   authEngine: AuthorizationEngine;
+  pipeline?: TrustSignalPipeline;
 }
 
 /**
@@ -231,6 +236,59 @@ export function createHandlers(context: HandlerContext) {
     },
 
     /**
+     * POST /api/v1/trust/signal
+     * Process a trust signal through the fast+slow pipeline
+     */
+    async processSignal(c: Context) {
+      if (!context.pipeline) {
+        return c.json({ error: { code: 'NOT_CONFIGURED', message: 'Signal pipeline not configured' } }, 501);
+      }
+
+      const body = await c.req.json();
+
+      // Basic validation
+      if (!body.agentId || typeof body.agentId !== 'string') {
+        return c.json({ error: { code: 'VALIDATION_ERROR', message: 'agentId is required' } }, 400);
+      }
+      if (typeof body.success !== 'boolean') {
+        return c.json({ error: { code: 'VALIDATION_ERROR', message: 'success must be a boolean' } }, 400);
+      }
+      if (!body.factorCode || typeof body.factorCode !== 'string') {
+        return c.json({ error: { code: 'VALIDATION_ERROR', message: 'factorCode is required' } }, 400);
+      }
+
+      const signal: SignalInput = {
+        agentId: body.agentId,
+        success: body.success,
+        factorCode: body.factorCode,
+        methodologyKey: body.methodologyKey,
+        magnitude: body.magnitude,
+        isReversal: body.isReversal,
+      };
+
+      const result = await context.pipeline.process(signal);
+
+      return c.json({
+        agentId: signal.agentId,
+        blocked: result.blocked,
+        blockReason: result.blockReason,
+        dynamics: {
+          newScore: result.dynamicsResult.newScore,
+          delta: result.dynamicsResult.delta,
+          circuitBreakerState: result.dynamicsResult.circuitBreakerState,
+          blockReason: result.dynamicsResult.blockReason,
+        },
+        profile: result.profile ? {
+          compositeScore: result.profile.compositeScore,
+          adjustedScore: result.profile.adjustedScore,
+          band: result.profile.band,
+          bandName: TrustBand[result.profile.band],
+          calculatedAt: result.profile.calculatedAt.toISOString(),
+        } : null,
+      });
+    },
+
+    /**
      * DELETE /api/v1/trust/:agentId
      * Delete a trust profile
      */
@@ -337,6 +395,7 @@ export function createHandlers(context: HandlerContext) {
         version: '0.1.0',
         endpoints: [
           { method: 'POST', path: '/api/v1/authorize', description: 'Authorize an intent' },
+          { method: 'POST', path: '/api/v1/trust/signal', description: 'Process trust signal (fast+slow pipeline)' },
           { method: 'GET', path: '/api/v1/trust/:agentId', description: 'Get trust profile' },
           { method: 'GET', path: '/api/v1/trust', description: 'List trust profiles' },
           { method: 'POST', path: '/api/v1/trust/calculate', description: 'Calculate trust' },
