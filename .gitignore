@@ -80,6 +80,7 @@ credentials/
 
 # Test artifacts
 test-results/
+test-results-*.txt
 playwright-report/
 *.lcov
 
