@@ -28,6 +28,19 @@ import {
   getProbeById,
 } from './probe-library.js';
 import { TrustDynamicsEngine } from '../trust/trust-dynamics.js';
+import { TrustSignalPipeline } from '../trust/signal-pipeline.js';
+
+/**
+ * Maps canary probe categories to 16-factor model codes for slow-lane evidence.
+ * FACTUAL/LOGICAL → Competence; ETHICAL/BEHAVIORAL → Alignment; CONSISTENCY → Reliability.
+ */
+const CANARY_CATEGORY_FACTOR: Record<CanaryCategory, string> = {
+  [CanaryCategory.FACTUAL]:      'CT-COMP',
+  [CanaryCategory.LOGICAL]:      'CT-COMP',
+  [CanaryCategory.ETHICAL]:      'OP-ALIGN',
+  [CanaryCategory.BEHAVIORAL]:   'CT-OBS',
+  [CanaryCategory.CONSISTENCY]:  'CT-REL',
+};
 
 /**
  * Response function type for agent interaction
@@ -45,16 +58,19 @@ export type CanaryEventListener = (event: CanaryFailureEvent) => void;
 export class CanaryProbeService {
   private readonly config: CanaryInjectionConfig;
   private readonly trustEngine?: TrustDynamicsEngine;
+  private readonly pipeline?: TrustSignalPipeline;
   private readonly stats: Map<string, CanaryProbeStats> = new Map();
   private readonly lastProbeTime: Map<string, Date> = new Map();
   private readonly eventListeners: CanaryEventListener[] = [];
 
   constructor(
     config: Partial<CanaryInjectionConfig> = {},
-    trustEngine?: TrustDynamicsEngine
+    trustEngine?: TrustDynamicsEngine,
+    pipeline?: TrustSignalPipeline
   ) {
     this.config = { ...DEFAULT_CANARY_CONFIG, ...config };
     this.trustEngine = trustEngine;
+    this.pipeline = pipeline;
   }
 
   /**
@@ -268,15 +284,27 @@ export class CanaryProbeService {
     probe: CanaryProbe
   ): Promise<void> {
     // Trip circuit breaker if critical probe failed
-    if (probe.critical && this.trustEngine) {
-      // Use a very low score to force circuit breaker trigger.
-      // methodologyKey tracks repeat failures by probe category for pattern detection.
-      this.trustEngine.updateTrust(agentId, {
-        currentScore: 5, // Below circuit breaker threshold
-        success: false,
-        ceiling: 100,
-        methodologyKey: `${probe.category}:${probe.subcategory}`,
-      });
+    if (probe.critical) {
+      const methodologyKey = `${probe.category}:${probe.subcategory}`;
+      const factorCode = CANARY_CATEGORY_FACTOR[probe.category];
+
+      if (this.pipeline) {
+        // New path: signal pipeline writes to both fast lane (CB) and slow lane (evidence)
+        await this.pipeline.process({
+          agentId,
+          success: false,
+          factorCode,
+          methodologyKey,
+        });
+      } else if (this.trustEngine) {
+        // Legacy path: fast lane only — no slow-lane evidence written
+        this.trustEngine.updateTrust(agentId, {
+          currentScore: 5, // Below circuit breaker threshold
+          success: false,
+          ceiling: 100,
+          methodologyKey,
+        });
+      }
     }
 
     // Emit failure event
@@ -449,10 +477,14 @@ export class CanaryProbeService {
 
 /**
  * Create a canary probe service
+ *
+ * Pass `pipeline` to route critical probe failures through both fast and slow trust lanes.
+ * Pass `trustEngine` alone for legacy fast-lane-only behavior (no evidence written).
  */
 export function createCanaryProbeService(
   config?: Partial<CanaryInjectionConfig>,
-  trustEngine?: TrustDynamicsEngine
+  trustEngine?: TrustDynamicsEngine,
+  pipeline?: TrustSignalPipeline
 ): CanaryProbeService {
-  return new CanaryProbeService(config, trustEngine);
+  return new CanaryProbeService(config, trustEngine, pipeline);
 }

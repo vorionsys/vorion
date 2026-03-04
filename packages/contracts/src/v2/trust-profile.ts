@@ -5,6 +5,17 @@
 import type { ObservationTier, TrustBand } from './enums.js';
 
 /**
+ * Graduated circuit breaker state for the trust dynamics engine.
+ *
+ * - 'normal'   : standard operation
+ * - 'degraded' : soft CB — score entered the warning zone; gains blocked,
+ *                losses still apply; auto-resets after tier-appropriate timeout
+ * - 'tripped'  : hard CB — all updates blocked; tier-dependent auto-reset
+ *                (T0-T2 auto-reset, T3+ require admin)
+ */
+export type CircuitBreakerState = 'normal' | 'degraded' | 'tripped';
+
+/**
  * Trust factor scores for an agent
  *
  * Each factor is scored 0.0-1.0 where:
@@ -304,6 +315,32 @@ export interface TrustDynamicsConfig {
    * Default: 72 hours (3 days)
    */
   methodologyWindowHours: number;
+
+  /**
+   * Score threshold (0-1000) for entering degraded mode (soft circuit breaker).
+   * When a LOSS drives the score below this value (but above circuitBreakerThreshold),
+   * the engine enters 'degraded' state: gains are blocked, losses still apply.
+   * Degraded auto-resets after cbDegradedAutoResetMinutes[tier].
+   * Default: 200 (T0/T1 boundary — warning zone)
+   */
+  degradedThreshold: number;
+
+  /**
+   * Minutes until automatic recovery from 'degraded' mode, indexed by tier (T0=index 0..T7=index 7).
+   * After this timeout the engine resets to 'normal' without admin action.
+   * Lower tiers recover faster (sandbox agents get short timeouts).
+   * Default: [5, 15, 30, 120, 240, 720, 1440, 2880]  (T0: 5min → T7: 2 days)
+   */
+  cbDegradedAutoResetMinutes: readonly number[];
+
+  /**
+   * Minutes until automatic recovery from 'tripped' state, indexed by tier.
+   * null = no auto-reset at that tier; admin override required.
+   * T0-T2: auto-reset allowed; T3+: admin required.
+   * Default: [15, 60, 120, null, null, null, null, null]
+   *          (T0: 15min, T1: 1hr, T2: 2hr; T3-T7: admin only)
+   */
+  cbTrippedAutoResetMinutes: readonly (number | null)[];
 }
 
 /** Default trust dynamics configuration per ATSF v2.0 */
@@ -314,9 +351,14 @@ export const DEFAULT_TRUST_DYNAMICS: TrustDynamicsConfig = {
   cooldownHours: 168,                // 7 days after any drop
   oscillationThreshold: 3,           // 3 direction changes triggers alert
   oscillationWindowHours: 24,        // Within 24 hours
-  circuitBreakerThreshold: 100,      // Trust < 100 (on 0-1000 scale) triggers circuit breaker
+  circuitBreakerThreshold: 100,      // Trust < 100 (on 0-1000 scale) → hard CB trip
   methodologyFailureThreshold: 3,    // 3 same-methodology failures → circuit breaker
   methodologyWindowHours: 72,        // Within 72 hours (3 days)
+  degradedThreshold: 200,            // Trust < 200 on a LOSS → degraded mode (warning zone)
+  // Per-tier degraded auto-reset (minutes): T0=5min → T7=2 days
+  cbDegradedAutoResetMinutes: [5, 15, 30, 120, 240, 720, 1440, 2880] as readonly number[],
+  // Per-tier tripped auto-reset (minutes): null = admin required; T0=15min, T1=1hr, T2=2hr, T3+=admin
+  cbTrippedAutoResetMinutes: [15, 60, 120, null, null, null, null, null] as readonly (number | null)[],
 };
 
 /**
@@ -359,12 +401,27 @@ export interface TrustDynamicsState {
   directionChanges: DirectionChange[];
   /** Last trust update direction */
   lastDirection: 'gain' | 'loss' | 'none';
-  /** Whether circuit breaker is tripped */
+  /**
+   * Graduated circuit breaker state.
+   * 'normal' → 'degraded' (score warning zone) → 'tripped' (hard lock)
+   * See CircuitBreakerState for full semantics.
+   */
+  circuitBreakerState: CircuitBreakerState;
+  /**
+   * Whether circuit breaker is fully tripped (hard CB).
+   * Derived from circuitBreakerState === 'tripped'.
+   * Kept for backwards compatibility.
+   */
   circuitBreakerTripped: boolean;
-  /** Reason for circuit breaker if tripped */
+  /** Reason for the current circuit breaker event (degraded or tripped) */
   circuitBreakerReason?: string;
-  /** When circuit breaker was tripped */
+  /** When the current circuit breaker event was triggered */
   circuitBreakerTrippedAt?: Date;
+  /**
+   * Agent tier at the time the circuit breaker event was triggered.
+   * Used to select the correct per-tier auto-reset timeout.
+   */
+  tierAtCbEvent?: number;
   /**
    * Recent failure timestamps keyed by methodology key.
    * Used to detect repeated failures with the same approach.

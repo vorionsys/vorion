@@ -62,6 +62,16 @@ describe('TrustDynamicsEngine', () => {
     it('should default getAsymmetryRatio to T7 (max)', () => {
       expect(engine.getAsymmetryRatio()).toBe(10);
     });
+
+    it('should include graduated CB defaults', () => {
+      const config = engine.getConfig();
+      expect(config.degradedThreshold).toBe(200);
+      // T0: 15min tripped auto-reset, T3+: null (admin required)
+      expect(config.cbTrippedAutoResetMinutes[0]).toBe(15);
+      expect(config.cbTrippedAutoResetMinutes[3]).toBeNull();
+      // T0: 5min degraded auto-reset
+      expect(config.cbDegradedAutoResetMinutes[0]).toBe(5);
+    });
   });
 
   describe('Asymmetric Gain (Logarithmic)', () => {
@@ -461,6 +471,39 @@ describe('TrustDynamicsEngine', () => {
       const reset = engine.resetCircuitBreaker('nonexistent', false);
       expect(reset).toBe(false);
     });
+
+    it('should NOT trip CB on a gain from a low score (CB check is loss-only)', () => {
+      // Gain from score 1 (zero-trust baseline) must not trigger CB,
+      // even though newScore = 1 + delta ≈ 1.06 which is still < circuitBreakerThreshold(100)
+      const result = engine.updateTrust('agent-low', {
+        currentScore: 1,
+        success: true,
+        ceiling: 500,
+      });
+
+      expect(result.circuitBreakerTripped).toBe(false);
+      expect(result.delta).toBeGreaterThan(0);
+    });
+
+    it('admin reset also clears the cooldown', () => {
+      const now = new Date('2024-01-01T12:00:00Z');
+
+      // Trip CB (which also sets cooldown)
+      engine.updateTrust('agent1', {
+        currentScore: 50,
+        success: false,
+        ceiling: 900,
+        now,
+      });
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(true);
+      expect(engine.isInCooldown('agent1', now)).toBe(true);
+
+      // Admin reset
+      engine.resetCircuitBreaker('agent1', true);
+
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(false);
+      expect(engine.isInCooldown('agent1', now)).toBe(false);
+    });
   });
 
   describe('Repeat Methodology Failures', () => {
@@ -663,6 +706,334 @@ describe('TrustDynamicsEngine', () => {
       expect(result).toHaveProperty('circuitBreakerTripped');
       expect(result).toHaveProperty('oscillationDetected');
       expect(result).toHaveProperty('state');
+    });
+  });
+
+  describe('Graduated Circuit Breaker', () => {
+    const now = new Date('2024-01-01T12:00:00Z');
+
+    it('loss into warning zone (100-200) enters degraded, not tripped', () => {
+      // score 150, T0 loss: 150 - 0.07*150 = 139.5 → 100 < 139.5 < 200 → degraded
+      const result = engine.updateTrust('agent1', {
+        currentScore: 150,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+
+      expect(result.circuitBreakerTripped).toBe(false);
+      expect(result.circuitBreakerDegraded).toBe(true);
+      expect(result.circuitBreakerState).toBe('degraded');
+      expect(engine.isCircuitBreakerDegraded('agent1')).toBe(true);
+      expect(engine.getCircuitBreakerState('agent1')).toBe('degraded');
+    });
+
+    it('result includes circuitBreakerDegraded and circuitBreakerState fields', () => {
+      const normalResult = engine.updateTrust('agent1', {
+        currentScore: 500,
+        success: true,
+        ceiling: 900,
+        now,
+      });
+      expect(normalResult.circuitBreakerDegraded).toBe(false);
+      expect(normalResult.circuitBreakerState).toBe('normal');
+    });
+
+    it('degraded mode blocks gains (blockedByDegraded flag)', () => {
+      // Enter degraded
+      engine.updateTrust('agent1', {
+        currentScore: 150,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+      expect(engine.isCircuitBreakerDegraded('agent1')).toBe(true);
+
+      // Attempt gain → blocked
+      const result = engine.updateTrust('agent1', {
+        currentScore: 139,
+        success: true,
+        ceiling: 900,
+        tier: 0,
+        now: new Date(now.getTime() + 1000),
+      });
+
+      expect(result.blockedByDegraded).toBe(true);
+      expect(result.blockedByCooldown).toBe(false);
+      expect(result.delta).toBe(0);
+      expect(result.circuitBreakerState).toBe('degraded');
+    });
+
+    it('degraded mode allows losses to still apply', () => {
+      // Enter degraded
+      engine.updateTrust('agent1', {
+        currentScore: 150,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+
+      // Loss still lands
+      const result = engine.updateTrust('agent1', {
+        currentScore: 139,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now: new Date(now.getTime() + 1000),
+      });
+
+      expect(result.blockedByDegraded).toBe(false);
+      expect(result.delta).toBeLessThan(0);
+    });
+
+    it('degraded takes priority over cooldown in result flags', () => {
+      // Enter degraded (this also starts cooldown)
+      engine.updateTrust('agent1', {
+        currentScore: 150,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+      // Both degraded and cooldown are active for 'agent1'
+      expect(engine.isCircuitBreakerDegraded('agent1')).toBe(true);
+      expect(engine.isInCooldown('agent1', now)).toBe(true);
+
+      // Gain attempt: degraded should be reported, not cooldown
+      const result = engine.updateTrust('agent1', {
+        currentScore: 139,
+        success: true,
+        ceiling: 900,
+        tier: 0,
+        now: new Date(now.getTime() + 1000),
+      });
+
+      expect(result.blockedByDegraded).toBe(true);
+      expect(result.blockedByCooldown).toBe(false);
+    });
+
+    it('loss below hard threshold from degraded escalates to tripped', () => {
+      // Enter degraded at score 150
+      engine.updateTrust('agent1', {
+        currentScore: 150,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+      expect(engine.isCircuitBreakerDegraded('agent1')).toBe(true);
+
+      // Loss with score 95 → 95 - 6.65 = 88.35 < 100 → escalates to tripped
+      const result = engine.updateTrust('agent1', {
+        currentScore: 95,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now: new Date(now.getTime() + 1000),
+      });
+
+      expect(result.circuitBreakerTripped).toBe(true);
+      expect(result.circuitBreakerReason).toBe('trust_below_threshold');
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(true);
+    });
+
+    it('oscillation skips degraded and trips hard CB directly', () => {
+      const eng = createTrustDynamicsEngine({ oscillationThreshold: 3 });
+      // Create alternating gain/loss pattern (score safely above degradedThreshold)
+      let score = 500;
+      for (let i = 0; i < 6; i++) {
+        const result = eng.updateTrust('agent1', {
+          currentScore: score,
+          success: i % 2 === 0,
+          ceiling: 900,
+          now: new Date(now.getTime() + i * 1000),
+        });
+        score = result.newScore;
+        if (result.circuitBreakerTripped) {
+          expect(result.circuitBreakerReason).toBe('oscillation_detected');
+          expect(eng.isCircuitBreakerDegraded('agent1')).toBe(false); // straight to tripped
+          return;
+        }
+      }
+      expect(eng.isCircuitBreakerTripped('agent1')).toBe(true);
+    });
+
+    it('repeat methodology failure skips degraded and trips hard CB directly', () => {
+      const eng = createTrustDynamicsEngine({ methodologyFailureThreshold: 3 });
+      // Score safely above degradedThreshold — CB should be from methodology, not score
+      let result;
+      for (let i = 0; i < 3; i++) {
+        result = eng.updateTrust('agent1', {
+          currentScore: 500,
+          success: false,
+          ceiling: 900,
+          methodologyKey: 'SA-SAFE',
+          now: new Date(now.getTime() + i * 3_600_000),
+        });
+      }
+
+      expect(result!.circuitBreakerTripped).toBe(true);
+      expect(result!.circuitBreakerReason).toContain('repeat_methodology_failure');
+      expect(eng.isCircuitBreakerDegraded('agent1')).toBe(false); // straight to tripped
+    });
+
+    it('isCircuitBreakerDegraded and getCircuitBreakerState return false/normal for unknown agent', () => {
+      expect(engine.isCircuitBreakerDegraded('nobody')).toBe(false);
+      expect(engine.getCircuitBreakerState('nobody')).toBe('normal');
+    });
+  });
+
+  describe('Tier-Aware Auto-Reset', () => {
+    const now = new Date('2024-01-01T12:00:00Z');
+
+    it('T0 tripped CB auto-resets after 15 minutes', () => {
+      // Trip at T0 (tier=0)
+      engine.updateTrust('agent1', {
+        currentScore: 50,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(true);
+
+      // 14 min later: still tripped
+      const t14 = new Date(now.getTime() + 14 * 60_000);
+      engine.updateTrust('agent1', {
+        currentScore: 50,
+        success: true,
+        ceiling: 900,
+        tier: 0,
+        now: t14,
+      });
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(true);
+
+      // 16 min later: auto-reset clears CB + cooldown, gain proceeds
+      const t16 = new Date(now.getTime() + 16 * 60_000);
+      const recovered = engine.updateTrust('agent1', {
+        currentScore: 50,
+        success: true,
+        ceiling: 900,
+        tier: 0,
+        now: t16,
+      });
+
+      expect(recovered.circuitBreakerTripped).toBe(false);
+      expect(recovered.delta).toBeGreaterThan(0);
+      expect(recovered.blockedByCooldown).toBe(false);
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(false);
+    });
+
+    it('T0 degraded CB auto-resets after 5 minutes', () => {
+      // Enter degraded at T0
+      engine.updateTrust('agent1', {
+        currentScore: 150,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+      expect(engine.isCircuitBreakerDegraded('agent1')).toBe(true);
+
+      // 4 min later: still degraded, gain still blocked
+      const t4 = new Date(now.getTime() + 4 * 60_000);
+      const stillDeg = engine.updateTrust('agent1', {
+        currentScore: 139,
+        success: true,
+        ceiling: 900,
+        tier: 0,
+        now: t4,
+      });
+      expect(stillDeg.blockedByDegraded).toBe(true);
+
+      // 6 min later: auto-reset, gain proceeds
+      const t6 = new Date(now.getTime() + 6 * 60_000);
+      const recovered = engine.updateTrust('agent1', {
+        currentScore: 139,
+        success: true,
+        ceiling: 900,
+        tier: 0,
+        now: t6,
+      });
+
+      expect(recovered.blockedByDegraded).toBe(false);
+      expect(recovered.delta).toBeGreaterThan(0);
+      expect(engine.getCircuitBreakerState('agent1')).toBe('normal');
+    });
+
+    it('T3+ tripped CB never auto-resets — requires admin', () => {
+      // Trip at T3 (tier=3, cbTrippedAutoResetMinutes[3] = null)
+      engine.updateTrust('agent1', {
+        currentScore: 50,
+        success: false,
+        ceiling: 900,
+        tier: 3,
+        now,
+      });
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(true);
+
+      // Even 999 hours later: still tripped (null = no auto-reset)
+      const farFuture = new Date(now.getTime() + 999 * 60 * 60_000);
+      engine.updateTrust('agent1', {
+        currentScore: 50,
+        success: true,
+        ceiling: 900,
+        tier: 3,
+        now: farFuture,
+      });
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(true);
+
+      // Admin override required
+      const reset = engine.resetCircuitBreaker('agent1', true);
+      expect(reset).toBe(true);
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(false);
+    });
+
+    it('auto-reset clears cooldown (CB reset = full redemption)', () => {
+      // Trip at T0, which also starts a 7-day cooldown
+      engine.updateTrust('agent1', {
+        currentScore: 50,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+      expect(engine.isInCooldown('agent1', now)).toBe(true);
+
+      // 16 min later: CB auto-resets AND cooldown cleared
+      const t16 = new Date(now.getTime() + 16 * 60_000);
+      expect(engine.isInCooldown('agent1', t16)).toBe(true); // still active before auto-reset
+
+      engine.updateTrust('agent1', {
+        currentScore: 50,
+        success: true,
+        ceiling: 900,
+        tier: 0,
+        now: t16,
+      });
+
+      // After auto-reset: both CB and cooldown cleared
+      expect(engine.isCircuitBreakerTripped('agent1')).toBe(false);
+      expect(engine.isInCooldown('agent1', t16)).toBe(false);
+    });
+
+    it('non-admin resetCircuitBreaker respects tier timeout', () => {
+      const eng = createTrustDynamicsEngine();
+      eng.updateTrust('agent1', {
+        currentScore: 50,
+        success: false,
+        ceiling: 900,
+        tier: 0,
+        now,
+      });
+
+      // Immediately (same now): timeout not elapsed → false
+      const tooSoon = eng.resetCircuitBreaker('agent1', false, now);
+      expect(tooSoon).toBe(false);
+      expect(eng.isCircuitBreakerTripped('agent1')).toBe(true);
     });
   });
 

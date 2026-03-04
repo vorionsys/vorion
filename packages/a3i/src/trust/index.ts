@@ -98,3 +98,12 @@ export {
   type TrustUpdateResult,
   type TrustUpdateOptions,
 } from './trust-dynamics.js';
+
+// Signal Pipeline (Pattern C: fast lane ↔ slow lane bridge)
+export {
+  TrustSignalPipeline,
+  createSignalPipeline,
+  type SignalInput,
+  type SignalResult,
+  type SignalPipelineConfig,
+} from './signal-pipeline.js';
