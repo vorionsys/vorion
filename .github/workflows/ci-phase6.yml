@@ -53,7 +53,7 @@ jobs:
         run: npx turbo build --filter="@vorion/car-*"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: car-typescript-dist
           path: packages/car-*/dist
@@ -189,7 +189,7 @@ jobs:
         run: twine check dist/*
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: car-python-dist
           path: packages/car-python/dist/
@@ -400,7 +400,7 @@ jobs:
           K6_SCENARIOS: smoke
 
       - name: Upload load test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: load-test-results
           path: tests/load/results/
