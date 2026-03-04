@@ -219,7 +219,7 @@ def get_ssp_controls(ssp):
 def get_reg_controls(reg):
     controls = set()
     for layer in reg["registry"]["components"].values():
-        for cap in layer.get("capabilities", []):
+        for cap in (layer.get("capabilities") or []):
             for ctrl in cap.get("controls", {}).get("nist_800_53", []):
                 controls.add(ctrl.upper())
     return controls
@@ -280,6 +280,10 @@ def main():
     gap = ssp_controls - reg_controls
     print(f"Gap controls to add: {len(gap)}")
 
+    if not gap:
+        print("Registry is already complete — no changes needed.")
+        return
+
     # Group gap controls by family
     gap_by_family = defaultdict(list)
     for ctrl in sorted(gap):
@@ -337,15 +341,25 @@ def main():
     with open(REG_PATH, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Strip any previously generated block — handles both old marker and new marker
+    # Insertion anchor — defined here so the stripping loop can also reference it
+    insertion_anchor = "\n  cross_references:"
+
+    # Strip any previously generated block — handles both old marker and new marker.
+    # Only remove the generated section; preserve the insertion anchor and everything after.
     for old_marker in [MARKER, "    # =========================================================================\n    # GENERATED:"]:
         if old_marker in content:
-            content = content[: content.index(old_marker)]
+            marker_idx = content.index(old_marker)
+            # Find where the generated block ends (at the insertion anchor)
+            end_idx = content.find(insertion_anchor, marker_idx)
+            if end_idx == -1:
+                # Anchor already gone — strip to end of file (legacy/corrupted state)
+                content = content[:marker_idx]
+            else:
+                content = content[:marker_idx] + content[end_idx:]
             print("Removed previously generated block.")
             break
 
     # Insert just before '  cross_references:' (2-space — top-level registry key)
-    insertion_anchor = "\n  cross_references:"
     if insertion_anchor not in content:
         print("ERROR: Could not find insertion anchor '  cross_references:' in registry.")
         sys.exit(1)
