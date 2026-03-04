@@ -1,6 +1,6 @@
 {
   "name": "@vorion/a3i",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A3I - Agent Anchor AI Trust Engine",
   "type": "module",
   "main": "./dist/index.js",

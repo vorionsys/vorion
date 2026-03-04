@@ -1,21 +1,24 @@
 
-## [Unreleased] — March 2026
+## [0.1.6](https://github.com/vorionsys/vorion/compare/v0.1.5...main) (2026-03-04)
+
+**Package bumps:** `@vorion/a3i` 0.1.0 → 0.1.1 · `@vorionsys/basis` 1.0.4 → 1.0.5
 
 ### Features
-- **a3i**: Wire `TrustSignalPipeline` into `PreActionGate` and `Orchestrator` — gate rejections emit `OP-ALIGN` negative signals; execution outcomes emit `CT-COMP` signals (success/failure with methodologyKey). `OrchestratorBuilder.withPipeline()` added. New E2E integration tests cover full lifecycle, circuit breaker trip, degraded state, methodology repeat-failure detection, and two-engine feedback loop. 17 new tests (3 gate + 3 orchestrator + 11 E2E), 74 total in affected files.
-- **a3i + basis**: Wire `KYA AccountabilityChain` to `TrustSignalPipeline` via injected `AccountabilitySignalCallback`; every accountability record now propagates a `CT-ACCT` trust signal through the fast+slow pipeline lanes without a basis→a3i upward dependency. New `createKYAWithPipeline()` factory in `packages/a3i/src/kya/`. 8 test cases (kya-pipeline.test.ts).
-- **POST /api/v1/trust/signal**: New `processSignal` handler registered in A3I API routes.
-- **tools/validate-oscal-ssp.py**: Python-based OSCAL structural validator for all 4 OSCAL artifacts (SSP, component-definition, assessment-plan, POA&M) — works without Java/CLI.
+- **a3i 0.1.1**: Wire `TrustSignalPipeline` into `PreActionGate` and `Orchestrator` — gate rejections emit `OP-ALIGN` negative signals; execution outcomes emit `CT-COMP` signals (success/failure with methodologyKey). `OrchestratorBuilder.withPipeline()` added. New E2E integration tests cover full lifecycle, circuit breaker trip, degraded state, methodology repeat-failure detection, and two-engine feedback loop. 17 new tests (3 gate + 3 orchestrator + 11 E2E), 74 total in affected files.
+- **a3i 0.1.1 + basis 1.0.5**: Wire `KYA AccountabilityChain` to `TrustSignalPipeline` via injected `AccountabilitySignalCallback`; every accountability record now propagates a `CT-ACCT` trust signal through the fast+slow pipeline lanes without a basis→a3i upward dependency. New `createKYAWithPipeline()` factory in `packages/a3i/src/kya/`. 8 test cases (kya-pipeline.test.ts).
+- **a3i 0.1.1**: `POST /api/v1/trust/signal` — new `processSignal` handler registered in A3I API routes.
+- **a3i 0.1.1**: `TrustSignalPipeline`, `TrustDynamicsEngine`, extended canary probes.
+- **tools**: `validate-oscal-ssp.py` — Python-based OSCAL structural validator for all 4 artifacts (SSP, component-definition, assessment-plan, POA&M), no Java/CLI required.
 
 ### Bug Fixes
-- **tools/fill-registry-gap.py**: Full idempotency fix — 4 bugs resolved: anchor truncation, variable-before-definition, early-exit when gap=0, and `NoneType` in `get_reg_controls`.
+- **tools**: `fill-registry-gap.py` fully idempotent — 4 bugs resolved (anchor truncation, variable-before-definition, early-exit when gap=0, `NoneType` in `get_reg_controls`).
 - **tests**: Resolve 52 failing TypeScript tests across 5 test files.
 
 ### Compliance & Documentation
-- **NIST CAISI RFI**: Document v2.2 finalized and ready for submission to regulations.gov Docket NIST-2025-0035 (deadline: March 9, 2026 11:59 PM ET). Covers all 5 RFI topics (1a–5e).
-- **OSCAL SSP**: Updated with 370 implemented NIST SP 800-53 controls (prior: 131); all 4 OSCAL artifacts pass structural validation.
-- **Control registry**: Expanded to 370 controls matching SSP implemented-requirements.
-- **Test count**: 9,757 TypeScript + 692 Python = 10,449 total tests.
+- **NIST CAISI RFI**: v2.2 finalized, ready for submission to regulations.gov Docket NIST-2025-0035 (deadline: March 9, 2026).
+- **OSCAL SSP**: 370 implemented NIST SP 800-53 controls (prior: 131); all 4 artifacts pass structural validation.
+- **NIST engagement**: Drafted 5 submissions — RFI, 3 CAISI listening session one-pagers (Finance/Healthcare/Education), NCCoE Agent Identity concept paper (April 2).
+- **Test count**: `@vorion/a3i` 418+ · Total: 9,757 TS + 692 Python = 10,449
 
 ---
 
