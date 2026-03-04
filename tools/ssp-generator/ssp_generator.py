@@ -174,6 +174,75 @@ class SSPGenerator:
 
         return self._control_registry
 
+    def _normalize_registry_to_controls(self, raw: dict) -> dict:
+        """Convert the Vorion component-capability registry YAML into a flat
+        ``{"controls": [...]}`` dict that ``_build_implemented_requirements``
+        can iterate over.
+
+        Input schema (Vorion control-registry.yaml)::
+
+            registry:
+              components:
+                <layer>:
+                  capabilities:
+                    - id: INTENT.tripwire
+                      description: "..."
+                      controls:
+                        nist_800_53: [SI-3, SI-4, ...]
+
+        Output schema::
+
+            {"controls": [{"id": "SI-3", "name": "SI-3", ...}, ...]}
+        """
+        root = raw.get("registry", raw)
+        components = root.get("components", {})
+
+        control_map: dict[str, dict] = {}
+
+        for _layer_name, layer in components.items():
+            if not isinstance(layer, dict):
+                continue
+            capabilities = layer.get("capabilities", [])
+            if not isinstance(capabilities, list):
+                continue
+            for cap in capabilities:
+                if not isinstance(cap, dict):
+                    continue
+                cap_id = cap.get("id", "")
+                cap_desc = cap.get("description", "")
+                cap_impl = cap.get("implementation", "")
+                ctrl_block = cap.get("controls", {})
+                nist_controls: list = (
+                    ctrl_block.get("nist_800_53", [])
+                    if isinstance(ctrl_block, dict)
+                    else []
+                )
+                for ctrl_id in nist_controls:
+                    if ctrl_id not in control_map:
+                        control_map[ctrl_id] = {
+                            "id": ctrl_id,
+                            "name": ctrl_id,
+                            "implementation_status": "implemented",
+                            "implementation_description": (
+                                cap_desc or f"Implemented via {cap_id}"
+                            ),
+                            "responsible_role": "system-administrator",
+                        }
+                    else:
+                        # Append additional capability context
+                        existing = control_map[ctrl_id]["implementation_description"]
+                        if cap_desc and cap_desc not in existing:
+                            control_map[ctrl_id][
+                                "implementation_description"
+                            ] = f"{existing} {cap_desc}"
+
+        logger.info(
+            "Normalized registry: %d unique NIST 800-53 controls from %d components",
+            len(control_map),
+            len(components),
+        )
+        return {"controls": list(control_map.values())}
+
     def _load_sbom(self) -> Optional[dict]:
         """Load CycloneDX SBOM JSON."""
         if self._sbom is not None:
@@ -787,6 +856,10 @@ class SSPGenerator:
 
         # Build implemented requirements
         implemented_requirements = []
+
+        # Normalize registry if it uses the Vorion component/capability tree format
+        if "registry" in registry or "components" in registry:
+            registry = self._normalize_registry_to_controls(registry)
 
         controls = registry.get("controls", [])
         for ctrl in controls:

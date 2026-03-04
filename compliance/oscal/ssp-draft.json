@@ -59,29 +59,29 @@
         {
           "uuid": "84f8e6ac-da66-4d4c-8dde-fd63d75dc0c4",
           "type": "person",
-          "name": "Designee of Vorion Board",
+          "name": "Ryan Cason",
           "email-addresses": [
-            "ao@vorion.org"
+            "Ryan@Vorion.org"
           ],
-          "remarks": "Authorizing Official placeholder. Replace name and email with the designated AO before final submission."
+          "remarks": "Authorizing Official."
         },
         {
           "uuid": "a3abef4b-6e08-45dd-8584-2c786357a3b0",
           "type": "person",
-          "name": "Vorion ISSO (Role-based)",
+          "name": "Alex Blanc",
           "email-addresses": [
-            "isso@vorion.org"
+            "Alex@Vorion.org"
           ],
-          "remarks": "Information System Security Officer placeholder. Replace name and email with the designated ISSO before final submission."
+          "remarks": "Information System Security Officer."
         },
         {
           "uuid": "e9a1dcf3-5b96-403a-809a-6a4fc47cee3b",
           "type": "person",
-          "name": "Vorion System Owner (Role-based)",
+          "name": "Ryan Cason",
           "email-addresses": [
-            "system-owner@vorion.org"
+            "Ryan@Vorion.org"
           ],
-          "remarks": "System Owner individual placeholder. Replace name and email with the designated System Owner before final submission."
+          "remarks": "System Owner."
         },
         {
           "uuid": "ef45f3d2-96e1-4532-a468-de9b2faeab67",
