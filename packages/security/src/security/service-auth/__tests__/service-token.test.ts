@@ -19,6 +19,7 @@ import {
   ServiceTokenError,
   TokenExpiredError,
   InvalidSignatureError,
+  SignatureTimestampError,
   DEFAULT_TOKEN_TTL_SECONDS,
   MAX_CLOCK_SKEW_SECONDS,
   MIN_TOKEN_TTL_SECONDS,

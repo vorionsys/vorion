@@ -42,24 +42,116 @@ vi.mock('../../../src/intent/metrics.js', () => ({
 describe('TEE Binding Service', () => {
   let teeService: TEEBindingService;
 
-  // Helper to create valid attestation
+  // ── Mock helpers: build platform-specific attestation structures ────────────
+
+  // SGX DCAP Quote v3: 436-byte buffer, version=3 at [0:2], MRENCLAVE at [112:144]
+  const buildSGXQuote = (measurementInput: string): string => {
+    const buf = Buffer.alloc(436, 0);
+    buf[0] = 0x03; buf[1] = 0x00; // version = 3 LE
+    // Build 32-byte MRENCLAVE: hex decode if possible, else use UTF-8 bytes (non-zero fill)
+    const mrBuf = Buffer.alloc(32, 0x42);
+    const hexStr = measurementInput.padEnd(64, '4');
+    const hexBytes = Buffer.from(hexStr, 'hex');
+    if (hexBytes.length >= 8) {
+      hexBytes.copy(mrBuf, 0, 0, Math.min(hexBytes.length, 32));
+    } else {
+      // Non-hex input: embed as UTF-8 so the quote is non-zero and distinct
+      Buffer.from(measurementInput, 'utf8').copy(mrBuf, 0, 0, 32);
+    }
+    mrBuf.copy(buf, 112, 0, 32);
+    return buf.toString('base64');
+  };
+
+  // Nitro COSE_Sign1 envelope: 64-byte buffer starting with CBOR tag 0xD2
+  const buildNitroDoc = (): string => {
+    const buf = Buffer.alloc(64, 0);
+    buf[0] = 0xd2; // COSE_Sign1 tag
+    return buf.toString('base64');
+  };
+
+  // SEV-SNP report: 1184-byte buffer, version=2 at [0:4], sigAlgo=1 at [20:24],
+  // MEASUREMENT at [144:192] matching the given 96-char hex string
+  const buildSEVReport = (measurementHex: string): string => {
+    const buf = Buffer.alloc(1184, 0);
+    const view = new DataView(buf.buffer);
+    view.setUint32(0, 2, true);  // version = 2
+    view.setUint32(20, 1, true); // sigAlgo = 1 (ECDSA P-384)
+    const measBytes = Buffer.from(measurementHex.slice(0, 96).padEnd(96, '0'), 'hex');
+    measBytes.copy(buf, 144, 0, 48);
+    return buf.toString('base64');
+  };
+
+  // Predefined mock measurement values per platform
+  const MOCK_NITRO_PCR = 'a'.repeat(96);       // 96 hex chars = valid SHA-384, non-zero
+  const MOCK_SEV_MEAS  = 'ab'.repeat(48);      // 96 hex chars = 48 bytes of 0xAB
+  // SGX: MRENCLAVE is 32 bytes = 64 hex chars; must match attestation.measurementHash exactly
+  const MOCK_SGX_MEAS  = 'abc123def456' + '4'.repeat(52); // full 64-char MRENCLAVE
+
+  // Build a valid TEEAttestation for any platform, with optional field overrides
   const createValidAttestation = (
     platform: typeof TEEPlatform[keyof typeof TEEPlatform] = TEEPlatform.SGX,
     overrides: Partial<TEEAttestation> = {}
-  ): TEEAttestation => ({
-    platform,
-    measurementHash: 'abc123def456',
-    timestamp: new Date(),
-    enclaveId: 'enclave-001',
-    signature: 'valid-signature',
-    pcrs: {
-      PCR0: 'hash0',
-      PCR1: 'hash1',
-      PCR2: 'hash2',
-    },
-    validUntil: new Date(Date.now() + 86400000), // 24 hours
-    ...overrides,
-  });
+  ): TEEAttestation => {
+    let signature: string;
+    let measurementHash: string;
+    let pcrs: Record<string, string>;
+
+    switch (platform) {
+      case TEEPlatform.NITRO:
+        measurementHash = MOCK_NITRO_PCR;
+        signature = buildNitroDoc();
+        pcrs = { PCR0: MOCK_NITRO_PCR, PCR1: 'b'.repeat(96), PCR2: 'c'.repeat(96) };
+        break;
+      case TEEPlatform.SEV:
+        measurementHash = MOCK_SEV_MEAS;
+        signature = buildSEVReport(MOCK_SEV_MEAS);
+        pcrs = { PCR0: 'hash0', PCR1: 'hash1', PCR2: 'hash2' };
+        break;
+      case TEEPlatform.TRUSTZONE:
+        measurementHash = MOCK_SGX_MEAS;
+        signature = Buffer.from(JSON.stringify({
+          tee_name: 'op-tee', session_id: 'session-001', measurement: MOCK_SGX_MEAS,
+        })).toString('base64');
+        pcrs = { PCR0: 'hash0', PCR1: 'hash1', PCR2: 'hash2' };
+        break;
+      case TEEPlatform.SECURE_ENCLAVE:
+        measurementHash = MOCK_SGX_MEAS;
+        signature = Buffer.from(JSON.stringify({
+          fmt: 'apple-appattest',
+          attStmt: { keyHash: MOCK_SGX_MEAS },
+          authData: 'dGVzdA==',
+        })).toString('base64');
+        pcrs = { PCR0: 'hash0', PCR1: 'hash1', PCR2: 'hash2' };
+        break;
+      default: // SGX
+        measurementHash = MOCK_SGX_MEAS;
+        signature = buildSGXQuote(MOCK_SGX_MEAS);
+        pcrs = { PCR0: 'hash0', PCR1: 'hash1', PCR2: 'hash2' };
+    }
+
+    const base: TEEAttestation = {
+      platform,
+      measurementHash,
+      timestamp: new Date(),
+      enclaveId: 'enclave-001',
+      signature,
+      pcrs,
+      validUntil: new Date(Date.now() + 86400000), // 24 hours
+    };
+
+    // For SGX: if measurementHash is overridden without a signature override,
+    // regenerate the SGX quote to match the new measurementHash prefix
+    const merged = { ...base, ...overrides };
+    if (
+      platform === TEEPlatform.SGX &&
+      overrides.measurementHash !== undefined &&
+      overrides.signature === undefined
+    ) {
+      merged.signature = buildSGXQuote(overrides.measurementHash);
+    }
+
+    return merged;
+  };
 
   beforeEach(() => {
     teeService = createTEEBindingService({
@@ -80,7 +172,8 @@ describe('TEE Binding Service', () => {
 
       expect(result.valid).toBe(true);
       expect(result.platform).toBe(TEEPlatform.SGX);
-      expect(result.measurementHash).toBe('abc123def456');
+      // measurementHash is the 64-char MRENCLAVE extracted from the mock quote
+      expect(result.measurementHash).toMatch(/^abc123def456/);
     });
 
     it('should verify valid Nitro attestation', async () => {
@@ -123,7 +216,7 @@ describe('TEE Binding Service', () => {
 
     it('should reject attestation with incomplete PCRs for Nitro', async () => {
       const attestation = createValidAttestation(TEEPlatform.NITRO, {
-        pcrs: { PCR0: 'hash0' }, // Missing PCR1 and PCR2
+        pcrs: { PCR0: 'a'.repeat(96) }, // Valid PCR0 format but missing PCR1 and PCR2
       });
 
       const result = await teeService.verifyAttestation(attestation);
@@ -294,7 +387,7 @@ describe('TEE Binding Service', () => {
       const service = createTEEBindingService({
         allowedPlatforms: [TEEPlatform.SGX],
         expectedMeasurements: {
-          'enclave-001': 'abc123def456',
+          'enclave-001': MOCK_SGX_MEAS, // must match the full 64-char MRENCLAVE
         },
       });
 
@@ -319,7 +412,8 @@ describe('TEE Binding Service', () => {
       const result = await service.verifyAttestation(attestation);
 
       expect(result.valid).toBe(false);
-      expect(result.reason).toContain('measurement');
+      // Reason contains 'mismatch' (structural MRENCLAVE or measurement mismatch)
+      expect(result.reason).toContain('mismatch');
     });
 
     it('should validate PCR0 for Nitro attestation', () => {

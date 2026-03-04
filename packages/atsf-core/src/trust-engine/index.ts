@@ -812,9 +812,10 @@ export class TrustEngine extends EventEmitter {
 
   /**
    * Validate a trust signal before ingestion.
-   * Rejects NaN, Infinity, out-of-range values, and missing required fields.
+   * Validates structural requirements only (null signal, missing entityId).
+   * Value sanitization (NaN, out-of-range) is handled by the caller before this.
    *
-   * @throws Error on invalid signal
+   * @throws Error if signal is null or missing entityId
    */
   private validateSignal(signal: TrustSignal): void {
     if (!signal) {
@@ -823,22 +824,20 @@ export class TrustEngine extends EventEmitter {
     if (!signal.entityId) {
       throw new Error('Signal must have an entityId');
     }
-    if (!signal.type || typeof signal.type !== 'string') {
-      throw new Error('Signal must have a non-empty string type');
-    }
-    if (!Number.isFinite(signal.value)) {
-      throw new Error(`Invalid signal value: ${signal.value} (must be a finite number)`);
-    }
-    if (signal.value < 0 || signal.value > 1) {
-      throw new Error(`Signal value out of range: ${signal.value} (must be 0.0–1.0)`);
-    }
   }
 
   /**
    * Record a trust signal
-   * @throws Error if signal is invalid (NaN, out of range, missing fields)
+   * NaN / out-of-range signal values are clamped to [0, 1] rather than
+   * rejected, ensuring the engine remains resilient under adversarial input.
    */
-  async recordSignal(signal: TrustSignal): Promise<void> {
+  async recordSignal(signalInput: TrustSignal): Promise<void> {
+    // Sanitize: NaN or ±Infinity → 0; values outside [0, 1] → clamp
+    const signal: TrustSignal = !Number.isFinite(signalInput.value)
+      ? { ...signalInput, value: 0 }
+      : signalInput.value < 0 || signalInput.value > 1
+        ? { ...signalInput, value: Math.max(0, Math.min(1, signalInput.value)) }
+        : signalInput;
     this.validateSignal(signal);
 
     let record = this.records.get(signal.entityId);

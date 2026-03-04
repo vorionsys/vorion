@@ -20,6 +20,7 @@ import {
   verifyClientSecret,
   InMemoryServiceAccountStore,
   ServiceAccountManager,
+  ServiceAccountStatus,
   ServiceAccountNotFoundError,
   ServiceAccountRevokedError,
   ServiceAccountSuspendedError,
@@ -1089,6 +1090,13 @@ describe('[Mutation-kill] isSecretRotationRecommended boundary (>= vs >)', () =>
 });
 
 describe('[Mutation-kill] isIpAllowed with empty array vs undefined', () => {
+  let manager: ServiceAccountManager;
+  let store: InMemoryServiceAccountStore;
+  beforeEach(() => {
+    const created = createManager();
+    manager = created.manager;
+    store = created.store;
+  });
   it('allows any IP when ipWhitelist is empty array', async () => {
     const result = await manager.createAccount(defaultInput({ ipWhitelist: [] }));
     // Force store to have empty array (schema might strip it)
@@ -1105,6 +1113,11 @@ describe('[Mutation-kill] isIpAllowed with empty array vs undefined', () => {
 });
 
 describe('[Mutation-kill] createAccount sets fields correctly', () => {
+  let manager: ServiceAccountManager;
+  beforeEach(() => {
+    const created = createManager();
+    manager = created.manager;
+  });
   it('sets status to ACTIVE (not revoked or suspended)', async () => {
     const result = await manager.createAccount(defaultInput());
     expect(result.account.status).toBe(ServiceAccountStatus.ACTIVE);
@@ -1158,6 +1171,11 @@ describe('[Mutation-kill] createAccount sets fields correctly', () => {
 });
 
 describe('[Mutation-kill] rotateSecret updates secretRotatedAt', () => {
+  let manager: ServiceAccountManager;
+  beforeEach(() => {
+    const created = createManager();
+    manager = created.manager;
+  });
   it('rotation result has a secretRotatedAt after original createdAt', async () => {
     const creation = await manager.createAccount(defaultInput());
     const originalTime = creation.account.secretRotatedAt!.getTime();
@@ -1221,6 +1239,11 @@ describe('[Mutation-kill] Error class statusCodes are exact', () => {
 });
 
 describe('[Mutation-kill] hasPermission wildcard prefix slice logic', () => {
+  let manager: ServiceAccountManager;
+  beforeEach(() => {
+    const created = createManager();
+    manager = created.manager;
+  });
   it('read:* removes exactly the last character (*) to get "read:"', async () => {
     // "read:*" → prefix "read:" → "read:anything".startsWith("read:") is true
     const result = await manager.createAccount(
@@ -1244,6 +1267,10 @@ describe('[Mutation-kill] hasPermission wildcard prefix slice logic', () => {
 });
 
 describe('[Mutation-kill] InMemoryServiceAccountStore returns copies not references', () => {
+  let store: InMemoryServiceAccountStore;
+  beforeEach(() => {
+    store = new InMemoryServiceAccountStore();
+  });
   it('create returns a copy, not the original', async () => {
     const original: ServiceAccount = {
       clientId: generateClientId(),
@@ -1289,6 +1316,10 @@ describe('[Mutation-kill] InMemoryServiceAccountStore returns copies not referen
 });
 
 describe('[Mutation-kill] updateLastUsed for non-existent account is silent', () => {
+  let store: InMemoryServiceAccountStore;
+  beforeEach(() => {
+    store = new InMemoryServiceAccountStore();
+  });
   it('does not throw when account does not exist', async () => {
     // updateLastUsed should silently do nothing
     await expect(store.updateLastUsed('nonexistent')).resolves.toBeUndefined();
@@ -1296,6 +1327,13 @@ describe('[Mutation-kill] updateLastUsed for non-existent account is silent', ()
 });
 
 describe('[Mutation-kill] ServiceAccountManager.verifyCredentials updates lastUsedAt', () => {
+  let manager: ServiceAccountManager;
+  let store: InMemoryServiceAccountStore;
+  beforeEach(() => {
+    const created = createManager();
+    manager = created.manager;
+    store = created.store;
+  });
   it('updates lastUsedAt asynchronously after successful verification', async () => {
     const result = await manager.createAccount(defaultInput());
     const before = await store.findByClientId(result.account.clientId);
