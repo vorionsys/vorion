@@ -173,7 +173,7 @@ graph TD
 | ATSF Core | Published | `@vorionsys/atsf-core` |
 | Shared Constants | Published | `@vorionsys/shared-constants` |
 | Contracts | Published | `@vorionsys/contracts` |
-| A3I | Development | 410 tests passing |
+| A3I | Development | 418+ tests passing (inc. KYA→pipeline bridge) |
 | Platform Core | Development | 82+ tests |
 | Cognigate | Development | SDK published |
 | PROOF Plane | Development | Hash chain + Merkle implemented |
@@ -258,7 +258,7 @@ vorion/
 │   ├── car-spec/                    # CAR specification (published, v1.1.0)
 │   ├── platform-core/              # Trust engine, governance, enforcement, proof
 │   ├── proof-plane/                 # Dual-hash (SHA-256 + SHA3-256) audit chain
-│   ├── a3i/                         # Agent orchestration layer (410 tests)
+│   ├── a3i/                         # Agent orchestration layer (418+ tests, KYA bridge)
 │   ├── security/                    # Crypto, DPoP, Merkle modules
 │   ├── runtime/                     # Agent runtime environment
 │   ├── sdk/                         # Platform SDK
@@ -421,7 +421,7 @@ npm run security:audit               # npm audit (high/critical)
 | Database | PostgreSQL 15+ (Drizzle ORM) | RLS for tenant isolation |
 | Auth | Supabase Auth | JWT + SSR middleware |
 | Cache | Redis 7+ (ioredis) | Session, JTI cache, BullMQ |
-| Testing | Vitest + Stryker (mutation) | 341+ tests |
+| Testing | Vitest + Stryker (mutation) | 9,757+ TS tests + 692 Python |
 | CI/CD | GitHub Actions | Lint, typecheck, build, test, SAST, secrets |
 | SAST | Semgrep (blocking) | Every push |
 | Secrets | gitleaks (blocking) | Every push |
@@ -536,11 +536,24 @@ See [SECURITY.md](SECURITY.md) for vulnerability reporting and [security.txt](se
 Vorion is designed to align with the following frameworks **(not yet certified or audited)**:
 
 - **NIST AI RMF** - [Detailed compliance mapping](docs/compliance/nist-ai-rmf-mapping.md) across Govern, Map, Measure, Manage (~86% coverage)
+- **NIST SP 800-53** - 370 controls implemented in [OSCAL SSP](compliance/oscal/ssp-draft.json) (OSCAL 1.1.2, validated). Automated verification: 52 controls, 20 tests.
 - **NIST COSAiS** - [SP 800-53 control overlay](docs/compliance/NIST-COSAiS-ALIGNMENT.md) for AI systems (Use Cases 3 & 4)
-- **OWASP ASI** - [Top 10 for Agentic Applications](docs/compliance/OWASP-ASI-MAPPING.md) mapping
+- **NIST CAISI RFI** - Submitted response to Docket NIST-2025-0035 (March 2026) covering AI agent security threat taxonomy, technical controls, and runtime governance standards. See [docs/nist-caisi-rfi-response-2026-02.md](docs/nist-caisi-rfi-response-2026-02.md).
+- **OWASP ASI** - [Top 10 for Agentic Applications](docs/compliance/OWASP-ASI-MAPPING.md) mapping (ASI01–ASI10)
 - **EU AI Act** - Ceiling enforcement caps high-risk AI systems, transparency requirements
 - **ISO/IEC 42001** - AI management system principles ([gap analysis complete](docs/VORION_V1_FULL_APPROVAL_PDFS/ISO_42001_GAP_ANALYSIS.md))
 - **SOC 2 Type II** - Security controls via RLS, audit chain, SAST (audit planned Q4 2026)
+
+### OSCAL Artifacts
+
+| Artifact | File | Status |
+|----------|------|--------|
+| System Security Plan | [compliance/oscal/ssp-draft.json](compliance/oscal/ssp-draft.json) | 370 controls, OSCAL 1.1.2 ✅ |
+| Component Definition | [compliance/oscal/component-definition.json](compliance/oscal/component-definition.json) | OSCAL 1.1.2 ✅ |
+| Assessment Plan | [compliance/oscal/assessment-plan.json](compliance/oscal/assessment-plan.json) | OSCAL 1.1.2 ✅ |
+| POA&M | [compliance/oscal/poam.json](compliance/oscal/poam.json) | OSCAL 1.1.2 ✅ |
+
+Run `python tools/validate-oscal-ssp.py` to validate all artifacts locally.
 
 ---
 
@@ -564,8 +577,11 @@ Vorion is designed to align with the following frameworks **(not yet certified o
 - [x] Creation modifiers at instantiation time
 
 ### Phase 7: Implementation (Q1-Q2 2026)
-- [ ] 8-week implementation (TypeScript types, test harness)
-- [ ] 200+ unit tests, <1ms P99 latency target
+- [x] Signal pipeline (fast + slow lanes, `TrustSignalPipeline`)
+- [x] KYA `AccountabilityChain` → `TrustSignalPipeline` bridge (`CT-ACCT` factor propagation)
+- [x] NIST CAISI RFI submitted (Docket NIST-2025-0035, March 2026)
+- [x] OSCAL SSP expanded to 370 NIST SP 800-53 controls
+- [ ] 200+ unit tests at <1ms P99 latency target
 - [ ] Merkle tree aggregation for proof chain
 - [ ] Zero-knowledge proof system (Circom/Groth16)
 - [ ] ACI standard publication (OpenID Foundation, W3C)
