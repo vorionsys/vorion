@@ -1,4 +1,4 @@
----
+﻿---
 sidebar_position: 1
 title: Specification Overview
 description: Full BASIS technical specification
@@ -104,4 +104,4 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHOULD", "RECOMMENDED", 
 
 ---
 
-*Full specification source: [GitHub](https://github.com/voriongit/basis-standard)*
+*Full specification source: [GitHub](https://github.com/vorionsys/vorion)*

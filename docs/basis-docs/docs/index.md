@@ -1,4 +1,4 @@
----
+﻿---
 slug: /
 sidebar_position: 1
 title: What is BASIS?
@@ -133,7 +133,7 @@ BASIS is the spec. Anyone can build a compliant implementation. No vendor lock-i
 
 ### Cognigate (Reference)
 The reference implementation maintained by Vorion.
-- [GitHub](https://github.com/voriongit/cognigate)
+- [GitHub](https://github.com/vorionsys/cognigate)
 - [Documentation](/cognigate)
 
 ### Build Your Own

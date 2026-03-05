@@ -1,4 +1,4 @@
-// @ts-check
+﻿// @ts-check
 import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
@@ -11,8 +11,8 @@ const config = {
   baseUrl: '/',
   trailingSlash: false,
 
-  organizationName: 'voriongit',
-  projectName: 'basis-standard',
+  organizationName: 'vorionsys',
+  projectName: 'vorion',
 
   onBrokenLinks: 'throw',
 
@@ -38,12 +38,12 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          editUrl: 'https://github.com/voriongit/basis-standard/tree/main/',
+          editUrl: 'https://github.com/vorionsys/vorion/tree/main/',
           routeBasePath: '/',
         },
         blog: {
           showReadingTime: true,
-          editUrl: 'https://github.com/voriongit/basis-standard/tree/main/',
+          editUrl: 'https://github.com/vorionsys/vorion/tree/main/',
         },
         theme: {
           customCss: './src/css/custom.css',

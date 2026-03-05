@@ -1,4 +1,4 @@
----
+﻿---
 sidebar_position: 1
 title: Getting Started
 description: Build your first BASIS-compliant agent
@@ -102,7 +102,7 @@ if (decision.allowed) {
 ### Option 2: Use Cognigate (Docker)
 
 ```bash
-git clone https://github.com/voriongit/cognigate.git
+git clone https://github.com/vorionsys/cognigate.git
 cd cognigate
 docker-compose up -d
 ```

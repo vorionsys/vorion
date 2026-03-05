@@ -1,4 +1,4 @@
----
+﻿---
 sidebar_position: 6
 title: Cognigate
 description: The open-source enforcement engine for BASIS
@@ -10,7 +10,7 @@ description: The open-source enforcement engine for BASIS
 
 **Stateless policy enforcement and cryptographic audit trails. Open source. Apache 2.0.**
 
-[GitHub](https://github.com/voriongit/cognigate) · [API Reference](https://cognigate.dev/api)
+[GitHub](https://github.com/vorionsys/cognigate) · [API Reference](https://cognigate.dev/api)
 
 ---
 
@@ -42,7 +42,7 @@ Cognigate is the open-source enforcement engine for the BASIS standard — a sta
 
 ```bash
 # Clone the repository
-git clone https://github.com/voriongit/cognigate.git
+git clone https://github.com/vorionsys/cognigate.git
 cd cognigate
 
 # Start with Docker Compose
@@ -56,7 +56,7 @@ docker-compose up -d
 ```bash
 # Prerequisites: Python 3.11+, Poetry
 
-git clone https://github.com/voriongit/cognigate.git
+git clone https://github.com/vorionsys/cognigate.git
 cd cognigate
 
 # Install dependencies
@@ -387,4 +387,4 @@ with ctx.governed_session() as session:
 
 - [Getting Started Guide](/implement/getting-started)
 - [API Reference](https://cognigate.dev/api)
-- [GitHub Repository](https://github.com/voriongit/cognigate)
+- [GitHub Repository](https://github.com/vorionsys/cognigate)

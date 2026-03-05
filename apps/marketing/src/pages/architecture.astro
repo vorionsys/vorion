@@ -174,7 +174,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <ul class="space-y-2 text-sm text-slate-400">
               <li class="flex items-start gap-2">
                 <span class="text-emerald-400">•</span>
-                Time-weighted averaging with 7-day half-life
+                Time-weighted signal averaging window: 7 days
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-emerald-400">•</span>
@@ -281,10 +281,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
             <h3 class="font-semibold text-rose-400 mb-4">Trust Decay</h3>
             <ul class="space-y-2 text-sm text-slate-400">
-              <li>• Base decay rate: 1% per interval</li>
-              <li>• Decay interval: 60 seconds</li>
+              <li>• Inactivity decay: 182-day half-life (stepped milestones)</li>
+              <li>• 50% score factor reached at 182 days idle</li>
               <li>• Failure threshold: signal value &lt; 0.3</li>
-              <li>• Accelerated decay: 3x after 2+ failures in 1 hour</li>
+              <li>• Failure penalty: 7–10× tier-scaled (T0 highest, T7 lowest)</li>
               <li>• Decay formula: <code class="text-rose-400">score × (1 - rate)^periods</code></li>
             </ul>
           </div>

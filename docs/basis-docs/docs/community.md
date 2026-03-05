@@ -1,4 +1,4 @@
----
+﻿---
 sidebar_position: 8
 title: Community
 description: Join the BASIS movement
@@ -17,7 +17,7 @@ description: Join the BASIS movement
 | Platform | Purpose | Link |
 |----------|---------|------|
 | **Discord** | Real-time chat, support, calls | [Join Discord](https://discord.gg/basis-protocol) |
-| **GitHub** | Code, specs, discussions | [github.com/voriongit](https://github.com/voriongit) |
+| **GitHub** | Code, specs, discussions | [github.com/vorionsys](https://github.com/vorionsys) |
 | **Twitter** | Announcements, updates | [@BASISprotocol](https://twitter.com/BASISprotocol) |
 
 ---
@@ -128,7 +128,7 @@ Propose changes to the standard:
 5. IMPLEMENT → Update spec & code
 ```
 
-[Submit an RFC →](https://github.com/voriongit/basis-standard/discussions)
+[Submit an RFC →](https://github.com/vorionsys/vorion/discussions)
 
 ---
 
@@ -141,14 +141,14 @@ We're committed to a welcoming community:
 - **Be inclusive** — Welcome diverse perspectives
 - **Be patient** — Help newcomers learn
 
-Full [Code of Conduct](https://github.com/voriongit/basis-standard/blob/main/CODE_OF_CONDUCT.md)
+Full [Code of Conduct](https://github.com/vorionsys/vorion/blob/main/CODE_OF_CONDUCT.md)
 
 ---
 
 ## Get Started
 
 1. **Join Discord** — Introduce yourself in #introductions
-2. **Star the repo** — [github.com/voriongit/basis-standard](https://github.com/voriongit/basis-standard)
+2. **Star the repo** — [github.com/vorionsys/vorion](https://github.com/vorionsys/vorion)
 3. **Read the spec** — Understand what we're building
 4. **Find an issue** — Look for "good first issue" labels
 5. **Show up** — Join the weekly community call
