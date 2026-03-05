@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  ArrowRight, Shield, Cpu, Scale, Database, Globe, MessageCircle,
+  ArrowRight, ChevronLeft, ChevronRight, Shield, Cpu, Scale, Database, Globe, MessageCircle,
   Lock, Unlock, AlertTriangle, CheckCircle, Zap, BarChart3, Users,
   FileCheck, Package
 } from 'lucide-react';
@@ -123,7 +123,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-white mb-4 text-center">See It In Action</h2>
           <p className="text-neutral-400 text-center mb-8">
-            Watch how ATSF evaluates and governs AI agent actions in real-time.
+            Watch how BASIS evaluates and governs AI agent actions in real-time.
           </p>
           <AnimatedDemo />
         </div>
@@ -150,18 +150,21 @@ export default function Home() {
               title="INTENT"
               subtitle="Reasoning Layer"
               desc="Interprets and normalizes goals into structured plans."
+              link="/basis/intent"
             />
             <StackCard
               icon={<Shield className="w-6 h-6 text-indigo-400" />}
               title="ENFORCE"
               subtitle="Enforcement Layer"
               desc="Validates plans against policies. Gates execution paths."
+              link="/basis/enforce"
             />
             <StackCard
               icon={<Database className="w-6 h-6 text-emerald-400" />}
               title="PROOF"
               subtitle="Audit Layer"
               desc="Immutable logging of intent lineage and enforcement decisions."
+              link="/basis/proof"
             />
           </div>
 
@@ -349,6 +352,19 @@ function AnimatedDemo() {
 
   const scenario = demoScenarios[scenarioIndex];
 
+  function navigateTo(index: number) {
+    setScenarioIndex(index);
+    setPhase('typing-user');
+  }
+
+  function handlePrev() {
+    navigateTo((scenarioIndex - 1 + demoScenarios.length) % demoScenarios.length);
+  }
+
+  function handleNext() {
+    navigateTo((scenarioIndex + 1) % demoScenarios.length);
+  }
+
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     switch (phase) {
@@ -398,12 +414,53 @@ function AnimatedDemo() {
   const decisionColors = { ALLOW: 'bg-green-500/20 text-green-400 border-green-500/50', DENY: 'bg-red-500/20 text-red-400 border-red-500/50', ESCALATE: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50', DEGRADE: 'bg-orange-500/20 text-orange-400 border-orange-500/50' };
   const decisionIcons = { ALLOW: <CheckCircle className="w-4 h-4" />, DENY: <Lock className="w-4 h-4" />, ESCALATE: <AlertTriangle className="w-4 h-4" />, DEGRADE: <Zap className="w-4 h-4" /> };
 
+  const scenarioLabels: Record<string, string> = {
+    email: 'Send Email',
+    payment: 'Process Payment',
+    schedule: 'Schedule Meeting',
+    admin: 'Delete Users',
+  };
+
   return (
     <div className="relative">
-      <div className="flex justify-center gap-2 mb-6">
-        {demoScenarios.map((s, i) => (
-          <button key={s.id} onClick={() => { setScenarioIndex(i); setPhase('typing-user'); }} className={`w-2.5 h-2.5 rounded-full transition-all ${i === scenarioIndex ? 'bg-indigo-400 scale-125' : 'bg-neutral-600 hover:bg-neutral-500'}`} />
-        ))}
+      {/* Scenario nav: arrows + labeled dots */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <button
+          onClick={handlePrev}
+          className="p-2 rounded-full bg-white/5 border border-white/10 text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+          aria-label="Previous scenario"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        <div className="flex items-center gap-3">
+          {demoScenarios.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => navigateTo(i)}
+              className={`flex flex-col items-center gap-1 transition-all ${
+                i === scenarioIndex ? 'opacity-100' : 'opacity-40 hover:opacity-70'
+              }`}
+            >
+              <span className={`text-xs font-medium transition-colors ${
+                i === scenarioIndex ? 'text-indigo-400' : 'text-neutral-500'
+              }`}>
+                {scenarioLabels[s.id]}
+              </span>
+              <span className={`block h-0.5 rounded-full transition-all ${
+                i === scenarioIndex ? 'w-full bg-indigo-400' : 'w-3 bg-neutral-600'
+              }`} />
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={handleNext}
+          className="p-2 rounded-full bg-white/5 border border-white/10 text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+          aria-label="Next scenario"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="flex h-[380px] rounded-xl overflow-hidden border border-white/10 bg-neutral-900">
