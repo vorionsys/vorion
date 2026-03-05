@@ -234,10 +234,15 @@ export class TrustFacade implements TrustGate {
         // Logarithmic gain: small increments
         delta = Math.log(1 + signal.weight * 10) * 2;
         break;
-      case 'failure':
-        // Exponential loss: significant penalty
-        delta = -(signal.weight * 50);
+      case 'failure': {
+        // Tier-scaled penalty: lower tiers are more lenient to aid ascension.
+        // T0=2× ... T4=7× ... T5/T6/T7=10×
+        const TIER_FAILURE_MULTS = [2, 3, 4, 5, 7, 10, 10, 10];
+        const currentTier = this.scoreToTier(currentScore);
+        const tierMult = TIER_FAILURE_MULTS[currentTier] ?? 2;
+        delta = -(signal.weight * 50 * tierMult);
         break;
+      }
       case 'violation':
         // Severe penalty for violations
         delta = -(signal.weight * 100);
