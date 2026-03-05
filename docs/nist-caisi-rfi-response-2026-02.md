@@ -149,8 +149,8 @@ We implement and recommend a **graduated trust architecture** with quantified sc
 
 **Key design principles:**
 - **Start at zero** — All new agents begin at T0 (Sandbox). Trust is earned and not assumed by default.
-- **Asymmetric scoring** — Failures impact trust 3x more than successes reward it, creating a natural bias toward reliability.
-- **Time decay** — Idle agents lose trust over time via stepped milestone decay with a 182-day half-life. Deductions begin at day 7 of inactivity (6% per step for the first 5 milestones, then 5% per step), reaching 50% of the original score at 182 days. The 3x failure multiplier compounds with decay; implementation profiles are configurable per deployment context. Stale high-trust entities are automatically demoted.
+- **Asymmetric scoring** — Failures impact trust 7–10× more than successes reward it (tier-scaled: T0 Sandbox uses a 7× loss ratio to allow early-stage recovery; T7 Autonomous uses a 10× ratio for strict accountability at full autonomy). The effective loss formula is `lossRate = gainRate × penaltyRatio(tier)`, applied proportionally to the current score, while gains follow a logarithmic curve bounded by the observability ceiling. A single penalty mechanism is applied per event — stacking penalties on the same event is prohibited to prevent double jeopardy.
+- **Time decay** — Idle agents lose trust over time via stepped milestone decay with a 182-day half-life. Deductions begin at day 7 of inactivity (milestones: 7/14/28/42/56/84/112/140/182 days), reaching 50% of the original score at 182 days. The tier-scaled loss ratio compounds with decay; implementation profiles are configurable per deployment context. Stale high-trust entities are automatically demoted.
 - **Behavioral signals** — In the legacy 4-category model, trust scores are computed from weighted categories: Behavioral (40%), Compliance (25%), Identity (20%), Context (15%). Current production profiles use a configurable multi-factor model while preserving the same asymmetric trust dynamics and governance semantics.
 
 **Fluid governance (three-tier decision model):**
@@ -529,7 +529,7 @@ contact@vorion.org
 
 ---
 
-*Document Version: 2.2*
+*Document Version: 2.3*
 *Prepared: March 2026*
 *For submission to: www.regulations.gov, Docket NIST-2025-0035*
 *Deadline: March 9, 2026, 11:59 PM ET*
