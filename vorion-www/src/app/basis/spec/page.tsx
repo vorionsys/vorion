@@ -70,11 +70,11 @@ export default function SpecPage() {
           <h3 className="text-xl font-semibold text-white mb-3 mt-6">1.2 Scope</h3>
           <p className="text-neutral-400 leading-relaxed mb-4">This specification defines:</p>
           <ul className="list-disc list-inside space-y-2 text-neutral-400">
-            <li><strong className="text-white">Architecture</strong> â€” The four-layer governance stack (INTENT, ENFORCE, PROOF, CHAIN)</li>
-            <li><strong className="text-white">Trust Model</strong> â€” Quantified trust scoring with tiers and decay mechanics</li>
-            <li><strong className="text-white">Capability Model</strong> â€” Hierarchical capability taxonomy and gating rules</li>
-            <li><strong className="text-white">Wire Protocol</strong> â€” Data formats for interoperability between systems</li>
-            <li><strong className="text-white">Audit Requirements</strong> â€” What must be logged and how</li>
+            <li><strong className="text-white">Architecture</strong> &mdash; The four-layer governance stack (INTENT, ENFORCE, PROOF, CHAIN)</li>
+            <li><strong className="text-white">Trust Model</strong> &mdash; Quantified trust scoring with tiers and decay mechanics</li>
+            <li><strong className="text-white">Capability Model</strong> &mdash; Hierarchical capability taxonomy and gating rules</li>
+            <li><strong className="text-white">Wire Protocol</strong> &mdash; Data formats for interoperability between systems</li>
+            <li><strong className="text-white">Audit Requirements</strong> &mdash; What must be logged and how</li>
           </ul>
 
           <h3 className="text-xl font-semibold text-white mb-3 mt-6">1.3 Terminology</h3>
@@ -152,45 +152,43 @@ export default function SpecPage() {
           <p className="text-neutral-400 leading-relaxed mb-6">
             BASIS defines a four-layer governance stack. Each layer has distinct responsibilities and interfaces.
           </p>
-          <div className="bg-black/30 border border-white/10 rounded-xl p-6 mb-6 overflow-x-auto">
-            <pre className="text-sm text-neutral-300 font-mono">
-{`â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                      Agent Action Request                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                              â”‚
-                              â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  LAYER 1: INTENT                                             â”‚
-â”‚  Parse, plan, and classify the requested action              â”‚
-â”‚  Output: Structured intent with risk classification          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                              â”‚
-                              â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  LAYER 2: ENFORCE                                            â”‚
-â”‚  Evaluate intent against trust score and policies            â”‚
-â”‚  Output: Governance decision (ALLOW/DENY/ESCALATE/DEGRADE)   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                              â”‚
-                              â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  LAYER 3: PROOF                                              â”‚
-â”‚  Log the decision with cryptographic integrity               â”‚
-â”‚  Output: Proof record with hash chain                        â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                              â”‚
-                              â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  LAYER 4: CHAIN (OPTIONAL)                                   â”‚
-â”‚  Anchor proof to external verification system                â”‚
-â”‚  Output: Blockchain/ledger commitment                        â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                              â”‚
-                              â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                      Action Execution (if ALLOW)             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜`}
-            </pre>
+          <div className="space-y-0 mb-6">
+            <div className="bg-white/5 border border-white/20 rounded-xl p-4 text-center">
+              <span className="text-sm font-semibold text-white">Agent Action Request</span>
+            </div>
+            <div className="flex justify-center"><div className="w-px h-6 bg-white/20"></div></div>
+            <div className="text-center text-white/30 text-xs">&#9660;</div>
+            <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4">
+              <div className="font-mono text-xs font-bold text-indigo-400 mb-1">LAYER 1: INTENT</div>
+              <div className="text-sm text-neutral-300">Parse, plan, and classify the requested action</div>
+              <div className="text-xs text-neutral-500 mt-1">Output: Structured intent with risk classification</div>
+            </div>
+            <div className="flex justify-center"><div className="w-px h-6 bg-white/20"></div></div>
+            <div className="text-center text-white/30 text-xs">&#9660;</div>
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+              <div className="font-mono text-xs font-bold text-amber-400 mb-1">LAYER 2: ENFORCE</div>
+              <div className="text-sm text-neutral-300">Evaluate intent against trust score and policies</div>
+              <div className="text-xs text-neutral-500 mt-1">Output: Governance decision (ALLOW / DENY / ESCALATE / DEGRADE)</div>
+            </div>
+            <div className="flex justify-center"><div className="w-px h-6 bg-white/20"></div></div>
+            <div className="text-center text-white/30 text-xs">&#9660;</div>
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+              <div className="font-mono text-xs font-bold text-emerald-400 mb-1">LAYER 3: PROOF</div>
+              <div className="text-sm text-neutral-300">Log the decision with cryptographic integrity</div>
+              <div className="text-xs text-neutral-500 mt-1">Output: Proof record with hash chain</div>
+            </div>
+            <div className="flex justify-center"><div className="w-px h-6 bg-white/20"></div></div>
+            <div className="text-center text-white/30 text-xs">&#9660;</div>
+            <div className="bg-white/5 border border-white/10 border-dashed rounded-xl p-4">
+              <div className="font-mono text-xs font-bold text-neutral-400 mb-1">LAYER 4: CHAIN <span className="text-neutral-600">(OPTIONAL)</span></div>
+              <div className="text-sm text-neutral-300">Anchor proof to external verification system</div>
+              <div className="text-xs text-neutral-500 mt-1">Output: Blockchain / ledger commitment</div>
+            </div>
+            <div className="flex justify-center"><div className="w-px h-6 bg-white/20"></div></div>
+            <div className="text-center text-white/30 text-xs">&#9660;</div>
+            <div className="bg-white/5 border border-white/20 rounded-xl p-4 text-center">
+              <span className="text-sm font-semibold text-white">Action Execution <span className="text-neutral-500 font-normal">(if ALLOW)</span></span>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -217,12 +215,14 @@ export default function SpecPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                <tr><td className="px-4 py-3 text-red-400">Sandbox</td><td className="px-4 py-3 font-mono text-neutral-300">0-99</td><td className="px-4 py-3 text-neutral-400">Isolated testing only</td></tr>
-                <tr><td className="px-4 py-3 text-orange-400">Provisional</td><td className="px-4 py-3 font-mono text-neutral-300">100-299</td><td className="px-4 py-3 text-neutral-400">Read public data, internal messaging</td></tr>
-                <tr><td className="px-4 py-3 text-yellow-400">Standard</td><td className="px-4 py-3 font-mono text-neutral-300">300-499</td><td className="px-4 py-3 text-neutral-400">Limited external communication</td></tr>
-                <tr><td className="px-4 py-3 text-emerald-400">Trusted</td><td className="px-4 py-3 font-mono text-neutral-300">500-699</td><td className="px-4 py-3 text-neutral-400">External API calls</td></tr>
-                <tr><td className="px-4 py-3 text-blue-400">Certified</td><td className="px-4 py-3 font-mono text-neutral-300">700-899</td><td className="px-4 py-3 text-neutral-400">Financial transactions</td></tr>
-                <tr><td className="px-4 py-3 text-purple-400">Autonomous</td><td className="px-4 py-3 font-mono text-neutral-300">900-1000</td><td className="px-4 py-3 text-neutral-400">Full autonomy within policy</td></tr>
+                <tr><td className="px-4 py-3 text-neutral-400">T0 &mdash; Sandbox</td><td className="px-4 py-3 font-mono text-neutral-300">0&ndash;199</td><td className="px-4 py-3 text-neutral-400">Isolated testing only</td></tr>
+                <tr><td className="px-4 py-3 text-yellow-600">T1 &mdash; Observed</td><td className="px-4 py-3 font-mono text-neutral-300">200&ndash;349</td><td className="px-4 py-3 text-neutral-400">Monitored read-only tasks</td></tr>
+                <tr><td className="px-4 py-3 text-yellow-400">T2 &mdash; Provisional</td><td className="px-4 py-3 font-mono text-neutral-300">350&ndash;499</td><td className="px-4 py-3 text-neutral-400">Read public data, internal messaging</td></tr>
+                <tr><td className="px-4 py-3 text-orange-400">T3 &mdash; Monitored</td><td className="px-4 py-3 font-mono text-neutral-300">500&ndash;649</td><td className="px-4 py-3 text-neutral-400">Limited external communication</td></tr>
+                <tr><td className="px-4 py-3 text-emerald-400">T4 &mdash; Standard</td><td className="px-4 py-3 font-mono text-neutral-300">650&ndash;799</td><td className="px-4 py-3 text-neutral-400">External API calls</td></tr>
+                <tr><td className="px-4 py-3 text-blue-400">T5 &mdash; Trusted</td><td className="px-4 py-3 font-mono text-neutral-300">800&ndash;875</td><td className="px-4 py-3 text-neutral-400">Financial transactions, elevated access</td></tr>
+                <tr><td className="px-4 py-3 text-indigo-400">T6 &mdash; Certified</td><td className="px-4 py-3 font-mono text-neutral-300">876&ndash;950</td><td className="px-4 py-3 text-neutral-400">Critical system modifications</td></tr>
+                <tr><td className="px-4 py-3 text-purple-400">T7 &mdash; Autonomous</td><td className="px-4 py-3 font-mono text-neutral-300">951&ndash;1000</td><td className="px-4 py-3 text-neutral-400">Full autonomy within policy</td></tr>
               </tbody>
             </table>
           </div>
@@ -235,25 +235,25 @@ export default function SpecPage() {
             <div className="bg-white/5 border border-white/10 rounded-xl p-5">
               <h3 className="text-lg font-bold text-white mb-2">BASIS Core</h3>
               <ul className="text-sm text-neutral-400 space-y-1">
-                <li>â€¢ INTENT layer</li>
-                <li>â€¢ ENFORCE layer</li>
-                <li>â€¢ PROOF layer</li>
+                <li>&#8226; INTENT layer</li>
+                <li>&#8226; ENFORCE layer</li>
+                <li>&#8226; PROOF layer</li>
               </ul>
             </div>
             <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-5">
               <h3 className="text-lg font-bold text-indigo-300 mb-2">BASIS Complete</h3>
               <ul className="text-sm text-neutral-400 space-y-1">
-                <li>â€¢ All Core requirements</li>
-                <li>â€¢ CHAIN layer</li>
-                <li>â€¢ Full capability taxonomy</li>
+                <li>&#8226; All Core requirements</li>
+                <li>&#8226; CHAIN layer</li>
+                <li>&#8226; Full capability taxonomy</li>
               </ul>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-xl p-5">
               <h3 className="text-lg font-bold text-white mb-2">BASIS Extended</h3>
               <ul className="text-sm text-neutral-400 space-y-1">
-                <li>â€¢ All Complete requirements</li>
-                <li>â€¢ Multi-tenant isolation</li>
-                <li>â€¢ Federated trust</li>
+                <li>&#8226; All Complete requirements</li>
+                <li>&#8226; Multi-tenant isolation</li>
+                <li>&#8226; Federated trust</li>
               </ul>
             </div>
           </div>
