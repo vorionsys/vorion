@@ -5,6 +5,14 @@ All notable changes to `@vorionsys/basis` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-03-04
+
+### Added
+- `AccountabilitySignalCallback` type exported from `AccountabilityChain`
+- `AccountabilityChain` constructor now accepts optional `onSignal` callback
+- `updateAccountabilityScore` emits `CT-ACCT` signals via callback (success/failure/denied)
+- Enables external signal pipelines (e.g. `TrustSignalPipeline`) to receive KYA events without upward dependency from basis to a3i
+
 ## [1.0.4] - 2026-02-25
 
 ### Changed
