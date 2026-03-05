@@ -20,7 +20,6 @@ const navigation = [
       { label: 'BASIS Standard', href: '/basis', description: 'The open governance standard' },
       { label: 'Cognigate Engine', href: 'https://cognigate.dev', external: true, description: 'Reference implementation' },
       { label: 'AgentAnchor', href: 'https://agentanchorai.com', external: true, description: 'Certification platform' },
-      { label: 'Omniscience', href: 'https://learn.vorion.org', external: true, description: 'Knowledge hub' },
     ],
   },
   {

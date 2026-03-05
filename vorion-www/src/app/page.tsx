@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   ArrowRight, ChevronLeft, ChevronRight, Shield, Cpu, Scale, Database, Globe, MessageCircle,
   Lock, Unlock, AlertTriangle, CheckCircle, Zap, BarChart3, Users,
-  FileCheck, Package
+  FileCheck, Package, X
 } from 'lucide-react';
 
 export default function Home() {
@@ -47,37 +47,7 @@ export default function Home() {
       </section>
 
       {/* The Challenge */}
-      <section className="py-20 px-6 border-t border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-white mb-4 text-center">The Challenge</h2>
-          <p className="text-neutral-400 text-center mb-12 max-w-2xl mx-auto">
-            AI agents are deployed without governance infrastructure, creating compliance and security risks.
-          </p>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl bg-white/5 border border-white/5 border-l-4 border-l-red-500">
-              <AlertTriangle className="w-8 h-8 text-red-400 mb-4" />
-              <h3 className="text-lg font-bold text-white mb-2">Ungoverned Agents</h3>
-              <p className="text-neutral-400 text-sm">
-                AI agents operate without trust boundaries, making unrestricted decisions with no accountability.
-              </p>
-            </div>
-            <div className="p-6 rounded-xl bg-white/5 border border-white/5 border-l-4 border-l-yellow-500">
-              <Lock className="w-8 h-8 text-yellow-400 mb-4" />
-              <h3 className="text-lg font-bold text-white mb-2">No Audit Trail</h3>
-              <p className="text-neutral-400 text-sm">
-                Enterprises can't prove what AI did, when, or why—a compliance nightmare.
-              </p>
-            </div>
-            <div className="p-6 rounded-xl bg-white/5 border border-white/5 border-l-4 border-l-orange-500">
-              <Users className="w-8 h-8 text-orange-400 mb-4" />
-              <h3 className="text-lg font-bold text-white mb-2">Trust Vacuum</h3>
-              <p className="text-neutral-400 text-sm">
-                No standard way to measure, verify, or communicate how much trust an AI agent has earned.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ChallengeSection />
 
       {/* The Solution - Platform Features */}
       <section id="platform" className="py-20 px-6 bg-gradient-to-b from-transparent to-indigo-500/5">
@@ -94,6 +64,8 @@ export default function Home() {
               description="0–1000 credit-score model with 8 tiers (T0–T7). 16 behavioral factors weighted across foundation, security, agency, maturity, and evolution domains."
               badges={['T7: Autonomous', 'T5: Trusted', 'T4: Standard']}
               badgeColors={['bg-cyan-500/10 text-cyan-400', 'bg-indigo-500/10 text-indigo-400', 'bg-green-500/10 text-green-400']}
+              link="/calculator"
+              linkLabel="Try the calculator →"
             />
             <FeatureCard
               icon={<Shield className="w-6 h-6 text-purple-400" />}
@@ -101,18 +73,24 @@ export default function Home() {
               description="Every action is checked against trust level. Insufficient trust? Request denied, escalated, or degraded automatically."
               badges={['ALLOW', 'DENY', 'ESCALATE', 'DEGRADE']}
               badgeColors={['bg-green-500/10 text-green-400', 'bg-red-500/10 text-red-400', 'bg-yellow-500/10 text-yellow-400', 'bg-orange-500/10 text-orange-400']}
+              link="/basis/enforce"
+              linkLabel="How enforcement works →"
             />
             <FeatureCard
               icon={<FileCheck className="w-6 h-6 text-emerald-400" />}
               title="Proof Chain"
               description="SHA-256 hashed audit trail with cryptographic verification. Every decision is provable, every action is traceable."
               code="prf_a7b2c9d4e5f6..."
+              link="/basis/proof"
+              linkLabel="See the proof spec →"
             />
             <FeatureCard
               icon={<Zap className="w-6 h-6 text-orange-400" />}
               title="Trust Decay"
               description="Trust isn't permanent. Scores decay over time with a 182-day half-life. Failures apply a tier-scaled 7–10× penalty — continuous good behavior required."
               footnote="182-day half-life | 7–10× tier-scaled penalty | Real-time updates"
+              link="/basis/trust"
+              linkLabel="Understand trust dynamics →"
             />
           </div>
         </div>
@@ -213,61 +191,76 @@ await agent.invoke(input, { callbacks: [callback] });`}</code>
 
           <div className="grid md:grid-cols-3 gap-6">
             {/* Developer Path */}
-            <div className="p-6 rounded-xl bg-gradient-to-b from-indigo-500/10 to-transparent border border-indigo-500/20 hover:border-indigo-500/40 transition-colors">
+            <div className="p-6 rounded-xl bg-gradient-to-b from-indigo-500/10 to-transparent border border-indigo-500/20 hover:border-indigo-500/40 transition-colors flex flex-col">
               <div className="w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center mb-4">
                 <Package className="w-6 h-6 text-indigo-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">I Want to Build</h3>
-              <p className="text-sm text-neutral-400 mb-6">Start integrating trust scoring and governance into your AI agents.</p>
-              <div className="space-y-3">
+              <p className="text-sm text-neutral-400 mb-4">Add trust scoring and governance to your AI agents in minutes. No architectural changes required.</p>
+              <div className="space-y-3 mb-6">
                 <code className="block text-sm text-indigo-400 bg-neutral-900 px-3 py-2 rounded font-mono">
                   npm install @vorionsys/atsf-core
                 </code>
-                <a href="https://github.com/vorionsys/vorion" target="_blank" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
-                  <Globe className="w-4 h-4" /> View on GitHub
+                <a href="https://cognigate.dev/docs" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                  <FileCheck className="w-4 h-4" /> Read the API docs
                 </a>
-                <a href="https://cognigate.dev/docs" target="_blank" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
-                  <FileCheck className="w-4 h-4" /> API Documentation
+                <a href="https://github.com/vorionsys/vorion" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                  <Globe className="w-4 h-4" /> Browse the source on GitHub
                 </a>
+              </div>
+              <div className="mt-auto">
+                <Link href="/demo" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white text-sm font-semibold transition-colors">
+                  Try the interactive demo <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             </div>
 
             {/* Evaluator Path */}
-            <div className="p-6 rounded-xl bg-gradient-to-b from-cyan-500/10 to-transparent border border-cyan-500/20 hover:border-cyan-500/40 transition-colors">
+            <div className="p-6 rounded-xl bg-gradient-to-b from-cyan-500/10 to-transparent border border-cyan-500/20 hover:border-cyan-500/40 transition-colors flex flex-col">
               <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center mb-4">
                 <Scale className="w-6 h-6 text-cyan-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">I Want to Evaluate</h3>
-              <p className="text-sm text-neutral-400 mb-6">Explore how VORION fits your organization&apos;s AI governance needs.</p>
-              <div className="space-y-3">
-                <Link href="/demo" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
-                  <Zap className="w-4 h-4" /> Try Live Demo
-                </Link>
+              <p className="text-sm text-neutral-400 mb-4">Understand the technical standard, see the compliance maps, and assess fit for your organisation.</p>
+              <div className="space-y-3 mb-6">
                 <Link href="/basis" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
                   <Shield className="w-4 h-4" /> Read the BASIS Standard
                 </Link>
                 <Link href="/basis/compliance" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
-                  <CheckCircle className="w-4 h-4" /> View Compliance Maps
+                  <CheckCircle className="w-4 h-4" /> NIST 800-53 &amp; compliance maps
+                </Link>
+                <Link href="/basis/trust" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                  <BarChart3 className="w-4 h-4" /> How trust scoring works
+                </Link>
+              </div>
+              <div className="mt-auto">
+                <Link href="/basis/spec" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-cyan-700 hover:bg-cyan-600 rounded-lg text-white text-sm font-semibold transition-colors">
+                  Read the full specification <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
 
             {/* Community Path */}
-            <div className="p-6 rounded-xl bg-gradient-to-b from-emerald-500/10 to-transparent border border-emerald-500/20 hover:border-emerald-500/40 transition-colors">
+            <div className="p-6 rounded-xl bg-gradient-to-b from-emerald-500/10 to-transparent border border-emerald-500/20 hover:border-emerald-500/40 transition-colors flex flex-col">
               <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
                 <Users className="w-6 h-6 text-emerald-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">I Want to Contribute</h3>
-              <p className="text-sm text-neutral-400 mb-6">Join the community shaping the future of AI governance.</p>
-              <div className="space-y-3">
-                <a href="https://discord.gg/basis-protocol" target="_blank" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
-                  <MessageCircle className="w-4 h-4" /> Join Discord
+              <p className="text-sm text-neutral-400 mb-4">The BASIS standard is open. Help us shape governance rules for the next wave of AI agents.</p>
+              <div className="space-y-3 mb-6">
+                <a href="https://github.com/vorionsys/vorion" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                  <Globe className="w-4 h-4" /> Fork the repo on GitHub
                 </a>
-                <a href="https://github.com/vorionsys/vorion/issues" target="_blank" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
-                  <Globe className="w-4 h-4" /> Open Issues
+                <a href="https://github.com/vorionsys/vorion/issues" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                  <FileCheck className="w-4 h-4" /> Browse open issues
                 </a>
-                <a href="https://twitter.com/vorionorg" target="_blank" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
-                  <BarChart3 className="w-4 h-4" /> Follow @vorionorg
+                <a href="https://discord.gg/basis-protocol" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
+                  <MessageCircle className="w-4 h-4" /> Join the Discord
+                </a>
+              </div>
+              <div className="mt-auto">
+                <a href="https://discord.gg/basis-protocol" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-700 hover:bg-emerald-600 rounded-lg text-white text-sm font-semibold transition-colors">
+                  Join the community <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
             </div>
@@ -286,7 +279,7 @@ await agent.invoke(input, { callbacks: [callback] });`}</code>
 }
 
 // Feature Card Component
-function FeatureCard({ icon, title, description, badges, badgeColors, code, footnote }: {
+function FeatureCard({ icon, title, description, badges, badgeColors, code, footnote, link, linkLabel }: {
   icon: React.ReactNode;
   title: string;
   description: string;
@@ -294,9 +287,11 @@ function FeatureCard({ icon, title, description, badges, badgeColors, code, foot
   badgeColors?: string[];
   code?: string;
   footnote?: string;
+  link?: string;
+  linkLabel?: string;
 }) {
   return (
-    <div className="p-8 rounded-xl bg-white/5 border border-white/5">
+    <div className="p-8 rounded-xl bg-white/5 border border-white/5 flex flex-col">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">{icon}</div>
         <h3 className="text-xl font-bold text-white">{title}</h3>
@@ -311,7 +306,135 @@ function FeatureCard({ icon, title, description, badges, badgeColors, code, foot
       )}
       {code && <code className="text-xs text-indigo-400 bg-neutral-900 px-3 py-2 rounded block font-mono mt-2">{code}</code>}
       {footnote && <div className="text-xs text-neutral-500 mt-3">{footnote}</div>}
+      {link && linkLabel && (
+        <div className="mt-auto pt-4">
+          <Link href={link} className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">{linkLabel}</Link>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Challenge Section with modal popups
+const challengeDetails = [
+  {
+    id: 'ungoverned',
+    icon: <AlertTriangle className="w-8 h-8 text-red-400" />,
+    accentClass: 'border-l-red-500',
+    title: 'Ungoverned Agents',
+    summary: 'AI agents operate without trust boundaries, making unrestricted decisions with no accountability.',
+    detail: {
+      headline: 'What happens when an AI agent has no rules?',
+      points: [
+        { heading: 'It can do anything', body: 'Without a trust boundary, an agent can send emails, move money, delete files, or escalate permissions — all on its own. There is nothing checking whether it should.' },
+        { heading: 'No one knows until it\'s too late', body: 'Ungoverned agents can act for hours or days before anyone notices a problem. By then, the damage is done and there\'s no clean record of what happened.' },
+        { heading: 'You can\'t scale what you can\'t control', body: 'Deploying more agents without governance multiplies the risk, not the value. Each new agent is a new attack surface and a new compliance liability.' },
+      ],
+      cta: { label: 'See how BASIS sets boundaries', href: '/basis/enforce' },
+    },
+  },
+  {
+    id: 'noaudit',
+    icon: <Lock className="w-8 h-8 text-yellow-400" />,
+    accentClass: 'border-l-yellow-500',
+    title: 'No Audit Trail',
+    summary: "Enterprises can't prove what AI did, when, or why — a compliance nightmare.",
+    detail: {
+      headline: 'Can you answer these three questions about your AI?',
+      points: [
+        { heading: 'What did it do?', body: 'Regulators and auditors ask for a record of every significant decision. Log files are not enough — they can be edited, deleted, or left incomplete.' },
+        { heading: 'Why did it do it?', body: 'It\'s not just what happened, but what rule or goal drove it. Without a structured audit trail, you can\'t reconstruct the reasoning chain that led to an outcome.' },
+        { heading: 'Can you prove it?', body: 'A proof record that is cryptographically signed and hash-chained can\'t be altered. That\'s the difference between a log and legal evidence.' },
+      ],
+      cta: { label: 'See how the Proof Chain works', href: '/basis/proof' },
+    },
+  },
+  {
+    id: 'vacuum',
+    icon: <Users className="w-8 h-8 text-orange-400" />,
+    accentClass: 'border-l-orange-500',
+    title: 'Trust Vacuum',
+    summary: 'No standard way to measure, verify, or communicate how much trust an AI agent has earned.',
+    detail: {
+      headline: 'How do you know if an AI agent has earned the right to act?',
+      points: [
+        { heading: 'Role-based access isn\'t enough', body: 'Giving an agent a role is a static decision made at setup. But behaviour changes over time. An agent that passed a test six months ago might have drifted significantly since.' },
+        { heading: 'No shared language for trust', body: 'Different teams, vendors, and regulators describe AI trust in different ways. Without a common score, comparisons are impossible and due diligence is guesswork.' },
+        { heading: 'Trust should be earned, live, and revocable', body: 'BASIS defines a 0–1000 score computed from real behavioural signals — updated in real time. An agent earns access by acting well, and loses it when it doesn\'t.' },
+      ],
+      cta: { label: 'See how trust scoring works', href: '/basis/trust' },
+    },
+  },
+];
+
+function ChallengeSection() {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const active = challengeDetails.find(c => c.id === openId);
+
+  return (
+    <section className="py-20 px-6 border-t border-white/5">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-white mb-4 text-center">The Challenge</h2>
+        <p className="text-neutral-400 text-center mb-12 max-w-2xl mx-auto">
+          AI agents are deployed without governance infrastructure, creating compliance and security risks.
+        </p>
+        <div className="grid md:grid-cols-3 gap-6">
+          {challengeDetails.map(c => (
+            <button
+              key={c.id}
+              onClick={() => setOpenId(c.id)}
+              className={`text-left p-6 rounded-xl bg-white/5 border border-white/5 border-l-4 ${c.accentClass} hover:bg-white/[0.08] transition-colors group`}
+            >
+              {c.icon}
+              <h3 className="text-lg font-bold text-white mt-4 mb-2">{c.title}</h3>
+              <p className="text-neutral-400 text-sm">{c.summary}</p>
+              <span className="inline-block mt-3 text-xs text-neutral-500 group-hover:text-neutral-300 transition-colors">Tap to learn more →</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {active && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setOpenId(null)}
+        >
+          <div
+            className="relative bg-neutral-900 border border-white/10 rounded-2xl max-w-lg w-full p-8 shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setOpenId(null)}
+              className="absolute top-4 right-4 p-2 text-neutral-500 hover:text-white transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="mb-1">{active.icon}</div>
+            <h3 className="text-2xl font-bold text-white mt-4 mb-2">{active.title}</h3>
+            <p className="text-neutral-400 text-sm mb-6">{active.detail.headline}</p>
+            <div className="space-y-5">
+              {active.detail.points.map(p => (
+                <div key={p.heading}>
+                  <h4 className="text-white font-semibold text-sm mb-1">{p.heading}</h4>
+                  <p className="text-neutral-400 text-sm leading-relaxed">{p.body}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8">
+              <Link
+                href={active.detail.cta.href}
+                onClick={() => setOpenId(null)}
+                className="inline-flex items-center gap-2 px-5 py-3 bg-white text-black font-semibold rounded-lg hover:bg-neutral-200 transition-colors text-sm"
+              >
+                {active.detail.cta.label} <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
