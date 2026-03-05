@@ -1,7 +1,7 @@
 ---
 project_name: 'Vorion Platform'
 user_name: 'Racas'
-date: '2026-02-27'
+date: '2026-03-05'
 sections_completed: ['overview', 'technology_stack', 'workspace_structure', 'naming_conventions', 'critical_rules', 'sprint_a', 'import_direction', 'feature_flags', 'migration_status', 'phase4_gate', 'npm_publishing', 'testing_maturity', 'ip_protections']
 status: 'active'
 rule_count: 58
@@ -30,17 +30,21 @@ _Critical rules and patterns for working in the Vorion Platform monorepo. Focus 
 
 ### Live Deployments
 
-| Site | URL | Source |
-|------|-----|--------|
-| AgentAnchor App | app.agentanchorai.com | apps/agentanchor |
-| AgentAnchor WWW | agentanchorai.com | apps/agentanchor-www |
-| BASIS Docs | basis.vorion.org | docs/basis-docs |
-| Vorion Corporate | vorion.org | vorion-www |
-| Kaizen | learn.vorion.org | kaizen |
-| Cognigate | cognigate.dev | cognigate-api (Python FastAPI) |
-| Status | status.agentanchorai.com | monitoring |
-| npm Org | npmjs.com/org/vorionsys | 11 packages published |
-| GitHub Public | github.com/vorionsys | vorion + cognigate repos |
+| Site | URL | Vercel Project | Source |
+|------|-----|---------------|--------|
+| Vorion Corporate | vorion.org | `vorion-www` | `vorion-www/` |
+| BASIS Docs | basis.vorion.org | `basis-docs` | `docs/basis-docs/` |
+| CAR Docs | car.vorion.org | `car-docs` | `docs/car-docs/` |
+| ATSF Docs (legacy) | atsf.vorion.org | `atsf-docs` | `docs/atsf-docs/` |
+| Cognigate | cognigate.dev | `cognigate` | `cognigate/` (separate repo) |
+| Kaizen Learning | learn.vorion.org | `kaizen` | `apps/kaizen/` |
+| Kaizen Docs | kaizen-docs.vercel.app | `kaizen-docs` | `kaizen-docs/` |
+| AgentAnchor App | app.agentanchorai.com | `agentanchor` | `apps/agentanchor/` |
+| AgentAnchor WWW | agentanchorai.com | `agentanchor-www` | `apps/agentanchor-www/` |
+| Aurais | aurais.net | `aurais` | `apps/aurais/` |
+| BAI Command Center | bai-cc.com | `bai-cc-www` | `apps/dashboard/` |
+| npm Org | npmjs.com/org/vorionsys | — | 11+ packages |
+| GitHub Public | github.com/vorionsys | — | vorion + cognigate repos |
 
 ---
 
