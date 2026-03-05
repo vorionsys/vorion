@@ -156,3 +156,6 @@ benchmarks/results/
 # Stryker mutation testing temp
 .stryker-tmp/
 reports/mutation/
+
+# Legacy ORION V1 context/ownership docs (contain personal emails and legal content)
+docs/ORION V1*
