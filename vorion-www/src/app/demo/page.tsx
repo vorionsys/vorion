@@ -158,7 +158,7 @@ main();`}</code>
             <ConceptCard
               icon={<CheckCircle className="w-5 h-5 text-emerald-400" />}
               title="Monitored Decay"
-              description="182-day half-life with tier-scaled 7–10× failure penalty. Continuous good behavior required to maintain trust."
+              description="182-day half-life with tier-scaled 2–10× failure penalty. T0 agents are most forgiving (2×); T5–T7 agents have no margin for error (10×)."
             />
           </div>
         </section>

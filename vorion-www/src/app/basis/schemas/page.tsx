@@ -122,8 +122,8 @@ export default function SchemasPage() {
     },
     "trust_tier_at_decision": {
       "type": "string",
-      "enum": ["sandbox", "provisional", "standard",
-               "trusted", "certified", "autonomous"]
+      "enum": ["sandbox", "observed", "provisional", "monitored",
+               "standard", "trusted", "certified", "autonomous"]
     },
     "denial_reason": {
       "type": ["string", "null"],

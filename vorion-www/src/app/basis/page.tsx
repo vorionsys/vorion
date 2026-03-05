@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { ArrowRight, Shield, Cpu, Database, Link2, Scale, FileText, BookOpen, AlertTriangle, CheckCircle, GitBranch, ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
 
@@ -51,18 +51,19 @@ export default function BASISPage() {
         {/* Four Layer Architecture */}
         <section className="px-6 max-w-7xl mx-auto mb-20">
           <h2 className="text-3xl font-bold text-white mb-8">The Four-Layer Architecture</h2>
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8">
-            <pre className="text-sm text-neutral-300 overflow-x-auto font-mono">
-{`â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  LAYER 1: INTENT    â†’ Parse & classify action requests      â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚  LAYER 2: ENFORCE   â†’ Evaluate against trust & policies     â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚  LAYER 3: PROOF     â†’ Log with cryptographic integrity      â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚  LAYER 4: CHAIN     â†’ Anchor to blockchain (optional)       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜`}
-            </pre>
+          <div className="mb-8 space-y-1">
+            {[
+              { num: '1', name: 'INTENT',  color: 'border-blue-500 bg-blue-500/10 text-blue-400',     desc: 'Parse & classify action requests' },
+              { num: '2', name: 'ENFORCE', color: 'border-indigo-500 bg-indigo-500/10 text-indigo-400', desc: 'Evaluate against trust score & policies' },
+              { num: '3', name: 'PROOF',   color: 'border-emerald-500 bg-emerald-500/10 text-emerald-400', desc: 'Log with cryptographic integrity' },
+              { num: '4', name: 'CHAIN',   color: 'border-purple-500 bg-purple-500/10 text-purple-400', desc: 'Anchor to external verifier (optional)' },
+            ].map((layer) => (
+              <div key={layer.num} className={`flex items-center gap-4 p-4 rounded-lg border-l-4 ${layer.color}`}>
+                <span className="font-mono text-xs text-neutral-500 w-16 shrink-0">LAYER {layer.num}</span>
+                <span className={`font-mono font-bold text-sm w-20 shrink-0 ${layer.color.split(' ')[2]}`}>{layer.name}</span>
+                <span className="text-neutral-400 text-sm">{layer.desc}</span>
+              </div>
+            ))}
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <LayerCard
@@ -136,7 +137,7 @@ export default function BASISPage() {
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                   <h4 className="font-mono text-sm text-red-400 mb-2">Failure Amplification</h4>
-                  <p className="text-neutral-400 text-sm">Tier-scaled 7–10× penalty on negative signals — highest at T0, lowest at T7. Failures hurt significantly more than successes help.</p>
+                  <p className="text-neutral-400 text-sm">Tier-scaled 2–10× penalty on failures — lowest at T0 (2×, aids ascension) rising to 10× at T5–T7. New agents can recover; high-trust agents pay steeply for any lapse.</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                   <h4 className="font-mono text-sm text-emerald-400 mb-2">Tier Boundaries</h4>
