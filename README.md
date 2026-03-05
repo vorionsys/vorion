@@ -200,7 +200,7 @@ graph TD
 
 ```bash
 # Clone the repository
-git clone https://github.com/vorion/vorion.git
+git clone https://github.com/vorionsys/vorion.git
 cd vorion
 
 # Install dependencies
@@ -219,7 +219,7 @@ npm run dev
 ### Basic Usage (TypeScript/Node.js)
 
 ```typescript
-import { IntentService, createIntentService } from '@vorion/platform';
+import { IntentService, createIntentService } from '@vorionsys/platform-core';
 
 // Create the intent service (requires database and Redis connections)
 const intentService = createIntentService();
@@ -631,7 +631,7 @@ Run `python tools/validate-oscal-ssp.py` to validate all artifacts locally.
 - **Documentation**: [learn.vorion.org](https://learn.vorion.org)
 - **Issues**: [GitHub Issues](https://github.com/vorionsys/vorion/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/vorionsys/vorion/discussions)
-- **Email**: support@agentanchorai.com
+- **Email**: hello@vorion.org
 
 ---
 
