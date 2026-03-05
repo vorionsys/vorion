@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Demo | VORION - Try AI Governance in 5 Minutes',
-  description: 'Get hands-on with AI agent trust scoring. Install atsf-core and see governance in action with a working demo.',
+  description: 'Get hands-on with AI agent trust scoring. Install @vorionsys/atsf-core and see governance in action with a working demo.',
 };
 
 export default function DemoPage() {
@@ -25,7 +25,7 @@ export default function DemoPage() {
             Try AI Governance in 5 Minutes
           </h1>
           <p className="text-xl text-neutral-400">
-            Install atsf-core and see trust scoring in action. No account required.
+            Install @vorionsys/atsf-core and see trust scoring in action. No account required.
           </p>
         </div>
 
@@ -158,7 +158,7 @@ main();`}</code>
             <ConceptCard
               icon={<CheckCircle className="w-5 h-5 text-emerald-400" />}
               title="Monitored Decay"
-              description="After 2+ failures in an hour, decay accelerates 3x to force accountability."
+              description="182-day half-life with tier-scaled 7–10× failure penalty. Continuous good behavior required to maintain trust."
             />
           </div>
         </section>

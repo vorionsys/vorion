@@ -82,7 +82,7 @@ export default function Home() {
       {/* The Solution - Platform Features */}
       <section id="platform" className="py-20 px-6 bg-gradient-to-b from-transparent to-indigo-500/5">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-white mb-4 text-center">The ATSF Solution</h2>
+          <h2 className="text-3xl font-bold text-white mb-4 text-center">The BASIS Solution</h2>
           <p className="text-neutral-400 text-center mb-12 max-w-2xl mx-auto">
             A comprehensive trust infrastructure that gives enterprises visibility, control, and accountability.
           </p>
@@ -111,8 +111,8 @@ export default function Home() {
             <FeatureCard
               icon={<Zap className="w-6 h-6 text-orange-400" />}
               title="Trust Decay"
-              description="Trust isn't permanent. Scores decay over time, with 3x accelerated decay after failures. Continuous good behavior required."
-              footnote="7-day half-life | 3x failure multiplier | Real-time updates"
+              description="Trust isn't permanent. Scores decay over time with a 182-day half-life. Failures apply a tier-scaled 7–10× penalty — continuous good behavior required."
+              footnote="182-day half-life | 7–10× tier-scaled penalty | Real-time updates"
             />
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function Home() {
           </div>
           <div className="bg-neutral-900 p-6 rounded-xl text-left max-w-2xl mx-auto border border-white/10">
             <pre className="text-sm text-neutral-300 overflow-x-auto">
-              <code>{`import { createTrustEngine } from 'atsf-core';
+              <code>{`import { createTrustEngine } from '@vorionsys/atsf-core';
 
 const engine = createTrustEngine();
 await engine.initializeEntity('agent-001', 2);
@@ -218,7 +218,7 @@ await agent.invoke(input, { callbacks: [callback] });`}</code>
               <p className="text-sm text-neutral-400 mb-6">Start integrating trust scoring and governance into your AI agents.</p>
               <div className="space-y-3">
                 <code className="block text-sm text-indigo-400 bg-neutral-900 px-3 py-2 rounded font-mono">
-                  npm install atsf-core
+                  npm install @vorionsys/atsf-core
                 </code>
                 <a href="https://github.com/vorionsys/vorion" target="_blank" className="flex items-center gap-2 text-sm text-neutral-300 hover:text-white transition-colors">
                   <Globe className="w-4 h-4" /> View on GitHub

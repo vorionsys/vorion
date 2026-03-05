@@ -132,11 +132,11 @@ export default function BASISPage() {
               <div className="space-y-4">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                   <h4 className="font-mono text-sm text-amber-400 mb-2">Decay</h4>
-                  <p className="text-neutral-400 text-sm">7-day half-life. Inactive agents lose trust over time to prevent stale high-trust entities.</p>
+                  <p className="text-neutral-400 text-sm">182-day half-life. Inactive agents reach 50% trust score at 182 days idle — stepped milestones at 7, 14, 28, 56, 112, and 182 days.</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                   <h4 className="font-mono text-sm text-red-400 mb-2">Failure Amplification</h4>
-                  <p className="text-neutral-400 text-sm">3x multiplier on negative deltas. Failures hurt more than successes help.</p>
+                  <p className="text-neutral-400 text-sm">Tier-scaled 7–10× penalty on negative signals — highest at T0, lowest at T7. Failures hurt significantly more than successes help.</p>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                   <h4 className="font-mono text-sm text-emerald-400 mb-2">Tier Boundaries</h4>
