@@ -97,7 +97,7 @@ CAR-ID (UUID v4)
 Trust Score (0–1000)
   └── Computed from behavioral signals (Behavioral 40%, Compliance 25%,
       Identity 20%, Context 15%)
-  └── Asymmetric: failures penalized 3× more than successes
+  └── Asymmetric: failures apply tier-scaled 7–10× penalty; recoveries are deliberately smaller
   └── Time-decays with 182-day half-life (idle agents lose authority)
   └── Determines trust tier (T0 Sandbox → T7 Autonomous)
   └── Trust tier = effective authorization scope

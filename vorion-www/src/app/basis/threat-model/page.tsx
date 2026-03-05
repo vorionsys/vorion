@@ -19,7 +19,7 @@ export default function ThreatModelPage() {
         <section>
           <h2 className="text-2xl font-bold text-white mb-4">Overview</h2>
           <p className="text-neutral-400 leading-relaxed">
-            This document defines the security threat model for BASIS-conformant implementations. It identifies threats, attack vectors, and required mitigations for AI agent governance systems.
+            This document defines the security threat model for BASIS-conformant implementations. It identifies threats, attack vectors, and required controls. These are architectural requirements for a fully conformant deployment — not all controls are active in the current early-stage Cognigate release.
           </p>
         </section>
 
@@ -94,12 +94,12 @@ export default function ThreatModelPage() {
               name="Entity Spoofing"
               impact="Critical"
               category="Authentication"
-              description="Attacker impersonates a trusted entity to leverage their trust score."
+              description="Attacker impersonates a trusted entity to leverage their trust score. Identity binding is a planned control — not yet active."
               mitigations={[
-                'Strong authentication required for all entities',
-                'Implement entity-specific API keys',
-                'Session binding to IP/device where possible',
-                'MFA for high-privilege operations'
+                'All entities MUST authenticate before trust operations are processed',
+                'API credentials MUST be entity-specific and non-transferable',
+                'Proof records MUST bind to the requesting entity ID at issuance',
+                'High-privilege operations MUST require step-up verification'
               ]}
             />
           </div>
@@ -107,7 +107,7 @@ export default function ThreatModelPage() {
 
         {/* Security Requirements */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">Security Requirements Summary</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Security Requirements (Architectural Baseline — Planned)</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <RequirementGroup
               title="Authentication"
@@ -138,7 +138,7 @@ export default function ThreatModelPage() {
               requirements={[
                 'Validate all input against schema',
                 'Parameterize all database queries',
-                'Implement prompt injection detection'
+                'Prompt injection controls required (planned)'
               ]}
             />
           </div>
@@ -185,7 +185,7 @@ function ThreatCard({ id, name, impact, category, description, mitigations }: {
       <h3 className="text-lg font-semibold text-white mb-2">{name}</h3>
       <p className="text-neutral-400 text-sm mb-4">{description}</p>
       <div>
-        <h4 className="text-xs font-semibold text-emerald-400 uppercase mb-2">Mitigations</h4>
+        <h4 className="text-xs font-semibold text-emerald-400 uppercase mb-2">Required Controls</h4>
         <ul className="space-y-1">
           {mitigations.map((m, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-neutral-300">

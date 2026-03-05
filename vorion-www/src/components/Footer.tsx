@@ -24,7 +24,7 @@ const footerSections: Record<string, FooterLink[]> = {
   Developers: [
     { label: 'Documentation', href: 'https://cognigate.dev/docs', external: true },
     { label: 'NPM Package', href: 'https://www.npmjs.com/package/@vorionsys/atsf-core', external: true },
-    { label: 'GitHub', href: 'https://github.com/vorionsys', external: true },
+    { label: 'GitHub — Open Source', href: 'https://github.com/vorionsys', external: true },
     { label: 'OpenAPI Spec', href: 'https://cognigate.dev/openapi.json', external: true },
   ],
   Company: [
@@ -60,7 +60,8 @@ export function Footer() {
             </Link>
             <p className="text-zinc-500 text-sm mb-6 max-w-xs">
               Governance for the Autonomous Age. Infrastructure to bind AI agents
-              to verifiable human intent.
+              to verifiable human intent. Open source at{' '}
+              <a href="https://github.com/vorionsys" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">github.com/vorionsys</a>.
             </p>
             {/* Social Links */}
             <div className="flex items-center gap-4">

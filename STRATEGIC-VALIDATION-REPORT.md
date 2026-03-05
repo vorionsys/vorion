@@ -105,7 +105,7 @@ After comprehensive codebase analysis, the Vorion project's claims are **substan
    - Loss: exponential (delta = -lossRate × current)
 ✅ 7-day cooldown after trust drops
 ✅ Circuit breaker on oscillation detection
-✅ Accelerated decay multiplier (3x on failures)
+✅ Tier-scaled failure penalty (7–10×, highest at T0 — lowest accumulated trust)
 ```
 
 ### 1.5 Security Hardening
