@@ -1,18 +1,8 @@
 /**
- * Phase 6: Trust Engine Hardening - Type Definitions (LEGACY)
- *
- * @deprecated Use `../phase6/types.ts` instead. This file is retained for
- * backward compatibility with ceiling-enforcement/kernel.ts and audit.ts
- * imports. The canonical 8-tier model, TrustTier enum, ROLE_GATE_MATRIX,
- * and TRUST_TIER_BOUNDARIES now live in `../phase6/types.ts`.
- *
- * Core types for all 5 architecture decisions:
- * Q1: Ceiling Enforcement (Kernel-level)
- * Q2: Context Policy (Immutable at instantiation)
- * Q3: Role Gates (Dual-layer)
- * Q4: Weight Presets (Hybrid spec + deltas)
- * Q5: Creation Modifiers (Instantiation time)
+ * @deprecated All types live in `../../phase6/types.ts`.
+ * This file is a thin re-export barrel for any remaining internal references.
  */
+export * from '../../phase6/types.js';
 
 // ============================================================================
 // Q1: CEILING ENFORCEMENT

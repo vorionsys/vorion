@@ -8,7 +8,7 @@
  * - <0.5ms validation latency
  */
 
-import { AgentContextPolicy } from '../phase6-types';
+import type { AgentContextPolicy } from '../../phase6/types.js';
 
 /**
  * Valid context types for agents

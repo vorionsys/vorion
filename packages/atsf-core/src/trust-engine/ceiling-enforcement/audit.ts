@@ -7,11 +7,11 @@
  * - Analytics: ceiling hit frequency, patterns, drift detection
  */
 
-import {
+import type {
   TrustEvent,
   TrustMetrics,
   Phase6ValidationError,
-} from '../phase6-types';
+} from '../../phase6/types.js';
 import {
   CeilingEnforcementResult,
   ContextType,

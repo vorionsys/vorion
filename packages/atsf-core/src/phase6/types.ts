@@ -784,6 +784,98 @@ export const trustComputationResultSchema = z.object({
 });
 
 // =============================================================================
+// TRUST EVENT (Q1 kernel-level audit record)
+// =============================================================================
+
+export interface TrustEvent {
+  readonly agentId: string;
+  readonly timestamp: number;
+  readonly rawScore: number;       // Pre-ceiling
+  readonly score: number;          // Post-ceiling [0, 1000]
+  readonly ceilingApplied: boolean;
+  readonly metrics: TrustMetrics;
+  readonly computedBy: string;
+  readonly layer: 'kernel' | 'policy' | 'basis';
+}
+
+// =============================================================================
+// AGENT CONTEXT POLICY (Q2 immutable-at-instantiation)
+// =============================================================================
+
+export interface AgentContextPolicy {
+  readonly context: ContextType;
+  readonly createdAt: number;
+  readonly createdBy: string;
+}
+
+// =============================================================================
+// CANONICAL TRUST PRESETS (Q4 — simple 4-weight format for direct scoring)
+// NOTE: For the full 16-factor production model see BASIS_CANONICAL_PRESETS below.
+// =============================================================================
+
+export interface CanonicalTrustWeights {
+  readonly observabilityWeight: number;
+  readonly capabilityWeight: number;
+  readonly behaviorWeight: number;
+  readonly contextWeight: number;
+}
+
+export const CANONICAL_TRUST_PRESETS: Record<string, CanonicalTrustWeights> = {
+  high_confidence: {
+    observabilityWeight: 0.30,
+    capabilityWeight: 0.25,
+    behaviorWeight: 0.30,
+    contextWeight: 0.15,
+  },
+  governance_focus: {
+    observabilityWeight: 0.40,
+    capabilityWeight: 0.10,
+    behaviorWeight: 0.30,
+    contextWeight: 0.20,
+  },
+  capability_focus: {
+    observabilityWeight: 0.20,
+    capabilityWeight: 0.40,
+    behaviorWeight: 0.25,
+    contextWeight: 0.15,
+  },
+};
+
+// =============================================================================
+// CREATION TYPE MODIFIERS (Q5)
+// =============================================================================
+
+export const CREATION_TYPE_MODIFIERS: Record<CreationType, number> = {
+  [CreationType.FRESH]: 0,
+  [CreationType.CLONED]: -50,
+  [CreationType.EVOLVED]: 25,
+  [CreationType.PROMOTED]: 50,
+  [CreationType.IMPORTED]: -100,
+};
+
+// =============================================================================
+// VALIDATION & ERRORS
+// =============================================================================
+
+export class Phase6ValidationError extends Error {
+  constructor(
+    public decision: 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5',
+    message: string
+  ) {
+    super(`[${decision}] ${message}`);
+    this.name = 'Phase6ValidationError';
+  }
+}
+
+export function validateContextType(context: unknown): context is ContextType {
+  return Object.values(ContextType).includes(context as ContextType);
+}
+
+export function validateCreationType(type: unknown): type is CreationType {
+  return Object.values(CreationType).includes(type as CreationType);
+}
+
+// =============================================================================
 // CANONICAL PRESETS (BASIS Standard - Immutable)
 // =============================================================================
 
