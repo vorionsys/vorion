@@ -1,93 +1,134 @@
 ﻿# Vorion Public Roadmap
 
-> **Status**: Active Development â€” BASIS v1.0 spec stabilization
+> **Status**: Active Development
 > Last updated: March 2026
 
 ---
 
-## What is Vorion?
+## The Stack
 
-Vorion is building **BASIS** â€” an open standard and runtime for AI agent governance. BASIS defines how autonomous agents must be controlled, monitored, and audited before taking action in enterprise environments.
+BASIS sets the rules. CAR identifies the agent. Cognigate enforces. PROOF keeps the receipts.
+
+| Component | What | Where |
+|-----------|------|-------|
+| **BASIS** | Open governance standard for AI agents | `@vorionsys/basis` |
+| **CAR** | Categorical Agentic Registry -- identity & trust tracking | `@vorion/car-cli`, `@vorion/car-client` |
+| **Cognigate** | Governance enforcement runtime | `cognigate.dev` |
+| **PROOF** | Immutable cryptographic audit trail | `@vorionsys/proof-plane` |
+| **CHAIN** | Optional blockchain anchoring of proof records | Layer 4 |
+| **AgentAnchor** | Commercial SaaS -- full governance fleet management | `agentanchorai.com` |
+| **Kaizen** | Education platform for AI governance | `learn.vorion.org` |
 
 ---
 
-## Now (Q1 2026)
+## Trust Model (8 Tiers, 0-1000)
 
-### BASIS v1.0 Specification
-- [x] Four-layer governance stack (INTENT -> ENFORCE -> PROOF -> CHAIN)
-- [x] 8-tier trust model (T0 Sandbox -> T7 Autonomous, scores 0-1000)
-- [x] Tier-scaled failure multipliers (2x at T0, up to 10x at T5-T7)
-- [x] Proof record schema with cryptographic integrity
-- [x] Wire protocol (JSON) for agent action requests and governance decisions
-- [ ] Conformance test suite (draft)
+| Tier | Name | Score | Failure Mult |
+|------|------|-------|-------------|
+| T0 | Sandbox | 0-199 | 2x |
+| T1 | Observed | 200-349 | 3x |
+| T2 | Provisional | 350-499 | 4x |
+| T3 | Monitored | 500-649 | 5x |
+| T4 | Standard | 650-799 | 7x |
+| T5 | Trusted | 800-875 | 10x |
+| T6 | Certified | 876-950 | 10x |
+| T7 | Autonomous | 951-1000 | 10x |
 
-### Cognigate (Reference Implementation)
-- [x] Trust scoring API with tier-aware signal processing
-- [x] ALLOW / DENY / ESCALATE / DEGRADE decision engine
-- [x] Trust decay over time
-- [ ] Bulk signal ingestion endpoint
+Failure multipliers scale with tier -- lowest at T0 to aid ascension, max at T5-T7 to enforce accountability.
+
+---
+
+## Release Waves
+
+| Wave | Target | Name | Deliverable |
+|------|--------|------|-------------|
+| 1 | Feb 26 | The Standard | BASIS + contracts + shared-constants + atsf-core on npm |
+| 2 | Mar 16 | The Pipeline | SDK + CAR + live API + Docker quickstart |
+| 3 | Mar 30 | The Platform | AgentAnchor SaaS invite-only launch |
+| 4 | Apr 20 | The Console | Aurais + vorion-admin operators console |
+| 5 | May 4 | The Academy | Kaizen courses + contributor guide + community |
+
+---
+
+## Wave 1 (Done) -- The Standard
+
+- [x] `@vorionsys/shared-constants` published
+- [x] `@vorionsys/contracts` published
+- [x] `@vorionsys/basis` published
+- [x] `@vorionsys/atsf-core` published
+- [x] 8-tier T0-T7 canonical trust model
+- [x] Specification at vorion.org/basis/spec
+
+---
+
+## Wave 2 -- The Pipeline (Mar 16)
+
+- [ ] `@vorionsys/sdk` with 5-minute quickstart
+- [ ] `@vorion/car-client` + `@vorion/car-cli` published
+- [ ] `@vorionsys/proof-plane` published
+- [ ] `@vorionsys/runtime` published
+- [ ] `docker run vorionsys/vorion` end-to-end
+- [ ] OpenAPI spec live at cognigate.dev/docs
 - [ ] gRPC transport support
 
-### BASIS SDK (@vorionsys/sdk)
-- [x] Agent action request builder
-- [x] Trust score polling
-- [ ] Streaming governance events
-- [ ] OpenAI/Anthropic middleware adapters
+---
+
+## Wave 3 -- The Platform (Mar 30)
+
+- [ ] AgentAnchor SaaS invite-only launch
+- [ ] Agent registration + policy management UI
+- [ ] Trust score dashboard
+- [ ] Compliance report export
+- [ ] Invite/access gate
 
 ---
 
-## Next (Q2 2026)
+## Wave 4 -- The Console (Apr 20)
 
-### CHAIN Layer (Proof Anchoring)
-- [ ] Pluggable ledger connectors (Ethereum, Hyperledger, PostgreSQL append-only)
-- [ ] Merkle proof generation for audit batches
-- [ ] Proof verification CLI (car verify)
+- [ ] Aurais: real-time agent fleet monitoring
+- [ ] vorion-admin: user management, RBAC, audit log viewer
+- [ ] Trust score trend dashboards
+- [ ] Alerting on trust degradation
 
-### AgentAnchor
-- [ ] Agent identity and credential standard
-- [ ] Cross-org agent trust federation
-- [ ] AgentAnchor SDK public release
+---
 
-### Developer Experience
-- [ ] npx create-basis-app scaffold
-- [ ] Docker Compose one-liner local stack
-- [ ] Postman collection for Cognigate API
-- [ ] Interactive demo at vorion.org/demo
+## Wave 5 -- The Academy (May 4)
+
+- [ ] Kaizen learning paths (Beginner / Integration Dev / Enterprise Admin)
+- [ ] Interactive code examples in docs
+- [ ] Contributor guide + architecture walkthrough
+- [ ] Discord community
+- [ ] v1.0.0 release
 
 ---
 
 ## Later (Q3-Q4 2026)
 
-### BASIS Extended Conformance
-- [ ] Multi-tenant isolation
 - [ ] Federated trust across organizations
-- [ ] Capability taxonomy v2 (hierarchical, versioned)
-
-### Platform
-- [ ] Managed Cognigate (hosted trust scoring)
-- [ ] Dashboard for trust score history and audit trails
+- [ ] Multi-tenant isolation (BASIS Extended conformance)
 - [ ] SIEM integrations (Splunk, Datadog)
-
-### Standards
-- [ ] BASIS submission to relevant standards body
-- [ ] Published conformance test suite
-- [ ] Third-party audited reference implementation
+- [ ] ZK proof receipts
+- [ ] Merkle batch proof anchoring
+- [ ] BASIS formal standards submission
 
 ---
 
-## Shipped
+## Sites
 
-| Version | Highlight |
-|---------|-----------|
-| 0.9.0 | Initial BASIS spec + Cognigate alpha |
-| 0.9.5 | 8-tier T0-T7 trust model + tier-scaled penalties |
-| 0.9.6 | Public spec page at vorion.org/basis/spec |
+| Site | URL | Status |
+|------|-----|--------|
+| Main website | vorion.org | Live |
+| Cognigate API | cognigate.dev | Live |
+| AgentAnchor SaaS | agentanchorai.com | Live (auth WIP) |
+| Aurais console | aurais.net | Live (preview) |
+| Kaizen education | learn.vorion.org | Live (content WIP) |
+| CAR docs | car.vorion.org | Live |
 
 ---
 
 ## Get Involved
 
-- **Spec discussion**: https://github.com/vorionsys/vorion/discussions
-- **Issues**: https://github.com/vorionsys/vorion/issues
-- **Docs**: https://www.vorion.org/basis
-- **License**: Apache-2.0
+- Spec: https://github.com/vorionsys/vorion
+- Issues: https://github.com/vorionsys/vorion/issues
+- Docs: https://www.vorion.org/basis
+- License: Apache-2.0 | CC BY 4.0 (Specification text)
