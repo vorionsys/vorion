@@ -173,7 +173,7 @@ graph TD
 | ATSF Core | Published | `@vorionsys/atsf-core` |
 | Shared Constants | Published | `@vorionsys/shared-constants` |
 | Contracts | Published | `@vorionsys/contracts` |
-| A3I | Development | 418+ tests passing (inc. KYA→pipeline bridge) |
+| A3I | Development | 637+ tests passing (NIST SP 800-53, AI RMF, SSDF, adversarial) |
 | Platform Core | Development | 82+ tests |
 | Cognigate | Development | SDK published |
 | PROOF Plane | Development | Hash chain + Merkle implemented |
@@ -258,7 +258,7 @@ vorion/
 │   ├── car-spec/                    # CAR specification (published, v1.1.0)
 │   ├── platform-core/              # Trust engine, governance, enforcement, proof
 │   ├── proof-plane/                 # Dual-hash (SHA-256 + SHA3-256) audit chain
-│   ├── a3i/                         # Agent orchestration layer (418+ tests, KYA bridge)
+│   ├── a3i/                         # Agent orchestration layer (637+ tests, NIST compliance + KYA bridge)
 │   ├── security/                    # Crypto, DPoP, Merkle modules
 │   ├── runtime/                     # Agent runtime environment
 │   ├── sdk/                         # Platform SDK
@@ -421,7 +421,7 @@ npm run security:audit               # npm audit (high/critical)
 | Database | PostgreSQL 15+ (Drizzle ORM) | RLS for tenant isolation |
 | Auth | Supabase Auth | JWT + SSR middleware |
 | Cache | Redis 7+ (ioredis) | Session, JTI cache, BullMQ |
-| Testing | Vitest + Stryker (mutation) | 9,757+ TS tests + 692 Python |
+| Testing | Vitest + Stryker (mutation) | 9,976+ TS tests + 692 Python |
 | CI/CD | GitHub Actions | Lint, typecheck, build, test, SAST, secrets |
 | SAST | Semgrep (blocking) | Every push |
 | Secrets | gitleaks (blocking) | Every push |

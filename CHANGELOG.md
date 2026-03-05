@@ -1,4 +1,24 @@
 
+## [0.1.7](https://github.com/vorionsys/vorion/compare/v0.1.6...main) (2026-03-04)
+
+**Package bumps:** `@vorion/a3i` 0.1.1 → 0.1.2
+
+### Features
+- **a3i 0.1.2 — NIST SP 800-53 compliance test suite**: 4 control families implemented as executable tests — Access Control (AC-3, AC-6, AC-6(9), AC-7), Audit & Accountability (AU), Incident Response (IR-4, IR-4(1), IR-5, IR-6, IR-7), System & Communications Protection (SC). Tests verify the trust engine satisfies each control at the implementation level.
+- **a3i 0.1.2 — NIST AI RMF GOVERN/MANAGE/MEASURE**: Executive-function tests covering tier policy codification (GV-1.x), 16-factor model coverage (GV-2.x), hysteresis and boundary stability (GV-3.x), and full MANAGE + MEASURE function suites.
+- **a3i 0.1.2 — SSDF practices**: NIST Secure Software Development Framework practice tests covering secure design, secure code, and verification.
+- **a3i 0.1.2 — Compliance suites**: Separation of Duties (SOD-1–4, fast/slow lane independence), Non-repudiation, Zero-trust verification.
+- **a3i 0.1.2 — Adversarial + boundary suites**: Trust manipulation resistance, tier transition boundary conditions (hysteresis, decay, asymmetric penalties).
+- **a3i 0.1.2 — Trust pipeline hardening**: `signal-pipeline.ts` +258 lines (fast/slow lane separation, degraded mode, circuit breaker state machine); `trust-calculator.ts` +58 lines (16-factor scoring precision, observation ceilings); `trust-dynamics.ts` +34 lines (asymmetric 3× penalty, 182-day decay model).
+- **cognigate**: New `TrustService` module centralizing trust scoring logic; `AgentTrustProfile` DB model; Alembic migrations infrastructure (`alembic.ini`, `migrations/`); gateway + proof routers wired to TrustService.
+
+### Compliance & Documentation
+- **Security cleanup**: 6 legacy ORION V1 context files removed from git tracking; `docs/ORION V1*` gitignored in both repos.
+- **agentanchor scripts**: Hardcoded personal emails removed from `TARGET_EMAILS`; now reads from `process.env.TARGET_EMAILS` env var.
+- **Test count**: `@vorion/a3i` 418 → **637** (+219) · Total: **9,976+** TS + 692 Python = **10,668+** combined
+
+---
+
 ## [0.1.6](https://github.com/vorionsys/vorion/compare/v0.1.5...main) (2026-03-04)
 
 **Package bumps:** `@vorion/a3i` 0.1.0 → 0.1.1 · `@vorionsys/basis` 1.0.4 → 1.0.5
