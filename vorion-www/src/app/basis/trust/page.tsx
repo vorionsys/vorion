@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Trust Model | BASIS',
-  description: 'The BASIS trust model: 0-1000 scoring, six tiers, decay mechanics, and failure amplification.',
+  description: 'The BASIS trust model: 0-1000 scoring, eight tiers (T0–T7), decay mechanics, and tier-scaled failure amplification.',
 };
 
 export default function TrustPage() {
@@ -18,7 +18,7 @@ export default function TrustPage() {
         <section>
           <h2 className="text-2xl font-bold text-white mb-4">Overview</h2>
           <p className="text-neutral-400 leading-relaxed">
-            BASIS uses a quantified trust model where entities earn trust through successful operations. Trust is not binary (allow/deny) but graduated on a 0-1000 scale with six tiers that progressively unlock capabilities.
+            BASIS uses a quantified trust model where entities earn trust through successful operations. Trust is not binary (allow/deny) but graduated on a 0-1000 scale with eight tiers (T0–T7) that progressively unlock capabilities.
           </p>
         </section>
 
@@ -32,61 +32,77 @@ export default function TrustPage() {
             </div>
             <div className="h-4 rounded-full bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 to-purple-500 mb-4"></div>
             <div className="flex justify-between text-xs text-neutral-500">
-              <span>Sandbox</span>
-              <span>Provisional</span>
-              <span>Standard</span>
-              <span>Trusted</span>
-              <span>Certified</span>
-              <span>Autonomous</span>
+              <span>T0</span>
+              <span>T1</span>
+              <span>T2</span>
+              <span>T3</span>
+              <span>T4</span>
+              <span>T5</span>
+              <span>T6</span>
+              <span>T7</span>
             </div>
           </div>
         </section>
 
         {/* Trust Tiers */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">Six Trust Tiers</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Eight Trust Tiers (T0–T7)</h2>
           <div className="space-y-4">
             <TierCard
-              name="Sandbox"
-              range="0-99"
+              name="T0 — Sandbox"
+              range="0–199"
               color="red"
-              capabilities={['Isolated testing only', 'No external access', 'No data persistence']}
-              description="New or untrusted entities. Completely sandboxed for evaluation."
+              capabilities={['Isolated testing only', 'No external access', 'No data persistence', 'Failure penalty 2× (most lenient)']}
+              description="New or untrusted agents. Completely sandboxed for evaluation."
             />
             <TierCard
-              name="Provisional"
-              range="100-299"
+              name="T1 — Observed"
+              range="200–349"
               color="orange"
-              capabilities={['Read public data', 'Internal messaging', 'Basic queries']}
-              description="Initial trust established. Limited read access, heavy monitoring."
+              capabilities={['Read public data', 'Internal messaging', 'Basic queries', 'Failure penalty 3×']}
+              description="Under active observation. Limited read access with heavy monitoring."
             />
             <TierCard
-              name="Standard"
-              range="300-499"
+              name="T2 — Provisional"
+              range="350–499"
+              color="amber"
+              capabilities={['Limited write operations', 'Strict guardrails enforced', 'Supervised external reads', 'Failure penalty 4×']}
+              description="Initial trust established. Write access permitted under strict constraints."
+            />
+            <TierCard
+              name="T3 — Monitored"
+              range="500–649"
               color="yellow"
-              capabilities={['Write internal data', 'Limited external read', 'Standard workflows']}
-              description="Established track record. Standard operations with normal oversight."
+              capabilities={['Standard internal workflows', 'Limited external reads', 'Expanding operational freedom', 'Failure penalty 5×']}
+              description="Continuous monitoring with expanding freedom. Track record building."
             />
             <TierCard
-              name="Trusted"
-              range="500-699"
+              name="T4 — Standard"
+              range="650–799"
               color="green"
-              capabilities={['External API calls', 'Email communication', 'Extended permissions']}
-              description="Proven reliability. External interactions permitted with light oversight."
+              capabilities={['External API calls', 'Email and messaging', 'Routine operations', 'Failure penalty 7×']}
+              description="Trusted for routine operations. External interactions permitted with normal oversight."
             />
             <TierCard
-              name="Certified"
-              range="700-899"
+              name="T5 — Trusted"
+              range="800–875"
               color="blue"
-              capabilities={['Financial transactions', 'Sensitive data access', 'Privileged operations']}
-              description="High trust verified. Financial and sensitive operations with minimal oversight."
+              capabilities={['Financial transactions', 'Expanded capability access', 'Minimal oversight required', 'Failure penalty 10×']}
+              description="Proven reliability. Financial and sensitive operations with minimal oversight."
             />
             <TierCard
-              name="Autonomous"
-              range="900-1000"
+              name="T6 — Certified"
+              range="876–950"
+              color="indigo"
+              capabilities={['Privileged operations', 'Sensitive data access', 'Independent operation', 'Failure penalty 10×']}
+              description="Independently certified. Operates autonomously with comprehensive audit trail."
+            />
+            <TierCard
+              name="T7 — Autonomous"
+              range="951–1000"
               color="purple"
-              capabilities={['Full autonomy within policy', 'Administrative functions', 'Audit-only oversight']}
-              description="Maximum trust achieved. Complete autonomy within defined policy boundaries."
+              capabilities={['Full autonomy within policy', 'Administrative functions', 'Audit-only oversight', 'Failure penalty 10×']}
+              description="Maximum trust. Complete autonomy within defined policy boundaries — zero tolerance for failures."
             />
           </div>
         </section>
@@ -113,18 +129,30 @@ decayed_score = current_score * decay_factor`}
 
           <h3 className="text-xl font-semibold text-white mb-3 mt-8">Failure Amplification</h3>
           <p className="text-neutral-400 leading-relaxed mb-4">
-            Failures hurt trust more than successes help. This asymmetry encourages conservative behavior:
+            Failure penalties scale with the agent&apos;s current tier. Lower-tier agents receive smaller
+            multipliers so new bots can ascend more easily; high-trust agents pay a steep price for any lapse.
           </p>
           <div className="bg-black/30 border border-white/10 rounded-xl p-6 mb-4">
             <pre className="text-sm text-neutral-300 font-mono">
-{`FAILURE_MULTIPLIER = 3.0
+{`# Tier-scaled failure multipliers (lower = more lenient, aids ascension)
+TIER_FAILURE_MULTIPLIERS = {
+    "T0": 2,   # Sandbox      — very forgiving
+    "T1": 3,   # Observed
+    "T2": 4,   # Provisional
+    "T3": 5,   # Monitored
+    "T4": 7,   # Standard
+    "T5": 10,  # Trusted
+    "T6": 10,  # Certified
+    "T7": 10,  # Autonomous   — no margin for error
+}
 
+tier = get_trust_tier(current_score)
 if action_delta < 0:
-    action_delta = action_delta * FAILURE_MULTIPLIER`}
+    action_delta = action_delta * TIER_FAILURE_MULTIPLIERS[tier]`}
             </pre>
           </div>
           <p className="text-neutral-400 text-sm">
-            Example: A failed action that would normally cost -10 points instead costs -30 points.
+            Example: A T0 agent failing costs 2× base; the same failure from a T5+ agent costs 10× base.
           </p>
 
           <h3 className="text-xl font-semibold text-white mb-3 mt-8">Tier Boundaries</h3>
@@ -141,11 +169,13 @@ if action_delta < 0:
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                <tr><td className="px-4 py-3 text-neutral-300">Sandbox → Provisional</td><td className="px-4 py-3 font-mono text-neutral-400">10</td><td className="px-4 py-3 text-neutral-400">100%</td></tr>
-                <tr><td className="px-4 py-3 text-neutral-300">Provisional → Standard</td><td className="px-4 py-3 font-mono text-neutral-400">50</td><td className="px-4 py-3 text-neutral-400">95%</td></tr>
-                <tr><td className="px-4 py-3 text-neutral-300">Standard → Trusted</td><td className="px-4 py-3 font-mono text-neutral-400">100</td><td className="px-4 py-3 text-neutral-400">98%</td></tr>
-                <tr><td className="px-4 py-3 text-neutral-300">Trusted → Certified</td><td className="px-4 py-3 font-mono text-neutral-400">500</td><td className="px-4 py-3 text-neutral-400">99%</td></tr>
-                <tr><td className="px-4 py-3 text-neutral-300">Certified → Autonomous</td><td className="px-4 py-3 font-mono text-neutral-400">1000</td><td className="px-4 py-3 text-neutral-400">99.9%</td></tr>
+                <tr><td className="px-4 py-3 text-neutral-300">T0 → T1 (Sandbox → Observed)</td><td className="px-4 py-3 font-mono text-neutral-400">20</td><td className="px-4 py-3 text-neutral-400">100%</td></tr>
+                <tr><td className="px-4 py-3 text-neutral-300">T1 → T2 (Observed → Provisional)</td><td className="px-4 py-3 font-mono text-neutral-400">50</td><td className="px-4 py-3 text-neutral-400">95%</td></tr>
+                <tr><td className="px-4 py-3 text-neutral-300">T2 → T3 (Provisional → Monitored)</td><td className="px-4 py-3 font-mono text-neutral-400">100</td><td className="px-4 py-3 text-neutral-400">95%</td></tr>
+                <tr><td className="px-4 py-3 text-neutral-300">T3 → T4 (Monitored → Standard)</td><td className="px-4 py-3 font-mono text-neutral-400">200</td><td className="px-4 py-3 text-neutral-400">98%</td></tr>
+                <tr><td className="px-4 py-3 text-neutral-300">T4 → T5 (Standard → Trusted)</td><td className="px-4 py-3 font-mono text-neutral-400">500</td><td className="px-4 py-3 text-neutral-400">99%</td></tr>
+                <tr><td className="px-4 py-3 text-neutral-300">T5 → T6 (Trusted → Certified)</td><td className="px-4 py-3 font-mono text-neutral-400">750</td><td className="px-4 py-3 text-neutral-400">99.5%</td></tr>
+                <tr><td className="px-4 py-3 text-neutral-300">T6 → T7 (Certified → Autonomous)</td><td className="px-4 py-3 font-mono text-neutral-400">1000</td><td className="px-4 py-3 text-neutral-400">99.9%</td></tr>
               </tbody>
             </table>
           </div>
@@ -158,7 +188,12 @@ if action_delta < 0:
             <pre className="text-sm text-neutral-300 font-mono">
 {`# Constants
 DECAY_HALF_LIFE_DAYS = 7
-FAILURE_MULTIPLIER = 3.0
+
+# Tier-scaled failure multipliers (lower tiers more lenient to aid ascension)
+TIER_FAILURE_MULTIPLIERS = {
+    "T0": 2, "T1": 3, "T2": 4,  "T3": 5,
+    "T4": 7, "T5": 10, "T6": 10, "T7": 10,
+}
 
 # Action deltas by outcome
 ACTION_DELTAS = {
@@ -186,9 +221,10 @@ def calculate_trust_score(
     # Get delta for action
     delta = ACTION_DELTAS.get(action_outcome, 0)
 
-    # Apply failure multiplier
+    # Apply tier-scaled failure amplification
     if delta < 0:
-        delta = delta * FAILURE_MULTIPLIER
+        tier = get_trust_tier(int(decayed_score))
+        delta = delta * TIER_FAILURE_MULTIPLIERS.get(tier, 2)
 
     # Calculate new score with bounds
     new_score = max(0, min(1000, int(decayed_score + delta)))
@@ -204,18 +240,22 @@ def calculate_trust_score(
           <div className="bg-black/30 border border-white/10 rounded-xl p-6 overflow-x-auto">
             <pre className="text-sm text-neutral-300 font-mono">
 {`def get_trust_tier(score: int) -> str:
-    if score >= 900:
-        return "autonomous"
-    elif score >= 700:
-        return "certified"
+    if score >= 951:
+        return "T7"   # Autonomous
+    elif score >= 876:
+        return "T6"   # Certified
+    elif score >= 800:
+        return "T5"   # Trusted
+    elif score >= 650:
+        return "T4"   # Standard
     elif score >= 500:
-        return "trusted"
-    elif score >= 300:
-        return "standard"
-    elif score >= 100:
-        return "provisional"
+        return "T3"   # Monitored
+    elif score >= 350:
+        return "T2"   # Provisional
+    elif score >= 200:
+        return "T1"   # Observed
     else:
-        return "sandbox"`}
+        return "T0"   # Sandbox`}
             </pre>
           </div>
         </section>
@@ -234,17 +274,21 @@ function TierCard({ name, range, color, capabilities, description }: {
   const colors: Record<string, string> = {
     red: 'border-red-500/30 bg-red-500/10',
     orange: 'border-orange-500/30 bg-orange-500/10',
+    amber: 'border-amber-500/30 bg-amber-500/10',
     yellow: 'border-yellow-500/30 bg-yellow-500/10',
     green: 'border-emerald-500/30 bg-emerald-500/10',
     blue: 'border-blue-500/30 bg-blue-500/10',
+    indigo: 'border-indigo-500/30 bg-indigo-500/10',
     purple: 'border-purple-500/30 bg-purple-500/10',
   };
   const textColors: Record<string, string> = {
     red: 'text-red-400',
     orange: 'text-orange-400',
+    amber: 'text-amber-400',
     yellow: 'text-yellow-400',
     green: 'text-emerald-400',
     blue: 'text-blue-400',
+    indigo: 'text-indigo-400',
     purple: 'text-purple-400',
   };
 

@@ -87,8 +87,8 @@ export default function Home() {
             <FeatureCard
               icon={<Zap className="w-6 h-6 text-orange-400" />}
               title="Trust Decay"
-              description="Trust isn't permanent. Scores decay over time with a 182-day half-life. Failures apply a tier-scaled 7–10× penalty — continuous good behavior required."
-              footnote="182-day half-life | 7–10× tier-scaled penalty | Real-time updates"
+              description="Trust isn't permanent. Scores decay over time with a 182-day half-life. Failures apply a tier-scaled 2–10× penalty — lowest at T0 to aid ascension, maximum at T5–T7 where there is no margin for error."
+              footnote="182-day half-life | 2–10× tier-scaled penalty | Real-time updates"
               link="/basis/trust"
               linkLabel="Understand trust dynamics →"
             />
