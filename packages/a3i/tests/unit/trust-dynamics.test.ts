@@ -622,6 +622,60 @@ describe('TrustDynamicsEngine', () => {
       }
     });
 
+    it('should trip CB on cross-methodology rotation (6 failures across unique keys)', () => {
+      const baseTime = new Date('2024-01-01T12:00:00Z');
+
+      // 6 failures, each with a DIFFERENT methodology key — no single key hits 3.
+      // But cross-methodology threshold of 6 should trip.
+      for (let i = 0; i < 5; i++) {
+        const result = engine.updateTrust('agent1', {
+          currentScore: 500 - i * 5,
+          success: false,
+          ceiling: 900,
+          methodologyKey: `unique-key-${i}`,
+          now: new Date(baseTime.getTime() + i * 3600000),
+        });
+        expect(result.circuitBreakerTripped).toBe(false);
+      }
+
+      // 6th failure with yet another unique key — should trip cross-methodology
+      const r6 = engine.updateTrust('agent1', {
+        currentScore: 475,
+        success: false,
+        ceiling: 900,
+        methodologyKey: 'unique-key-5',
+        now: new Date(baseTime.getTime() + 5 * 3600000),
+      });
+
+      expect(r6.circuitBreakerTripped).toBe(true);
+      expect(r6.circuitBreakerReason).toBe('cross_methodology_failure_rotation');
+    });
+
+    it('should not trip cross-methodology if failures are within per-key threshold', () => {
+      const baseTime = new Date('2024-01-01T12:00:00Z');
+
+      // 4 failures across 2 keys (2 each) — total is 4 < 6, no cross-trip
+      engine.updateTrust('agent1', {
+        currentScore: 500, success: false, ceiling: 900,
+        methodologyKey: 'key-A', now: new Date(baseTime.getTime()),
+      });
+      engine.updateTrust('agent1', {
+        currentScore: 465, success: false, ceiling: 900,
+        methodologyKey: 'key-A', now: new Date(baseTime.getTime() + 3600000),
+      });
+      engine.updateTrust('agent1', {
+        currentScore: 432, success: false, ceiling: 900,
+        methodologyKey: 'key-B', now: new Date(baseTime.getTime() + 7200000),
+      });
+      const r4 = engine.updateTrust('agent1', {
+        currentScore: 400, success: false, ceiling: 900,
+        methodologyKey: 'key-B', now: new Date(baseTime.getTime() + 10800000),
+      });
+
+      // 4 total failures across 2 keys, neither hits per-key 3, total < 6
+      expect(r4.circuitBreakerReason).not.toBe('cross_methodology_failure_rotation');
+    });
+
     it('should not track methodology when no key provided', () => {
       // 3 failures with no methodologyKey — should not trip methodology circuit breaker
       for (let i = 0; i < 3; i++) {

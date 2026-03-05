@@ -65,9 +65,11 @@ export {
 export {
   TrustCalculator,
   createTrustCalculator,
+  DEFAULT_DIMINISHING_RETURNS,
   type TrustCalculatorConfig,
   type CalculateOptions,
   type AggregationResult,
+  type DiminishingReturnsWeightFn,
 } from './trust-calculator.js';
 
 // Profile Store
@@ -106,4 +108,6 @@ export {
   type SignalInput,
   type SignalResult,
   type SignalPipelineConfig,
+  type BlockedSignalEvent,
+  type SignalMetrics,
 } from './signal-pipeline.js';

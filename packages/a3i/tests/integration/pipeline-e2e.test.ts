@@ -87,15 +87,15 @@ describe('Pipeline E2E Integration', () => {
       expect(profileBefore).not.toBeNull();
 
       // Create gate with pipeline wired; disable pending states so rejection is immediate.
-      // Trust score 50 is below the CRITICAL threshold of 80.
-      const trustProvider = createMapTrustProvider({ 'gate-agent': 50 });
+      // Trust score 500 is below the CRITICAL threshold of 800 (0-1000 scale).
+      const trustProvider = createMapTrustProvider({ 'gate-agent': 500 });
       const gate = new PreActionGate(
         { allowPendingStates: false },
         trustProvider,
         pipeline
       );
 
-      // Agent tries a CRITICAL action (needs 80 trust on 0-100 scale) - will be rejected
+      // Agent tries a CRITICAL action (needs 800 trust on 0-1000 scale) - will be rejected
       const gateResult = await gate.verify({
         agentId: 'gate-agent',
         action: 'Delete production database',
@@ -385,6 +385,46 @@ describe('Pipeline E2E Integration', () => {
       });
       expect(r4.blocked).toBe(true);
       expect(r4.blockReason).toBe('circuit_breaker');
+    });
+
+    it('methodology rotation with 6+ unique keys should trip cross-methodology CB', async () => {
+      await profiles.create('rotation-agent', ObservationTier.WHITE_BOX, [
+        createEvidence('CT-COMP', 300),
+        createEvidence('CT-REL', 300),
+        createEvidence('CT-OBS', 300),
+        createEvidence('CT-TRANS', 300),
+        createEvidence('CT-ACCT', 300),
+        createEvidence('SA-SAFE', 300),
+      ]);
+
+      const now = new Date();
+
+      // 5 failures with unique keys — no single key hits 3, total < 6
+      for (let i = 0; i < 5; i++) {
+        const r = await pipeline.process({
+          agentId: 'rotation-agent',
+          success: false,
+          factorCode: 'CT-COMP',
+          methodologyKey: `rotation-key-${i}`,
+          now: new Date(now.getTime() + i * 1000),
+        });
+        // May be blocked by score-based CB, but not by cross-methodology yet
+        if (r.dynamicsResult.circuitBreakerTripped) {
+          expect(r.dynamicsResult.circuitBreakerReason).not.toBe('cross_methodology_failure_rotation');
+        }
+      }
+
+      // 6th failure with another unique key — should trip cross-methodology
+      const r6 = await pipeline.process({
+        agentId: 'rotation-agent',
+        success: false,
+        factorCode: 'CT-COMP',
+        methodologyKey: 'rotation-key-5',
+        now: new Date(now.getTime() + 5000),
+      });
+
+      // Agent should be locked by cross-methodology rotation OR by score-based CB
+      expect(dynamics.isCircuitBreakerTripped('rotation-agent')).toBe(true);
     });
 
     it('different methodologyKeys should NOT cross-contaminate', async () => {

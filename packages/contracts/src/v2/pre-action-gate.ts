@@ -34,11 +34,11 @@ export enum RiskLevel {
  * Per ATSF v2.0 Section 4.4
  */
 export const TRUST_THRESHOLDS: Record<RiskLevel, number> = {
-  [RiskLevel.READ]: 0.0,      // Anyone can read
-  [RiskLevel.LOW]: 20,        // Minimal trust required (0.2 * 100)
-  [RiskLevel.MEDIUM]: 40,     // Moderate trust required (0.4 * 100)
-  [RiskLevel.HIGH]: 60,       // Significant trust required (0.6 * 100)
-  [RiskLevel.CRITICAL]: 80,   // Maximum trust + human approval (0.8 * 100)
+  [RiskLevel.READ]: 0,        // Anyone can read
+  [RiskLevel.LOW]: 200,       // T1 Observed minimum (0-1000 scale)
+  [RiskLevel.MEDIUM]: 400,    // T2/T3 boundary (0-1000 scale)
+  [RiskLevel.HIGH]: 600,      // T3 Monitored minimum (0-1000 scale)
+  [RiskLevel.CRITICAL]: 800,  // T5 Trusted minimum + human approval (0-1000 scale)
 };
 
 /**

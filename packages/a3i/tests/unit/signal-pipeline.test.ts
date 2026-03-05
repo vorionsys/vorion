@@ -5,7 +5,7 @@
  * immediately trips the hard CB. T0 Sandbox auto-resets in 15 minutes.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ObservationTier } from '@vorionsys/contracts';
 import {
   TrustDynamicsEngine,
@@ -424,6 +424,413 @@ describe('TrustSignalPipeline', () => {
       });
 
       expect(result.evidence!.source).toBe('canary_probe');
+    });
+  });
+
+  // ============================================================
+  // Per-agent serialization (P1)
+  // ============================================================
+
+  describe('per-agent serialization', () => {
+    it('serializes concurrent signals for the same agent', async () => {
+      // Seed a profile so score is above CB thresholds
+      await seedProfile(profiles, 'agent-serial', now);
+
+      // Fire 5 concurrent success signals for the same agent
+      const signals = Array.from({ length: 5 }, (_, i) =>
+        pipeline.process({
+          agentId: 'agent-serial',
+          success: true,
+          factorCode: 'CT-COMP',
+          now: new Date(now.getTime() + i * 100),
+        })
+      );
+
+      const results = await Promise.all(signals);
+
+      // All should succeed (serialized, no race condition)
+      for (const r of results) {
+        expect(r.blocked).toBe(false);
+        expect(r.evidence).not.toBeNull();
+      }
+
+      // Profile versions should increment monotonically (serialized writes)
+      const versions = results.map(r => r.profile!.version);
+      for (let i = 1; i < versions.length; i++) {
+        expect(versions[i]).toBeGreaterThan(versions[i - 1]!);
+      }
+    });
+
+    it('allows concurrent signals for different agents', async () => {
+      // Two different agents can process in parallel without blocking each other
+      await seedProfile(profiles, 'agent-a', now);
+      await seedProfile(profiles, 'agent-b', now);
+
+      const [resultA, resultB] = await Promise.all([
+        pipeline.process({
+          agentId: 'agent-a',
+          success: true,
+          factorCode: 'CT-COMP',
+          now,
+        }),
+        pipeline.process({
+          agentId: 'agent-b',
+          success: true,
+          factorCode: 'CT-COMP',
+          now,
+        }),
+      ]);
+
+      expect(resultA.blocked).toBe(false);
+      expect(resultB.blocked).toBe(false);
+      expect(resultA.profile!.agentId).toBe('agent-a');
+      expect(resultB.profile!.agentId).toBe('agent-b');
+    });
+
+    it('continues processing after a previous signal in the chain fails', async () => {
+      // Override profile service to fail on first get, succeed on second
+      const failingProfiles = new TrustProfileService();
+      let callCount = 0;
+      const originalGet = failingProfiles.get.bind(failingProfiles);
+      failingProfiles.get = async (agentId: string) => {
+        callCount++;
+        if (callCount === 1) {
+          throw new Error('Transient DB error');
+        }
+        return originalGet(agentId);
+      };
+
+      const failPipeline = createSignalPipeline(dynamics, failingProfiles);
+
+      // First call will fail (due to injected error)
+      const p1 = failPipeline.process({
+        agentId: 'agent-fail',
+        success: true,
+        factorCode: 'CT-COMP',
+        now,
+      });
+
+      // Second call should still succeed (chained after first)
+      const p2 = failPipeline.process({
+        agentId: 'agent-fail',
+        success: true,
+        factorCode: 'CT-COMP',
+        now: new Date(now.getTime() + 1000),
+      });
+
+      await expect(p1).rejects.toThrow('Transient DB error');
+      const result2 = await p2;
+      expect(result2.blocked).toBe(false);
+    });
+  });
+
+  // ============================================================
+  // dispatchSignal (P1)
+  // ============================================================
+
+  describe('dispatchSignal', () => {
+    it('processes signal without awaiting', async () => {
+      // dispatchSignal is fire-and-forget but still routes through process()
+      await seedProfile(profiles, 'agent-dispatch', now);
+
+      pipeline.dispatchSignal({
+        agentId: 'agent-dispatch',
+        success: true,
+        factorCode: 'CT-COMP',
+        now,
+      });
+
+      // Wait for the microtask queue to flush
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // Profile should have been updated
+      const profile = await profiles.get('agent-dispatch');
+      expect(profile).not.toBeNull();
+      expect(profile!.version).toBeGreaterThanOrEqual(1);
+    });
+
+    it('calls onDispatchError when processing fails', async () => {
+      const errors: Array<{ error: unknown; agentId: string }> = [];
+      const errorHandler = (error: unknown, signal: { agentId: string }) => {
+        errors.push({ error, agentId: signal.agentId });
+      };
+
+      // Create a profile service that always fails
+      const brokenProfiles = new TrustProfileService();
+      brokenProfiles.get = async () => { throw new Error('DB down'); };
+
+      const brokenPipeline = createSignalPipeline(dynamics, brokenProfiles, {
+        onDispatchError: errorHandler,
+      });
+
+      brokenPipeline.dispatchSignal({
+        agentId: 'agent-broken',
+        success: true,
+        factorCode: 'CT-COMP',
+        now,
+      });
+
+      // Wait for the microtask queue to flush
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      expect(errors.length).toBe(1);
+      expect(errors[0]!.agentId).toBe('agent-broken');
+      expect((errors[0]!.error as Error).message).toBe('DB down');
+    });
+
+    it('uses default error handler (console.error) when no custom handler provided', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const brokenProfiles = new TrustProfileService();
+      brokenProfiles.get = async () => { throw new Error('Network error'); };
+
+      // No custom onDispatchError — should use default console.error
+      const defaultPipeline = createSignalPipeline(dynamics, brokenProfiles);
+
+      defaultPipeline.dispatchSignal({
+        agentId: 'agent-default-err',
+        success: true,
+        factorCode: 'CT-COMP',
+        now,
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+  });
+
+  // ============================================================
+  // Rate limiting (P2)
+  // ============================================================
+
+  describe('rate limiting', () => {
+    it('drops signals when rate limit is exceeded', async () => {
+      const ratePipeline = createSignalPipeline(dynamics, profiles, {
+        rateLimitPerAgent: 3,
+        rateLimitWindowMs: 60_000,
+      });
+      await seedProfile(profiles, 'agent-rl', now);
+
+      const results = [];
+      for (let i = 0; i < 5; i++) {
+        results.push(
+          await ratePipeline.process({
+            agentId: 'agent-rl',
+            success: true,
+            factorCode: 'CT-COMP',
+            now: new Date(now.getTime() + i * 100), // all within the same window
+          })
+        );
+      }
+
+      // First 3 should succeed, 4th and 5th should be rate limited
+      expect(results[0]!.blocked).toBe(false);
+      expect(results[1]!.blocked).toBe(false);
+      expect(results[2]!.blocked).toBe(false);
+      expect(results[3]!.blocked).toBe(true);
+      expect(results[3]!.blockReason).toBe('rate_limited');
+      expect(results[4]!.blocked).toBe(true);
+      expect(results[4]!.blockReason).toBe('rate_limited');
+    });
+
+    it('allows signals after the rate limit window expires', async () => {
+      const ratePipeline = createSignalPipeline(dynamics, profiles, {
+        rateLimitPerAgent: 2,
+        rateLimitWindowMs: 1_000, // 1 second window
+      });
+      await seedProfile(profiles, 'agent-rl2', now);
+
+      // Use up the limit
+      await ratePipeline.process({ agentId: 'agent-rl2', success: true, factorCode: 'CT-COMP', now });
+      await ratePipeline.process({
+        agentId: 'agent-rl2', success: true, factorCode: 'CT-COMP',
+        now: new Date(now.getTime() + 100),
+      });
+
+      // 3rd within window — blocked
+      const blocked = await ratePipeline.process({
+        agentId: 'agent-rl2', success: true, factorCode: 'CT-COMP',
+        now: new Date(now.getTime() + 200),
+      });
+      expect(blocked.blockReason).toBe('rate_limited');
+
+      // After window expires — should succeed
+      const afterWindow = await ratePipeline.process({
+        agentId: 'agent-rl2', success: true, factorCode: 'CT-COMP',
+        now: new Date(now.getTime() + 1500),
+      });
+      expect(afterWindow.blocked).toBe(false);
+    });
+
+    it('rate limits are per-agent (different agents have separate counters)', async () => {
+      const ratePipeline = createSignalPipeline(dynamics, profiles, {
+        rateLimitPerAgent: 1,
+        rateLimitWindowMs: 60_000,
+      });
+      await seedProfile(profiles, 'agent-rl-a', now);
+      await seedProfile(profiles, 'agent-rl-b', now);
+
+      // Each agent gets 1 signal
+      const a = await ratePipeline.process({
+        agentId: 'agent-rl-a', success: true, factorCode: 'CT-COMP', now,
+      });
+      const b = await ratePipeline.process({
+        agentId: 'agent-rl-b', success: true, factorCode: 'CT-COMP', now,
+      });
+
+      expect(a.blocked).toBe(false);
+      expect(b.blocked).toBe(false);
+
+      // Second signal for agent-a is blocked, but agent-b could still go (already used its 1)
+      const a2 = await ratePipeline.process({
+        agentId: 'agent-rl-a', success: true, factorCode: 'CT-COMP',
+        now: new Date(now.getTime() + 100),
+      });
+      expect(a2.blockReason).toBe('rate_limited');
+    });
+
+    it('does not rate limit when disabled (rateLimitPerAgent=0)', async () => {
+      // Default config has rateLimitPerAgent=0
+      await seedProfile(profiles, 'agent-no-rl', now);
+
+      const results = [];
+      for (let i = 0; i < 20; i++) {
+        results.push(
+          await pipeline.process({
+            agentId: 'agent-no-rl',
+            success: true,
+            factorCode: 'CT-COMP',
+            now: new Date(now.getTime() + i * 100),
+          })
+        );
+      }
+
+      // None should be rate limited (might be blocked for other reasons like cooldown)
+      expect(results.filter(r => r.blockReason === 'rate_limited').length).toBe(0);
+    });
+  });
+
+  // ============================================================
+  // Audit trail - onBlocked (P2)
+  // ============================================================
+
+  describe('audit trail (onBlocked)', () => {
+    it('emits BlockedSignalEvent on circuit breaker trip', async () => {
+      const blocked: Array<{ reason: string; agentId: string }> = [];
+      const auditPipeline = createSignalPipeline(dynamics, profiles, {
+        onBlocked: (event) => {
+          blocked.push({ reason: event.blockReason, agentId: event.agentId });
+        },
+      });
+
+      // Zero-trust: first failure trips CB
+      await auditPipeline.process({
+        agentId: 'agent-audit-cb',
+        success: false,
+        factorCode: 'SA-SAFE',
+        now,
+      });
+
+      expect(blocked.length).toBe(1);
+      expect(blocked[0]!.reason).toBe('circuit_breaker');
+      expect(blocked[0]!.agentId).toBe('agent-audit-cb');
+    });
+
+    it('emits BlockedSignalEvent on rate limit', async () => {
+      const blocked: Array<{ reason: string; factorCode: string }> = [];
+      const auditPipeline = createSignalPipeline(dynamics, profiles, {
+        rateLimitPerAgent: 1,
+        rateLimitWindowMs: 60_000,
+        onBlocked: (event) => {
+          blocked.push({ reason: event.blockReason, factorCode: event.factorCode });
+        },
+      });
+      await seedProfile(profiles, 'agent-audit-rl', now);
+
+      // First goes through
+      await auditPipeline.process({
+        agentId: 'agent-audit-rl', success: true, factorCode: 'CT-COMP', now,
+      });
+      // Second is rate limited
+      await auditPipeline.process({
+        agentId: 'agent-audit-rl', success: true, factorCode: 'CT-REL',
+        now: new Date(now.getTime() + 100),
+      });
+
+      expect(blocked.length).toBe(1);
+      expect(blocked[0]!.reason).toBe('rate_limited');
+      expect(blocked[0]!.factorCode).toBe('CT-REL');
+    });
+
+    it('does not emit onBlocked for successful signals', async () => {
+      const blocked: string[] = [];
+      const auditPipeline = createSignalPipeline(dynamics, profiles, {
+        onBlocked: (event) => { blocked.push(event.blockReason); },
+      });
+      await seedProfile(profiles, 'agent-audit-ok', now);
+
+      await auditPipeline.process({
+        agentId: 'agent-audit-ok', success: true, factorCode: 'CT-COMP', now,
+      });
+
+      expect(blocked.length).toBe(0);
+    });
+  });
+
+  // ============================================================
+  // Metrics - onSignalProcessed (P3)
+  // ============================================================
+
+  describe('metrics (onSignalProcessed)', () => {
+    it('emits metrics for every signal (blocked and unblocked)', async () => {
+      const metrics: Array<{ blocked: boolean; delta: number; agentId: string }> = [];
+      const metricsPipeline = createSignalPipeline(dynamics, profiles, {
+        onSignalProcessed: (m) => {
+          metrics.push({ blocked: m.blocked, delta: m.delta, agentId: m.agentId });
+        },
+      });
+      await seedProfile(profiles, 'agent-metrics', now);
+
+      // Success signal (not blocked)
+      await metricsPipeline.process({
+        agentId: 'agent-metrics', success: true, factorCode: 'CT-COMP', now,
+      });
+
+      expect(metrics.length).toBe(1);
+      expect(metrics[0]!.blocked).toBe(false);
+      expect(metrics[0]!.delta).toBeGreaterThan(0);
+    });
+
+    it('emits metrics with correct blockReason on blocked signal', async () => {
+      const metrics: Array<{ blockReason?: string }> = [];
+      const metricsPipeline = createSignalPipeline(dynamics, profiles, {
+        onSignalProcessed: (m) => { metrics.push({ blockReason: m.blockReason }); },
+      });
+
+      // Zero-trust failure → CB trip
+      await metricsPipeline.process({
+        agentId: 'agent-metrics-cb', success: false, factorCode: 'SA-SAFE', now,
+      });
+
+      expect(metrics.length).toBe(1);
+      expect(metrics[0]!.blockReason).toBe('circuit_breaker');
+    });
+
+    it('includes durationMs in metrics', async () => {
+      const durations: number[] = [];
+      const metricsPipeline = createSignalPipeline(dynamics, profiles, {
+        onSignalProcessed: (m) => { durations.push(m.durationMs); },
+      });
+      await seedProfile(profiles, 'agent-dur', now);
+
+      await metricsPipeline.process({
+        agentId: 'agent-dur', success: true, factorCode: 'CT-COMP', now,
+      });
+
+      expect(durations.length).toBe(1);
+      expect(durations[0]).toBeGreaterThanOrEqual(0);
     });
   });
 

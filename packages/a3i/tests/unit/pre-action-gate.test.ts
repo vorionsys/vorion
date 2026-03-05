@@ -177,27 +177,27 @@ describe('PreActionGate', () => {
   });
 
   describe('Trust Thresholds', () => {
-    it('should have correct default thresholds per ATSF v2.0', () => {
+    it('should have correct default thresholds per ATSF v2.0 (0-1000 scale)', () => {
       const thresholds = gate.getThresholds();
       expect(thresholds[RiskLevel.READ]).toBe(0);
-      expect(thresholds[RiskLevel.LOW]).toBe(20);
-      expect(thresholds[RiskLevel.MEDIUM]).toBe(40);
-      expect(thresholds[RiskLevel.HIGH]).toBe(60);
-      expect(thresholds[RiskLevel.CRITICAL]).toBe(80);
+      expect(thresholds[RiskLevel.LOW]).toBe(200);
+      expect(thresholds[RiskLevel.MEDIUM]).toBe(400);
+      expect(thresholds[RiskLevel.HIGH]).toBe(600);
+      expect(thresholds[RiskLevel.CRITICAL]).toBe(800);
     });
 
     it('should allow custom thresholds', () => {
       const customGate = createPreActionGate({
         trustThresholds: {
-          [RiskLevel.LOW]: 30,
-          [RiskLevel.MEDIUM]: 50,
+          [RiskLevel.LOW]: 300,
+          [RiskLevel.MEDIUM]: 500,
         },
       });
 
       const thresholds = customGate.getThresholds();
-      expect(thresholds[RiskLevel.LOW]).toBe(30);
-      expect(thresholds[RiskLevel.MEDIUM]).toBe(50);
-      expect(thresholds[RiskLevel.HIGH]).toBe(60); // Default
+      expect(thresholds[RiskLevel.LOW]).toBe(300);
+      expect(thresholds[RiskLevel.MEDIUM]).toBe(500);
+      expect(thresholds[RiskLevel.HIGH]).toBe(600); // Default
     });
   });
 
@@ -225,7 +225,7 @@ describe('PreActionGate', () => {
         resourceScope: ['database'],
         dataSensitivity: DataSensitivity.CONFIDENTIAL,
         reversibility: Reversibility.IRREVERSIBLE,
-      }, 30); // Below HIGH threshold of 60
+      }, 300); // Below CRITICAL threshold of 800
 
       expect(result.status).toBe(GateStatus.REJECTED);
       expect(result.passed).toBe(false);
@@ -242,7 +242,7 @@ describe('PreActionGate', () => {
         resourceScope: ['system'],
         dataSensitivity: DataSensitivity.INTERNAL,
         reversibility: Reversibility.PARTIALLY_REVERSIBLE,
-      }, 65); // Above HIGH threshold of 60
+      }, 650); // Above HIGH threshold of 600
 
       expect(result.status).toBe(GateStatus.PENDING_VERIFICATION);
       expect(result.requirements).toBeDefined();
@@ -257,7 +257,7 @@ describe('PreActionGate', () => {
         resourceScope: ['accounts'],
         dataSensitivity: DataSensitivity.RESTRICTED,
         reversibility: Reversibility.IRREVERSIBLE,
-      }, 85); // Above CRITICAL threshold
+      }, 850); // Above CRITICAL threshold of 800
 
       expect(result.status).toBe(GateStatus.PENDING_HUMAN_APPROVAL);
       expect(result.requirements!.some(r => r.type === 'HUMAN_APPROVAL')).toBe(true);
@@ -271,7 +271,7 @@ describe('PreActionGate', () => {
         resourceScope: ['config'],
         dataSensitivity: DataSensitivity.INTERNAL,
         reversibility: Reversibility.REVERSIBLE,
-      }, 25); // Trust = 25, Medium risk requires 40
+      }, 250); // Trust = 250, Medium risk requires 400
 
       expect(result.trustDeficit).toBeGreaterThan(0);
     });
@@ -280,8 +280,8 @@ describe('PreActionGate', () => {
   describe('Trust Provider Integration', () => {
     it('should use trust provider for score lookup', async () => {
       const trustProvider = createMapTrustProvider({
-        'agent1': 75,
-        'agent2': 25,
+        'agent1': 750,
+        'agent2': 250,
       });
 
       const gateWithProvider = createPreActionGate({}, trustProvider);
@@ -306,8 +306,8 @@ describe('PreActionGate', () => {
         reversibility: Reversibility.REVERSIBLE,
       });
 
-      expect(result1.currentTrust).toBe(75);
-      expect(result2.currentTrust).toBe(25);
+      expect(result1.currentTrust).toBe(750);
+      expect(result2.currentTrust).toBe(250);
     });
 
     it('should default to zero trust for unknown agents (zero-start principle)', async () => {
@@ -339,7 +339,7 @@ describe('PreActionGate', () => {
         resourceScope: ['files'],
         dataSensitivity: DataSensitivity.PUBLIC,
         reversibility: Reversibility.REVERSIBLE,
-      }, 50);
+      }, 500);
 
       expect(canProceed).toBe(true);
     });
@@ -352,21 +352,21 @@ describe('PreActionGate', () => {
         resourceScope: ['files'],
         dataSensitivity: DataSensitivity.CONFIDENTIAL,
         reversibility: Reversibility.IRREVERSIBLE,
-      }, 30);
+      }, 300);
 
       expect(canProceed).toBe(false);
     });
   });
 
   describe('getMaxRiskLevel', () => {
-    it('should return correct max risk level for trust scores', () => {
+    it('should return correct max risk level for trust scores (0-1000 scale)', () => {
       expect(gate.getMaxRiskLevel(0)).toBe(RiskLevel.READ);
-      expect(gate.getMaxRiskLevel(19)).toBe(RiskLevel.READ);
-      expect(gate.getMaxRiskLevel(20)).toBe(RiskLevel.LOW);
-      expect(gate.getMaxRiskLevel(40)).toBe(RiskLevel.MEDIUM);
-      expect(gate.getMaxRiskLevel(60)).toBe(RiskLevel.HIGH);
-      expect(gate.getMaxRiskLevel(80)).toBe(RiskLevel.CRITICAL);
-      expect(gate.getMaxRiskLevel(100)).toBe(RiskLevel.CRITICAL);
+      expect(gate.getMaxRiskLevel(199)).toBe(RiskLevel.READ);
+      expect(gate.getMaxRiskLevel(200)).toBe(RiskLevel.LOW);
+      expect(gate.getMaxRiskLevel(400)).toBe(RiskLevel.MEDIUM);
+      expect(gate.getMaxRiskLevel(600)).toBe(RiskLevel.HIGH);
+      expect(gate.getMaxRiskLevel(800)).toBe(RiskLevel.CRITICAL);
+      expect(gate.getMaxRiskLevel(1000)).toBe(RiskLevel.CRITICAL);
     });
   });
 
@@ -382,7 +382,7 @@ describe('PreActionGate', () => {
         resourceScope: ['files'],
         dataSensitivity: DataSensitivity.PUBLIC,
         reversibility: Reversibility.REVERSIBLE,
-      }, 50);
+      }, 500);
 
       expect(listener).toHaveBeenCalled();
       const event = listener.mock.calls[0][0];
@@ -401,7 +401,7 @@ describe('PreActionGate', () => {
         resourceScope: ['database'],
         dataSensitivity: DataSensitivity.RESTRICTED,
         reversibility: Reversibility.IRREVERSIBLE,
-      }, 10);
+      }, 100);
 
       const event = listener.mock.calls[0][0];
       expect(event.type).toBe('GATE_REJECTED');
@@ -420,7 +420,7 @@ describe('PreActionGate', () => {
         resourceScope: ['files'],
         dataSensitivity: DataSensitivity.PUBLIC,
         reversibility: Reversibility.REVERSIBLE,
-      }, 50);
+      }, 500);
 
       expect(listener).not.toHaveBeenCalled();
     });
@@ -441,7 +441,7 @@ describe('PreActionGate', () => {
         resourceScope: ['files'],
         dataSensitivity: DataSensitivity.INTERNAL,
         reversibility: Reversibility.REVERSIBLE,
-      }, 45);
+      }, 450);
 
       // Should approve directly since we meet the threshold
       expect(result.status).toBe(GateStatus.APPROVED);
@@ -455,7 +455,7 @@ describe('PreActionGate', () => {
         resourceScope: ['files'],
         dataSensitivity: DataSensitivity.PUBLIC,
         reversibility: Reversibility.REVERSIBLE,
-      }, 50);
+      }, 500);
 
       expect(result.expiresAt.getTime()).toBeGreaterThan(result.verifiedAt.getTime());
     });
@@ -468,7 +468,7 @@ describe('PreActionGate', () => {
         resourceScope: ['files'],
         dataSensitivity: DataSensitivity.PUBLIC,
         reversibility: Reversibility.REVERSIBLE,
-      }, 50);
+      }, 500);
 
       expect(result.verificationId).toBeDefined();
       expect(result.verificationId.length).toBeGreaterThan(0);
@@ -484,7 +484,7 @@ describe('PreActionGate', () => {
         resourceScope: ['files'],
         dataSensitivity: DataSensitivity.CONFIDENTIAL,
         reversibility: Reversibility.IRREVERSIBLE,
-      }, 30);
+      }, 300);
 
       expect(result.reasoning.length).toBeGreaterThan(0);
       expect(result.reasoning.some(r => r.includes('Risk level'))).toBe(true);
@@ -525,8 +525,8 @@ describe('Trust Progression Path', () => {
     expect(writeResult.passed).toBe(false);
     expect(writeResult.trustDeficit).toBeGreaterThan(0);
 
-    // After building trust to 25...
-    trustScores.set('new-agent', 25);
+    // After building trust to 250 (T1 Observed level)...
+    trustScores.set('new-agent', 250);
 
     // Can now do LOW risk operations
     const writeResult2 = await gate.verify({

@@ -317,6 +317,15 @@ export interface TrustDynamicsConfig {
   methodologyWindowHours: number;
 
   /**
+   * Total failures across ALL methodology keys within the rolling window
+   * that trigger a circuit breaker trip, regardless of per-key counts.
+   * Closes the "methodology rotation" attack where an agent uses unique
+   * keys to stay below the per-key threshold.
+   * Default: 6 (2x methodologyFailureThreshold)
+   */
+  crossMethodologyFailureThreshold: number;
+
+  /**
    * Score threshold (0-1000) for entering degraded mode (soft circuit breaker).
    * When a LOSS drives the score below this value (but above circuitBreakerThreshold),
    * the engine enters 'degraded' state: gains are blocked, losses still apply.
@@ -354,6 +363,7 @@ export const DEFAULT_TRUST_DYNAMICS: TrustDynamicsConfig = {
   circuitBreakerThreshold: 100,      // Trust < 100 (on 0-1000 scale) → hard CB trip
   methodologyFailureThreshold: 3,    // 3 same-methodology failures → circuit breaker
   methodologyWindowHours: 72,        // Within 72 hours (3 days)
+  crossMethodologyFailureThreshold: 6, // 6 total failures across ANY keys → circuit breaker
   degradedThreshold: 200,            // Trust < 200 on a LOSS → degraded mode (warning zone)
   // Per-tier degraded auto-reset (minutes): T0=5min → T7=2 days
   cbDegradedAutoResetMinutes: [5, 15, 30, 120, 240, 720, 1440, 2880] as readonly number[],

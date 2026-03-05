@@ -125,15 +125,13 @@ export class PreActionGate {
       verificationId,
     });
 
-    // Route gate rejections through trust pipeline
+    // Route gate rejections through trust pipeline (non-blocking)
     if (!passed && this.pipeline) {
-      this.pipeline.process({
+      this.pipeline.dispatchSignal({
         agentId: request.agentId,
         success: false,
         factorCode: 'OP-ALIGN',
         methodologyKey: `gate:rejected:${riskLevel}`,
-      }).catch(() => {
-        // Pipeline errors should not break gate verification
       });
     }
 

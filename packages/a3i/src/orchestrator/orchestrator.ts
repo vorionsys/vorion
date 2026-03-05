@@ -270,16 +270,14 @@ export class Orchestrator {
       );
     }
 
-    // Route execution outcome through trust pipeline
+    // Route execution outcome through trust pipeline (non-blocking)
     if (this.pipeline) {
       const signalSuccess = execution.success;
-      this.pipeline.process({
+      this.pipeline.dispatchSignal({
         agentId: intent.agentId,
         success: signalSuccess,
         factorCode: 'CT-COMP',
         methodologyKey: signalSuccess ? undefined : `execution:failure:${intent.actionType}`,
-      }).catch(() => {
-        // Pipeline errors should not break orchestration
       });
     }
 

@@ -3,6 +3,7 @@ import {
   TrustCalculator,
   createTrustCalculator,
   createEvidence,
+  DEFAULT_DIMINISHING_RETURNS,
 } from '../../src/trust/index.js';
 import { ObservationTier, TrustBand } from '@vorionsys/contracts';
 
@@ -170,6 +171,134 @@ describe('TrustCalculator Class', () => {
       const result = calculator.aggregateEvidence(evidence, new Date('2024-12-01'), false);
       expect(result.oldestEvidence).toEqual(oldDate);
       expect(result.newestEvidence).toEqual(newDate);
+    });
+  });
+
+  describe('Dilution Resistance (Diminishing Returns)', () => {
+    it('should resist dilution of a large negative signal by many small positives', () => {
+      const now = new Date();
+      const evidence = [
+        // One large negative signal
+        { evidenceId: 'neg', factorCode: 'CT-COMP', impact: -500, source: 'test', collectedAt: now },
+        // 100 tiny positive signals attempting to dilute it
+        ...Array.from({ length: 100 }, (_, i) => ({
+          evidenceId: `pos-${i}`,
+          factorCode: 'CT-COMP',
+          impact: 1,
+          source: 'test',
+          collectedAt: now,
+        })),
+      ];
+
+      const profile = calculator.calculate('dilution-agent', ObservationTier.WHITE_BOX, evidence, {
+        applyDecay: false,
+        now,
+      });
+
+      // Without diminishing returns: avg = (-500 + 100) / 101 ≈ -3.96, factorScore ≈ 0.496
+      // With diminishing returns: -500 gets 1.0 weight, 100 tiny +1s get progressively less
+      // Weighted avg ≈ -60.9, factorScore ≈ 0.439 — well below baseline 0.5
+      // Key property: 100 flooding signals cannot negate a single critical failure
+      expect(profile.factorScores['CT-COMP']).toBeLessThan(0.45);
+      // Also verify it's significantly lower than what simple averaging would give (~0.496)
+      expect(profile.factorScores['CT-COMP']).toBeLessThan(0.496);
+    });
+
+    it('should give full weight to the largest signals', () => {
+      const now = new Date();
+      // Two signals: one large, one small
+      const evidence = [
+        { evidenceId: 'large', factorCode: 'CT-COMP', impact: 300, source: 'test', collectedAt: now },
+        { evidenceId: 'small', factorCode: 'CT-COMP', impact: 10, source: 'test', collectedAt: now },
+      ];
+
+      const profile = calculator.calculate('weight-agent', ObservationTier.WHITE_BOX, evidence, {
+        applyDecay: false,
+        now,
+      });
+
+      // With diminishing returns: weighted avg = (300*1.0 + 10*0.7) / (1.0+0.7) ≈ 180.6
+      // factorScore = 0.5 + 180.6/1000 ≈ 0.681
+      // Simple avg would give (300+10)/2 = 155, factorScore = 0.5 + 0.155 = 0.655
+      // Diminishing returns should give MORE weight to the large signal
+      expect(profile.factorScores['CT-COMP']).toBeGreaterThan(0.65);
+    });
+
+    it('should still work correctly with a single evidence item', () => {
+      const now = new Date();
+      const evidence = [
+        { evidenceId: 'single', factorCode: 'CT-COMP', impact: 200, source: 'test', collectedAt: now },
+      ];
+
+      const profile = calculator.calculate('single-agent', ObservationTier.WHITE_BOX, evidence, {
+        applyDecay: false,
+        now,
+      });
+
+      // Single evidence: weight = 1.0, avg = 200
+      // factorScore = 0.5 + 200/1000 = 0.7
+      expect(profile.factorScores['CT-COMP']).toBeCloseTo(0.7, 1);
+    });
+  });
+
+  describe('Configurable Diminishing Returns (P3)', () => {
+    it('DEFAULT_DIMINISHING_RETURNS produces known weights', () => {
+      expect(DEFAULT_DIMINISHING_RETURNS(0)).toBe(1.0);
+      expect(DEFAULT_DIMINISHING_RETURNS(1)).toBe(0.7);
+      expect(DEFAULT_DIMINISHING_RETURNS(2)).toBe(0.5);
+      expect(DEFAULT_DIMINISHING_RETURNS(5)).toBe(0.2);
+      expect(DEFAULT_DIMINISHING_RETURNS(9)).toBe(0.2);
+      expect(DEFAULT_DIMINISHING_RETURNS(10)).toBe(0.05);
+      expect(DEFAULT_DIMINISHING_RETURNS(100)).toBe(0.05);
+    });
+
+    it('custom weight function changes dilution behavior', () => {
+      const now = new Date();
+      // Aggressive curve: only the first signal matters
+      const aggressiveCalc = createTrustCalculator({
+        diminishingReturns: (i) => (i === 0 ? 1.0 : 0.0),
+      });
+      // Flat curve: all signals weighted equally (like simple average)
+      const flatCalc = createTrustCalculator({
+        diminishingReturns: () => 1.0,
+      });
+
+      const evidence = [
+        { evidenceId: 'neg', factorCode: 'CT-COMP', impact: -500, source: 'test', collectedAt: now },
+        ...Array.from({ length: 10 }, (_, i) => ({
+          evidenceId: `pos-${i}`, factorCode: 'CT-COMP', impact: 50, source: 'test', collectedAt: now,
+        })),
+      ];
+
+      const aggressive = aggressiveCalc.calculate('a1', ObservationTier.WHITE_BOX, evidence, {
+        applyDecay: false, now,
+      });
+      const flat = flatCalc.calculate('a2', ObservationTier.WHITE_BOX, evidence, {
+        applyDecay: false, now,
+      });
+
+      // Aggressive: only -500 counts → factor ≈ 0.0 (clamped)
+      // Flat: average = (-500 + 50*10) / 11 ≈ 0 → factor ≈ 0.5
+      expect(aggressive.factorScores['CT-COMP']).toBeLessThan(0.05);
+      expect(flat.factorScores['CT-COMP']).toBeGreaterThan(0.45);
+    });
+
+    it('default behavior is unchanged when no custom function provided', () => {
+      const now = new Date();
+      const defaultCalc = createTrustCalculator();
+      const explicitCalc = createTrustCalculator({
+        diminishingReturns: DEFAULT_DIMINISHING_RETURNS,
+      });
+
+      const evidence = [
+        { evidenceId: 'e1', factorCode: 'CT-COMP', impact: 300, source: 'test', collectedAt: now },
+        { evidenceId: 'e2', factorCode: 'CT-COMP', impact: -100, source: 'test', collectedAt: now },
+      ];
+
+      const d = defaultCalc.calculate('d', ObservationTier.WHITE_BOX, evidence, { applyDecay: false, now });
+      const e = explicitCalc.calculate('e', ObservationTier.WHITE_BOX, evidence, { applyDecay: false, now });
+
+      expect(d.factorScores['CT-COMP']).toBeCloseTo(e.factorScores['CT-COMP']!, 10);
     });
   });
 

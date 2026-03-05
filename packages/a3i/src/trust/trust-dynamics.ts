@@ -239,6 +239,18 @@ export class TrustDynamicsEngine {
           this.tripCircuitBreaker(state, circuitBreakerReason, tier, now);
         }
       }
+
+      // Cross-methodology rotation detection: if total failures across ALL keys
+      // exceed crossMethodologyFailureThreshold, trip CB even if no single key hit 3.
+      // Closes the "use a unique key per failure" attack vector.
+      if (!circuitBreakerTripped) {
+        const crossTripped = this.checkCrossMethodologyFailures(state, now);
+        if (crossTripped) {
+          circuitBreakerTripped = true;
+          circuitBreakerReason = 'cross_methodology_failure_rotation';
+          this.tripCircuitBreaker(state, circuitBreakerReason, tier, now);
+        }
+      }
     }
 
     // Update last direction
@@ -457,6 +469,28 @@ export class TrustDynamicsEngine {
       state.methodologyFailures[methodologyKey]!.length >=
       this.config.methodologyFailureThreshold
     );
+  }
+
+  /**
+   * Check total failures across ALL methodology keys within the rolling window.
+   * Returns true if the cross-methodology threshold is reached.
+   * This closes the "methodology rotation" attack vector.
+   */
+  private checkCrossMethodologyFailures(
+    state: TrustDynamicsState,
+    now: Date
+  ): boolean {
+    const windowMs = this.config.methodologyWindowHours * 60 * 60 * 1000;
+    const cutoff = new Date(now.getTime() - windowMs);
+
+    let totalFailures = 0;
+    for (const timestamps of Object.values(state.methodologyFailures)) {
+      if (timestamps) {
+        totalFailures += timestamps.filter((ts) => ts >= cutoff).length;
+      }
+    }
+
+    return totalFailures >= this.config.crossMethodologyFailureThreshold;
   }
 
   // ============================================================

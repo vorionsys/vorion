@@ -51,6 +51,27 @@ function clampFactorScore(score: number): number {
 }
 
 /**
+ * Weight function for diminishing returns in evidence aggregation.
+ * Given the 0-based index of a sorted impact, returns the weight (0.0-1.0).
+ *
+ * Impacts are sorted by absolute magnitude (descending) before weighting,
+ * so index 0 is always the largest signal.
+ */
+export type DiminishingReturnsWeightFn = (index: number) => number;
+
+/**
+ * Default diminishing returns weight curve.
+ * 1st: 100%, 2nd: 70%, 3rd: 50%, 4-10: 20%, 11+: 5%
+ */
+export const DEFAULT_DIMINISHING_RETURNS: DiminishingReturnsWeightFn = (i: number) => {
+  if (i === 0) return 1.0;
+  if (i === 1) return 0.7;
+  if (i === 2) return 0.5;
+  if (i < 10) return 0.2;
+  return 0.05;
+};
+
+/**
  * Configuration for the TrustCalculator
  */
 export interface TrustCalculatorConfig {
@@ -73,6 +94,12 @@ export interface TrustCalculatorConfig {
    * Override default EVIDENCE_TYPE_MULTIPLIERS
    */
   evidenceTypeMultipliers?: Partial<Record<EvidenceType, number>>;
+  /**
+   * Custom diminishing returns weight function for evidence aggregation.
+   * Override to adjust how much weight subsequent evidence signals receive.
+   * @default DEFAULT_DIMINISHING_RETURNS — [1.0, 0.7, 0.5, 0.2 (4-10), 0.05 (11+)]
+   */
+  diminishingReturns?: DiminishingReturnsWeightFn;
 }
 
 /**
@@ -103,6 +130,7 @@ export class TrustCalculator {
   private readonly config: Required<TrustCalculatorConfig>;
   private readonly hysteresisCalculator: HysteresisCalculator;
   private readonly evidenceMultipliers: Record<EvidenceType, number>;
+  private readonly weightFn: DiminishingReturnsWeightFn;
 
   constructor(config: TrustCalculatorConfig = {}) {
     this.config = {
@@ -112,7 +140,9 @@ export class TrustCalculator {
       maxEvidenceAgeDays: config.maxEvidenceAgeDays ?? 365,
       enableEvidenceTypeWeighting: config.enableEvidenceTypeWeighting ?? true,
       evidenceTypeMultipliers: config.evidenceTypeMultipliers ?? {},
+      diminishingReturns: config.diminishingReturns ?? DEFAULT_DIMINISHING_RETURNS,
     };
+    this.weightFn = this.config.diminishingReturns;
 
     // Merge custom multipliers with defaults
     this.evidenceMultipliers = {
@@ -343,7 +373,15 @@ export class TrustCalculator {
   }
 
   /**
-   * Compute factor scores from impact arrays
+   * Compute factor scores from impact arrays using diminishing returns.
+   *
+   * Impacts are sorted by absolute magnitude (descending) so that the
+   * largest signals always receive full weight. Subsequent signals of
+   * decreasing magnitude receive progressively lower weights:
+   *   1st: 100%, 2nd: 70%, 3rd: 50%, 4th+: 30%
+   *
+   * This prevents a "dilution attack" where an agent floods many small
+   * positive signals to average away a single large negative signal.
    */
   private computeFactorScoresFromImpacts(
     impacts: Record<string, number[]>
@@ -352,8 +390,22 @@ export class TrustCalculator {
 
     for (const [factorCode, factorImpacts] of Object.entries(impacts)) {
       if (factorImpacts.length > 0) {
-        // Use average of impacts
-        const avgImpact = factorImpacts.reduce((a, b) => a + b, 0) / factorImpacts.length;
+        // Sort by absolute magnitude (descending) so largest signals get full weight
+        const sorted = [...factorImpacts].sort((a, b) => Math.abs(b) - Math.abs(a));
+
+        // Apply diminishing returns weights via the configurable weight function.
+        // This ensures that flooding with hundreds of signals cannot
+        // meaningfully dilute a single large impact.
+        let weightedSum = 0;
+        let totalWeight = 0;
+
+        for (let i = 0; i < sorted.length; i++) {
+          const w = this.weightFn(i);
+          weightedSum += sorted[i]! * w;
+          totalWeight += w;
+        }
+
+        const avgImpact = totalWeight > 0 ? weightedSum / totalWeight : 0;
         // Impacts are on -1000 to +1000 scale; factor scores are 0.0-1.0
         // Convert impact to factor score delta: impact / 1000
         const baseline = factorScores[factorCode] ?? INITIAL_FACTOR_SCORE;
