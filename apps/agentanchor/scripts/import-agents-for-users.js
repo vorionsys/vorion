@@ -14,11 +14,11 @@ const SEED_FILE = './data/seeds/ai-workforce-agents.json';
 const DATABASE_URL = process.env.DATABASE_URL;
 const DRY_RUN = process.argv.includes('--dry-run');
 
-// Target users
-const TARGET_EMAILS = [
-  'racason@gmail.com',
-  'metagoat@duck.com'
-];
+// Target users — configure via TARGET_EMAILS env var (comma-separated)
+// e.g. TARGET_EMAILS=user@example.com,other@example.com node scripts/import-agents-for-users.js
+const TARGET_EMAILS = process.env.TARGET_EMAILS
+  ? process.env.TARGET_EMAILS.split(',').map(e => e.trim()).filter(Boolean)
+  : [];
 
 async function main() {
   console.log('═'.repeat(60));

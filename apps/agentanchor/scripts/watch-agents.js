@@ -19,11 +19,11 @@ const SEED_FILE = path.resolve(__dirname, '../data/seeds/ai-workforce-agents.jso
 const DATABASE_URL = process.env.DATABASE_URL;
 const DEBOUNCE_MS = 1000; // Wait 1s after last change before syncing
 
-// Target users to sync agents for
-const TARGET_EMAILS = [
-  'racason@gmail.com',
-  'metagoat@duck.com'
-];
+// Target users to sync agents for — configure via TARGET_EMAILS env var (comma-separated)
+// e.g. TARGET_EMAILS=user@example.com,other@example.com node scripts/watch-agents.js
+const TARGET_EMAILS = process.env.TARGET_EMAILS
+  ? process.env.TARGET_EMAILS.split(',').map(e => e.trim()).filter(Boolean)
+  : [];
 
 let syncTimeout = null;
 let isSyncing = false;
