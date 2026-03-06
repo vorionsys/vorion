@@ -298,7 +298,7 @@ jobs:
     if: always() && github.event.inputs.dry_run != 'true'
     steps:
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           payload: |
             {
