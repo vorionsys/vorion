@@ -44,7 +44,7 @@ jobs:
           STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_KEY }}
 
       - name: Upload Stryker report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: stryker-report
@@ -107,7 +107,7 @@ jobs:
           cat mutmut-results.txt >> $GITHUB_STEP_SUMMARY
 
       - name: Upload mutmut results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: mutmut-report
