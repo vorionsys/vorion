@@ -12,7 +12,7 @@ BASIS sets the rules. CAR identifies the agent. Cognigate enforces. PROOF keeps 
 | Component | What | Where |
 |-----------|------|-------|
 | **BASIS** | Open governance standard for AI agents | `@vorionsys/basis` |
-| **CAR** | Categorical Agentic Registry -- identity & trust tracking | `@vorion/car-cli`, `@vorion/car-client` |
+| **CAR** | Categorical Agentic Registry -- identity & trust tracking | `@vorionsys/car-cli`, `@vorionsys/car-client` |
 | **Cognigate** | Governance enforcement runtime | `cognigate.dev` |
 | **PROOF** | Immutable cryptographic audit trail | `@vorionsys/proof-plane` |
 | **CHAIN** | Optional blockchain anchoring of proof records | Layer 4 |
@@ -63,13 +63,13 @@ Failure multipliers scale with tier -- lowest at T0 to aid ascension, max at T5-
 
 ## Wave 2 -- The Pipeline (Mar 16)
 
-- [ ] `@vorionsys/sdk` with 5-minute quickstart
-- [ ] `@vorion/car-client` + `@vorion/car-cli` published
-- [ ] `@vorionsys/proof-plane` published
-- [ ] `@vorionsys/runtime` published
-- [ ] `docker run vorionsys/vorion` end-to-end
-- [ ] OpenAPI spec live at cognigate.dev/docs
-- [ ] gRPC transport support
+- [x] `@vorionsys/sdk` with 5-minute quickstart
+- [x] `@vorionsys/car-client` + `@vorionsys/car-cli` published
+- [x] `@vorionsys/proof-plane` published
+- [x] `@vorionsys/runtime` published
+- [x] `docker run vorionsys/vorion` end-to-end
+- [x] OpenAPI spec live at cognigate.dev/docs
+- [ ] gRPC transport support (Q3 2026)
 
 ---
 
