@@ -2,6 +2,7 @@
   "name": "marketing",
   "type": "module",
   "version": "1.0.0",
+  "license": "Apache-2.0",
   "description": "Vorion.org - AI Governance Platform. Projects, packages, architecture, ecosystem, and product pages.",
   "scripts": {
     "dev": "astro dev",

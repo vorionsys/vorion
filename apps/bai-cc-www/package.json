@@ -2,6 +2,7 @@
   "name": "bai-cc-www",
   "type": "module",
   "version": "2.0.0",
+  "license": "Apache-2.0",
   "description": "BAI Command Center - Internal IT/DevOps dashboard for the Vorion ecosystem",
   "scripts": {
     "dev": "astro dev",

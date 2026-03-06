@@ -1,6 +1,7 @@
 {
   "name": "bai-cc-dashboard",
   "version": "1.0.0",
+  "license": "Apache-2.0",
   "description": "Vorion Public Dashboard - Cloudflare Pages + Workers",
   "type": "module",
   "scripts": {

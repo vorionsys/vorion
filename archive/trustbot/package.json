@@ -28,7 +28,7 @@
     "basis"
   ],
   "author": "Vorion",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "@vorionsys/atsf-core": "file:./packages/atsf-core",
     "@hono/node-server": "^1.19.9",

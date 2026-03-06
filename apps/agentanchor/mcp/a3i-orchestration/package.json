@@ -1,6 +1,7 @@
 {
   "name": "@a3i/agent-orchestration-mcp",
   "version": "1.0.0",
+  "license": "Apache-2.0",
   "description": "MCP Server for A3I Agent Orchestration - Inter-agent communication, guard rails, and collaboration",
   "main": "dist/index.js",
   "type": "module",

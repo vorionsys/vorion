@@ -1,6 +1,7 @@
 {
   "name": "@vorion/agentanchor",
   "version": "0.1.0",
+  "license": "Apache-2.0",
   "description": "AgentAnchor - AI Governance Operating System (B2B Portal)",
   "private": true,
   "engines": {

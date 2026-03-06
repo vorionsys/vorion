@@ -36,7 +36,7 @@
     "certification"
   ],
   "author": "Vorion <dev@vorion.org>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/vorionsys/vorion-sdk.git"

@@ -1,6 +1,7 @@
 {
   "name": "@vorion/kaizen-docs",
   "version": "0.0.0",
+  "license": "Apache-2.0",
   "description": "Kaizen Documentation Site (Docusaurus)",
   "private": true,
   "scripts": {

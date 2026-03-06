@@ -1,6 +1,7 @@
 {
   "name": "atsf-dashboard",
   "version": "3.0.0",
+  "license": "Apache-2.0",
   "description": "ATSF v3.0 Admin Dashboard",
   "private": true,
   "scripts": {
