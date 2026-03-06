@@ -1,8 +1,8 @@
 /**
- * @deprecated All types live in `../../phase6/types.ts`.
+ * @deprecated All types live in `../phase6/types.ts`.
  * This file is a thin re-export barrel for any remaining internal references.
  */
-export * from '../../phase6/types.js';
+export * from '../phase6/types.js';
 
 // ============================================================================
 // Q1: CEILING ENFORCEMENT
