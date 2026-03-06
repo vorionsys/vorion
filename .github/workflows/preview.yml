@@ -32,7 +32,7 @@ jobs:
       vorion-www: ${{ steps.filter.outputs.vorion-www }}
       packages: ${{ steps.filter.outputs.packages }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
@@ -65,7 +65,7 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.packages == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -103,7 +103,7 @@ jobs:
       always() &&
       needs.changes.outputs.agentanchor == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -150,7 +150,7 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.agentanchor-www == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -192,7 +192,7 @@ jobs:
       always() &&
       needs.changes.outputs.kaizen == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -239,7 +239,7 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.vorion-www == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -279,7 +279,7 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.marketing == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -319,7 +319,7 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.aurais == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
