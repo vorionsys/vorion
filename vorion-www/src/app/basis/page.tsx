@@ -107,7 +107,7 @@ export default function BASISPage() {
           </div>
           <div className="grid lg:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-xl font-semibold text-white mb-4">Six Trust Tiers (0-1000)</h3>
+              <h3 className="text-xl font-semibold text-white mb-4">Eight Trust Tiers (T0&ndash;T7)</h3>
               <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-white/5">
@@ -118,12 +118,14 @@ export default function BASISPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    <TrustRow tier="Sandbox" score="0-99" capabilities="Isolated testing only" color="red" />
-                    <TrustRow tier="Provisional" score="100-299" capabilities="Read public data, internal messaging" color="orange" />
-                    <TrustRow tier="Standard" score="300-499" capabilities="Limited external communication" color="yellow" />
-                    <TrustRow tier="Trusted" score="500-699" capabilities="External API calls" color="green" />
-                    <TrustRow tier="Certified" score="700-899" capabilities="Financial transactions" color="blue" />
-                    <TrustRow tier="Autonomous" score="900-1000" capabilities="Full autonomy within policy" color="purple" />
+                    <TrustRow tier="T0 — Sandbox" score="0–199" capabilities="Isolated testing only" color="neutral" />
+                    <TrustRow tier="T1 — Observed" score="200–349" capabilities="Read public data, internal messaging" color="yellow600" />
+                    <TrustRow tier="T2 — Provisional" score="350–499" capabilities="Limited write, strict guardrails" color="yellow" />
+                    <TrustRow tier="T3 — Monitored" score="500–649" capabilities="Standard workflows, limited external reads" color="orange" />
+                    <TrustRow tier="T4 — Standard" score="650–799" capabilities="External API calls, routine operations" color="green" />
+                    <TrustRow tier="T5 — Trusted" score="800–875" capabilities="Financial transactions, elevated access" color="blue" />
+                    <TrustRow tier="T6 — Certified" score="876–950" capabilities="Critical system modifications" color="indigo" />
+                    <TrustRow tier="T7 — Autonomous" score="951–1000" capabilities="Full autonomy within policy" color="purple" />
                   </tbody>
                 </table>
               </div>
@@ -315,11 +317,13 @@ interface TrustRowProps {
 
 function TrustRow({ tier, score, capabilities, color }: TrustRowProps) {
   const colorClasses: Record<string, string> = {
-    red: 'text-red-400',
-    orange: 'text-orange-400',
+    neutral: 'text-neutral-400',
+    yellow600: 'text-yellow-600',
     yellow: 'text-yellow-400',
+    orange: 'text-orange-400',
     green: 'text-emerald-400',
     blue: 'text-blue-400',
+    indigo: 'text-indigo-400',
     purple: 'text-purple-400',
   };
 
