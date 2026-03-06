@@ -74,7 +74,20 @@ jobs:
         run: npm ci
 
       - name: Build all packages
-        run: npx turbo run build --filter='./packages/*' --filter='!./packages/n8n-nodes-cognigate'
+        run: |
+          npx turbo run build \
+            --filter=@vorionsys/contracts \
+            --filter=@vorionsys/shared-constants \
+            --filter=@vorionsys/basis \
+            --filter=@vorionsys/atsf-core \
+            --filter=@vorionsys/proof-plane \
+            --filter=@vorionsys/runtime \
+            --filter=@vorionsys/cognigate \
+            --filter=@vorionsys/car-client \
+            --filter=@vorionsys/car-cli \
+            --filter=@vorionsys/sdk \
+            --filter=@vorionsys/council \
+            --filter=@vorionsys/ai-gateway
 
       - name: Verify tag matches root version
         run: |
