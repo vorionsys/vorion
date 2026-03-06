@@ -117,14 +117,14 @@ export default function TrustPage() {
           </p>
           <div className="bg-black/30 border border-white/10 rounded-xl p-6 mb-4">
             <pre className="text-sm text-neutral-300 font-mono">
-{`DECAY_HALF_LIFE_DAYS = 7
+{`DECAY_HALF_LIFE_DAYS = 182
 
 decay_factor = 0.5 ^ (days_since_last_action / DECAY_HALF_LIFE_DAYS)
 decayed_score = current_score * decay_factor`}
             </pre>
           </div>
           <p className="text-neutral-400 text-sm">
-            Example: An agent with score 800 that takes no action for 7 days decays to 400.
+            Example: An agent with score 1000 that takes no action for 182 days decays to 500.
           </p>
 
           <h3 className="text-xl font-semibold text-white mb-3 mt-8">Failure Amplification</h3>
@@ -187,7 +187,7 @@ if action_delta < 0:
           <div className="bg-black/30 border border-white/10 rounded-xl p-6 overflow-x-auto">
             <pre className="text-sm text-neutral-300 font-mono">
 {`# Constants
-DECAY_HALF_LIFE_DAYS = 7
+DECAY_HALF_LIFE_DAYS = 182
 
 # Tier-scaled failure multipliers (lower tiers more lenient to aid ascension)
 TIER_FAILURE_MULTIPLIERS = {
