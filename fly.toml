@@ -1,7 +1,7 @@
 # Vorion API - Fly.io configuration
 # Deploy from monorepo root: fly deploy
 
-app = 'vorion-api'
+app = 'vorionsys-api'
 primary_region = 'iad'
 
 [build]
@@ -10,7 +10,6 @@ primary_region = 'iad'
 [env]
   NODE_ENV = 'production'
   PORT = '8080'
-  DEMO_MODE = 'true'
 
 [http_service]
   internal_port = 8080

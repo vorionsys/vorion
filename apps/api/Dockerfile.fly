@@ -1,21 +1,32 @@
 # Fly.io Dockerfile for Vorion API
-# NOTE: This runs in demo/proxy mode - for full agent execution, use a VPS
+# Multi-stage: build TypeScript, then run lean production image
+
+# --- Stage 1: Build ---
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY apps/api/package*.json ./
+RUN npm install
+
+COPY apps/api/src ./src
+COPY apps/api/tsconfig.json ./tsconfig.json
+
+RUN npm run build
+
+# --- Stage 2: Production ---
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy and install dependencies
-COPY apps/api/package*.json ./
-RUN npm ci --only=production
+COPY --from=builder /app/package*.json ./
+RUN npm install --omit=dev
 
-# Copy built files
-COPY apps/api/dist ./dist
-COPY apps/api/.env.fly ./.env
+COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
 ENV PORT=8080
 ENV HOST=0.0.0.0
-ENV DEMO_MODE=true
 
 EXPOSE 8080
 

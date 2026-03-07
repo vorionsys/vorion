@@ -105,15 +105,52 @@ export function Footer() {
 
         {/* Compliance Badges */}
         <div className="border-t border-zinc-800 pt-8 mb-8">
-          <p className="text-xs text-zinc-600 uppercase tracking-wide mb-4">
+          <p className="text-xs text-zinc-600 uppercase tracking-wide mb-3">
             Designed for compliance with
           </p>
-          <div className="flex flex-wrap items-center gap-6 text-sm text-zinc-500">
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">NIST AI RMF</span>
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">EU AI Act</span>
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">ISO 42001</span>
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">SOC 2</span>
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">GDPR</span>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-500 mb-5">
+            {([
+              { label: 'NIST AI RMF', href: '/basis/compliance#nist-ai-rmf', tip: 'NIST AI Risk Management Framework' },
+              { label: 'EU AI Act', href: '/basis/compliance#eu-ai-act', tip: 'EU Artificial Intelligence Act (Art. 9–15)' },
+              { label: 'ISO 42001', href: '/basis/compliance#iso-42001', tip: 'ISO/IEC 42001 AI Management Systems' },
+              { label: 'SOC 2', href: '/basis/compliance#soc2', tip: 'SOC 2 Type II — Security & Availability' },
+              { label: 'GDPR', href: '/basis/compliance#gdpr', tip: 'EU General Data Protection Regulation' },
+            ] as const).map(({ label, href, tip }) => (
+              <div key={label} className="group relative">
+                <Link
+                  href={href}
+                  className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800 hover:border-zinc-600 hover:text-white transition-colors"
+                >
+                  {label}
+                </Link>
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block z-10 pointer-events-none">
+                  <div className="bg-zinc-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                    {tip}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-zinc-700 uppercase tracking-wide mb-3">Roadmap</p>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            {([
+              { label: 'NIST AI 600-1', tip: 'NIST GenAI Profile · Targeting 2026' },
+              { label: 'EU AI Act Milestones', tip: 'Full enforcement milestones · Aug 2026' },
+              { label: 'CAISI', tip: 'NIST Collaborative AI Standards Initiative · 2026' },
+              { label: 'ISO 42005', tip: 'AI Impact Assessment Standard · In development' },
+              { label: 'CISA AI Guidelines', tip: 'CISA Secure AI Development · 2026' },
+            ] as const).map(({ label, tip }) => (
+              <div key={label} className="group relative">
+                <span className="px-3 py-1 bg-zinc-900/50 rounded-full border border-dashed border-zinc-700 text-zinc-600 cursor-default text-sm">
+                  {label}
+                </span>
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block z-10 pointer-events-none">
+                  <div className="bg-zinc-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                    {tip}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

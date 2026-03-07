@@ -16,7 +16,7 @@ const PORT = parseInt(process.env.PORT || '4000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
 const API_KEY = process.env.API_KEY || 'vorion-dev-key';
 const ROOT_DIR = process.env.ROOT_DIR || path.resolve(__dirname, '../../../');
-const DEMO_MODE = process.env.DEMO_MODE === 'true' || process.env.FLY_APP_NAME !== undefined;
+const DEMO_MODE = process.env.DEMO_MODE === 'true';
 
 // Demo responses for when running without agent packages
 const DEMO_RESPONSES: Record<string, string> = {

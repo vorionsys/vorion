@@ -78,8 +78,22 @@ export default function CompliancePage() {
           </div>
         </section>
 
+        {/* NIST AI RMF */}
+        <section id="nist-ai-rmf">
+          <h2 className="text-2xl font-bold text-white mb-4">NIST AI Risk Management Framework</h2>
+          <p className="text-neutral-400 leading-relaxed mb-4">
+            BASIS maps directly to the NIST AI RMF four core functions: GOVERN, MAP, MEASURE, MANAGE.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <ComplianceCard title="GOVERN" coverage="Full" items={['Policy definition via trust tiers', 'Accountability assignment', 'Organizational roles']} />
+            <ComplianceCard title="MAP" coverage="Full" items={['Risk classification engine', 'Context categorization', 'Capability scope mapping']} />
+            <ComplianceCard title="MEASURE" coverage="Full" items={['Trust scoring', 'Audit metrics', 'PROOF layer records']} />
+            <ComplianceCard title="MANAGE" coverage="Full" items={['ENFORCE layer controls', 'Escalation circuits', 'Incident response hooks']} />
+          </div>
+        </section>
+
         {/* SOC 2 */}
-        <section>
+        <section id="soc2">
           <h2 className="text-2xl font-bold text-white mb-4">SOC 2 Type II</h2>
           <p className="text-neutral-400 leading-relaxed mb-4">
             BASIS provides comprehensive coverage for SOC 2 Trust Services Criteria:
@@ -92,8 +106,54 @@ export default function CompliancePage() {
           </div>
         </section>
 
+        {/* ISO 42001 */}
+        <section id="iso-42001">
+          <h2 className="text-2xl font-bold text-white mb-4">ISO/IEC 42001:2023</h2>
+          <p className="text-neutral-400 leading-relaxed mb-4">
+            The first international standard for AI management systems. BASIS satisfies its core requirements:
+          </p>
+          <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-white/5">
+                <tr>
+                  <th className="text-left px-4 py-3 text-neutral-400 font-medium">Clause</th>
+                  <th className="text-left px-4 py-3 text-neutral-400 font-medium">Requirement</th>
+                  <th className="text-left px-4 py-3 text-neutral-400 font-medium">BASIS Implementation</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                <tr>
+                  <td className="px-4 py-3 text-white font-mono">§6.1</td>
+                  <td className="px-4 py-3 text-neutral-400">Risk treatment</td>
+                  <td className="px-4 py-3 text-neutral-300">Trust tier risk classification</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-white font-mono">§8.1</td>
+                  <td className="px-4 py-3 text-neutral-400">Operational planning</td>
+                  <td className="px-4 py-3 text-neutral-300">Capability gating, ENFORCE layer</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-white font-mono">§8.4</td>
+                  <td className="px-4 py-3 text-neutral-400">AI system lifecycle</td>
+                  <td className="px-4 py-3 text-neutral-300">Versioned policy, audit chain</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-white font-mono">§9.1</td>
+                  <td className="px-4 py-3 text-neutral-400">Performance monitoring</td>
+                  <td className="px-4 py-3 text-neutral-300">Trust decay, health checks</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-white font-mono">§10.1</td>
+                  <td className="px-4 py-3 text-neutral-400">Improvement</td>
+                  <td className="px-4 py-3 text-neutral-300">Incident → policy update loop</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         {/* GDPR */}
-        <section>
+        <section id="gdpr">
           <h2 className="text-2xl font-bold text-white mb-4">GDPR</h2>
           <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
@@ -136,7 +196,7 @@ export default function CompliancePage() {
         </section>
 
         {/* EU AI Act */}
-        <section>
+        <section id="eu-ai-act">
           <h2 className="text-2xl font-bold text-white mb-4">EU AI Act</h2>
           <p className="text-neutral-400 leading-relaxed mb-4">
             BASIS provides critical support for high-risk AI system requirements:

@@ -165,12 +165,18 @@ export async function synthesize(request: SynthesisRequest): Promise<SynthesisRe
 }
 
 /**
- * Stream synthesis response for real-time UI updates
+ * Stream synthesis response for real-time UI updates.
+ *
+ * Routes synthesis streaming through the Vorion Platform API when
+ * PLATFORM_API_URL is configured (uses /api/v1/ai/chat/stream).
+ * Falls back to direct Gemini SDK when platform API is unavailable.
+ *
+ * Returns a Response object suitable for use in Next.js route handlers.
  */
-export async function streamSynthesis(request: SynthesisRequest) {
+export async function streamSynthesis(request: SynthesisRequest): Promise<Response> {
   const models = request.models || ['gemini', 'claude', 'grok'];
 
-  // Generate perspectives first (could also stream these)
+  // Generate perspectives (routed through platform API when available)
   const perspectives = await Promise.all(
     models.map(model => generatePerspective(model, request.query, request.context))
   );
@@ -183,11 +189,36 @@ export async function streamSynthesis(request: SynthesisRequest) {
     .replace('{perspectives}', perspectivesText)
     .replace('{query}', request.query);
 
-  // Stream the synthesis
-  return streamText({
+  const platformUrl = process.env.PLATFORM_API_URL;
+  const platformKey = process.env.PLATFORM_API_KEY;
+
+  // Route synthesis streaming through platform API when configured
+  if (platformUrl && platformKey) {
+    try {
+      const res = await fetch(`${platformUrl}/api/v1/ai/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${platformKey}`,
+        },
+        body: JSON.stringify({
+          provider: 'gemini',
+          messages: [{ role: 'user', content: synthesisPrompt }],
+        }),
+      });
+      if (res.ok && res.body) return res;
+      console.warn('[Kaizen] Platform API streaming failed, falling back to direct SDK');
+    } catch (err) {
+      console.warn('[Kaizen] Platform API streaming error, falling back to direct SDK:', err);
+    }
+  }
+
+  // Direct SDK fallback
+  const result = streamText({
     model: google('gemini-2.0-flash'),
     prompt: synthesisPrompt,
   });
+  return result.toTextStreamResponse();
 }
 
 /**
