@@ -1,4 +1,4 @@
-﻿# Vorion Public Roadmap
+# Vorion Public Roadmap
 
 > **Status**: Active Development
 > Last updated: March 2026
@@ -131,4 +131,4 @@ Failure multipliers scale with tier -- lowest at T0 to aid ascension, max at T5-
 - Spec: https://github.com/vorionsys/vorion
 - Issues: https://github.com/vorionsys/vorion/issues
 - Docs: https://www.vorion.org/basis
-- License: Apache-2.0 | CC BY 4.0 (Specification text)
+- License: Apache-2.0 | Apache-2.0 (Specification text)

@@ -907,4 +907,4 @@ Response:
 **Status**: Draft for Review
 **Next Review**: After Phase 1 implementation
 **Maintained By**: BASIS Standards Committee
-**License**: CC BY 4.0 (Specification), Apache 2.0 (Reference Implementation)
+**License**: Apache-2.0

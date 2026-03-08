@@ -1139,7 +1139,7 @@ if not is_safe:
   },
   {
     term: 'BASIS Standard',
-    definition: 'The Mission Standards — an open standard (CC BY 4.0) for AI agent governance defining 8 clearance tiers (T0-T7) on a 0-1000 scale, mission authorization, and mission enforcement. Implementation published as @vorionsys/car-spec on npm.',
+    definition: 'The Mission Standards — an open standard (Apache-2.0) for AI agent governance defining 8 clearance tiers (T0-T7) on a 0-1000 scale, mission authorization, and mission enforcement. Implementation published as @vorionsys/car-spec on npm.',
     level: 'intermediate',
     category: 'protocols',
     tags: ['standards', 'governance', 'vorion', 'npm'],

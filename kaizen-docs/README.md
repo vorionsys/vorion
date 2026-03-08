@@ -88,4 +88,4 @@ See [Contributing Guide](./docs/contributing.md) for guidelines on adding conten
 
 ## License
 
-Content licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Content licensed under [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).

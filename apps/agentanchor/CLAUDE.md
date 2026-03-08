@@ -37,7 +37,7 @@ This app is part of the Vorion monorepo at `C:\Axiom`
 ## BASIS Standard (Open Source)
 - **Site:** basis.vorion.org
 - **Source:** docs/basis-docs/ in monorepo
-- **License:** Open standard (CC BY 4.0)
+- **License:** Open standard (Apache-2.0)
 
 ## Architecture
 AgentAnchor implements the BASIS four-layer governance model:

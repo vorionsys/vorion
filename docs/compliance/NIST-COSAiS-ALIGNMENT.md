@@ -11,7 +11,7 @@
 | Prepared by | Vorion |
 | Contact | contact@vorion.org |
 | Platform Version | Vorion v6 (Phase 6) |
-| Specification | BASIS v1.0.0 (CC BY 4.0) |
+| Specification | BASIS v1.0.0 (Apache-2.0) |
 
 ---
 

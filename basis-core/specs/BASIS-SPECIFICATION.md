@@ -2,7 +2,7 @@
 
 **Baseline Authority for Safe & Interoperable Systems**
 
-Version 1.0.0 | January 2026 | CC BY 4.0
+Version 1.0.0 | January 2026 | Apache-2.0
 
 ---
 
@@ -22,7 +22,7 @@ This document is the normative specification. Implementations claiming BASIS com
 | Status | Draft Specification |
 | Published | 2026-01-15 |
 | Editors | Vorion |
-| License | CC BY 4.0 |
+| License | Apache-2.0 |
 
 ### Version History
 
@@ -857,4 +857,4 @@ See the reference implementation at: https://github.com/voriongit/cognigate
 
 ---
 
-*Copyright © 2026 Vorion. This work is licensed under CC BY 4.0.*
+*Copyright © 2026 Vorion. This work is licensed under Apache-2.0.*

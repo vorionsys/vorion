@@ -73,7 +73,7 @@ Not an app. Not a chatbot. An **infrastructure layer**.
 ### 3.2 BASIS Standard (Open Specification)
 
 **Location:** learn.vorion.org
-**License:** CC BY 4.0
+**License:** Apache-2.0
 
 The open specification defining what must happen before an AI agent acts.
 

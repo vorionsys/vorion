@@ -79,7 +79,7 @@ Existing identity standards (SAML, OAuth 2.0, OIDC, FIDO2) were designed for thr
 
 2. **Google A2A Protocol (Agent-to-Agent)** — Defines inter-agent communication but authentication is API-key-based with no trust tier or behavioral context. An identity extension for A2A is a high-value standards gap.
 
-3. **The BASIS Standard (Vorion, CC BY 4.0)** — An open standard specifying agent trust scoring, governance, and identity (CAR-ID) with a reference implementation. We offer this to the NCCoE as input material for the project.
+3. **The BASIS Standard (Vorion, Apache-2.0)** — An open standard specifying agent trust scoring, governance, and identity (CAR-ID) with a reference implementation. We offer this to the NCCoE as input material for the project.
 
 ---
 
@@ -211,7 +211,7 @@ Based on our implementation experience, we recommend the NCCoE project focus on 
 
 3. **An inter-agent trust chain specification** — How agents verify each other's identity and trust level before accepting delegated instructions. This is the multi-agent authentication gap that poses the greatest current risk as MCP and A2A deployments scale.
 
-We offer the entire Vorion reference implementation (Apache-2.0) and the BASIS Standard (CC BY 4.0) as input materials for the project, and welcome participation in the NCCoE's community of interest for this effort.
+We offer the entire Vorion reference implementation (Apache-2.0) and the BASIS Standard (Apache-2.0) as input materials for the project, and welcome participation in the NCCoE's community of interest for this effort.
 
 ---
 

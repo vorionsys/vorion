@@ -140,7 +140,7 @@ To contribute to the specification, please see [CONTRIBUTING.md](CONTRIBUTING.md
 ## 📜 License
 
 - Standard and schemas: **Apache 2.0**
-- Documentation: **CC BY 4.0**
+- Documentation: **Apache-2.0**
 
 ---
 

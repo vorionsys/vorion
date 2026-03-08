@@ -93,7 +93,7 @@ FUNDING REQUEST
 We are seeking $750,000 over 18 months to:
 
 1. Complete core platform development (BASIS constraint engine, Trust Engine, Proof system)
-2. Open-source governance primitives under Apache 2.0/CC BY 4.0 licenses
+2. Open-source governance primitives under Apache-2.0 license
 3. Pilot with 3-5 enterprise partners in regulated industries (finance, healthcare)
 4. Publish governance methodology and empirical findings
 5. Engage with standards bodies (NIST, ISO) on practical implementation guidance
@@ -184,7 +184,7 @@ If there's room for follow-up conversation, emphasize:
 2. **Quantified Trust**: Only governance approach with graduated permissions based on behavioral scoring
 3. **Cryptographic Proof**: Blockchain-like integrity without blockchain overhead
 4. **Efficiency Focus**: CTV monitoring addresses sustainability as governance concern
-5. **Open Standards**: Apache 2.0/CC BY 4.0 licensing for governance primitives
+5. **Open Standards**: Apache-2.0 licensing for governance primitives
 6. **Regulatory Alignment**: EU AI Act, ISO 42001, NIST AI RMF from design
 
 ---

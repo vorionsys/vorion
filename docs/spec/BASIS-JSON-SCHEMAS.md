@@ -1236,4 +1236,4 @@ Schemas are versioned via the URL path (`/v1/`, `/v2/`, etc.):
 
 ---
 
-*Copyright © 2026 Vorion. This work is licensed under CC BY 4.0.*
+*Copyright © 2026 Vorion. This work is licensed under Apache-2.0.*

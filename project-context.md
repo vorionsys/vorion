@@ -22,7 +22,7 @@ _Critical rules and patterns for working in the Vorion Platform monorepo. Focus 
 
 **Vorion** is an AI Governance Platform providing trust scoring, policy enforcement, and audit trails for AI agents. The monorepo contains:
 
-- **BASIS** - Open governance standard (CC BY 4.0)
+- **BASIS** - Open governance standard (Apache-2.0)
 - **AgentAnchor** - B2B marketplace for governed AI agents
 - **Cognigate** - Developer runtime for constrained AI execution
 - **Kaizen** - Learning platform for AI governance

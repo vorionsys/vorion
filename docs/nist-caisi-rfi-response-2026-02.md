@@ -20,7 +20,7 @@
 
 ## Contribution Statement
 
-Vorion submits this response as a **standards contribution** to NIST CAISI. The concepts, threat analyses, and reference implementations described herein are offered to NIST and the public under open licenses — CC BY 4.0 for specifications, Apache-2.0 for all software — for unrestricted use in developing voluntary AI agent security standards.
+Vorion submits this response as a **standards contribution** to NIST CAISI. The concepts, threat analyses, and reference implementations described herein are offered to NIST and the public under the Apache-2.0 open-source license for unrestricted use in developing voluntary AI agent security standards.
 
 This document is structured in three layers:
 
@@ -45,7 +45,7 @@ Existing cybersecurity frameworks — designed for systems with well-defined bou
 
 This response addresses all five RFI topics. For each, we describe the problem, propose what standards should require, and — where applicable — offer an open-source reference implementation as one possible configuration. The supporting materials include:
 
-- **The BASIS Standard** (CC BY 4.0) — An open specification for AI agent trust scoring, governance, and cryptographic auditability
+- **The BASIS Standard** (Apache-2.0) — An open specification for AI agent trust scoring, governance, and cryptographic auditability
 - **A reference implementation** (Apache-2.0) — Including trust engines, governance gateways, and proof-chain services, with 15,865 automated tests across 481 test files
 - **A published threat model** — STRIDE-based, identifying 20 threat scenarios across 7 categories, mapped to the OWASP Top 10 for Agentic Applications (2026)
 
@@ -176,17 +176,42 @@ Threat profiles shift substantially across deployment dimensions. Standards shou
 
 | Decision | Meaning | Agent Behavior |
 |----------|---------|---------------|
-| **Approved** | Proceed with constraints | Constraints define allowed tools, data scopes, rate limits, execution time |
-| **Refine** | Scope reduction needed | Agent can reduce scope, add constraints, request human approval, or decompose the intent |
-| **Denied** | Hard policy violation | Triggers containment escalation and trust decay |
+| **Approved** | Proceed with constraints | Constraints define allowed tools, data scopes, rate limits, execution time. Resets the refinement strike counter to zero. |
+| **Refine** | Scope reduction needed | Agent can reduce scope, add constraints, request human approval, or decompose the intent. Increments the strike counter. |
+| **Denied** | Hard policy violation | Triggers containment escalation and trust decay. Resets the strike counter (no further negotiation). |
 
-The "Refine" category is critical: it transforms access denial into collaborative negotiation between agent and governance system, reducing false-positive denials while maintaining security boundaries. However, standards must also address the risk of **infinite refinement loops** — agents perpetually resubmitting refined intents without reaching resolution. Mandatory limits on refinement iterations (with escalation to human review or denial after the limit) should be part of any governance specification.
+The "Refine" category is critical: it transforms access denial into collaborative negotiation between agent and governance system, reducing false-positive denials while maintaining security boundaries. However, Refine must be **bounded, not open-ended**. Without strict limits, an agent can exploit the refinement pathway as a workaround engine — repeatedly adjusting intents until it finds a permutation that passes policy, effectively brute-forcing its way through governance.
+
+**Bounded Refinement Protocol (recommended: 3-strike escalation):**
+
+| Strike | Event | System Response |
+|--------|-------|----------------|
+| 1 | First Refine | Normal: agent may reduce scope and resubmit. Warning logged. |
+| 2 | Second consecutive Refine | Elevated: agent must provide structured justification with the resubmission. Enhanced monitoring activated. |
+| 3 | Third consecutive Refine | **Automatic escalation to Denied (RED).** Trust penalty applied. Human review required before the agent can retry this intent category. |
+| Reset | Any Approved decision | Strike counter returns to zero. |
+
+The 3-strike threshold is illustrative; NIST should determine the appropriate bound. The principle is non-negotiable: **refinement must be finite and progressively restrictive**, not an infinite negotiation channel. Each successive Refine should narrow the agent's options, not widen them. Standards should specify:
+
+- A maximum refinement count per intent (configurable, with a recommended default)
+- Progressive restriction on each iteration (the agent's available scope must be strictly smaller on each resubmission)
+- Mandatory structured justification after the first strike (natural language alone is insufficient)
+- Automatic trust decay on reaching the strike limit, proportional to the sensitivity of the denied intent
+- A cooldown period before the agent can reattempt the same intent category
+- All strike events logged to the cryptographic audit chain with full refinement history
 
 **3. Zero-knowledge cryptographic audit chains.** Every governance decision should produce a cryptographic proof record. Standards should require:
 
 - **Chain integrity** — Each record is cryptographically linked to its predecessor, forming a tamper-evident chain
 - **Identity binding** — Digital signatures bind each record to a specific agent identity
-- **Batch verification** — Periodic aggregation (e.g., Merkle trees) enables efficient bulk verification and external anchoring
+- **Batch verification** — Periodic aggregation enables efficient bulk verification and external anchoring. Multiple data structures can serve this purpose; the standard should require the *capability*, not a specific primitive:
+  - **Merkle trees** — Established, widely understood; O(log n) inclusion proofs; used in Certificate Transparency, Git, and blockchain systems
+  - **Verkle trees** — More compact proofs than Merkle (O(1) proof size via polynomial commitments); actively adopted by Ethereum for state verification
+  - **Vector commitments (KZG)** — Constant-size proofs regardless of dataset size; higher computational cost for commitment generation but extremely efficient verification
+  - **Append-only hash chains** — Simplest option; linear chain with O(n) verification but trivial implementation; sufficient for low-volume sequential audit logs
+  - **Authenticated skip lists** — O(log n) verification with simpler implementation than tree structures; well-suited for append-heavy workloads
+  
+  NIST should specify the verification properties required (tamper evidence, inclusion proofs, batch anchoring) and let implementers select the data structure appropriate for their scale and latency requirements
 - **Privacy-preserving verification** — Agents should be able to prove trust tier membership without revealing exact scores, using zero-knowledge proof techniques
 
 The specific cryptographic algorithms (hash functions, signature schemes, zero-knowledge proof systems) should be left to implementers and updated as cryptographic standards evolve. What matters for standardization is the *requirement* — an immutable, verifiable, privacy-preserving audit chain — not the specific primitives.
@@ -198,7 +223,40 @@ The specific cryptographic algorithms (hash functions, signature schemes, zero-k
 - **Resource budgets** — Per-task compute, time, and API-call budgets that hard-terminate execution when exceeded
 - **Escalation on limit** — When any limit is reached, behavior should escalate to human review rather than silent termination, preserving the agent's context for diagnosis
 
-**One possible configuration.** The BASIS specification defines an 8-tier trust model (T0 Sandbox through T7 Autonomous), a GREEN/YELLOW/RED governance decision framework with configurable refinement limits, and a cryptographic proof chain with defined interfaces for zero-knowledge verification. The reference implementation includes 15,865 automated tests — including 693 trust engine tests and 1,262 security and compliance verification tests covering NIST SP 800-53 Rev 5 control families. Published enforcement latency: governance gate decisions in ~30ms typical, proof logging in ~10ms typical.
+**5. Clone and fork trust inheritance.** When an agent is cloned, forked, or replicated from a known-good parent, starting the clone at T0 (Sandbox) is wasteful if the clone is provably identical. Starting it at the parent's full trust level is dangerous — a clone may behave differently in a new environment. Standards should define **bounded trust acceleration** for clones:
+
+| Acceleration Model | Mechanism | Starting Trust | Constraints |
+|-------------------|-----------|---------------|-------------|
+| **Attestation-gated inheritance** | Clone proves code/model/config identity match via cryptographic hash attestation against parent's registered fingerprint | Parent score × discount factor (e.g., 0.5–0.7) | Attestation must cover all executable components; any hash mismatch → T0 |
+| **Capped fast-track** | Clone starts at T0 but with an accelerated evaluation period (fewer successes needed per tier) | T0, with 2–3x faster tier progression | Hard cap at T3 (Monitored) regardless of parent tier; must earn T4+ independently |
+| **Trust passport** | Parent organization issues a signed, time-limited trust attestation the clone carries | Passport tier (configurable, max T3) | Expires after configurable duration (e.g., 72 hours); must be renewed or the clone reverts to earned trust |
+| **Behavioral fast-follow** | Clone’s initial actions are compared to parent’s behavioral baseline; trust accelerates if behavior matches within statistical tolerance | T0, with per-action trust bonuses for baseline-matching behavior | Any deviation from parent baseline immediately reverts to standard (slow) trust accrual |
+
+Standards should specify:
+- A maximum inherited trust ceiling (recommended: no higher than T3 for any acceleration model)
+- Mandatory cryptographic attestation linking clone identity to parent identity
+- Accelerated evaluation criteria that are stricter, not looser, than standard criteria (the clone is earning trust faster, so each evaluation checkpoint should require higher confidence)
+- Clone-specific audit records that link back to the parent’s proof chain, enabling end-to-end lineage verification
+- Immediate trust revocation for the clone if the parent’s trust is revoked or degraded
+
+**6. Cross-organizational fleet trust.** When agents from Organization A need to interact with agents from Organization B, neither organization’s internal trust scores are meaningful to the other. Internal trust is earned within a specific environment, policy set, and monitoring regime — none of which transfer across organizational boundaries. Standards should define a **trust federation model**:
+
+| Component | Purpose | Mechanism |
+|-----------|---------|----------|
+| **Trust corridor** | Bilateral agreement between organizations defining scope and ceiling for cross-org agent interactions | Signed policy document specifying: allowed interaction types, maximum trust tier for external agents, data classification boundaries, audit chain interoperability requirements |
+| **Fleet reputation score** | Organization-level trust metric based on aggregate behavior of all agents in the org’s fleet | Computed from: fleet-wide failure rate, mean time to containment, audit chain completeness, incident history. Published as a signed attestation, verifiable by partner organizations |
+| **Cross-org trust ceiling** | Maximum trust tier that an external agent can achieve within your namespace, regardless of its home organization’s trust | Configurable per trust corridor; recommended default: T3 (Monitored). Agents requiring higher access must be explicitly promoted by the host organization’s governance system |
+| **Trust passport exchange** | Portable, cryptographically signed trust attestation carried by agents operating across org boundaries | Contains: agent identity, home org identity, current trust tier (as attested by home org), fleet reputation score, attestation timestamp, expiry. Signed by the home org’s trust authority; verifiable by the host org without contacting the home org |
+| **Federated audit chain** | Interoperable proof records that span organizational boundaries | Cross-org interactions produce dual proof records — one in each org’s audit chain — linked by a shared interaction ID. Each org maintains sovereignty over its own chain while enabling cross-chain verification |
+| **Revocation propagation** | When an agent is compromised in one org, partner orgs are notified | Revocation events propagate through trust corridors with configurable latency requirements. Emergency revocations should propagate within minutes, not hours |
+
+Research priorities for cross-organizational trust:
+- **Decentralized trust registries** — Shared infrastructure (potentially blockchain-anchored or using distributed hash tables) where organizations publish and revoke fleet attestations without requiring a central authority
+- **Privacy-preserving fleet reputation** — Organizations should be able to prove their fleet meets minimum quality thresholds without revealing incident details or internal trust scores (zero-knowledge fleet attestations)
+- **Trust transitivity limits** — If Org A trusts Org B and Org B trusts Org C, should Org A automatically trust Org C’s agents? Standards should define when transitivity is appropriate (likely never by default) and what explicit opt-in looks like
+- **Regulatory jurisdiction mapping** — Cross-org trust corridors must account for different regulatory regimes (EU AI Act, NIST AI RMF, ISO 42001) and ensure that the strictest applicable regime governs the interaction
+
+**One possible configuration.** The BASIS specification defines an 8-tier trust model (T0 Sandbox through T7 Autonomous), a GREEN/YELLOW/RED governance decision framework with a 3-strike bounded refinement protocol (YELLOW → RED after 3 consecutive refinements), clone trust acceleration with attestation-gated inheritance, cross-organizational trust corridors with fleet reputation scoring, and a cryptographic proof chain with defined interfaces for zero-knowledge verification. The reference implementation includes 15,865 automated tests — including 693 trust engine tests and 1,262 security and compliance verification tests covering NIST SP 800-53 Rev 5 control families. Published enforcement latency: governance gate decisions in ~30ms typical, proof logging in ~10ms typical.
 
 **A note on latency.** Governance-before-execution introduces per-action overhead. Pre-action trust evaluation, policy checks, and proof logging add latency to every agent operation. In the reference implementation, this overhead is modest (30–40ms per decision), but in complex deployments with layered policies, high-frequency agent actions, or resource-constrained environments, cumulative latency may become significant. We acknowledge this as an open challenge and urge NIST to encourage research into **adaptive governance** — methods for calibrating governance overhead to deployment context, including lighter-weight checks for low-risk operations, pre-computed authorization for recurring patterns, and configurable governance granularity that allows operators to tune the security-performance tradeoff for their specific use case.
 
@@ -247,7 +305,7 @@ AI agent patching differs fundamentally from traditional software patching:
 
 **What standards should address.** Agent-specific control families that extend CSF 2.0 and bridge the gap between AI RMF's risk management focus and the operational security controls agents require at runtime.
 
-**Recommendation for NIST:** We urge NIST to develop a voluntary **AI Agent Security Controls Catalog** — a companion to SP 800-53 — that codifies runtime controls for agentic systems: graduated trust scoring, progressive containment, fluid governance decision models, zero-knowledge cryptographic audit chains, loop and runaway termination, and agent identity isolation. These controls exist today in early implementations; what the ecosystem lacks is a normative reference that enables consistent adoption, interoperable assessment, and compliance mapping. We contribute our [reference implementation (15,865 tests, Apache-2.0)](https://github.com/vorionsys/vorion) and [BASIS specification (CC BY 4.0)](https://basis.vorion.org) as inputs for this effort.
+**Recommendation for NIST:** We urge NIST to develop a voluntary **AI Agent Security Controls Catalog** — a companion to SP 800-53 — that codifies runtime controls for agentic systems: graduated trust scoring, progressive containment, fluid governance decision models, zero-knowledge cryptographic audit chains, loop and runaway termination, and agent identity isolation. These controls exist today in early implementations; what the ecosystem lacks is a normative reference that enables consistent adoption, interoperable assessment, and compliance mapping. We contribute our [reference implementation (15,865 tests, Apache-2.0)](https://github.com/vorionsys/vorion) and [BASIS specification (Apache-2.0)](https://basis.vorion.org) as inputs for this effort.
 
 ---
 
@@ -457,14 +515,14 @@ AI agent deployments are rapidly expanding but remain predominantly in bounded e
 
 | Resource | Type | License | URL |
 |----------|------|---------|-----|
-| BASIS Standard | Open specification | CC BY 4.0 | basis.vorion.org |
+| BASIS Standard | Open specification | Apache-2.0 | basis.vorion.org |
 | Trust Engine | Reference implementation | Apache-2.0 | @vorionsys/atsf-core |
 | Governance Gateway | Reference implementation | Apache-2.0 | @vorionsys/cognigate |
 | Proof Chain Service | Reference implementation | Apache-2.0 | @vorionsys/proof-plane |
 | Agent Registry | Reference implementation | Apache-2.0 | @vorionsys/car-spec |
-| Threat Model | Documentation | CC BY 4.0 | BASIS-THREAT-MODEL.md |
-| Compliance Mapping | Documentation | CC BY 4.0 | BASIS-COMPLIANCE-MAPPING.md |
-| OWASP Control Mapping | Documentation | CC BY 4.0 | Published at basis.vorion.org/blog |
+| Threat Model | Documentation | Apache-2.0 | BASIS-THREAT-MODEL.md |
+| Compliance Mapping | Documentation | Apache-2.0 | BASIS-COMPLIANCE-MAPPING.md |
+| OWASP Control Mapping | Documentation | Apache-2.0 | Published at basis.vorion.org/blog |
 
 **What standards should address.** NIST should develop or endorse:
 1. A standardized trust scoring format that enables trust portability between platforms
@@ -477,9 +535,11 @@ These formats need not be tied to any specific implementation. The value is in i
 
 1. **Agent identity standards** — There is no established standard for AI agent identity that is distinct from human identity or service accounts. Government collaboration on agent identity (analogous to PIV/CAC for humans) would address threats ASI03, ASI07, and ASI09 simultaneously.
 
-2. **Multi-agent trust propagation** — As government agencies deploy multi-agent systems, trust propagation between agencies' agents will require interoperable trust frameworks. NIST is uniquely positioned to develop cross-organizational agent trust standards.
+2. **Cross-organizational fleet trust** — As government agencies deploy multi-agent systems, trust propagation between agencies' agents will require interoperable trust frameworks. No current standard defines how Organization A's agents establish trust with Organization B's agents, how fleet-level reputation translates across boundaries, or how trust revocation propagates between organizations. NIST is uniquely positioned to develop cross-organizational agent trust standards, including: (a) a trust federation protocol defining bilateral trust corridors with configurable ceilings, (b) a fleet reputation attestation format that enables organizations to publish verifiable fleet quality metrics, (c) a trust passport schema for agents operating across organizational boundaries, and (d) guidance on trust transitivity limits and regulatory jurisdiction mapping for cross-border agent interactions. Government agencies — which routinely need agents to operate across department boundaries under different compliance regimes — are the ideal proving ground for these standards.
 
-3. **Incident reporting and coordination** — AI agent security incidents are currently unreportable through existing channels (CISA, CVE). A reporting mechanism specifically designed for agent security incidents — including prompt injection campaigns, supply chain compromises, and behavioral drift events — would improve collective defense.
+3. **Clone and fork governance** — As organizations scale agent fleets through cloning and replication, standards for trust inheritance become critical. Without guidance, organizations will either start every clone at zero trust (wasteful, creates deployment friction) or grant full parent trust (dangerous, creates a trust laundering vector). NIST should define bounded trust acceleration models with attestation requirements, inheritance ceilings, and lineage tracking.
+
+4. **Incident reporting and coordination** — AI agent security incidents are currently unreportable through existing channels (CISA, CVE). A reporting mechanism specifically designed for agent security incidents — including prompt injection campaigns, supply chain compromises, and behavioral drift events — would improve collective defense.
 
 4. **Compliance framework alignment** — Government agencies face compliance requirements (FedRAMP, FISMA) that have no mapping to AI agent security controls. NIST guidance on how agent security controls satisfy existing compliance requirements would accelerate safe adoption.
 
@@ -489,17 +549,21 @@ In priority order:
 
 1. **Prompt injection defenses** — Despite being identified as a critical vulnerability for 3+ years, no robust defense exists. Research should focus on architectural solutions (separating instruction and data channels) rather than input filtering alone.
 
-2. **Multi-agent trust propagation models** — Formal models for how trust should propagate, decay, and revoke across agent fleets. Current approaches are ad hoc.
+2. **Cross-organizational fleet trust and federation** — Formal models for how trust should propagate, decay, and revoke across agent fleets that span multiple organizations. Current approaches are ad hoc and confined to single-organization boundaries. Research should address: trust corridor protocols, fleet reputation computation, privacy-preserving fleet attestations (zero-knowledge proofs of fleet quality without revealing incident details), trust transitivity limits, and decentralized trust registries that operate without a central authority.
 
-3. **Infinite loop and runaway detection** — Methods to detect and safely terminate circular delegation, recursive tool invocation, and unbounded governance negotiation cycles in multi-agent systems. This includes distributed cycle detection algorithms that can operate without requiring any single agent to have global visibility.
+3. **Clone trust acceleration and lineage verification** — Methods to safely accelerate trust for cloned or replicated agents without creating trust laundering vectors. Research should explore: attestation-gated inheritance models, behavioral fast-follow comparison algorithms, cryptographic lineage chains linking clones to parents, and the security implications of trust inheritance across different environments.
 
-4. **Behavioral drift detection** — Methods to detect when an agent's behavior has shifted from its intended purpose, especially through subtle changes that individually appear benign but collectively represent goal drift.
+4. **Infinite loop and runaway detection** — Methods to detect and safely terminate circular delegation, recursive tool invocation, and unbounded governance negotiation cycles (including bounded refinement protocol enforcement) in multi-agent systems. This includes distributed cycle detection algorithms that can operate without requiring any single agent to have global visibility.
 
-5. **Agent-to-agent authentication** — Cryptographic protocols for agent-to-agent communication that provide authentication, integrity, and non-repudiation without introducing prohibitive latency.
+5. **Proof chain data structure selection** — Comparative analysis of tamper-evident data structures (Merkle trees, Verkle trees, vector commitments, authenticated skip lists, append-only hash chains) for agent audit chains at varying scales. Research should evaluate: proof size, verification latency, anchoring frequency, storage overhead, and suitability for cross-organizational federated audit chains.
 
-6. **Adaptive governance and latency optimization** — Methods for dynamically adjusting governance overhead based on operation risk level, agent trust posture, and deployment context. Research should explore pre-computed authorization for recurring patterns, risk-proportional governance depth, and configurable security-performance tradeoffs that allow operators to tune governance latency for their specific environment.
+6. **Behavioral drift detection** — Methods to detect when an agent's behavior has shifted from its intended purpose, especially through subtle changes that individually appear benign but collectively represent goal drift.
 
-7. **Containment effectiveness measurement** — Empirical research on how effectively containment mechanisms prevent harm propagation, and what containment levels are appropriate for different risk categories.
+7. **Agent-to-agent authentication** — Cryptographic protocols for agent-to-agent communication that provide authentication, integrity, and non-repudiation without introducing prohibitive latency.
+
+8. **Adaptive governance and latency optimization** — Methods for dynamically adjusting governance overhead based on operation risk level, agent trust posture, and deployment context. Research should explore pre-computed authorization for recurring patterns, risk-proportional governance depth, and configurable security-performance tradeoffs that allow operators to tune governance latency for their specific environment.
+
+9. **Containment effectiveness measurement** — Empirical research on how effectively containment mechanisms prevent harm propagation, and what containment levels are appropriate for different risk categories.
 
 ### 5(d): International approaches and their benefits/drawbacks
 
@@ -550,10 +614,10 @@ All materials below are offered to NIST under open licenses for unrestricted use
 
 | Document | Description | License | Link |
 |----------|-------------|---------|------|
-| OWASP ASI01–ASI10 Control Mapping | Maps all 10 OWASP agentic AI risks to controls | CC BY 4.0 | [basis.vorion.org/blog](https://basis.vorion.org/blog) |
-| BASIS Specification | Open standard for AI agent trust scoring | CC BY 4.0 | [basis.vorion.org](https://basis.vorion.org) |
-| BASIS Threat Model | STRIDE-based analysis: 20 scenarios, 7 categories | CC BY 4.0 | [GitHub](https://github.com/vorionsys/vorion/blob/main/docs/spec/BASIS-THREAT-MODEL.md) |
-| Compliance Mapping | SOC 2, ISO 27001, GDPR, HIPAA, PCI DSS, EU AI Act, NIST AI RMF | CC BY 4.0 | [GitHub](https://github.com/vorionsys/vorion/tree/main/docs/compliance) |
+| OWASP ASI01–ASI10 Control Mapping | Maps all 10 OWASP agentic AI risks to controls | Apache-2.0 | [basis.vorion.org/blog](https://basis.vorion.org/blog) |
+| BASIS Specification | Open standard for AI agent trust scoring | Apache-2.0 | [basis.vorion.org](https://basis.vorion.org) |
+| BASIS Threat Model | STRIDE-based analysis: 20 scenarios, 7 categories | Apache-2.0 | [GitHub](https://github.com/vorionsys/vorion/blob/main/docs/spec/BASIS-THREAT-MODEL.md) |
+| Compliance Mapping | SOC 2, ISO 27001, GDPR, HIPAA, PCI DSS, EU AI Act, NIST AI RMF | Apache-2.0 | [GitHub](https://github.com/vorionsys/vorion/tree/main/docs/compliance) |
 | Reference Implementation | Full platform with 15,865 tests | Apache-2.0 | [GitHub](https://github.com/vorionsys/vorion) |
 
 ---

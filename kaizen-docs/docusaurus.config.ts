@@ -143,7 +143,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `© ${new Date().getFullYear()} Vorion. Content licensed under CC BY 4.0.`,
+      copyright: `© ${new Date().getFullYear()} Vorion. Content licensed under Apache-2.0.`,
     },
     prism: {
       theme: prismThemes.github,

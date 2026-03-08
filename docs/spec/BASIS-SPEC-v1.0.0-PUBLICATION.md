@@ -11,7 +11,7 @@
 | **Status** | Draft for Public Comment |
 | **Date** | 2026-02-11 |
 | **Editors** | Vorion |
-| **License** | CC BY 4.0 (Specification Text); Apache 2.0 (Reference Implementation) |
+| **License** | Apache-2.0 |
 | **Feedback** | https://github.com/voriongit/basis-spec/issues |
 | **Latest Version** | https://vorion.org/basis/spec/v1 |
 
@@ -1262,7 +1262,7 @@ Schema versioning follows the URL path convention (`/v1/`, `/v2/`, etc.). Minor 
 
 ### E.1 Specification License
 
-This specification document is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to share and adapt this material for any purpose, including commercial use, provided you give appropriate credit.
+This specification document is licensed under the Apache License, Version 2.0 (Apache-2.0). You may use, modify, and distribute this material under the terms of the Apache-2.0 license.
 
 ### E.2 Reference Implementation License
 
@@ -1272,14 +1272,9 @@ The reference implementation (`@vorionsys/basis`) is licensed under the Apache L
 
 Vorion commits to licensing any patents essential to implementing this specification on reasonable and non-discriminatory (RAND) terms, or royalty-free (RAND-Z) terms where feasible.
 
-### E.4 Known License Discrepancy
+### E.4 License Clarification
 
-Earlier internal drafts of this specification inconsistently listed the license as "CC BY 4.0" without distinguishing between the specification text and the implementation code. The intended licensing has always been:
-
-- **Specification text**: CC BY 4.0
-- **Reference implementation code**: Apache 2.0
-
-Implementers should note this distinction. The `package.json` field `"license": "Apache-2.0"` refers to the implementation code, not this specification.
+All BASIS materials — specification text, reference implementation code, documentation, threat models, and compliance mappings — are licensed under Apache-2.0. Earlier internal drafts inconsistently distinguished between specification and implementation licenses; as of March 2026, the project uses a single license (Apache-2.0) for all artifacts.
 
 ---
 
@@ -1289,6 +1284,6 @@ This specification was developed by Vorion with contributions from the BASIS Sta
 
 ---
 
-*Copyright 2026 Vorion. This specification is licensed under CC BY 4.0. The reference implementation is licensed under Apache 2.0.*
+*Copyright 2026 Vorion. Licensed under Apache-2.0.*
 
 *Document Identifier: BASIS-SPEC-1.0.0 | Status: Draft for Public Comment | Date: 2026-02-11*

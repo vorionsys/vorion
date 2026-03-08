@@ -1,4 +1,4 @@
-﻿import { BasisLayout } from '@/components/BasisLayout';
+import { BasisLayout } from '@/components/BasisLayout';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -38,7 +38,7 @@ export default function SpecPage() {
               </tr>
               <tr>
                 <td className="py-2 text-neutral-500">License</td>
-                <td className="py-2 text-neutral-300">CC BY 4.0</td>
+                <td className="py-2 text-neutral-300">Apache-2.0</td>
               </tr>
             </tbody>
           </table>

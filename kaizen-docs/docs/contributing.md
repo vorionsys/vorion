@@ -240,7 +240,7 @@ Contributors are recognized in:
 
 ## License
 
-All contributions are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). By contributing, you agree to this license.
+All contributions are licensed under [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0). By contributing, you agree to this license.
 
 ---
 

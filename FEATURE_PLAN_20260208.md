@@ -43,7 +43,7 @@ This is the single source of truth. Every site, README, and SDK must align to th
 
 | Name | What It Is | Analogy | Owned By |
 |------|-----------|---------|----------|
-| **BASIS** | Open governance standard | The traffic law | Community (CC BY 4.0) |
+| **BASIS** | Open governance standard | The traffic law | Community (Apache-2.0) |
 | **CAR** | Categorical Agentic Registry — identity & trust tracking | The DMV / license plate | Vorion (open spec) |
 | **CAR ID** | Unique identifier issued to each registered agent | License plate number | Issued per agent |
 | **ACI Spec** | Agent Capability Interface — TypeScript types & contracts | The engineering blueprint | `@vorionsys/aci-spec` (Apache 2.0) |

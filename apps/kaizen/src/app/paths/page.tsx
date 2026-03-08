@@ -343,7 +343,7 @@ export default function LearningPathsPage() {
       <footer className="border-t border-gray-800 py-8 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Vorion. Content licensed under CC BY 4.0.
+            © {new Date().getFullYear()} Vorion. Content licensed under Apache-2.0.
           </p>
           <div className="flex gap-4 text-sm text-gray-500">
             <Link href="/lexicon" className="hover:text-cyan-400 transition-colors">

@@ -450,4 +450,4 @@ Custom codes:
 
 ---
 
-*Copyright © 2026 Vorion. This work is licensed under CC BY 4.0.*
+*Copyright © 2026 Vorion. This work is licensed under Apache-2.0.*

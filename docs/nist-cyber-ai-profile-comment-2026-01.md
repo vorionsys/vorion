@@ -306,8 +306,8 @@ The following open resources are available for NIST review as example implementa
 
 | Resource | URL | License |
 |----------|-----|---------|
-| BASIS Specification | https://basis.vorion.org | CC BY 4.0 |
-| Core Specification | https://basis.vorion.org/spec/overview | CC BY 4.0 |
+| BASIS Specification | https://basis.vorion.org | Apache-2.0 |
+| Core Specification | https://basis.vorion.org/spec/overview | Apache-2.0 |
 | Efficiency Specification | https://github.com/voriongit/vorion/tree/master/docs/basis-docs/docs/spec | Apache 2.0 |
 | Reference Implementation | https://github.com/voriongit/vorion | Apache 2.0 |
 

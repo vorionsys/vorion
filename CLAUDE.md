@@ -49,7 +49,7 @@ git -C C:\voriongit\vorion-public push origin main
 ## Ecosystem Overview
 
 ### Products
-- **BASIS Standard** — Open specification for AI agent governance pipeline (CC BY 4.0 for the spec document, Apache 2.0 for code). 5 stages: CAR → INTENT → ENFORCE → PROOF → CHAIN. Canonical URL: https://basis.vorion.org
+- **BASIS Standard** — Open specification for AI agent governance pipeline (Apache-2.0 for the spec document, Apache 2.0 for code). 5 stages: CAR → INTENT → ENFORCE → PROOF → CHAIN. Canonical URL: https://basis.vorion.org
 - **Cognigate** — Open-source stateless enforcement engine implementing BASIS (Apache 2.0). Interactive playground + API docs at https://cognigate.dev. v0.2.0.
 - **AgentAnchor** — B2B marketplace for governed AI agents. https://agentanchorai.com
 - **Kaizen** — AI governance learning platform. https://learn.vorion.org
@@ -67,9 +67,9 @@ git -C C:\voriongit\vorion-public push origin main
 ### Licensing
 | Asset | License |
 |-------|---------|
-| BASIS Standard specification | CC BY 4.0 |
+| BASIS Standard specification | Apache-2.0 |
 | All code packages (vorion, cognigate) | Apache 2.0 |
-| kaizen-docs content | CC BY 4.0 (LICENSE file added March 2026) |
+| kaizen-docs content | Apache-2.0 (LICENSE file added March 2026) |
 
 ### Test Counts (as of March 2026)
 - TypeScript: 9,976+

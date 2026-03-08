@@ -115,7 +115,7 @@ npm install @vorionsys/car-spec
 
 ## Contributing
 
-This knowledge base is **open to community contributions** under CC BY 4.0.
+This knowledge base is **open to community contributions** under Apache-2.0.
 
 [Learn how to contribute →](/contributing)
 

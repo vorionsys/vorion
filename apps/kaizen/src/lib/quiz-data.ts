@@ -1588,7 +1588,7 @@ export const quizQuestions: QuizQuestion[] = [
       { id: optId(), text: 'A standard for robot movement commands and autonomous control', isCorrect: false },
       { id: optId(), text: 'A metric for measuring regulatory adherence and compliance', isCorrect: false },
     ],
-    explanation: 'The BASIS Standard is an open standard (CC BY 4.0) for AI governance defining trust tiers, capability gating, and policy enforcement. Implementation available via npm: @vorionsys/car-spec.',
+    explanation: 'The BASIS Standard is an open standard (Apache-2.0) for AI governance defining trust tiers, capability gating, and policy enforcement. Implementation available via npm: @vorionsys/car-spec.',
     difficulty: 'expert',
   },
 

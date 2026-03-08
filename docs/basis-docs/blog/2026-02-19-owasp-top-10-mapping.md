@@ -162,7 +162,7 @@ CAR → INTENT → ENFORCE → PROOF → CHAIN (optional)
 
 ## Get Involved
 
-BASIS is an open standard (CC BY 4.0). The reference implementation, Cognigate, is Apache 2.0.
+BASIS is an open standard (Apache-2.0). The reference implementation, Cognigate, is Apache 2.0.
 
 - [Read the spec](/spec/overview)
 - [Explore the five stages](/layers/car)

@@ -30,7 +30,7 @@ const submissions = [
     highlights: [
       { icon: AlertTriangle, color: 'text-red-400', label: 'Threat Model', text: 'Goal hijacking, tool weaponization, memory poisoning \u2014 10 novel attack vectors unique to agents' },
       { icon: Shield, color: 'text-indigo-400', label: 'Control Pattern', text: 'Trust-tiered gating: T0\u2013T7 tiers with 16 behavioral factors governing what agents can do' },
-      { icon: CheckCircle, color: 'text-emerald-400', label: 'Open Source', text: 'Full reference implementation at github.com/vorionsys/vorion (Apache-2.0 + CC BY 4.0)' },
+      { icon: CheckCircle, color: 'text-emerald-400', label: 'Open Source', text: 'Full reference implementation at github.com/vorionsys/vorion (Apache-2.0)' },
     ],
   },
 ];

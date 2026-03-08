@@ -156,4 +156,4 @@ BASIS is community-governed. Here's how to participate:
 
 ---
 
-*BASIS is an open standard released under CC BY 4.0. Reference implementations are Apache 2.0.*
+*BASIS is an open standard released under Apache-2.0. Reference implementations are Apache 2.0.*
