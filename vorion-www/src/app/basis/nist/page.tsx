@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ExternalLink, FileText, Shield, Calendar, Hash, ArrowRight, AlertTriangle, CheckCircle, Zap } from 'lucide-react';
+import { ExternalLink, FileText, Shield, Calendar, Hash, ArrowRight, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export const metadata = {
   title: 'NIST Submissions | Vorion',
@@ -13,12 +13,12 @@ const submissions = [
     badgeColor: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
     title: 'NIST CAISI: Security Considerations for AI Agents',
     docket: 'NIST-2025-0035',
-    document: 'Federal Register Vol. 91, No. 5 (pp. 698–701)',
+    document: 'Federal Register Vol. 91, No. 5 (pp. 698\u2013701)',
     submitted: 'March 9, 2026',
     deadline: 'March 9, 2026, 11:59 PM ET',
-    status: 'Submitted',
-    statusColor: 'text-emerald-400',
-    summary: 'Vorion\'s response to NIST CAISI\'s RFI on AI agent security, drawing from direct experience building the Vorion Governed AI Execution Platform. Addresses all five RFI topics with concrete implementation patterns, quantitative data, and open-source reference implementations.',
+    status: 'Pending submission',
+    statusColor: 'text-amber-400',
+    summary: 'Vorion\u2019s response to NIST CAISI\u2019s RFI on AI agent security, drawing from direct experience building the Vorion Governed AI Execution Platform. Addresses all five RFI topics with concrete implementation patterns, quantitative data, and open-source reference implementations.',
     keyPoints: [
       '10 threat categories specific to agentic AI, mapped to OWASP Top 10 for Agentic Applications',
       'Trust-tiered capability gating as the primary security control pattern',
@@ -28,35 +28,9 @@ const submissions = [
     githubUrl: 'https://github.com/vorionsys/vorion/blob/main/docs/nist-caisi-rfi-response-2026-02.md',
     regulationsUrl: 'https://www.regulations.gov/docket/NIST-2025-0035',
     highlights: [
-      { icon: AlertTriangle, color: 'text-red-400', label: 'Threat Model', text: 'Goal hijacking, tool weaponization, memory poisoning — 10 novel attack vectors unique to agents' },
-      { icon: Shield, color: 'text-indigo-400', label: 'Control Pattern', text: 'Trust-tiered gating: T0–T7 tiers with 16 behavioral factors governing what agents can do' },
+      { icon: AlertTriangle, color: 'text-red-400', label: 'Threat Model', text: 'Goal hijacking, tool weaponization, memory poisoning \u2014 10 novel attack vectors unique to agents' },
+      { icon: Shield, color: 'text-indigo-400', label: 'Control Pattern', text: 'Trust-tiered gating: T0\u2013T7 tiers with 16 behavioral factors governing what agents can do' },
       { icon: CheckCircle, color: 'text-emerald-400', label: 'Open Source', text: 'Full reference implementation at github.com/vorionsys/vorion (Apache-2.0 + CC BY 4.0)' },
-    ],
-  },
-  {
-    id: 'csf-profile',
-    badge: 'Public Comment',
-    badgeColor: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
-    title: 'NIST IR 8596: Cybersecurity Framework Profile for AI',
-    docket: 'NIST IR 8596 (Preliminary Draft)',
-    document: 'Cybersecurity Framework Profile for Artificial Intelligence',
-    submitted: 'January 18, 2026',
-    deadline: 'January 30, 2026',
-    status: 'Submitted',
-    statusColor: 'text-emerald-400',
-    summary: 'Vorion\'s public comment on NIST\'s preliminary Cyber AI Profile. Identifies four gaps in the current draft and proposes concrete additions for operational efficiency as security, graduated trust mechanisms, cryptographic auditability standards, and sustainability alignment with EU AI Act Article 40.',
-    keyPoints: [
-      'Resource exhaustion as an exploitable security vector (Economic Denial of Service)',
-      'Graduated trust — binary allow/deny is insufficient for autonomous agent systems',
-      'Cryptographic auditability requirements for forensic AI incident analysis',
-      'Sustainability metrics alignment with ISO/IEC 21031:2024 and EU AI Act Article 40',
-    ],
-    githubUrl: 'https://github.com/vorionsys/vorion/blob/main/docs/nist-cyber-ai-profile-comment-2026-01.md',
-    regulationsUrl: 'https://www.nist.gov/artificial-intelligence/executive-order-safe-secure-and-trustworthy-artificial-intelligence',
-    highlights: [
-      { icon: Zap, color: 'text-yellow-400', label: 'Key Gap', text: 'CSF profile does not address resource exhaustion attacks or Economic Denial of Service vectors' },
-      { icon: Shield, color: 'text-purple-400', label: 'Proposed Addition', text: 'Resource governance controls: declared manifests, cost-to-value monitoring, automatic throttling' },
-      { icon: CheckCircle, color: 'text-emerald-400', label: 'Framework Alignment', text: 'Maps to CSF 2.0 subcategories ID.AM-05, PR.PS-05 with concrete implementation guidance' },
     ],
   },
 ];
