@@ -111,16 +111,16 @@ Organizations should define explicit signal impacts. One possible approach:
 | Signal Type | Base Impact | Rationale |
 |-------------|-------------|-----------|
 | task_completed | +5 points | Positive behavioral signal |
-| task_failed | −35 to −50 points | Tier-scaled (7–10x positive signal): lenient at T0, strict at T7 |
+| task_failed | -15 points | 3x amplification incentivizes reliability |
 | policy_violation | -50 points | Serious compliance breach |
 | compliance_check_passed | +2 points | Periodic verification bonus |
 | human_endorsement | +25 points | Explicit trust delegation |
 
 **Initial Trust Score:** Entities should initialize at score 0 (Sandbox tier) unless explicitly promoted by an administrator with appropriate authority. This ensures new agents demonstrate trustworthiness before gaining capabilities.
 
-**Trust Decay Considerations:** A 14-day half-life profile for inactive agents can balance security (preventing stale high-trust entities) with operational practicality (allowing for maintenance windows). Organizations may wish to implement a "Maintenance" status that pauses decay during planned downtime, preventing penalization for scheduled maintenance.[3]
+**Trust Decay Considerations:** A 14-day half-life for inactive agents balances security (preventing stale high-trust entities) with operational practicality (allowing for maintenance windows). Organizations may wish to implement a "Maintenance" status that pauses decay during planned downtime, preventing penalization for scheduled maintenance.[3]
 
-[3] Note: The BASIS specification default is a stepped milestone model with a 182-day half-life and first deduction at day 7. A 14-day profile is an optional enterprise tuning choice for faster privilege decay.
+[3] Note: The BASIS specification default is 7-day half-life; the 14-day recommendation accommodates enterprise maintenance cycles. Organizations may adjust based on their agent velocity and risk tolerance.
 
 ---
 
@@ -367,7 +367,7 @@ https://vorion.org
 | Signal Type | Impact | Notes |
 |-------------|--------|-------|
 | task_completed | +5 | Standard positive signal |
-| task_failed | −35 to −50 | Tier-scaled: 7x at T0, 10x at T7 |
+| task_failed | -15 | 3x amplification for failures |
 | policy_violation | -50 | Serious compliance breach |
 | compliance_check_passed | +2 | Periodic verification |
 | human_endorsement | +25 | Explicit trust delegation |
