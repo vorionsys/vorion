@@ -10,8 +10,21 @@
 [![AI TRiSM](https://img.shields.io/badge/AI%20TRiSM-Aligned-yellow.svg)](docs/VORION_V1_FULL_APPROVAL_PDFS/AI_TRISM_COMPLIANCE_MAPPING.md)
 [![Coverage](https://img.shields.io/badge/Coverage-TBD-lightgrey.svg)](#)
 [![npm: shared-constants](https://img.shields.io/npm/v/@vorionsys/shared-constants?label=shared-constants)](https://www.npmjs.com/package/@vorionsys/shared-constants)
-[![npm: car-spec](https://img.shields.io/npm/v/@vorionsys/car-spec?label=car-spec)](https://www.npmjs.com/package/@vorionsys/car-spec)
 [![npm: basis](https://img.shields.io/npm/v/@vorionsys/basis?label=basis)](https://www.npmjs.com/package/@vorionsys/basis)
+[![npm: atsf-core](https://img.shields.io/npm/v/@vorionsys/atsf-core?label=atsf-core)](https://www.npmjs.com/package/@vorionsys/atsf-core)
+[![npm: contracts](https://img.shields.io/npm/v/@vorionsys/contracts?label=contracts)](https://www.npmjs.com/package/@vorionsys/contracts)
+[![npm: car-spec](https://img.shields.io/npm/v/@vorionsys/car-spec?label=car-spec)](https://www.npmjs.com/package/@vorionsys/car-spec)
+[![npm: cognigate](https://img.shields.io/npm/v/@vorionsys/cognigate?label=cognigate)](https://www.npmjs.com/package/@vorionsys/cognigate)
+[![npm: proof-plane](https://img.shields.io/npm/v/@vorionsys/proof-plane?label=proof-plane)](https://www.npmjs.com/package/@vorionsys/proof-plane)
+[![npm: council](https://img.shields.io/npm/v/@vorionsys/council?label=council)](https://www.npmjs.com/package/@vorionsys/council)
+[![npm: ai-gateway](https://img.shields.io/npm/v/@vorionsys/ai-gateway?label=ai-gateway)](https://www.npmjs.com/package/@vorionsys/ai-gateway)
+[![npm: sdk](https://img.shields.io/npm/v/@vorionsys/sdk?label=sdk)](https://www.npmjs.com/package/@vorionsys/sdk)
+[![npm: runtime](https://img.shields.io/npm/v/@vorionsys/runtime?label=runtime)](https://www.npmjs.com/package/@vorionsys/runtime)
+[![npm: agent-sdk](https://img.shields.io/npm/v/@vorionsys/agent-sdk?label=agent-sdk)](https://www.npmjs.com/package/@vorionsys/agent-sdk)
+[![npm: car-client](https://img.shields.io/npm/v/@vorionsys/car-client?label=car-client)](https://www.npmjs.com/package/@vorionsys/car-client)
+[![npm: car-cli](https://img.shields.io/npm/v/@vorionsys/car-cli?label=car-cli)](https://www.npmjs.com/package/@vorionsys/car-cli)
+[![npm: security](https://img.shields.io/npm/v/@vorionsys/security?label=security)](https://www.npmjs.com/package/@vorionsys/security)
+[![npm: platform-core](https://img.shields.io/npm/v/@vorionsys/platform-core?label=platform-core)](https://www.npmjs.com/package/@vorionsys/platform-core)
 
 > **Security Notice**: The only official Vorion repositories are hosted at [github.com/vorionsys](https://github.com/vorionsys). Be aware that threat actors have used similar-sounding names (e.g., "Vortax", "VorTion") for credential-stealing malware campaigns. Always verify the source before downloading software. Official releases are cryptographically signed.
 
@@ -20,14 +33,27 @@
 ## Quick Install
 
 ```bash
-# Core governance constants (single source of truth)
-npm install @vorionsys/shared-constants
+# Foundation (start here)
+npm install @vorionsys/shared-constants   # trust tiers, constants
+npm install @vorionsys/contracts          # Zod schemas, DB types
+npm install @vorionsys/basis              # BASIS rule engine
+npm install @vorionsys/atsf-core          # trust scoring framework
 
-# Cognigate SDK for AI governance API
-npm install @vorionsys/cognigate
+# Governance & Enforcement
+npm install @vorionsys/cognigate          # policy enforcement SDK
+npm install @vorionsys/council            # 16-agent governance orchestrator
+npm install @vorionsys/ai-gateway         # multi-provider AI routing
+npm install @vorionsys/proof-plane        # tamper-evident audit chain
+npm install @vorionsys/security           # crypto, DPoP, Merkle modules
 
-# CAR Spec (Categorical Agentic Registry)
-npm install @vorionsys/car-spec
+# SDKs & Clients
+npm install @vorionsys/sdk                # platform SDK
+npm install @vorionsys/agent-sdk          # agent-facing SDK
+npm install @vorionsys/runtime            # agent runtime environment
+npm install @vorionsys/car-spec           # CAR specification
+npm install @vorionsys/car-client         # CAR API client
+npm install @vorionsys/car-cli            # CAR CLI tooling
+npm install @vorionsys/platform-core      # trust engine & enforcement
 ```
 
 ---
@@ -102,12 +128,8 @@ graph TD
         AC[atsf-core]
         CG[cognigate]
         CS[car-spec]
-    end
-
-    subgraph "Internal Packages"
-        PC[platform-core]
         PP[proof-plane]
-        A3[a3i]
+        PC[platform-core]
         RT[runtime]
         SE[security]
         SDK[sdk]
@@ -115,6 +137,11 @@ graph TD
         CLI[car-cli]
         AS[agent-sdk]
         CO[council]
+        AG[ai-gateway]
+    end
+
+    subgraph "Internal Packages"
+        A3[a3i]
     end
 
     subgraph "Applications"
@@ -131,8 +158,13 @@ graph TD
     CT --> AC
     CT --> A3
     CT --> CG
+    CT --> AG
+    CT --> SE
     SC --> AC
     SC --> BS
+    SC --> CO
+    SC --> SDK
+    SC --> AS
     BS --> PC
     PP --> PC
     AC --> PC
@@ -603,14 +635,36 @@ Run `python tools/validate-oscal-ssp.py` to validate all artifacts locally.
 
 ### Published Packages
 
-| Package | Description |
-|---------|-------------|
-| `@vorionsys/shared-constants` | Canonical trust tiers, role mappings, provenance types |
-| `@vorionsys/contracts` | Zod schemas, DB table definitions, validators |
-| `@vorionsys/cognigate` | Cognigate SDK for AI governance API |
-| `@vorionsys/car-spec` | CAR (Categorical Agentic Registry) specification |
-| `@vorionsys/atsf-core` | ATSF trust scoring framework |
-| `@vorionsys/basis` | BASIS rule engine |
+**Foundation**
+
+| Package | npm | Description |
+|---------|-----|-------------|
+| [`@vorionsys/shared-constants`](https://www.npmjs.com/package/@vorionsys/shared-constants) | [![npm](https://img.shields.io/npm/v/@vorionsys/shared-constants?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/shared-constants) | Canonical trust tiers, role mappings, provenance types |
+| [`@vorionsys/contracts`](https://www.npmjs.com/package/@vorionsys/contracts) | [![npm](https://img.shields.io/npm/v/@vorionsys/contracts?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/contracts) | Zod schemas, Drizzle DB table definitions, shared validators |
+| [`@vorionsys/basis`](https://www.npmjs.com/package/@vorionsys/basis) | [![npm](https://img.shields.io/npm/v/@vorionsys/basis?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/basis) | BASIS rule engine — 182-day stepped trust decay, 8-tier scoring |
+| [`@vorionsys/atsf-core`](https://www.npmjs.com/package/@vorionsys/atsf-core) | [![npm](https://img.shields.io/npm/v/@vorionsys/atsf-core?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/atsf-core) | ATSF trust scoring framework |
+| [`@vorionsys/car-spec`](https://www.npmjs.com/package/@vorionsys/car-spec) | [![npm](https://img.shields.io/npm/v/@vorionsys/car-spec?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/car-spec) | CAR (Categorical Agentic Registry) specification v1.1.0 |
+
+**Governance & Enforcement**
+
+| Package | npm | Description |
+|---------|-----|-------------|
+| [`@vorionsys/cognigate`](https://www.npmjs.com/package/@vorionsys/cognigate) | [![npm](https://img.shields.io/npm/v/@vorionsys/cognigate?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/cognigate) | Cognigate policy enforcement SDK |
+| [`@vorionsys/council`](https://www.npmjs.com/package/@vorionsys/council) | [![npm](https://img.shields.io/npm/v/@vorionsys/council?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/council) | 16-agent governance orchestrator |
+| [`@vorionsys/ai-gateway`](https://www.npmjs.com/package/@vorionsys/ai-gateway) | [![npm](https://img.shields.io/npm/v/@vorionsys/ai-gateway?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/ai-gateway) | AI provider gateway with policy enforcement |
+| [`@vorionsys/proof-plane`](https://www.npmjs.com/package/@vorionsys/proof-plane) | [![npm](https://img.shields.io/npm/v/@vorionsys/proof-plane?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/proof-plane) | Dual-hash (SHA-256 + SHA3-256) tamper-evident audit chain |
+| [`@vorionsys/security`](https://www.npmjs.com/package/@vorionsys/security) | [![npm](https://img.shields.io/npm/v/@vorionsys/security?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/security) | Crypto, DPoP, and Merkle modules |
+
+**SDKs & Clients**
+
+| Package | npm | Description |
+|---------|-----|-------------|
+| [`@vorionsys/sdk`](https://www.npmjs.com/package/@vorionsys/sdk) | [![npm](https://img.shields.io/npm/v/@vorionsys/sdk?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/sdk) | Platform SDK for building on Vorion |
+| [`@vorionsys/agent-sdk`](https://www.npmjs.com/package/@vorionsys/agent-sdk) | [![npm](https://img.shields.io/npm/v/@vorionsys/agent-sdk?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/agent-sdk) | Agent-facing SDK for governance integration |
+| [`@vorionsys/runtime`](https://www.npmjs.com/package/@vorionsys/runtime) | [![npm](https://img.shields.io/npm/v/@vorionsys/runtime?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/runtime) | Agent runtime environment |
+| [`@vorionsys/platform-core`](https://www.npmjs.com/package/@vorionsys/platform-core) | [![npm](https://img.shields.io/npm/v/@vorionsys/platform-core?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/platform-core) | Trust engine, governance, enforcement, and proof integration |
+| [`@vorionsys/car-client`](https://www.npmjs.com/package/@vorionsys/car-client) | [![npm](https://img.shields.io/npm/v/@vorionsys/car-client?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/car-client) | CAR API client library |
+| [`@vorionsys/car-cli`](https://www.npmjs.com/package/@vorionsys/car-cli) | [![npm](https://img.shields.io/npm/v/@vorionsys/car-cli?label=&color=blue)](https://www.npmjs.com/package/@vorionsys/car-cli) | CAR CLI tooling for agent registry management |
 
 ### Sites
 
@@ -639,3 +693,4 @@ Run `python tools/validate-oscal-ssp.py` to validate all artifacts locally.
 
 Platform: Proprietary. See [LICENSE](LICENSE).
 Published packages (`@vorionsys/*`): Apache-2.0.
+
