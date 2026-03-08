@@ -19,16 +19,17 @@ const footerSections: Record<string, FooterLink[]> = {
     { label: 'BASIS Standard', href: '/basis' },
     { label: 'Cognigate', href: 'https://cognigate.dev', external: true },
     { label: 'AgentAnchor', href: 'https://agentanchorai.com', external: true },
-    { label: 'Omniscience', href: 'https://learn.vorion.org', external: true },
+    { label: 'Kaizen', href: 'https://learn.vorion.org', external: true },
   ],
   Developers: [
-    { label: 'Documentation', href: 'https://cognigate.dev/docs', external: true },
+    { label: 'Documentation', href: 'https://github.com/vorionsys/vorion/tree/main/docs', external: true },
     { label: 'NPM Package', href: 'https://www.npmjs.com/package/@vorionsys/atsf-core', external: true },
-    { label: 'GitHub — Open Source', href: 'https://github.com/vorionsys', external: true },
-    { label: 'OpenAPI Spec', href: 'https://cognigate.dev/openapi.json', external: true },
+    { label: 'GitHub', href: 'https://github.com/vorionsys', external: true },
+    { label: 'OpenAPI Spec', href: 'https://vorionsys-api.fly.dev/openapi.json', external: true },
   ],
   Company: [
     { label: 'About', href: '/manifesto' },
+    { label: 'NIST Submissions', href: '/basis/nist' },
     { label: 'Contact', href: '/#contact' },
     { label: 'Status', href: '/status' },
   ],
@@ -60,8 +61,7 @@ export function Footer() {
             </Link>
             <p className="text-zinc-500 text-sm mb-6 max-w-xs">
               Governance for the Autonomous Age. Infrastructure to bind AI agents
-              to verifiable human intent. Open source at{' '}
-              <a href="https://github.com/vorionsys" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">github.com/vorionsys</a>.
+              to verifiable human intent.
             </p>
             {/* Social Links */}
             <div className="flex items-center gap-4">
@@ -105,15 +105,57 @@ export function Footer() {
 
         {/* Compliance Badges */}
         <div className="border-t border-zinc-800 pt-8 mb-8">
-          <p className="text-xs text-zinc-600 uppercase tracking-wide mb-4">
+          <p className="text-xs text-zinc-600 uppercase tracking-wide mb-3">
             Designed for compliance with
           </p>
-          <div className="flex flex-wrap items-center gap-6 text-sm text-zinc-500">
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">NIST AI RMF</span>
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">EU AI Act</span>
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">ISO 42001</span>
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">SOC 2</span>
-            <span className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800">GDPR</span>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-500 mb-5">
+            {([
+              { label: 'NIST AI RMF', href: '/basis/compliance#nist-ai-rmf', tip: 'NIST AI Risk Management Framework' },
+              { label: 'EU AI Act', href: '/basis/compliance#eu-ai-act', tip: 'EU Artificial Intelligence Act (Art. 9–15)' },
+              { label: 'ISO 42001', href: '/basis/compliance#iso-42001', tip: 'ISO/IEC 42001 AI Management Systems' },
+              { label: 'SOC 2', href: '/basis/compliance#soc2', tip: 'SOC 2 Type II — Security & Availability' },
+              { label: 'GDPR', href: '/basis/compliance#gdpr', tip: 'EU General Data Protection Regulation' },
+            ] as const).map(({ label, href, tip }) => (
+              <div key={label} className="group relative">
+                <Link
+                  href={href}
+                  className="px-3 py-1 bg-zinc-900 rounded-full border border-zinc-800 hover:border-zinc-600 hover:text-white transition-colors"
+                >
+                  {label}
+                </Link>
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block z-10 pointer-events-none">
+                  <div className="bg-zinc-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                    {tip}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-zinc-700 uppercase tracking-wide mb-3">Roadmap</p>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            {([
+              { label: 'NIST AI 600-1', tip: 'NIST GenAI Profile · Targeting 2026', href: 'https://airc.nist.gov/Docs/1' },
+              { label: 'EU AI Act Milestones', tip: 'Full enforcement milestones · Aug 2026', href: 'https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai' },
+              { label: 'CAISI', tip: 'NIST Collaborative AI Standards Initiative · 2026', href: 'https://airc.nist.gov/Docs/2' },
+              { label: 'ISO 42005', tip: 'AI Impact Assessment Standard · In development', href: 'https://www.iso.org/standard/44546.html' },
+              { label: 'CISA AI Guidelines', tip: 'CISA Secure AI Development · 2026', href: 'https://www.cisa.gov/ai' },
+            ] as const).map(({ label, tip, href }) => (
+              <div key={label} className="group relative">
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1 bg-zinc-900/50 rounded-full border border-dashed border-zinc-700 text-zinc-600 hover:border-zinc-500 hover:text-zinc-400 transition-colors text-sm inline-block"
+                >
+                  {label}
+                </a>
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block z-10 pointer-events-none">
+                  <div className="bg-zinc-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                    {tip}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -133,7 +175,7 @@ export function Footer() {
               Security
             </Link>
             <Link
-              href="https://cognigate.dev/openapi.json"
+              href="https://vorionsys-api.fly.dev/openapi.json"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-white transition-colors"

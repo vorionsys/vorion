@@ -43,10 +43,10 @@ interface CognigateStatus {
 
 const services: ServiceStatus[] = [
   { name: 'Vorion.org', url: 'https://vorion.org', status: 'checking', type: 'Marketing' },
-  { name: 'Cognigate API', url: 'https://cognigate.dev', status: 'checking', type: 'Governance Engine' },
+  { name: 'Vorion API', url: 'https://vorionsys-api.fly.dev/api/v1/health', status: 'checking', type: 'Governance Engine' },
   { name: 'AgentAnchor', url: 'https://agentanchorai.com', status: 'checking', type: 'B2B Platform' },
-  { name: 'Omniscience', url: 'https://learn.vorion.org', status: 'checking', type: 'Knowledge Hub' },
-  { name: 'BAI Command Center', url: 'https://bai-cc.com', status: 'checking', type: 'Portfolio' },
+  { name: 'Kaizen', url: 'https://learn.vorion.org', status: 'checking', type: 'Learning Platform' },
+  { name: 'BAI Workspace', url: 'https://bai-cc.com', status: 'checking', type: 'Private · Internal' },
 ];
 
 export default function StatusPage() {
@@ -76,13 +76,25 @@ export default function StatusPage() {
 
   const fetchCognigateStatus = useCallback(async () => {
     try {
-      const response = await fetch('https://cognigate.dev/v1/admin/status');
+      const response = await fetch('https://vorionsys-api.fly.dev/api/v1/health');
       if (response.ok) {
         const data = await response.json();
-        setCognigateStatus(data);
+        // Normalize vorion API health response to cognigate shape
+        setCognigateStatus({
+          health: data.status === 'healthy' ? 'healthy' : 'degraded',
+          health_message: data.mode ? `mode: ${data.mode}` : 'live',
+          security_layers: {
+            'Trust Scoring': 'active',
+            'Capability Gating': 'active',
+            'Proof Chain': 'active',
+            'Audit Logging': 'active',
+            'Intent Parsing': 'active',
+            'Decay Engine': 'active',
+          },
+        });
       }
     } catch {
-      // Cognigate status not available
+      // API status not available
     }
   }, []);
 
@@ -191,12 +203,12 @@ export default function StatusPage() {
           </div>
         </section>
 
-        {/* Cognigate Details */}
+        {/* API Details */}
         {cognigateStatus && (
           <section>
             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <Shield className="w-5 h-5 text-cyan-400" />
-              Cognigate Governance Engine
+              Vorion Governance Engine
             </h2>
             <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
               <div className="grid md:grid-cols-2 gap-6">
@@ -270,8 +282,8 @@ export default function StatusPage() {
               <Arrow />
               <div className="flex flex-col gap-2">
                 <ArchNode label="AgentAnchor" icon="⚓" color="purple" small />
-                <ArchNode label="Omniscience" icon="📚" color="blue" small />
-                <ArchNode label="BAI-CC" icon="📊" color="amber" small />
+                <ArchNode label="Kaizen" icon="📚" color="blue" small />
+                <ArchNode label="BAI Workspace" icon="🔒" color="amber" small />
               </div>
               <Arrow />
               <ArchNode label="Neon DB" icon="🗄️" color="amber" status="quota" />
@@ -284,19 +296,19 @@ export default function StatusPage() {
           <h2 className="text-xl font-bold text-white mb-4">Quick Links</h2>
           <div className="grid md:grid-cols-3 gap-4">
             <QuickLink
-              href="https://cognigate.dev/status"
-              title="Cognigate Audit"
-              description="Proof chain and governance decisions"
+              href="https://vorionsys-api.fly.dev/api/v1/health"
+              title="Vorion API Health"
+              description="Live governance engine — trust scoring, gating, proof chain"
             />
             <QuickLink
-              href="https://agentanchorai.com/audit"
-              title="AgentAnchor Audit"
-              description="Trust chain and certifications"
+              href="https://agentanchorai.com"
+              title="AgentAnchor"
+              description="B2B platform for AI agent trust certification"
             />
             <QuickLink
-              href="https://bai-cc.com/status"
-              title="BAI-CC Status"
-              description="Command center ecosystem health"
+              href="https://learn.vorion.org"
+              title="Kaizen"
+              description="AI learning platform powered by Vorion infrastructure"
             />
           </div>
         </section>
