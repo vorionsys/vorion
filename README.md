@@ -570,7 +570,7 @@ Vorion is designed to align with the following frameworks **(not yet certified o
 - **NIST AI RMF** - [Detailed compliance mapping](docs/compliance/nist-ai-rmf-mapping.md) across Govern, Map, Measure, Manage (~86% coverage)
 - **NIST SP 800-53** - 370 controls implemented in [OSCAL SSP](compliance/oscal/ssp-draft.json) (OSCAL 1.1.2, validated). Automated verification: 52 controls, 20 tests.
 - **NIST COSAiS** - [SP 800-53 control overlay](docs/compliance/NIST-COSAiS-ALIGNMENT.md) for AI systems (Use Cases 3 & 4)
-- **NIST CAISI RFI** - Submitted response to Docket NIST-2025-0035 (March 2026) covering AI agent security threat taxonomy, technical controls, and runtime governance standards. See [docs/nist-caisi-rfi-response-2026-02.md](docs/nist-caisi-rfi-response-2026-02.md).
+- **NIST CAISI RFI** - Pending submission to Docket NIST-2025-0035 (deadline March 9, 2026) covering AI agent security threat taxonomy, technical controls, and runtime governance standards. See [docs/nist-caisi-rfi-response-2026-02.md](docs/nist-caisi-rfi-response-2026-02.md).
 - **OWASP ASI** - [Top 10 for Agentic Applications](docs/compliance/OWASP-ASI-MAPPING.md) mapping (ASI01–ASI10)
 - **EU AI Act** - Ceiling enforcement caps high-risk AI systems, transparency requirements
 - **ISO/IEC 42001** - AI management system principles ([gap analysis complete](docs/VORION_V1_FULL_APPROVAL_PDFS/ISO_42001_GAP_ANALYSIS.md))
@@ -611,7 +611,7 @@ Run `python tools/validate-oscal-ssp.py` to validate all artifacts locally.
 ### Phase 7: Implementation (Q1-Q2 2026)
 - [x] Signal pipeline (fast + slow lanes, `TrustSignalPipeline`)
 - [x] KYA `AccountabilityChain` → `TrustSignalPipeline` bridge (`CT-ACCT` factor propagation)
-- [x] NIST CAISI RFI submitted (Docket NIST-2025-0035, March 2026)
+- [ ] NIST CAISI RFI submission (Docket NIST-2025-0035, deadline March 9, 2026)
 - [x] OSCAL SSP expanded to 370 NIST SP 800-53 controls
 - [ ] 200+ unit tests at <1ms P99 latency target
 - [ ] Merkle tree aggregation for proof chain
@@ -693,4 +693,5 @@ Run `python tools/validate-oscal-ssp.py` to validate all artifacts locally.
 
 Platform: Proprietary. See [LICENSE](LICENSE).
 Published packages (`@vorionsys/*`): Apache-2.0.
+
 
