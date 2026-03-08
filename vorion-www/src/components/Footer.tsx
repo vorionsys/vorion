@@ -22,10 +22,10 @@ const footerSections: Record<string, FooterLink[]> = {
     { label: 'Kaizen', href: 'https://learn.vorion.org', external: true },
   ],
   Developers: [
-    { label: 'Documentation', href: 'https://github.com/vorionsys/vorion/tree/main/docs', external: true },
+    { label: 'Documentation', href: 'https://cognigate.dev/docs', external: true },
     { label: 'NPM Package', href: 'https://www.npmjs.com/package/@vorionsys/atsf-core', external: true },
     { label: 'GitHub', href: 'https://github.com/vorionsys', external: true },
-    { label: 'OpenAPI Spec', href: 'https://vorionsys-api.fly.dev/openapi.json', external: true },
+    { label: 'OpenAPI Spec', href: 'https://cognigate.dev/openapi.json', external: true },
   ],
   Company: [
     { label: 'About', href: '/manifesto' },
@@ -175,7 +175,7 @@ export function Footer() {
               Security
             </Link>
             <Link
-              href="https://vorionsys-api.fly.dev/openapi.json"
+              href="https://cognigate.dev/openapi.json"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-white transition-colors"
